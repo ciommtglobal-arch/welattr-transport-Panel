@@ -1,0 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-border: var(--primary-border);
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-border: var(--secondary-border);
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted-border: var(--muted-border);
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-border: var(--accent-border);
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-border: var(--destructive-border);
+
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  /* Restrained cream and burnt-orange accents */
+  /* Dark Slate/Navy background for hero */
+  
+  --background: 215 28% 10%; /* #121822 */
+  --foreground: 40 20% 97%; /* #f8f6f3 cream */
+  
+  --card: 215 25% 12%; 
+  --card-foreground: 40 20% 97%;
+  --card-border: 215 20% 20%;
+  
+  --popover: 215 25% 12%;
+  --popover-foreground: 40 20% 97%;
+  --popover-border: 215 20% 20%;
+  
+  --primary: 21 89% 52%; /* #ea580c burnt orange */
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 40 20% 95%; /* Cream */
+  --secondary-foreground: 215 28% 10%;
+  
+  --muted: 215 20% 20%;
+  --muted-foreground: 215 15% 65%;
+  
+  --accent: 215 20% 20%;
+  --accent-foreground: 40 20% 97%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --border: 215 20% 20%;
+  --input: 215 20% 20%;
+  --ring: 21 89% 52%;
+  
+  --app-font-sans: 'Plus Jakarta Sans', sans-serif;
+  --app-font-serif: 'Playfair Display', serif;
+  --app-font-mono: 'Space Mono', monospace;
+  
+  --radius: 0rem;
+}
+
+.dark {
+  --background: 215 28% 10%;
+  --foreground: 40 20% 97%;
+  
+  --card: 215 25% 12%; 
+  --card-foreground: 40 20% 97%;
+  --card-border: 215 20% 20%;
+  
+  --popover: 215 25% 12%;
+  --popover-foreground: 40 20% 97%;
+  --popover-border: 215 20% 20%;
+  
+  --primary: 21 89% 52%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 40 20% 95%;
+  --secondary-foreground: 215 28% 10%;
+  
+  --muted: 215 20% 20%;
+  --muted-foreground: 215 15% 65%;
+  
+  --accent: 215 20% 20%;
+  --accent-foreground: 40 20% 97%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --border: 215 20% 20%;
+  --input: 215 20% 20%;
+  --ring: 21 89% 52%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@keyframes slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up-fade {
+  animation: slide-up-fade 1s ease-out forwards;
+}
+
+.delay-150 { animation-delay: 150ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-700 { animation-delay: 700ms; }
+.delay-1000 { animation-delay: 1000ms; }
+
+.opacity-0 {
+  opacity: 0;
+}
+
+.clip-circle {
+  clip-path: circle(50% at 50% 50%);
+}
+
+.bg-hero-image {
+  /* We will use CSS variables or a pseudo-element for the hero background to keep it neat */
+}

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "MMT Global Website"
+description = "A cinematic, mobile-first corporate website for MMT Global Finance and its international holding ecosystem, with a responsive landing page, working content navigation, business areas, and contact call-to-action."
+version = "1.0.0"
+id = "artifacts/mmt-global-website"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25030
+
+[services.development]
+run = "pnpm --filter @workspace/mmt-global-website run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mmt-global-website", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/mmt-global-website/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25030"
+BASE_PATH = "/"
