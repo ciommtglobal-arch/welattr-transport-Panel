@@ -56,9 +56,9 @@ export default function Home() {
             <button onClick={() => scrollToSection("contact")} className="hover:text-primary transition-colors">
               İLETİŞİM
             </button>
-             <button onClick={() => scrollToSection("contact")} className="px-5 py-2.5 bg-primary text-white hover:bg-primary/90 transition-colors rounded-none font-semibold uppercase tracking-wider text-xs">
+              <Link href="/limit" className="px-5 py-2.5 bg-primary text-white hover:bg-primary/90 transition-colors rounded-none font-semibold uppercase tracking-wider text-xs">
               PORTALA GİRİŞ
-            </button>
+              </Link>
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -88,9 +88,9 @@ export default function Home() {
         <button onClick={() => scrollToSection("contact")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
           İLETİŞİM
         </button>
-         <button onClick={() => scrollToSection("contact")} className="mt-8 px-8 py-4 bg-primary text-white transition-colors rounded-none font-semibold uppercase tracking-wider text-sm">
+          <Link href="/limit" className="mt-8 px-8 py-4 bg-primary text-white transition-colors rounded-none font-semibold uppercase tracking-wider text-sm">
           PORTALA GİRİŞ
-        </button>
+          </Link>
       </div>
 
       {/* Hero Section */}
