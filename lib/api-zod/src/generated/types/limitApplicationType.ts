@@ -12,5 +12,6 @@ export type LimitApplicationType = typeof LimitApplicationType[keyof typeof Limi
 export const LimitApplicationType = {
   individual: 'individual',
   commercial: 'commercial',
+  housing: 'housing',
   vehicle: 'vehicle',
 } as const;

@@ -21,6 +21,7 @@ export const limitApplicationStatusEnum = pgEnum(
 export const limitApplicationTypeEnum = pgEnum("limit_application_type", [
   "individual",
   "commercial",
+  "housing",
   "vehicle",
 ]);
 

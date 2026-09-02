@@ -35,6 +35,7 @@ export type LimitApplicationType = typeof LimitApplicationType[keyof typeof Limi
 export const LimitApplicationType = {
   individual: 'individual',
   commercial: 'commercial',
+  housing: 'housing',
   vehicle: 'vehicle',
 } as const;
 
@@ -66,6 +67,9 @@ export const LimitApplicationInputRequestType = {
   İhtiyaç_finansmanı: 'İhtiyaç finansmanı',
   Eğitim_finansmanı: 'Eğitim finansmanı',
   Sağlık_finansmanı: 'Sağlık finansmanı',
+  Konut_alımı: 'Konut alımı',
+  Konut_yenileme: 'Konut yenileme',
+  Konut_refinansmanı: 'Konut refinansmanı',
   İşletme_sermayesi: 'İşletme sermayesi',
   Yatırım_finansmanı: 'Yatırım finansmanı',
   Ticari_limit: 'Ticari limit',

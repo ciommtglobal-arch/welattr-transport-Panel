@@ -37,12 +37,12 @@ export const createLimitApplicationBodyNoteMax = 4000;
 
 
 export const CreateLimitApplicationBody = zod.object({
-  "applicationType": zod.enum(['individual', 'commercial', 'vehicle']),
+  "applicationType": zod.enum(['individual', 'commercial', 'housing', 'vehicle']),
   "fullName": zod.string().min(createLimitApplicationBodyFullNameMin).max(createLimitApplicationBodyFullNameMax),
   "company": zod.string().min(createLimitApplicationBodyCompanyMin).max(createLimitApplicationBodyCompanyMax),
   "email": zod.email().max(createLimitApplicationBodyEmailMax),
   "phone": zod.string().min(createLimitApplicationBodyPhoneMin).max(createLimitApplicationBodyPhoneMax),
-  "requestType": zod.enum(['İhtiyaç finansmanı', 'Eğitim finansmanı', 'Sağlık finansmanı', 'İşletme sermayesi', 'Yatırım finansmanı', 'Ticari limit', 'Proje finansmanı', 'Otomobil', 'Ticari araç', 'İş makinesi']),
+  "requestType": zod.enum(['İhtiyaç finansmanı', 'Eğitim finansmanı', 'Sağlık finansmanı', 'Konut alımı', 'Konut yenileme', 'Konut refinansmanı', 'İşletme sermayesi', 'Yatırım finansmanı', 'Ticari limit', 'Proje finansmanı', 'Otomobil', 'Ticari araç', 'İş makinesi']),
   "amount": zod.string().regex(createLimitApplicationBodyAmountRegExp),
   "currency": zod.enum(['TRY', 'USD', 'EUR', 'GBP']),
   "note": zod.string().max(createLimitApplicationBodyNoteMax).optional()
@@ -54,7 +54,7 @@ export const createLimitApplicationResponseAmountRegExp = new RegExp('^\\d+(\\.\
 export const CreateLimitApplicationResponse = zod.object({
   "id": zod.int(),
   "referenceCode": zod.string(),
-  "applicationType": zod.enum(['individual', 'commercial', 'vehicle']),
+  "applicationType": zod.enum(['individual', 'commercial', 'housing', 'vehicle']),
   "fullName": zod.string(),
   "company": zod.string(),
   "email": zod.email(),
@@ -93,7 +93,7 @@ export const GetLimitApplicationsResponse = zod.object({
   "items": zod.array(zod.object({
   "id": zod.int(),
   "referenceCode": zod.string(),
-  "applicationType": zod.enum(['individual', 'commercial', 'vehicle']),
+  "applicationType": zod.enum(['individual', 'commercial', 'housing', 'vehicle']),
   "fullName": zod.string(),
   "company": zod.string(),
   "email": zod.email(),
@@ -135,7 +135,7 @@ export const updateLimitApplicationStatusResponseAmountRegExp = new RegExp('^\\d
 export const UpdateLimitApplicationStatusResponse = zod.object({
   "id": zod.int(),
   "referenceCode": zod.string(),
-  "applicationType": zod.enum(['individual', 'commercial', 'vehicle']),
+  "applicationType": zod.enum(['individual', 'commercial', 'housing', 'vehicle']),
   "fullName": zod.string(),
   "company": zod.string(),
   "email": zod.email(),

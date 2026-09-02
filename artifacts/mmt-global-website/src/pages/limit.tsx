@@ -7,7 +7,7 @@ import {
 } from "@workspace/api-client-react";
 
 type LimitFormData = {
-  applicationType: "individual" | "commercial" | "vehicle";
+  applicationType: "individual" | "commercial" | "housing" | "vehicle";
   fullName: string;
   company: string;
   email: string;
@@ -43,6 +43,16 @@ const categoryConfig = {
     ],
     requestLabel: "Talep türü",
     notePlaceholder: "Finansman ihtiyacınızı ve projenizi kısaca anlatın",
+  },
+  housing: {
+    label: "Konut",
+    title: "Konut finansmanı",
+    italicTitle: "başvurusu.",
+    description:
+      "Konut alımı, yenileme veya mevcut finansmanınızı yapılandırma hedefiniz için çözüm oluşturalım.",
+    requestTypes: ["Konut alımı", "Konut yenileme", "Konut refinansmanı"],
+    requestLabel: "Finansman amacı",
+    notePlaceholder: "Konutun konumu, değeri ve finansman ihtiyacınızı yazın",
   },
   vehicle: {
     label: "Taşıt",
@@ -105,7 +115,9 @@ export default function Limit({
           form.company ||
           (category === "individual"
             ? "Bireysel başvuru"
-            : "Taşıt finansmanı başvurusu"),
+            : category === "housing"
+              ? "Konut finansmanı başvurusu"
+              : "Taşıt finansmanı başvurusu"),
         note: form.note.trim() || undefined,
       } as LimitApplicationInput);
       setReferenceCode(application.referenceCode);
@@ -168,12 +180,12 @@ export default function Limit({
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.7fr_1.3fr] lg:gap-24">
           <aside className="flex flex-col justify-between">
             <div>
-              <div className="mb-8 grid grid-cols-3 border border-border/70 bg-background/40">
-                {(["individual", "commercial", "vehicle"] as const).map(
+              <div className="mb-8 grid grid-cols-2 border border-border/70 bg-background/40 md:grid-cols-4">
+                {(["commercial", "housing", "vehicle", "individual"] as const).map(
                   (item) => (
                     <Link
                       key={item}
-                      href={`/limit/${item === "vehicle" ? "tasit" : item === "individual" ? "bireysel" : "ticari"}`}
+                      href={`/limit/${item === "vehicle" ? "tasit" : item === "housing" ? "konut" : item === "individual" ? "bireysel" : "ticari"}`}
                       className={`px-3 py-4 text-center text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors md:px-5 ${
                         item === category
                           ? "bg-primary text-white"
@@ -251,14 +263,22 @@ export default function Limit({
                   />
                   {category !== "individual" ? (
                     <Field
-                      label={category === "vehicle" ? "Şirket / kurum" : "Şirket"}
+                      label={
+                        category === "vehicle"
+                          ? "Şirket / kurum"
+                          : category === "housing"
+                            ? "Banka / kurum (opsiyonel)"
+                            : "Şirket"
+                      }
                       name="company"
                       value={form.company}
                       onChange={updateField}
                       placeholder={
                         category === "vehicle"
                           ? "Varsa şirket veya kurum adı"
-                          : "Şirket adı"
+                          : category === "housing"
+                            ? "Varsa banka veya kurum adı"
+                            : "Şirket adı"
                       }
                       required={category === "commercial"}
                     />

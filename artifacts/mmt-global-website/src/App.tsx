@@ -115,6 +115,7 @@ function Router() {
         <Route path="/limit" component={LimitRedirect} />
         <Route path="/limit/bireysel" component={IndividualLimit} />
         <Route path="/limit/ticari" component={CommercialLimit} />
+        <Route path="/limit/konut" component={HousingLimit} />
         <Route path="/limit/tasit" component={VehicleLimit} />
         <Route path="/sign-in/*?" component={SignInPage} />
         <Route path="/sign-up/*?" component={SignUpPage} />
@@ -134,6 +135,10 @@ function IndividualLimit() {
 
 function CommercialLimit() {
   return <Limit category="commercial" />;
+}
+
+function HousingLimit() {
+  return <Limit category="housing" />;
 }
 
 function VehicleLimit() {

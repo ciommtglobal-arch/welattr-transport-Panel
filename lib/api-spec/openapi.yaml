@@ -240,6 +240,9 @@ components:
             - İhtiyaç finansmanı
             - Eğitim finansmanı
             - Sağlık finansmanı
+            - Konut alımı
+            - Konut yenileme
+            - Konut refinansmanı
             - İşletme sermayesi
             - Yatırım finansmanı
             - Ticari limit
@@ -269,7 +272,7 @@ components:
           maxLength: 4000
     LimitApplicationType:
       type: string
-      enum: [individual, commercial, vehicle]
+      enum: [individual, commercial, housing, vehicle]
     LimitApplicationPage:
       type: object
       required:
