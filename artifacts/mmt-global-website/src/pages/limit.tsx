@@ -1,8 +1,18 @@
 import { FormEvent, useState } from "react";
-import { ArrowLeft, CheckCircle2, Loader2, Send } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  FileText,
+  Loader2,
+  Send,
+  Upload,
+} from "lucide-react";
 import { Link } from "wouter";
 import {
   createLimitApplication,
+  requestUploadUrl,
+  type LimitApplicationDocumentInput,
+  type LimitApplicationDocumentType,
   type LimitApplicationInput,
 } from "@workspace/api-client-react";
 
@@ -15,7 +25,46 @@ type LimitFormData = {
   requestType: string;
   amount: string;
   currency: string;
+  vehicleDetails: string;
   note: string;
+};
+
+const commonDocumentRequirements: Array<{
+  type: LimitApplicationDocumentType;
+  label: string;
+  description: string;
+}> = [
+  {
+    type: "personal_information",
+    label: "Şahıs bilgileri",
+    description: "Kimlik veya şahıs bilgilerini içeren belge",
+  },
+  {
+    type: "tax_certificate",
+    label: "Vergi levhası",
+    description: "Güncel vergi levhası",
+  },
+  {
+    type: "signature_circular",
+    label: "İmza sirküsü",
+    description: "Güncel imza sirküsü veya imza beyannamesi",
+  },
+  {
+    type: "kkb_report",
+    label: "KKB raporu",
+    description: "Güncel Kredi Kayıt Bürosu raporu",
+  },
+  {
+    type: "findeks_report",
+    label: "Findeks raporu",
+    description: "Güncel Findeks risk raporu",
+  },
+];
+
+const sskDocumentRequirement = {
+  type: "ssk_service_statement" as const,
+  label: "SSK hizmet dökümü",
+  description: "Bireysel başvuru için güncel SGK/SSK hizmet dökümü",
 };
 
 const categoryConfig = {
@@ -85,6 +134,7 @@ function createInitialForm(
     requestType: categoryConfig[category].requestTypes[0],
     amount: "",
     currency: "TRY",
+    vehicleDetails: "",
     note: "",
   };
 };
@@ -180,6 +230,14 @@ export default function Limit({
   const [referenceCode, setReferenceCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [uploadingLabel, setUploadingLabel] = useState("");
+  const [documentFiles, setDocumentFiles] = useState<
+    Partial<Record<LimitApplicationDocumentType, File>>
+  >({});
+  const documentRequirements =
+    category === "individual"
+      ? [...commonDocumentRequirements, sskDocumentRequirement]
+      : commonDocumentRequirements;
 
   const updateField = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -194,6 +252,42 @@ export default function Limit({
     setIsSubmitting(true);
 
     try {
+      const missingDocument = documentRequirements.find(
+        (requirement) => !documentFiles[requirement.type],
+      );
+      if (missingDocument) {
+        throw new Error(`${missingDocument.label} belgesini yükleyin.`);
+      }
+
+      const documents = await Promise.all(
+        documentRequirements.map(async (requirement) => {
+          const file = documentFiles[requirement.type]!;
+          setUploadingLabel(`${requirement.label} yükleniyor`);
+          const upload = await requestUploadUrl({
+            name: file.name,
+            size: file.size,
+            contentType: file.type as "application/pdf" | "image/jpeg" | "image/png",
+          });
+          const uploadResponse = await fetch(upload.uploadURL, {
+            method: "PUT",
+            headers: { "Content-Type": file.type },
+            body: file,
+          });
+          if (!uploadResponse.ok) {
+            throw new Error(`${requirement.label} yüklenemedi.`);
+          }
+
+          return {
+            documentType: requirement.type,
+            objectPath: upload.objectPath,
+            fileName: file.name,
+            contentType: file.type,
+            size: file.size,
+          } as LimitApplicationDocumentInput;
+        }),
+      );
+
+      setUploadingLabel("Başvuru kaydediliyor");
       const application = await createLimitApplication({
         ...form,
         company:
@@ -203,6 +297,9 @@ export default function Limit({
             : category === "housing"
               ? "Konut finansmanı başvurusu"
               : "Taşıt finansmanı başvurusu"),
+        vehicleDetails:
+          category === "vehicle" ? form.vehicleDetails.trim() : undefined,
+        documents,
         note: form.note.trim() || undefined,
       } as LimitApplicationInput);
       setReferenceCode(application.referenceCode);
@@ -214,6 +311,7 @@ export default function Limit({
           : "Başvurunuz gönderilemedi. Lütfen tekrar deneyin.",
       );
     } finally {
+      setUploadingLabel("");
       setIsSubmitting(false);
     }
   };
@@ -326,6 +424,7 @@ export default function Limit({
                   type="button"
                   onClick={() => {
                     setForm(createInitialForm(category));
+                     setDocumentFiles({});
                     setSubmitted(false);
                     setReferenceCode("");
                     setErrorMessage("");
@@ -430,6 +529,21 @@ export default function Limit({
                   </div>
                 </div>
 
+                {category === "vehicle" ? (
+                  <label className="flex flex-col gap-2 text-sm">
+                    <span className="font-semibold">Araç bilgileri</span>
+                    <textarea
+                      name="vehicleDetails"
+                      value={form.vehicleDetails}
+                      onChange={updateField}
+                      placeholder="Marka, model, model yılı, kilometre, satış bedeli ve varsa plaka/şasi bilgisini yazın"
+                      rows={4}
+                      required
+                      className="resize-y border-b border-secondary-foreground/25 bg-transparent px-0 py-3 text-secondary-foreground outline-none transition-colors placeholder:text-secondary-foreground/40 focus:border-primary"
+                    />
+                  </label>
+                ) : null}
+
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-semibold">Kısaca ihtiyacınız</span>
                   <textarea
@@ -442,12 +556,63 @@ export default function Limit({
                   />
                 </label>
 
+                <section className="border border-secondary-foreground/15 bg-background/5 p-5 md:p-6">
+                  <div className="mb-5 flex items-start gap-3">
+                    <FileText className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                    <div>
+                      <h3 className="font-semibold">Başvuru belgeleri</h3>
+                      <p className="mt-1 text-xs leading-relaxed text-secondary-foreground/55">
+                        PDF, JPG veya PNG yükleyebilirsiniz. Her dosya en fazla 10 MB olabilir.
+                        {category === "individual"
+                          ? " SSK hizmet dökümü yalnızca bireysel başvuruda zorunludur."
+                          : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {documentRequirements.map((requirement) => {
+                      const selectedFile = documentFiles[requirement.type];
+                      return (
+                        <label
+                          key={requirement.type}
+                          className="group cursor-pointer border border-secondary-foreground/15 p-4 transition-colors hover:border-primary"
+                        >
+                          <input
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                            required
+                            className="sr-only"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0];
+                              setDocumentFiles((current) => ({
+                                ...current,
+                                [requirement.type]: file,
+                              }));
+                            }}
+                          />
+                          <span className="flex items-center gap-2 text-sm font-semibold">
+                            <Upload className="h-4 w-4 text-primary" />
+                            {requirement.label}
+                          </span>
+                          <span className="mt-2 block text-xs leading-relaxed text-secondary-foreground/45">
+                            {selectedFile
+                              ? selectedFile.name
+                              : requirement.description}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </section>
+
                 <button
                   type="submit"
                   disabled={isSubmitting}
                   className="flex w-full items-center justify-center gap-3 bg-primary px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isSubmitting ? "Gönderiliyor" : "Başvuruyu gönder"}
+                  {isSubmitting
+                    ? uploadingLabel || "Gönderiliyor"
+                    : "Başvuruyu gönder"}
                   {isSubmitting ? (
                     <Loader2 size={17} className="animate-spin" />
                   ) : (

@@ -247,6 +247,7 @@ export default function Home() {
               icon={<Briefcase className="w-8 h-8" />}
               title="Finansal Hizmetler"
               desc="Kurumsal büyüme için stratejik danışmanlık, yatırım yönetimi ve yapısal finansman çözümleri sunuyoruz."
+              href="/limit"
             />
             <EcosystemCard 
               icon={<Factory className="w-8 h-8" />}
@@ -324,7 +325,7 @@ export default function Home() {
                 <li><span className="hover:text-primary transition-colors cursor-pointer">Lojistik</span></li>
                 <li><span className="hover:text-primary transition-colors cursor-pointer">Sağlık Turizmi</span></li>
                 <li><span className="hover:text-primary transition-colors cursor-pointer">İnşaat & Gelişim</span></li>
-                <li><span className="hover:text-primary transition-colors cursor-pointer">Finans & Medya</span></li>
+                <li><Link href="/limit" className="hover:text-primary transition-colors">Finans & Medya</Link></li>
               </ul>
             </div>
 
@@ -374,8 +375,8 @@ export default function Home() {
   );
 }
 
-function EcosystemCard({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
-  return (
+function EcosystemCard({ icon, title, desc, href }: { icon: React.ReactNode, title: string, desc: string, href?: string }) {
+  const card = (
     <div className="group border border-border/50 bg-card p-8 md:p-10 hover:border-primary/50 transition-all duration-500 rounded-tr-[2rem] rounded-bl-[2rem] hover:-translate-y-2 flex flex-col">
       <div className="w-16 h-16 rounded-full bg-background flex items-center justify-center text-primary mb-8 group-hover:scale-110 transition-transform duration-500 shadow-sm border border-border/50">
         {icon}
@@ -389,5 +390,13 @@ function EcosystemCard({ icon, title, desc }: { icon: React.ReactNode, title: st
         <ArrowRight size={14} />
       </div>
     </div>
+  );
+
+  return href ? (
+    <Link href={href} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+      {card}
+    </Link>
+  ) : (
+    card
   );
 }

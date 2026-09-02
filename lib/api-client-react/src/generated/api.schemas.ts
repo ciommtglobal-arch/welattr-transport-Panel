@@ -5,6 +5,10 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface ErrorEnvelope {
+  error: string;
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -39,6 +43,48 @@ export const LimitApplicationType = {
   vehicle: 'vehicle',
 } as const;
 
+export type LimitApplicationDocumentType = typeof LimitApplicationDocumentType[keyof typeof LimitApplicationDocumentType];
+
+
+export const LimitApplicationDocumentType = {
+  personal_information: 'personal_information',
+  tax_certificate: 'tax_certificate',
+  signature_circular: 'signature_circular',
+  kkb_report: 'kkb_report',
+  findeks_report: 'findeks_report',
+  ssk_service_statement: 'ssk_service_statement',
+} as const;
+
+export type LimitApplicationDocumentInputContentType = typeof LimitApplicationDocumentInputContentType[keyof typeof LimitApplicationDocumentInputContentType];
+
+
+export const LimitApplicationDocumentInputContentType = {
+  'application/pdf': 'application/pdf',
+  'image/jpeg': 'image/jpeg',
+  'image/png': 'image/png',
+} as const;
+
+export interface LimitApplicationDocumentInput {
+  documentType: LimitApplicationDocumentType;
+  /** @pattern ^/objects/uploads/[a-zA-Z0-9-]+$ */
+  objectPath: string;
+  /**
+     * @minLength 1
+     * @maxLength 255
+     */
+  fileName: string;
+  contentType: LimitApplicationDocumentInputContentType;
+  /**
+     * @minimum 1
+     * @maximum 10485760
+     */
+  size: number;
+}
+
+export type LimitApplicationDocument = LimitApplicationDocumentInput & {
+  id: number;
+};
+
 export interface LimitApplication {
   id: number;
   referenceCode: string;
@@ -51,6 +97,9 @@ export interface LimitApplication {
   /** @pattern ^\d+(\.\d{1,2})?$ */
   amount: string;
   currency: LimitApplicationCurrency;
+  /** @nullable */
+  vehicleDetails?: string | null;
+  documents: LimitApplicationDocument[];
   /** @nullable */
   note?: string | null;
   status: LimitApplicationStatus;
@@ -112,6 +161,13 @@ export interface LimitApplicationInput {
   /** @pattern ^\d+(\.\d{1,2})?$ */
   amount: string;
   currency: LimitApplicationInputCurrency;
+  /** @maxLength 2000 */
+  vehicleDetails?: string;
+  /**
+     * @minItems 5
+     * @maxItems 6
+     */
+  documents: LimitApplicationDocumentInput[];
   /** @maxLength 4000 */
   note?: string;
 }
@@ -120,6 +176,35 @@ export interface LimitApplicationStatusUpdate {
   status: LimitApplicationStatus;
   /** @maxLength 4000 */
   internalNote?: string;
+}
+
+export type UploadUrlRequestContentType = typeof UploadUrlRequestContentType[keyof typeof UploadUrlRequestContentType];
+
+
+export const UploadUrlRequestContentType = {
+  'application/pdf': 'application/pdf',
+  'image/jpeg': 'image/jpeg',
+  'image/png': 'image/png',
+} as const;
+
+export interface UploadUrlRequest {
+  /**
+     * @minLength 1
+     * @maxLength 255
+     */
+  name: string;
+  /**
+     * @minimum 1
+     * @maximum 10485760
+     */
+  size: number;
+  contentType: UploadUrlRequestContentType;
+}
+
+export interface UploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+  metadata?: UploadUrlRequest;
 }
 
 export interface LimitApplicationPage {

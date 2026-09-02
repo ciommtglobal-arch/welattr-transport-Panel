@@ -9,6 +9,38 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Başvuru belgesi için güvenli yükleme adresi oluşturur
+ */
+export const requestUploadUrlBodyNameMax = 255;
+
+export const requestUploadUrlBodySizeMax = 10485760;
+
+
+
+export const RequestUploadUrlBody = zod.object({
+  "name": zod.string().min(1).max(requestUploadUrlBodyNameMax),
+  "size": zod.int().min(1).max(requestUploadUrlBodySizeMax),
+  "contentType": zod.enum(['application/pdf', 'image/jpeg', 'image/png'])
+})
+
+export const requestUploadUrlResponseMetadataNameMax = 255;
+
+export const requestUploadUrlResponseMetadataSizeMax = 10485760;
+
+
+
+export const RequestUploadUrlResponse = zod.object({
+  "uploadURL": zod.url(),
+  "objectPath": zod.string(),
+  "metadata": zod.object({
+  "name": zod.string().min(1).max(requestUploadUrlResponseMetadataNameMax),
+  "size": zod.int().min(1).max(requestUploadUrlResponseMetadataSizeMax),
+  "contentType": zod.enum(['application/pdf', 'image/jpeg', 'image/png'])
+}).optional()
+})
+
+
+/**
  * Returns server health status
  * @summary Health check
  */
@@ -32,6 +64,16 @@ export const createLimitApplicationBodyPhoneMin = 7;
 export const createLimitApplicationBodyPhoneMax = 32;
 
 export const createLimitApplicationBodyAmountRegExp = new RegExp('^\\d+(\\.\\d{1,2})?$');
+export const createLimitApplicationBodyVehicleDetailsMax = 2000;
+
+export const createLimitApplicationBodyDocumentsItemObjectPathRegExp = new RegExp('^/objects/uploads/[a-zA-Z0-9-]+$');
+export const createLimitApplicationBodyDocumentsItemFileNameMax = 255;
+
+export const createLimitApplicationBodyDocumentsItemSizeMax = 10485760;
+
+export const createLimitApplicationBodyDocumentsMin = 5;
+export const createLimitApplicationBodyDocumentsMax = 6;
+
 export const createLimitApplicationBodyNoteMax = 4000;
 
 
@@ -45,10 +87,23 @@ export const CreateLimitApplicationBody = zod.object({
   "requestType": zod.enum(['İhtiyaç finansmanı', 'Eğitim finansmanı', 'Sağlık finansmanı', 'Konut alımı', 'Konut yenileme', 'Konut refinansmanı', 'İşletme sermayesi', 'Yatırım finansmanı', 'Ticari limit', 'Proje finansmanı', 'Otomobil', 'Ticari araç', 'İş makinesi']),
   "amount": zod.string().regex(createLimitApplicationBodyAmountRegExp),
   "currency": zod.enum(['TRY', 'USD', 'EUR', 'GBP']),
+  "vehicleDetails": zod.string().max(createLimitApplicationBodyVehicleDetailsMax).optional(),
+  "documents": zod.array(zod.object({
+  "documentType": zod.enum(['personal_information', 'tax_certificate', 'signature_circular', 'kkb_report', 'findeks_report', 'ssk_service_statement']),
+  "objectPath": zod.string().regex(createLimitApplicationBodyDocumentsItemObjectPathRegExp),
+  "fileName": zod.string().min(1).max(createLimitApplicationBodyDocumentsItemFileNameMax),
+  "contentType": zod.enum(['application/pdf', 'image/jpeg', 'image/png']),
+  "size": zod.int().min(1).max(createLimitApplicationBodyDocumentsItemSizeMax)
+})).min(createLimitApplicationBodyDocumentsMin).max(createLimitApplicationBodyDocumentsMax),
   "note": zod.string().max(createLimitApplicationBodyNoteMax).optional()
 })
 
 export const createLimitApplicationResponseAmountRegExp = new RegExp('^\\d+(\\.\\d{1,2})?$');
+export const createLimitApplicationResponseDocumentsItemOneObjectPathRegExp = new RegExp('^/objects/uploads/[a-zA-Z0-9-]+$');
+export const createLimitApplicationResponseDocumentsItemOneFileNameMax = 255;
+
+export const createLimitApplicationResponseDocumentsItemOneSizeMax = 10485760;
+
 
 
 export const CreateLimitApplicationResponse = zod.object({
@@ -62,6 +117,16 @@ export const CreateLimitApplicationResponse = zod.object({
   "requestType": zod.string(),
   "amount": zod.string().regex(createLimitApplicationResponseAmountRegExp),
   "currency": zod.enum(['TRY', 'USD', 'EUR', 'GBP']),
+  "vehicleDetails": zod.string().nullish(),
+  "documents": zod.array(zod.object({
+  "documentType": zod.enum(['personal_information', 'tax_certificate', 'signature_circular', 'kkb_report', 'findeks_report', 'ssk_service_statement']),
+  "objectPath": zod.string().regex(createLimitApplicationResponseDocumentsItemOneObjectPathRegExp),
+  "fileName": zod.string().min(1).max(createLimitApplicationResponseDocumentsItemOneFileNameMax),
+  "contentType": zod.enum(['application/pdf', 'image/jpeg', 'image/png']),
+  "size": zod.int().min(1).max(createLimitApplicationResponseDocumentsItemOneSizeMax)
+}).and(zod.object({
+  "id": zod.int()
+}))),
   "note": zod.string().nullish(),
   "status": zod.enum(['new', 'reviewing', 'approved', 'rejected']),
   "internalNote": zod.string().nullish(),
@@ -87,6 +152,11 @@ export const GetLimitApplicationsQueryParams = zod.object({
 })
 
 export const getLimitApplicationsResponseItemsItemAmountRegExp = new RegExp('^\\d+(\\.\\d{1,2})?$');
+export const getLimitApplicationsResponseItemsItemDocumentsItemOneObjectPathRegExp = new RegExp('^/objects/uploads/[a-zA-Z0-9-]+$');
+export const getLimitApplicationsResponseItemsItemDocumentsItemOneFileNameMax = 255;
+
+export const getLimitApplicationsResponseItemsItemDocumentsItemOneSizeMax = 10485760;
+
 
 
 export const GetLimitApplicationsResponse = zod.object({
@@ -101,6 +171,16 @@ export const GetLimitApplicationsResponse = zod.object({
   "requestType": zod.string(),
   "amount": zod.string().regex(getLimitApplicationsResponseItemsItemAmountRegExp),
   "currency": zod.enum(['TRY', 'USD', 'EUR', 'GBP']),
+  "vehicleDetails": zod.string().nullish(),
+  "documents": zod.array(zod.object({
+  "documentType": zod.enum(['personal_information', 'tax_certificate', 'signature_circular', 'kkb_report', 'findeks_report', 'ssk_service_statement']),
+  "objectPath": zod.string().regex(getLimitApplicationsResponseItemsItemDocumentsItemOneObjectPathRegExp),
+  "fileName": zod.string().min(1).max(getLimitApplicationsResponseItemsItemDocumentsItemOneFileNameMax),
+  "contentType": zod.enum(['application/pdf', 'image/jpeg', 'image/png']),
+  "size": zod.int().min(1).max(getLimitApplicationsResponseItemsItemDocumentsItemOneSizeMax)
+}).and(zod.object({
+  "id": zod.int()
+}))),
   "note": zod.string().nullish(),
   "status": zod.enum(['new', 'reviewing', 'approved', 'rejected']),
   "internalNote": zod.string().nullish(),
@@ -130,6 +210,11 @@ export const UpdateLimitApplicationStatusBody = zod.object({
 })
 
 export const updateLimitApplicationStatusResponseAmountRegExp = new RegExp('^\\d+(\\.\\d{1,2})?$');
+export const updateLimitApplicationStatusResponseDocumentsItemOneObjectPathRegExp = new RegExp('^/objects/uploads/[a-zA-Z0-9-]+$');
+export const updateLimitApplicationStatusResponseDocumentsItemOneFileNameMax = 255;
+
+export const updateLimitApplicationStatusResponseDocumentsItemOneSizeMax = 10485760;
+
 
 
 export const UpdateLimitApplicationStatusResponse = zod.object({
@@ -143,6 +228,16 @@ export const UpdateLimitApplicationStatusResponse = zod.object({
   "requestType": zod.string(),
   "amount": zod.string().regex(updateLimitApplicationStatusResponseAmountRegExp),
   "currency": zod.enum(['TRY', 'USD', 'EUR', 'GBP']),
+  "vehicleDetails": zod.string().nullish(),
+  "documents": zod.array(zod.object({
+  "documentType": zod.enum(['personal_information', 'tax_certificate', 'signature_circular', 'kkb_report', 'findeks_report', 'ssk_service_statement']),
+  "objectPath": zod.string().regex(updateLimitApplicationStatusResponseDocumentsItemOneObjectPathRegExp),
+  "fileName": zod.string().min(1).max(updateLimitApplicationStatusResponseDocumentsItemOneFileNameMax),
+  "contentType": zod.enum(['application/pdf', 'image/jpeg', 'image/png']),
+  "size": zod.int().min(1).max(updateLimitApplicationStatusResponseDocumentsItemOneSizeMax)
+}).and(zod.object({
+  "id": zod.int()
+}))),
   "note": zod.string().nullish(),
   "status": zod.enum(['new', 'reviewing', 'approved', 'rejected']),
   "internalNote": zod.string().nullish(),

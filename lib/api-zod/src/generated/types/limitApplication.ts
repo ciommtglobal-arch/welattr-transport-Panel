@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { LimitApplicationCurrency } from './limitApplicationCurrency';
+import type { LimitApplicationDocument } from './limitApplicationDocument';
 import type { LimitApplicationStatus } from './limitApplicationStatus';
 import type { LimitApplicationType } from './limitApplicationType';
 
@@ -21,6 +22,9 @@ export interface LimitApplication {
   /** @pattern ^\d+(\.\d{1,2})?$ */
   amount: string;
   currency: LimitApplicationCurrency;
+  /** @nullable */
+  vehicleDetails?: string | null;
+  documents: LimitApplicationDocument[];
   /** @nullable */
   note?: string | null;
   status: LimitApplicationStatus;

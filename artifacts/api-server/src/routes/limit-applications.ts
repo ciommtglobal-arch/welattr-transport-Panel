@@ -10,15 +10,25 @@ import {
 import {
   db,
   limitApplicationAuditLogsTable,
+  limitApplicationDocumentsTable,
   limitApplicationsTable,
   staffUsersTable,
   type LimitApplication,
+  type LimitApplicationDocument,
 } from "@workspace/db";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import {
+  ObjectNotFoundError,
+  ObjectStorageService,
+} from "../lib/objectStorage";
 
 const router: IRouter = Router();
+const objectStorageService = new ObjectStorageService();
 
-function serializeApplication(application: LimitApplication) {
+function serializeApplication(
+  application: LimitApplication,
+  documents: LimitApplicationDocument[],
+) {
   return {
     id: application.id,
     referenceCode: application.referenceCode,
@@ -30,6 +40,15 @@ function serializeApplication(application: LimitApplication) {
     requestType: application.requestType,
     amount: application.amount,
     currency: application.currency,
+    vehicleDetails: application.vehicleDetails,
+    documents: documents.map((document) => ({
+      id: document.id,
+      documentType: document.documentType,
+      objectPath: document.objectPath,
+      fileName: document.fileName,
+      contentType: document.contentType,
+      size: document.size,
+    })),
     note: application.note,
     status: application.status,
     internalNote: application.internalNote,
@@ -79,16 +98,73 @@ router.post("/limit-applications", async (req, res) => {
     return;
   }
 
+  const requiredDocumentTypes: Array<
+    (typeof parsed.data.documents)[number]["documentType"]
+  > = [
+    "personal_information",
+    "tax_certificate",
+    "signature_circular",
+    "kkb_report",
+    "findeks_report",
+    ...(parsed.data.applicationType === "individual"
+      ? ["ssk_service_statement" as const]
+      : []),
+  ];
+  const providedDocumentTypes = new Set(
+    parsed.data.documents.map((document) => document.documentType),
+  );
+  const missingDocument = requiredDocumentTypes.find(
+    (documentType) => !providedDocumentTypes.has(documentType),
+  );
+  if (missingDocument) {
+    res.status(400).json({ error: "Gerekli başvuru belgeleri eksik." });
+    return;
+  }
+
+  if (
+    parsed.data.applicationType === "vehicle" &&
+    !parsed.data.vehicleDetails?.trim()
+  ) {
+    res.status(400).json({ error: "Araç bilgilerini girmeniz gerekiyor." });
+    return;
+  }
+
+  try {
+    await Promise.all(
+      parsed.data.documents.map((document) =>
+        objectStorageService.getObjectEntityFile(document.objectPath),
+      ),
+    );
+  } catch (error) {
+    if (error instanceof ObjectNotFoundError) {
+      res.status(400).json({ error: "Yüklenen belgelerden biri bulunamadı." });
+      return;
+    }
+    throw error;
+  }
+
   const applicantClerkUserId = getAuth(req).userId ?? null;
   const created = await db.transaction(async (tx) => {
+    const { documents, ...applicationData } = parsed.data;
     const [application] = await tx
       .insert(limitApplicationsTable)
       .values({
-        ...parsed.data,
-        note: parsed.data.note?.trim() || null,
+        ...applicationData,
+        vehicleDetails: applicationData.vehicleDetails?.trim() || null,
+        note: applicationData.note?.trim() || null,
         referenceCode: createReferenceCode(),
         applicantClerkUserId,
       })
+      .returning();
+
+    const createdDocuments = await tx
+      .insert(limitApplicationDocumentsTable)
+      .values(
+        documents.map((document) => ({
+          applicationId: application.id,
+          ...document,
+        })),
+      )
       .returning();
 
     await tx.insert(limitApplicationAuditLogsTable).values({
@@ -96,12 +172,15 @@ router.post("/limit-applications", async (req, res) => {
       actorClerkUserId: applicantClerkUserId,
       action: "application_created",
       nextStatus: "new",
+      metadata: { documentCount: createdDocuments.length },
     });
 
-    return application;
+    return { application, documents: createdDocuments };
   });
 
-  res.status(201).json(serializeApplication(created));
+  res
+    .status(201)
+    .json(serializeApplication(created.application, created.documents));
 });
 
 router.get("/limit-applications", async (req, res) => {
@@ -131,9 +210,28 @@ router.get("/limit-applications", async (req, res) => {
       .from(limitApplicationsTable)
       .where(where),
   ]);
+  const documents =
+    items.length === 0
+      ? []
+      : await db
+          .select()
+          .from(limitApplicationDocumentsTable)
+          .where(
+            inArray(
+              limitApplicationDocumentsTable.applicationId,
+              items.map((item) => item.id),
+            ),
+          );
 
   res.json({
-    items: items.map(serializeApplication),
+    items: items.map((application) =>
+      serializeApplication(
+        application,
+        documents.filter(
+          (document) => document.applicationId === application.id,
+        ),
+      ),
+    ),
     page,
     pageSize,
     total: countRows[0]?.count ?? 0,
@@ -191,7 +289,12 @@ router.patch("/limit-applications/:id/status", async (req, res) => {
     return application;
   });
 
-  res.json(serializeApplication(updated));
+  const documents = await db
+    .select()
+    .from(limitApplicationDocumentsTable)
+    .where(eq(limitApplicationDocumentsTable.applicationId, updated.id));
+
+  res.json(serializeApplication(updated, documents));
 });
 
 export default router;

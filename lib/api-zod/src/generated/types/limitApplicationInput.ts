@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { LimitApplicationDocumentInput } from './limitApplicationDocumentInput';
 import type { LimitApplicationInputCurrency } from './limitApplicationInputCurrency';
 import type { LimitApplicationInputRequestType } from './limitApplicationInputRequestType';
 import type { LimitApplicationType } from './limitApplicationType';
@@ -32,6 +33,13 @@ export interface LimitApplicationInput {
   /** @pattern ^\d+(\.\d{1,2})?$ */
   amount: string;
   currency: LimitApplicationInputCurrency;
+  /** @maxLength 2000 */
+  vehicleDetails?: string;
+  /**
+     * @minItems 5
+     * @maxItems 6
+     */
+  documents: LimitApplicationDocumentInput[];
   /** @maxLength 4000 */
   note?: string;
 }

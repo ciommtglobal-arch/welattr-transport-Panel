@@ -25,6 +25,18 @@ export const limitApplicationTypeEnum = pgEnum("limit_application_type", [
   "vehicle",
 ]);
 
+export const limitApplicationDocumentTypeEnum = pgEnum(
+  "limit_application_document_type",
+  [
+    "personal_information",
+    "tax_certificate",
+    "signature_circular",
+    "kkb_report",
+    "findeks_report",
+    "ssk_service_statement",
+  ],
+);
+
 export const staffRoleEnum = pgEnum("staff_role", [
   "admin",
   "operations",
@@ -69,6 +81,7 @@ export const limitApplicationsTable = pgTable(
     requestType: text("request_type").notNull(),
     amount: numeric("amount", { precision: 15, scale: 2 }).notNull(),
     currency: text("currency").notNull(),
+    vehicleDetails: text("vehicle_details"),
     note: text("note"),
     status: limitApplicationStatusEnum("status").notNull().default("new"),
     internalNote: text("internal_note"),
@@ -89,6 +102,33 @@ export const limitApplicationsTable = pgTable(
     index("limit_applications_status_idx").on(table.status),
     index("limit_applications_email_idx").on(table.email),
     index("limit_applications_created_at_idx").on(table.createdAt),
+  ],
+);
+
+export const limitApplicationDocumentsTable = pgTable(
+  "limit_application_documents",
+  {
+    id: serial("id").primaryKey(),
+    applicationId: integer("application_id")
+      .notNull()
+      .references(() => limitApplicationsTable.id, { onDelete: "cascade" }),
+    documentType: limitApplicationDocumentTypeEnum("document_type").notNull(),
+    objectPath: text("object_path").notNull(),
+    fileName: text("file_name").notNull(),
+    contentType: text("content_type").notNull(),
+    size: integer("size").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("limit_application_documents_application_idx").on(
+      table.applicationId,
+    ),
+    uniqueIndex("limit_application_documents_type_idx").on(
+      table.applicationId,
+      table.documentType,
+    ),
   ],
 );
 
@@ -134,6 +174,8 @@ export const insertStaffUserSchema = createInsertSchema(staffUsersTable).omit({
 });
 
 export type LimitApplication = typeof limitApplicationsTable.$inferSelect;
+export type LimitApplicationDocument =
+  typeof limitApplicationDocumentsTable.$inferSelect;
 export type InsertLimitApplication = z.infer<
   typeof insertLimitApplicationSchema
 >;

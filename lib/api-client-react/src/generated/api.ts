@@ -20,13 +20,16 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ErrorEnvelope,
   ErrorResponse,
   GetLimitApplicationsParams,
   HealthStatus,
   LimitApplication,
   LimitApplicationInput,
   LimitApplicationPage,
-  LimitApplicationStatusUpdate
+  LimitApplicationStatusUpdate,
+  UploadUrlRequest,
+  UploadUrlResponse
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -55,6 +58,86 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getRequestUploadUrlUrl = () => {
+
+
+
+
+  return `/api/storage/uploads/request-url`
+}
+
+/**
+ * @summary Başvuru belgesi için güvenli yükleme adresi oluşturur
+ */
+export const requestUploadUrl = async (uploadUrlRequest: UploadUrlRequest, options?: Parameters<typeof customFetch>[1]): Promise<UploadUrlResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<UploadUrlResponse>(getRequestUploadUrlUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(uploadUrlRequest)
+  }
+);}
+
+
+
+
+
+export const getRequestUploadUrlMutationKey = () => ['requestUploadUrl'] as const;
+
+export const getRequestUploadUrlMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,RequestUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,RequestUploadUrlMutationVariables, TContext> => {
+
+const mutationKey = getRequestUploadUrlMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestUploadUrl>>, RequestUploadUrlMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestUploadUrl(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestUploadUrlMutationResult = NonNullable<Awaited<ReturnType<typeof requestUploadUrl>>>
+    export type RequestUploadUrlMutationBody = BodyType<UploadUrlRequest>
+    export type RequestUploadUrlMutationError = ErrorType<ErrorEnvelope>
+    export type RequestUploadUrlMutationVariables = {data: BodyType<UploadUrlRequest>}
+
+    /**
+ * @summary Başvuru belgesi için güvenli yükleme adresi oluşturur
+ */
+export const useRequestUploadUrl = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,RequestUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestUploadUrl>>,
+        TError,
+        RequestUploadUrlMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestUploadUrlMutationOptions(options));
+    }
 
 export const getHealthCheckUrl = () => {
 
