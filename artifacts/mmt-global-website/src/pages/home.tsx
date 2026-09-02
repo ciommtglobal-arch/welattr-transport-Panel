@@ -427,8 +427,8 @@ function EcosystemCard({
       <p className="text-card-foreground/70 font-light leading-relaxed text-sm mb-8 flex-grow">
         {desc}
       </p>
-      <div className="flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-primary opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-        <span>İncele</span>
+      <div className="flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-primary transition-all duration-300 group-hover:translate-x-1">
+        <span>{href ? "Başvuruyu başlat" : "İncele"}</span>
         <ArrowRight size={14} />
       </div>
     </div>

@@ -1,6 +1,7 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import {
   ArrowLeft,
+  ArrowRight,
   CheckCircle2,
   FileText,
   Loader2,
@@ -29,6 +30,8 @@ type LimitFormData = {
   vehicleDetails: string;
   note: string;
 };
+
+type LimitStep = 1 | 2 | 3;
 
 const commonDocumentRequirements: Array<{
   type: LimitApplicationDocumentType;
@@ -238,6 +241,8 @@ export default function Limit({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [uploadingLabel, setUploadingLabel] = useState("");
+  const [step, setStep] = useState<LimitStep>(1);
+  const formRef = useRef<HTMLFormElement>(null);
   const [documentFiles, setDocumentFiles] = useState<
     Partial<Record<LimitApplicationDocumentType, File>>
   >({});
@@ -245,6 +250,11 @@ export default function Limit({
     category === "individual"
       ? [...commonDocumentRequirements, sskDocumentRequirement]
       : commonDocumentRequirements;
+  const steps = [
+    { number: 1, label: "Bilgileriniz" },
+    { number: 2, label: "Finansman" },
+    { number: 3, label: "Belgeler" },
+  ] as const;
 
   const updateField = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -331,6 +341,13 @@ export default function Limit({
       setUploadingLabel("");
       setIsSubmitting(false);
     }
+  };
+
+  const goToNextStep = () => {
+    if (!formRef.current?.reportValidity()) return;
+    setStep((current) =>
+      current < 3 ? (current + 1) as LimitStep : current,
+    );
   };
 
   return (
@@ -441,7 +458,8 @@ export default function Limit({
                   type="button"
                   onClick={() => {
                     setForm(createInitialForm(category));
-                     setDocumentFiles({});
+                    setDocumentFiles({});
+                    setStep(1);
                     setSubmitted(false);
                     setReferenceCode("");
                     setErrorMessage("");
@@ -452,7 +470,30 @@ export default function Limit({
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-7">
+              <form ref={formRef} onSubmit={handleSubmit} className="space-y-7">
+                <div className="mb-10 grid grid-cols-3 border-b border-secondary-foreground/15">
+                  {steps.map((item) => (
+                    <div
+                      key={item.number}
+                      className={`border-b-2 px-2 pb-4 text-center transition-colors ${
+                        item.number === step
+                          ? "border-primary text-secondary-foreground"
+                          : item.number < step
+                            ? "border-primary/40 text-secondary-foreground/70"
+                            : "border-transparent text-secondary-foreground/35"
+                      }`}
+                    >
+                      <span className="font-mono text-xs text-primary">
+                        0{item.number}
+                      </span>
+                      <span className="mt-2 block text-[10px] font-semibold uppercase tracking-[0.12em] md:text-xs">
+                        {item.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {step === 1 ? (
                 <div className="grid gap-7 md:grid-cols-2">
                   <Field
                     label="Ad soyad"
@@ -503,7 +544,10 @@ export default function Limit({
                     required
                   />
                 </div>
+                ) : null}
 
+                {step === 2 ? (
+                <>
                 <div className="grid gap-7 md:grid-cols-2">
                   <label className="flex flex-col gap-2 text-sm">
                     <span className="font-semibold">{config.requestLabel}</span>
@@ -572,7 +616,10 @@ export default function Limit({
                     className="resize-y border-b border-secondary-foreground/25 bg-transparent px-0 py-3 text-secondary-foreground outline-none transition-colors placeholder:text-secondary-foreground/40 focus:border-primary"
                   />
                 </label>
+                </>
+                ) : null}
 
+                {step === 3 ? (
                 <section className="border border-secondary-foreground/15 bg-background/5 p-5 md:p-6">
                   <div className="mb-5 flex items-start gap-3">
                     <FileText className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -597,7 +644,6 @@ export default function Limit({
                           <input
                             type="file"
                             accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                            required
                             className="sr-only"
                             onChange={(event) => {
                               const file = event.target.files?.[0];
@@ -627,21 +673,33 @@ export default function Limit({
                     })}
                   </div>
                 </section>
+                ) : null}
 
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex w-full items-center justify-center gap-3 bg-primary px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSubmitting
-                    ? uploadingLabel || "Gönderiliyor"
-                    : "Başvuruyu gönder"}
-                  {isSubmitting ? (
-                    <Loader2 size={17} className="animate-spin" />
-                  ) : (
-                    <Send size={17} />
-                  )}
-                </button>
+                {step < 3 ? (
+                  <button
+                    type="button"
+                    onClick={goToNextStep}
+                    className="flex w-full items-center justify-center gap-3 bg-primary px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-primary/90"
+                  >
+                    Sonraki adıma geç
+                    <ArrowRight size={17} />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex w-full items-center justify-center gap-3 bg-primary px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSubmitting
+                      ? uploadingLabel || "Gönderiliyor"
+                      : "Başvuruyu gönder"}
+                    {isSubmitting ? (
+                      <Loader2 size={17} className="animate-spin" />
+                    ) : (
+                      <Send size={17} />
+                    )}
+                  </button>
+                )}
                 {errorMessage ? (
                   <p
                     role="alert"
