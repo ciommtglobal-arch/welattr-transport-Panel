@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { ArrowDownRight, Menu, X, ArrowRight, ChevronRight, Globe2, Building2, Stethoscope, Truck, Tv, Briefcase, Factory } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 // Make sure to use the generated image
 const HERO_BG = "/hero-bridge.jpg";
@@ -56,7 +57,15 @@ export default function Home() {
             <button onClick={() => scrollToSection("contact")} className="hover:text-primary transition-colors">
               İLETİŞİM
             </button>
-              <Link href="/limit" className="px-5 py-2.5 bg-primary text-white hover:bg-primary/90 transition-colors rounded-none font-semibold uppercase tracking-wider text-xs">
+              <Link
+                href="/limit"
+                onClick={() =>
+                  trackEvent("application_center_opened", {
+                    location: "desktop_navigation",
+                  })
+                }
+                className="px-5 py-2.5 bg-primary text-white hover:bg-primary/90 transition-colors rounded-none font-semibold uppercase tracking-wider text-xs"
+              >
               PORTALA GİRİŞ
               </Link>
           </div>
@@ -109,7 +118,15 @@ export default function Home() {
             Bireysel
           </Link>
         </div>
-        <Link href="/limit" className="mt-2 px-8 py-4 bg-primary text-white transition-colors rounded-none font-semibold uppercase tracking-wider text-sm">
+        <Link
+          href="/limit"
+          onClick={() =>
+            trackEvent("application_center_opened", {
+              location: "mobile_navigation",
+            })
+          }
+          className="mt-2 px-8 py-4 bg-primary text-white transition-colors rounded-none font-semibold uppercase tracking-wider text-sm"
+        >
           TÜM BAŞVURULAR
         </Link>
       </div>
@@ -248,6 +265,7 @@ export default function Home() {
               title="Finansal Hizmetler"
               desc="Kurumsal büyüme için stratejik danışmanlık, yatırım yönetimi ve yapısal finansman çözümleri sunuyoruz."
               href="/limit"
+              analyticsLocation="ecosystem_card"
             />
             <EcosystemCard 
               icon={<Factory className="w-8 h-8" />}
@@ -325,7 +343,19 @@ export default function Home() {
                 <li><span className="hover:text-primary transition-colors cursor-pointer">Lojistik</span></li>
                 <li><span className="hover:text-primary transition-colors cursor-pointer">Sağlık Turizmi</span></li>
                 <li><span className="hover:text-primary transition-colors cursor-pointer">İnşaat & Gelişim</span></li>
-                <li><Link href="/limit" className="hover:text-primary transition-colors">Finans & Medya</Link></li>
+                <li>
+                  <Link
+                    href="/limit"
+                    onClick={() =>
+                      trackEvent("application_center_opened", {
+                        location: "footer",
+                      })
+                    }
+                    className="hover:text-primary transition-colors"
+                  >
+                    Finans & Medya
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -375,7 +405,19 @@ export default function Home() {
   );
 }
 
-function EcosystemCard({ icon, title, desc, href }: { icon: React.ReactNode, title: string, desc: string, href?: string }) {
+function EcosystemCard({
+  icon,
+  title,
+  desc,
+  href,
+  analyticsLocation,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  href?: string;
+  analyticsLocation?: string;
+}) {
   const card = (
     <div className="group border border-border/50 bg-card p-8 md:p-10 hover:border-primary/50 transition-all duration-500 rounded-tr-[2rem] rounded-bl-[2rem] hover:-translate-y-2 flex flex-col">
       <div className="w-16 h-16 rounded-full bg-background flex items-center justify-center text-primary mb-8 group-hover:scale-110 transition-transform duration-500 shadow-sm border border-border/50">
@@ -393,7 +435,16 @@ function EcosystemCard({ icon, title, desc, href }: { icon: React.ReactNode, tit
   );
 
   return href ? (
-    <Link href={href} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+    <Link
+      href={href}
+      onClick={() =>
+        analyticsLocation &&
+        trackEvent("application_center_opened", {
+          location: analyticsLocation,
+        })
+      }
+      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+    >
       {card}
     </Link>
   ) : (

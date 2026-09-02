@@ -8,6 +8,7 @@ import {
   Upload,
 } from "lucide-react";
 import { Link } from "wouter";
+import { trackEvent } from "@/lib/analytics";
 import {
   createLimitApplication,
   requestUploadUrl,
@@ -193,6 +194,12 @@ export function LimitChooser() {
                 <Link
                   key={category}
                   href={categoryPath[category]}
+                  onClick={() =>
+                    trackEvent("application_category_selected", {
+                      category,
+                      location: "application_center",
+                    })
+                  }
                   className="group min-h-64 border border-border/70 bg-card p-7 transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:bg-secondary hover:text-secondary-foreground md:p-8"
                 >
                   <span className="font-mono text-xs tracking-[0.2em] text-primary">
@@ -250,12 +257,14 @@ export default function Limit({
     event.preventDefault();
     setErrorMessage("");
     setIsSubmitting(true);
+    let failureReason = "request_error";
 
     try {
       const missingDocument = documentRequirements.find(
         (requirement) => !documentFiles[requirement.type],
       );
       if (missingDocument) {
+        failureReason = "missing_document";
         throw new Error(`${missingDocument.label} belgesini yükleyin.`);
       }
 
@@ -304,7 +313,15 @@ export default function Limit({
       } as LimitApplicationInput);
       setReferenceCode(application.referenceCode);
       setSubmitted(true);
+      trackEvent("application_submitted", {
+        category,
+        request_type: form.requestType,
+      });
     } catch (error) {
+      trackEvent("application_submission_failed", {
+        category,
+        reason: failureReason,
+      });
       setErrorMessage(
         error instanceof Error
           ? error.message
@@ -588,6 +605,12 @@ export default function Limit({
                                 ...current,
                                 [requirement.type]: file,
                               }));
+                              if (file) {
+                                trackEvent("application_document_selected", {
+                                  category,
+                                  document_type: requirement.type,
+                                });
+                              }
                             }}
                           />
                           <span className="flex items-center gap-2 text-sm font-semibold">
