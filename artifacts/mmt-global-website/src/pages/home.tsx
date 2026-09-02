@@ -159,7 +159,7 @@ export default function Home() {
               Üret.
             </span>
             <span className="font-serif italic text-primary font-normal opacity-0 animate-slide-up-fade delay-500">
-              Ticaret.
+              Tanıt.
             </span>
             <span className="font-semibold opacity-0 animate-slide-up-fade delay-700">
               Sat.
