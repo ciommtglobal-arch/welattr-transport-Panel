@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, type IRouter } from "express";
 import { getAuth } from "@clerk/express";
 import {
   CreateLimitApplicationBody,
@@ -12,15 +12,15 @@ import {
   limitApplicationAuditLogsTable,
   limitApplicationDocumentsTable,
   limitApplicationsTable,
-  staffUsersTable,
   type LimitApplication,
   type LimitApplicationDocument,
 } from "@workspace/db";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import {
   ObjectNotFoundError,
   ObjectStorageService,
 } from "../lib/objectStorage";
+import { requireStaff } from "../lib/staffAuth";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -61,32 +61,6 @@ function createReferenceCode() {
   const year = new Date().getUTCFullYear();
   const suffix = randomBytes(4).toString("hex").toUpperCase();
   return `MMT-${year}-${suffix}`;
-}
-
-async function requireStaff(req: Request, res: Response) {
-  const { userId } = getAuth(req);
-  if (!userId) {
-    res.status(401).json({ error: "Oturum açmanız gerekiyor." });
-    return null;
-  }
-
-  const [staff] = await db
-    .select()
-    .from(staffUsersTable)
-    .where(
-      and(
-        eq(staffUsersTable.clerkUserId, userId),
-        eq(staffUsersTable.active, 1),
-      ),
-    )
-    .limit(1);
-
-  if (!staff) {
-    res.status(403).json({ error: "Bu alan için personel yetkisi gerekiyor." });
-    return null;
-  }
-
-  return { staff, userId };
 }
 
 router.post("/limit-applications", async (req, res) => {

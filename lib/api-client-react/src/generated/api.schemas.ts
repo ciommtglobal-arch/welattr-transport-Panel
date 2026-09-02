@@ -207,6 +207,21 @@ export interface UploadUrlResponse {
   metadata?: UploadUrlRequest;
 }
 
+export interface ObjectDownloadUrlRequest {
+  /**
+     * Başvuru belgesinin normalize edilmiş özel obje yolu.
+     * @pattern ^/objects/uploads/[a-zA-Z0-9-]+$
+     */
+  objectPath: string;
+}
+
+export interface ObjectDownloadUrlResponse {
+  /** Kısa süreli imzalı GET adresi. */
+  downloadURL: string;
+  /** İmzalı adresin geçerliliğinin sona erdiği zaman. */
+  expiresAt: string;
+}
+
 export interface LimitApplicationPage {
   items: LimitApplication[];
   page: number;

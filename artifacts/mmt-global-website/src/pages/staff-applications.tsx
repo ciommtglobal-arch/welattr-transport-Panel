@@ -4,12 +4,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   BriefcaseBusiness,
+  ExternalLink,
   FileText,
   Loader2,
   RefreshCw,
 } from "lucide-react";
 import { Link } from "wouter";
 import {
+  useRequestObjectDownloadUrl,
   useGetLimitApplications,
   useUpdateLimitApplicationStatus,
   type LimitApplication,
@@ -42,12 +44,7 @@ const documentLabels: Record<
   ssk_service_statement: "SSK hizmet dökümü",
 };
 
-const statusOptions = [
-  "new",
-  "reviewing",
-  "approved",
-  "rejected",
-] as const;
+const statusOptions = ["new", "reviewing", "approved", "rejected"] as const;
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("tr-TR", {
@@ -139,6 +136,11 @@ function ApplicationInbox() {
   const [reviewStatus, setReviewStatus] =
     useState<LimitApplicationStatus>("new");
   const [internalNote, setInternalNote] = useState("");
+  const [openingDocumentId, setOpeningDocumentId] = useState<number | null>(
+    null,
+  );
+  const [documentError, setDocumentError] = useState<string | null>(null);
+  const requestDocumentUrl = useRequestObjectDownloadUrl();
   const updateStatus = useUpdateLimitApplicationStatus({
     mutation: {
       onSuccess: async () => {
@@ -165,6 +167,32 @@ function ApplicationInbox() {
         internalNote: internalNote.trim() || undefined,
       },
     });
+  };
+
+  const openDocument = async (documentId: number, objectPath: string) => {
+    const documentWindow = window.open("about:blank", "_blank");
+    if (!documentWindow) {
+      setDocumentError(
+        "Belgeyi açmak için tarayıcınızda açılır pencerelere izin verin.",
+      );
+      return;
+    }
+
+    documentWindow.opener = null;
+    setOpeningDocumentId(documentId);
+    setDocumentError(null);
+
+    try {
+      const { downloadURL } = await requestDocumentUrl.mutateAsync({
+        data: { objectPath },
+      });
+      documentWindow.location.replace(downloadURL);
+    } catch {
+      documentWindow.close();
+      setDocumentError("Belge açılamadı. Lütfen tekrar deneyin.");
+    } finally {
+      setOpeningDocumentId(null);
+    }
   };
 
   if (applications.isLoading) {
@@ -294,13 +322,22 @@ function ApplicationInbox() {
               </div>
 
               <dl className="grid gap-5 py-7 text-sm sm:grid-cols-2">
-                <Info label="Kategori" value={typeLabels[selectedApplication.applicationType]} />
+                <Info
+                  label="Kategori"
+                  value={typeLabels[selectedApplication.applicationType]}
+                />
                 <Info label="Talep" value={selectedApplication.requestType} />
-                <Info label="Şirket / kurum" value={selectedApplication.company} />
+                <Info
+                  label="Şirket / kurum"
+                  value={selectedApplication.company}
+                />
                 <Info label="Telefon" value={selectedApplication.phone} />
                 <Info label="E-posta" value={selectedApplication.email} />
                 {selectedApplication.vehicleDetails ? (
-                  <Info label="Araç bilgileri" value={selectedApplication.vehicleDetails} />
+                  <Info
+                    label="Araç bilgileri"
+                    value={selectedApplication.vehicleDetails}
+                  />
                 ) : null}
               </dl>
 
@@ -332,9 +369,29 @@ function ApplicationInbox() {
                       <p className="mt-1 truncate text-[11px] text-foreground/45">
                         {document.fileName}
                       </p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void openDocument(document.id, document.objectPath)
+                        }
+                        disabled={openingDocumentId === document.id}
+                        className="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary hover:text-primary/70 disabled:opacity-60"
+                      >
+                        {openingDocumentId === document.id ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <ExternalLink size={14} />
+                        )}
+                        Aç / indir
+                      </button>
                     </div>
                   ))}
                 </div>
+                {documentError ? (
+                  <p className="mt-3 text-sm text-destructive">
+                    {documentError}
+                  </p>
+                ) : null}
               </div>
 
               <form

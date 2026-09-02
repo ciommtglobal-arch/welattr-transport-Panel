@@ -64,6 +64,36 @@ export class ObjectStorageService {
     return data.signed_url;
   }
 
+  async getObjectEntityDownloadURL(objectPath: string, ttlSec = 5 * 60) {
+    const file = await this.getObjectEntityFile(objectPath);
+    const expiresAt = new Date(Date.now() + ttlSec * 1000);
+
+    const response = await fetch(
+      `${REPLIT_SIDECAR_ENDPOINT}/object-storage/signed-object-url`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bucket_name: file.bucket.name,
+          object_name: file.name,
+          method: "GET",
+          expires_at: expiresAt.toISOString(),
+        }),
+        signal: AbortSignal.timeout(30_000),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to sign object URL: ${response.status}`);
+    }
+
+    const data = (await response.json()) as { signed_url: string };
+    return {
+      downloadURL: data.signed_url,
+      expiresAt: expiresAt.toISOString(),
+    };
+  }
+
   normalizeObjectEntityPath(rawPath: string) {
     const url = new URL(rawPath);
     const privateDirectory = `${this.getPrivateObjectDir().replace(/\/$/, "")}/`;

@@ -12,7 +12,57 @@ tags:
     description: Health operations
   - name: limit-applications
     description: Corporate limit application operations
+  - name: Storage
+    description: Özel başvuru belgeleri için güvenli depolama işlemleri
 paths:
+  /storage/objects/request-download-url:
+    post:
+      tags: [Storage]
+      operationId: requestObjectDownloadUrl
+      summary: Başvuru belgesi için kısa süreli imzalı okuma adresi oluşturur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ObjectDownloadUrlRequest"
+      responses:
+        "200":
+          description: İmzalı okuma adresi oluşturuldu.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjectDownloadUrlResponse"
+        "400":
+          description: Geçersiz obje yolu.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Belge bulunamadı.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: İmzalı okuma adresi oluşturulamadı.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
   /storage/uploads/request-url:
     post:
       tags: [Storage]
@@ -391,6 +441,27 @@ components:
           type: string
         metadata:
           $ref: "#/components/schemas/UploadUrlRequest"
+    ObjectDownloadUrlRequest:
+      type: object
+      additionalProperties: false
+      required: [objectPath]
+      properties:
+        objectPath:
+          type: string
+          pattern: "^/objects/uploads/[a-zA-Z0-9-]+$"
+          description: Başvuru belgesinin normalize edilmiş özel obje yolu.
+    ObjectDownloadUrlResponse:
+      type: object
+      required: [downloadURL, expiresAt]
+      properties:
+        downloadURL:
+          type: string
+          format: uri
+          description: Kısa süreli imzalı GET adresi.
+        expiresAt:
+          type: string
+          format: date-time
+          description: İmzalı adresin geçerliliğinin sona erdiği zaman.
     LimitApplicationPage:
       type: object
       required:
@@ -416,4 +487,3 @@ components:
       properties:
         error:
           type: string
-

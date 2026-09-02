@@ -9,6 +9,22 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Başvuru belgesi için kısa süreli imzalı okuma adresi oluşturur
+ */
+export const requestObjectDownloadUrlBodyObjectPathRegExp = new RegExp('^/objects/uploads/[a-zA-Z0-9-]+$');
+
+
+export const RequestObjectDownloadUrlBody = zod.object({
+  "objectPath": zod.string().regex(requestObjectDownloadUrlBodyObjectPathRegExp).describe('Başvuru belgesinin normalize edilmiş özel obje yolu.')
+})
+
+export const RequestObjectDownloadUrlResponse = zod.object({
+  "downloadURL": zod.url().describe('Kısa süreli imzalı GET adresi.'),
+  "expiresAt": zod.coerce.date().describe('İmzalı adresin geçerliliğinin sona erdiği zaman.')
+})
+
+
+/**
  * @summary Başvuru belgesi için güvenli yükleme adresi oluşturur
  */
 export const requestUploadUrlBodyNameMax = 255;

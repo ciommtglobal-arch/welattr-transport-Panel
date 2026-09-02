@@ -28,6 +28,8 @@ import type {
   LimitApplicationInput,
   LimitApplicationPage,
   LimitApplicationStatusUpdate,
+  ObjectDownloadUrlRequest,
+  ObjectDownloadUrlResponse,
   UploadUrlRequest,
   UploadUrlResponse
 } from './api.schemas';
@@ -58,6 +60,86 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getRequestObjectDownloadUrlUrl = () => {
+
+
+
+
+  return `/api/storage/objects/request-download-url`
+}
+
+/**
+ * @summary Başvuru belgesi için kısa süreli imzalı okuma adresi oluşturur
+ */
+export const requestObjectDownloadUrl = async (objectDownloadUrlRequest: ObjectDownloadUrlRequest, options?: Parameters<typeof customFetch>[1]): Promise<ObjectDownloadUrlResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<ObjectDownloadUrlResponse>(getRequestObjectDownloadUrlUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(objectDownloadUrlRequest)
+  }
+);}
+
+
+
+
+
+export const getRequestObjectDownloadUrlMutationKey = () => ['requestObjectDownloadUrl'] as const;
+
+export const getRequestObjectDownloadUrlMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestObjectDownloadUrl>>, TError,RequestObjectDownloadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestObjectDownloadUrl>>, TError,RequestObjectDownloadUrlMutationVariables, TContext> => {
+
+const mutationKey = getRequestObjectDownloadUrlMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestObjectDownloadUrl>>, RequestObjectDownloadUrlMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestObjectDownloadUrl(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestObjectDownloadUrlMutationResult = NonNullable<Awaited<ReturnType<typeof requestObjectDownloadUrl>>>
+    export type RequestObjectDownloadUrlMutationBody = BodyType<ObjectDownloadUrlRequest>
+    export type RequestObjectDownloadUrlMutationError = ErrorType<ErrorEnvelope>
+    export type RequestObjectDownloadUrlMutationVariables = {data: BodyType<ObjectDownloadUrlRequest>}
+
+    /**
+ * @summary Başvuru belgesi için kısa süreli imzalı okuma adresi oluşturur
+ */
+export const useRequestObjectDownloadUrl = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestObjectDownloadUrl>>, TError,RequestObjectDownloadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestObjectDownloadUrl>>,
+        TError,
+        RequestObjectDownloadUrlMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestObjectDownloadUrlMutationOptions(options));
+    }
 
 export const getRequestUploadUrlUrl = () => {
 

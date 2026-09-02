@@ -23,6 +23,8 @@ export * from './limitApplicationPage';
 export * from './limitApplicationStatus';
 export * from './limitApplicationStatusUpdate';
 export * from './limitApplicationType';
+export * from './objectDownloadUrlRequest';
+export * from './objectDownloadUrlResponse';
 export * from './uploadUrlRequest';
 export * from './uploadUrlRequestContentType';
 export * from './uploadUrlResponse';
