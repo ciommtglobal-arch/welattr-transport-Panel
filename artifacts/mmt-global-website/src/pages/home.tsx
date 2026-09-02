@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { ArrowDownRight, Menu, X, ArrowRight, ChevronRight, Globe2, Building2, Stethoscope, Truck, Tv, Briefcase, Factory } from "lucide-react";
+import { ArrowDownRight, Menu, X, ArrowRight, Globe2, Building2, Stethoscope, Truck, Tv, Briefcase, Factory } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 
 // Make sure to use the generated image
 const HERO_BG = "/hero-bridge.jpg";
+const BUSINESS_PHONE = "+44 114 352 1434";
+const BUSINESS_PHONE_LINK = "+441143521434";
+const WHATSAPP_LINK = "https://wa.me/441143521434";
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -298,13 +301,13 @@ export default function Home() {
           <p className="text-lg md:text-xl opacity-90 max-w-2xl mb-12 font-light">
             Sınırları aşan projelerde ve stratejik yatırımlarda güvenilir iş ortağınız olmak için buradayız.
           </p>
-          <div className="flex flex-col sm:flex-row gap-6">
-             <a href="mailto:info@mmtglobal.com" className="px-8 py-4 bg-background text-foreground hover:bg-background/90 transition-colors font-semibold uppercase tracking-wider text-sm">
-              BİZİMLE İLETİŞİME GEÇİN
-             </a>
-             <a href="#contact" className="px-8 py-4 bg-transparent border border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2">
-              KÜRESEL OFİSLERİMİZ <ChevronRight size={16} />
-             </a>
+           <div className="flex flex-col sm:flex-row gap-6">
+              <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="px-8 py-4 bg-background text-foreground hover:bg-background/90 transition-colors font-semibold uppercase tracking-wider text-sm">
+               WHATSAPP'TAN YAZIN
+              </a>
+              <a href={`tel:${BUSINESS_PHONE_LINK}`} className="px-8 py-4 bg-transparent border border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+               {BUSINESS_PHONE}
+              </a>
           </div>
         </div>
       </section>
@@ -364,7 +367,8 @@ export default function Home() {
               <ul className="space-y-4 text-sm text-foreground/60">
                 <li>Büyükdere Cad. No:123<br/>Şişli, İstanbul / Türkiye</li>
                 <li><a href="mailto:info@mmtglobal.com" className="hover:text-primary transition-colors">info@mmtglobal.com</a></li>
-                <li><a href="tel:+902120000000" className="hover:text-primary transition-colors">+90 (212) 000 00 00</a></li>
+                <li><a href={`tel:${BUSINESS_PHONE_LINK}`} className="hover:text-primary transition-colors">{BUSINESS_PHONE}</a></li>
+                <li><a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">WhatsApp</a></li>
               </ul>
             </div>
           </div>
