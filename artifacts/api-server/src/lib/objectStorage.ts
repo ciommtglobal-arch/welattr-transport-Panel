@@ -107,7 +107,7 @@ export class ObjectStorageService {
   }
 
   async getObjectEntityFile(objectPath: string): Promise<File> {
-    if (!objectPath.startsWith("/objects/uploads/")) {
+    if (!/^\/objects\/uploads\/[a-zA-Z0-9-]+$/.test(objectPath)) {
       throw new ObjectNotFoundError();
     }
 
