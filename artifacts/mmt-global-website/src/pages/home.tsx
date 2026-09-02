@@ -63,9 +63,12 @@ export default function Home() {
 
           {/* Mobile Menu Toggle */}
           <button
-            className="md:hidden z-50 p-2 -mr-2"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            type="button"
+            className="relative z-[60] flex min-h-12 min-w-12 items-center justify-center p-2 -mr-2 touch-manipulation"
+            onClick={() => setMobileMenuOpen((open) => !open)}
             aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -74,6 +77,7 @@ export default function Home() {
 
       {/* Mobile Menu Overlay */}
       <div
+        id="mobile-navigation"
         className={cn(
           "fixed inset-0 bg-background/95 backdrop-blur-xl z-40 flex flex-col items-center justify-center gap-8 transition-all duration-300 ease-in-out md:hidden",
           mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
@@ -88,9 +92,26 @@ export default function Home() {
         <button onClick={() => scrollToSection("contact")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
           İLETİŞİM
         </button>
-          <Link href="/limit" className="mt-8 px-8 py-4 bg-primary text-white transition-colors rounded-none font-semibold uppercase tracking-wider text-sm">
-          PORTALA GİRİŞ
+        <div className="mt-4 grid w-[min(20rem,calc(100vw-3rem))] grid-cols-2 gap-3 border-t border-border/60 pt-6">
+          <p className="col-span-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-foreground/50">
+            Başvuru kategorileri
+          </p>
+          <Link href="/limit/ticari" className="border border-border px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider hover:border-primary hover:text-primary">
+            Ticari
           </Link>
+          <Link href="/limit/konut" className="border border-border px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider hover:border-primary hover:text-primary">
+            Konut
+          </Link>
+          <Link href="/limit/tasit" className="border border-border px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider hover:border-primary hover:text-primary">
+            Taşıt
+          </Link>
+          <Link href="/limit/bireysel" className="border border-border px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider hover:border-primary hover:text-primary">
+            Bireysel
+          </Link>
+        </div>
+        <Link href="/limit" className="mt-2 px-8 py-4 bg-primary text-white transition-colors rounded-none font-semibold uppercase tracking-wider text-sm">
+          TÜM BAŞVURULAR
+        </Link>
       </div>
 
       {/* Hero Section */}

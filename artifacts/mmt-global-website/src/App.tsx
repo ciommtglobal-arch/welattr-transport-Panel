@@ -8,7 +8,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import Home from '@/pages/home';
-import Limit from '@/pages/limit';
+import Limit, { LimitChooser } from '@/pages/limit';
 import {
   Route,
   Redirect,
@@ -112,7 +112,7 @@ function Router() {
     <RoutedErrorBoundary>
       <Switch>
         <Route path="/" component={Home} />
-        <Route path="/limit" component={LimitRedirect} />
+        <Route path="/limit" component={LimitChooser} />
         <Route path="/limit/bireysel" component={IndividualLimit} />
         <Route path="/limit/ticari" component={CommercialLimit} />
         <Route path="/limit/konut" component={HousingLimit} />
@@ -123,10 +123,6 @@ function Router() {
       </Switch>
     </RoutedErrorBoundary>
   );
-}
-
-function LimitRedirect() {
-  return <Redirect to="/limit/bireysel" />;
 }
 
 function IndividualLimit() {

@@ -66,6 +66,13 @@ const categoryConfig = {
   },
 } as const;
 
+const categoryPath = {
+  commercial: "/limit/ticari",
+  housing: "/limit/konut",
+  vehicle: "/limit/tasit",
+  individual: "/limit/bireysel",
+} as const;
+
 function createInitialForm(
   category: LimitFormData["applicationType"],
 ): LimitFormData {
@@ -81,6 +88,84 @@ function createInitialForm(
     note: "",
   };
 };
+
+export function LimitChooser() {
+  const categories = ["commercial", "housing", "vehicle", "individual"] as const;
+
+  return (
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border/70 bg-background/95">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-12">
+          <Link href="/" className="group flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-br-xl rounded-tl-xl bg-primary text-lg font-bold text-primary-foreground transition-transform group-hover:scale-95">
+              M
+            </span>
+            <span className="text-lg font-semibold tracking-wider">
+              MMT <span className="font-light opacity-80">GLOBAL</span>
+            </span>
+          </Link>
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/65 transition-colors hover:text-primary"
+          >
+            <ArrowLeft size={15} />
+            Ana sayfa
+          </Link>
+        </div>
+      </header>
+
+      <section className="relative overflow-hidden bg-secondary px-6 py-16 text-secondary-foreground md:px-12 md:py-24">
+        <div className="pointer-events-none absolute -right-24 -top-32 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative mx-auto max-w-7xl">
+          <p className="mb-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-secondary-foreground/55">
+            <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+            MMT Global / Başvuru merkezi
+          </p>
+          <h1 className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight md:text-8xl">
+            İhtiyacınıza uygun
+            <span className="block font-serif font-normal italic text-primary">
+              başvuruyu seçin.
+            </span>
+          </h1>
+          <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-secondary-foreground/70 md:text-xl">
+            Ticari, konut, taşıt veya bireysel finansman başvurunuz için ilgili
+            kategoriye tıklayarak ilerleyin.
+          </p>
+        </div>
+      </section>
+
+      <section className="px-6 py-12 md:px-12 md:py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {categories.map((category, index) => {
+              const config = categoryConfig[category];
+              return (
+                <Link
+                  key={category}
+                  href={categoryPath[category]}
+                  className="group min-h-64 border border-border/70 bg-card p-7 transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:bg-secondary hover:text-secondary-foreground md:p-8"
+                >
+                  <span className="font-mono text-xs tracking-[0.2em] text-primary">
+                    0{index + 1}
+                  </span>
+                  <h2 className="mt-16 text-2xl font-semibold">
+                    {config.label}
+                  </h2>
+                  <p className="mt-3 text-sm leading-relaxed text-foreground/60 transition-colors group-hover:text-secondary-foreground/70">
+                    {config.description}
+                  </p>
+                  <span className="mt-7 inline-flex border-b border-primary pb-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                    Başvuruya ilerle
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
 
 export default function Limit({
   category,
@@ -185,7 +270,7 @@ export default function Limit({
                   (item) => (
                     <Link
                       key={item}
-                      href={`/limit/${item === "vehicle" ? "tasit" : item === "housing" ? "konut" : item === "individual" ? "bireysel" : "ticari"}`}
+                      href={categoryPath[item]}
                       className={`px-3 py-4 text-center text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors md:px-5 ${
                         item === category
                           ? "bg-primary text-white"
