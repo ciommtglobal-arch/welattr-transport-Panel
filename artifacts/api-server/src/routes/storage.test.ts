@@ -5,6 +5,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const authState = vi.hoisted(() => ({
   userId: null as string | null,
   active: null as number | null,
+  documentSaved: false,
+}));
+
+const mockTables = vi.hoisted(() => ({
+  staffUsersTable: {
+    clerkUserId: "clerk_user_id",
+    active: "active",
+  },
+  limitApplicationDocumentsTable: {
+    objectPath: "object_path",
+  },
 }));
 
 vi.mock("@clerk/express", () => ({
@@ -14,28 +25,30 @@ vi.mock("@clerk/express", () => ({
 vi.mock("@workspace/db", () => ({
   db: {
     select: () => ({
-      from: () => ({
+      from: (table: unknown) => ({
         where: () => ({
           limit: async () =>
-            authState.active === 1
-              ? [
-                  {
-                    id: 1,
-                    clerkUserId: authState.userId,
-                    email: "staff@example.com",
-                    role: "reviewer",
-                    active: 1,
-                  },
-                ]
-              : [],
+            table === mockTables.limitApplicationDocumentsTable
+              ? authState.documentSaved
+                ? [{ objectPath }]
+                : []
+              : authState.active === 1
+                ? [
+                    {
+                      id: 1,
+                      clerkUserId: authState.userId,
+                      email: "staff@example.com",
+                      role: "reviewer",
+                      active: 1,
+                    },
+                  ]
+                : [],
         }),
       }),
     }),
   },
-  staffUsersTable: {
-    clerkUserId: "clerk_user_id",
-    active: "active",
-  },
+  staffUsersTable: mockTables.staffUsersTable,
+  limitApplicationDocumentsTable: mockTables.limitApplicationDocumentsTable,
 }));
 
 import {
@@ -66,6 +79,7 @@ describe("secure document download URLs", () => {
     vi.setSystemTime(new Date("2026-09-02T12:00:00.000Z"));
     authState.userId = "clerk-user-1";
     authState.active = 1;
+    authState.documentSaved = true;
     getObjectEntityFile.mockReset();
     fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
@@ -109,6 +123,19 @@ describe("secure document download URLs", () => {
       .send({ objectPath });
 
     expect(response.status).toBe(403);
+    expect(getObjectEntityFile).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("returns 404 and does not inspect storage for an orphaned object path", async () => {
+    authState.documentSaved = false;
+
+    const response = await request(app)
+      .post("/storage/objects/request-download-url")
+      .send({ objectPath });
+
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe("Belge bulunamadı.");
     expect(getObjectEntityFile).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
   });

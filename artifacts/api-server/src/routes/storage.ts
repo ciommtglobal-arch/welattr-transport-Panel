@@ -5,6 +5,8 @@ import {
   RequestUploadUrlBody,
   RequestUploadUrlResponse,
 } from "@workspace/api-zod";
+import { db, limitApplicationDocumentsTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 import {
   ObjectNotFoundError,
   ObjectStorageService,
@@ -20,6 +22,19 @@ router.post("/storage/objects/request-download-url", async (req, res) => {
   const parsed = RequestObjectDownloadUrlBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Belge yolu geçersiz." });
+    return;
+  }
+
+  const [document] = await db
+    .select({ objectPath: limitApplicationDocumentsTable.objectPath })
+    .from(limitApplicationDocumentsTable)
+    .where(
+      eq(limitApplicationDocumentsTable.objectPath, parsed.data.objectPath),
+    )
+    .limit(1);
+
+  if (!document) {
+    res.status(404).json({ error: "Belge bulunamadı." });
     return;
   }
 
