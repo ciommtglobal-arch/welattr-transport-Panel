@@ -10,6 +10,7 @@ import NotFound from '@/pages/not-found';
 import Home from '@/pages/home';
 import Limit, { LimitChooser } from '@/pages/limit';
 import StaffApplications from '@/pages/staff-applications';
+import DemoWallet from '@/pages/demo-wallet';
 import {
   Route,
   Redirect,
@@ -118,6 +119,7 @@ function Router() {
         <Route path="/limit/ticari" component={CommercialLimit} />
         <Route path="/limit/konut" component={HousingLimit} />
         <Route path="/limit/tasit" component={VehicleLimit} />
+        <Route path="/cuzdan-demo" component={DemoWallet} />
         <Route path="/staff/applications" component={StaffApplications} />
         <Route path="/sign-in/*?" component={SignInPage} />
         <Route path="/sign-up/*?" component={SignUpPage} />

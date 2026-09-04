@@ -75,6 +75,12 @@ export default function Home() {
               >
               PORTALA GİRİŞ
               </Link>
+              <Link
+                href="/cuzdan-demo"
+                className="border border-primary px-5 py-2.5 text-primary transition-colors hover:bg-primary hover:text-white rounded-none font-semibold uppercase tracking-wider text-xs"
+              >
+                DEMO CÜZDAN
+              </Link>
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -138,6 +144,12 @@ export default function Home() {
           className="mt-2 px-8 py-4 bg-primary text-white transition-colors rounded-none font-semibold uppercase tracking-wider text-sm"
         >
           TÜM BAŞVURULAR
+        </Link>
+        <Link
+          href="/cuzdan-demo"
+          className="mt-2 border border-primary px-8 py-4 text-primary transition-colors hover:bg-primary hover:text-white rounded-none font-semibold uppercase tracking-wider text-sm"
+        >
+          DEMO CÜZDAN
         </Link>
       </div>
 
