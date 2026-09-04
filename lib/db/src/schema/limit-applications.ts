@@ -13,10 +13,12 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const limitApplicationStatusEnum = pgEnum(
-  "limit_application_status",
-  ["new", "reviewing", "approved", "rejected"],
-);
+export const limitApplicationStatusEnum = pgEnum("limit_application_status", [
+  "new",
+  "reviewing",
+  "approved",
+  "rejected",
+]);
 
 export const limitApplicationTypeEnum = pgEnum("limit_application_type", [
   "individual",
@@ -125,6 +127,7 @@ export const limitApplicationDocumentsTable = pgTable(
     index("limit_application_documents_application_idx").on(
       table.applicationId,
     ),
+    index("limit_application_documents_object_path_idx").on(table.objectPath),
     uniqueIndex("limit_application_documents_type_idx").on(
       table.applicationId,
       table.documentType,

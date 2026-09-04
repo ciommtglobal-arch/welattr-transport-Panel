@@ -64,6 +64,57 @@ export class ObjectStorageService {
     return data.signed_url;
   }
 
+  async listObjectEntityFiles() {
+    const uploadDirectory = `${this.getPrivateObjectDir().replace(
+      /\/+$/,
+      "",
+    )}/uploads`;
+    const { bucketName, objectName: uploadObjectPrefix } =
+      parseObjectPath(uploadDirectory);
+    const privateObjectPrefix = uploadObjectPrefix.slice(0, -"uploads".length);
+    const uploadsPrefix = `${uploadObjectPrefix}/`;
+    const [files] = await objectStorageClient
+      .bucket(bucketName)
+      .getFiles({ prefix: uploadsPrefix });
+
+    const entries = await Promise.all(
+      files.map(async (file) => {
+        if (
+          !new RegExp(`^${escapeRegExp(uploadsPrefix)}[a-zA-Z0-9-]+$`).test(
+            file.name,
+          )
+        ) {
+          return null;
+        }
+
+        const [metadata] = await file.getMetadata();
+        if (!metadata.timeCreated) {
+          return null;
+        }
+
+        const createdAt = new Date(metadata.timeCreated);
+        if (Number.isNaN(createdAt.getTime())) {
+          return null;
+        }
+
+        return {
+          file,
+          objectPath: `/objects/${file.name.slice(privateObjectPrefix.length)}`,
+          createdAt,
+          size: metadata.size ? Number(metadata.size) : null,
+        };
+      }),
+    );
+
+    return entries.filter(
+      (entry): entry is NonNullable<typeof entry> => entry !== null,
+    );
+  }
+
+  async deleteObjectEntityFile(file: File) {
+    await file.delete({ ignoreNotFound: true });
+  }
+
   async getObjectEntityDownloadURL(objectPath: string, ttlSec = 5 * 60) {
     const file = await this.getObjectEntityFile(objectPath);
     const expiresAt = new Date(Date.now() + ttlSec * 1000);
@@ -132,4 +183,8 @@ function parseObjectPath(path: string) {
     bucketName: pathParts[1],
     objectName: pathParts.slice(2).join("/"),
   };
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

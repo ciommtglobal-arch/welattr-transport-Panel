@@ -30,6 +30,8 @@ import type {
   LimitApplicationStatusUpdate,
   ObjectDownloadUrlRequest,
   ObjectDownloadUrlResponse,
+  OrphanUploadCleanupRequest,
+  OrphanUploadCleanupResponse,
   UploadUrlRequest,
   UploadUrlResponse
 } from './api.schemas';
@@ -219,6 +221,90 @@ export const useRequestUploadUrl = <TError = ErrorType<ErrorEnvelope>,
         TContext
       > => {
       return useMutation(getRequestUploadUrlMutationOptions(options));
+    }
+
+export const getCleanupOrphanUploadsUrl = () => {
+
+
+
+
+  return `/api/storage/uploads/cleanup-orphans`
+}
+
+/**
+ * Zamanlanmış bakım işi tarafından çağrılmak üzere tasarlanmıştır.
+ * Varsayılan saklama süresi 24 saattir ve ORPHAN_UPLOAD_RETENTION_HOURS
+ * ortam değişkeniyle artırılabilir. Yalnızca admin ve operations personeli
+ * çağırabilir. dryRun true olduğunda hiçbir obje silinmez.
+ * @summary Başvuruya bağlanmayan eski yüklemeleri raporlar veya temizler
+ */
+export const cleanupOrphanUploads = async (orphanUploadCleanupRequest?: OrphanUploadCleanupRequest, options?: Parameters<typeof customFetch>[1]): Promise<OrphanUploadCleanupResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<OrphanUploadCleanupResponse>(getCleanupOrphanUploadsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(orphanUploadCleanupRequest)
+  }
+);}
+
+
+
+
+
+export const getCleanupOrphanUploadsMutationKey = () => ['cleanupOrphanUploads'] as const;
+
+export const getCleanupOrphanUploadsMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cleanupOrphanUploads>>, TError,CleanupOrphanUploadsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof cleanupOrphanUploads>>, TError,CleanupOrphanUploadsMutationVariables, TContext> => {
+
+const mutationKey = getCleanupOrphanUploadsMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cleanupOrphanUploads>>, CleanupOrphanUploadsMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  cleanupOrphanUploads(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CleanupOrphanUploadsMutationResult = NonNullable<Awaited<ReturnType<typeof cleanupOrphanUploads>>>
+    export type CleanupOrphanUploadsMutationBody = BodyType<OrphanUploadCleanupRequest> | undefined
+    export type CleanupOrphanUploadsMutationError = ErrorType<ErrorEnvelope>
+    export type CleanupOrphanUploadsMutationVariables = {data?: BodyType<OrphanUploadCleanupRequest>}
+
+    /**
+ * @summary Başvuruya bağlanmayan eski yüklemeleri raporlar veya temizler
+ */
+export const useCleanupOrphanUploads = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cleanupOrphanUploads>>, TError,CleanupOrphanUploadsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof cleanupOrphanUploads>>,
+        TError,
+        CleanupOrphanUploadsMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCleanupOrphanUploadsMutationOptions(options));
     }
 
 export const getHealthCheckUrl = () => {

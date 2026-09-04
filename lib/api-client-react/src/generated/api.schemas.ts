@@ -207,6 +207,30 @@ export interface UploadUrlResponse {
   metadata?: UploadUrlRequest;
 }
 
+export interface OrphanUploadCleanupRequest {
+  /** Adayları raporlar ancak silme işlemi yapmaz. */
+  dryRun?: boolean;
+}
+
+export type OrphanUploadCleanupResponseFailedObjectsItem = {
+  objectPath: string;
+  error: string;
+};
+
+export interface OrphanUploadCleanupResponse {
+  dryRun: boolean;
+  retentionHours: number;
+  cutoffAt: string;
+  scannedObjects: number;
+  referencedObjects: number;
+  orphanedObjects: number;
+  eligibleObjects: number;
+  eligibleObjectPaths: string[];
+  deletedObjectPaths: string[];
+  skippedReferencedObjectPaths: string[];
+  failedObjects: OrphanUploadCleanupResponseFailedObjectsItem[];
+}
+
 export interface ObjectDownloadUrlRequest {
   /**
      * Başvuru belgesinin normalize edilmiş özel obje yolu.

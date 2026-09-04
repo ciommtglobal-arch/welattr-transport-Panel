@@ -10,6 +10,10 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
+- `POST /api/storage/uploads/cleanup-orphans` — scheduled maintenance endpoint for
+  removing unreferenced uploads. It defaults to a 24-hour retention window;
+  set `ORPHAN_UPLOAD_RETENTION_HOURS` to increase it. Admin or operations staff
+  can call it with `{ "dryRun": true }` to inspect candidates before deletion.
 
 ## Stack
 

@@ -57,6 +57,37 @@ export const RequestUploadUrlResponse = zod.object({
 
 
 /**
+ * Zamanlanmış bakım işi tarafından çağrılmak üzere tasarlanmıştır.
+ * Varsayılan saklama süresi 24 saattir ve ORPHAN_UPLOAD_RETENTION_HOURS
+ * ortam değişkeniyle artırılabilir. Yalnızca admin ve operations personeli
+ * çağırabilir. dryRun true olduğunda hiçbir obje silinmez.
+ * @summary Başvuruya bağlanmayan eski yüklemeleri raporlar veya temizler
+ */
+export const cleanupOrphanUploadsBodyDryRunDefault = false;
+
+export const CleanupOrphanUploadsBody = zod.object({
+  "dryRun": zod.boolean().default(cleanupOrphanUploadsBodyDryRunDefault).describe('Adayları raporlar ancak silme işlemi yapmaz.')
+})
+
+export const CleanupOrphanUploadsResponse = zod.object({
+  "dryRun": zod.boolean(),
+  "retentionHours": zod.int(),
+  "cutoffAt": zod.coerce.date(),
+  "scannedObjects": zod.int(),
+  "referencedObjects": zod.int(),
+  "orphanedObjects": zod.int(),
+  "eligibleObjects": zod.int(),
+  "eligibleObjectPaths": zod.array(zod.string()),
+  "deletedObjectPaths": zod.array(zod.string()),
+  "skippedReferencedObjectPaths": zod.array(zod.string()),
+  "failedObjects": zod.array(zod.object({
+  "objectPath": zod.string(),
+  "error": zod.string()
+}))
+})
+
+
+/**
  * Returns server health status
  * @summary Health check
  */

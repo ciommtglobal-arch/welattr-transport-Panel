@@ -93,6 +93,53 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+  /storage/uploads/cleanup-orphans:
+    post:
+      tags: [Storage]
+      operationId: cleanupOrphanUploads
+      summary: Başvuruya bağlanmayan eski yüklemeleri raporlar veya temizler
+      description: |
+        Zamanlanmış bakım işi tarafından çağrılmak üzere tasarlanmıştır.
+        Varsayılan saklama süresi 24 saattir ve ORPHAN_UPLOAD_RETENTION_HOURS
+        ortam değişkeniyle artırılabilir. Yalnızca admin ve operations personeli
+        çağırabilir. dryRun true olduğunda hiçbir obje silinmez.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrphanUploadCleanupRequest"
+      responses:
+        "200":
+          description: Temizlik özeti.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrphanUploadCleanupResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Admin or operations access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "400":
+          description: Geçersiz temizlik isteği.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: Temizlik gerçekleştirilemedi.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
   /healthz:
     get:
       operationId: healthCheck
@@ -441,6 +488,66 @@ components:
           type: string
         metadata:
           $ref: "#/components/schemas/UploadUrlRequest"
+    OrphanUploadCleanupRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        dryRun:
+          type: boolean
+          default: false
+          description: Adayları raporlar ancak silme işlemi yapmaz.
+    OrphanUploadCleanupResponse:
+      type: object
+      required:
+        - dryRun
+        - retentionHours
+        - cutoffAt
+        - scannedObjects
+        - referencedObjects
+        - orphanedObjects
+        - eligibleObjects
+        - eligibleObjectPaths
+        - deletedObjectPaths
+        - skippedReferencedObjectPaths
+        - failedObjects
+      properties:
+        dryRun:
+          type: boolean
+        retentionHours:
+          type: integer
+        cutoffAt:
+          type: string
+          format: date-time
+        scannedObjects:
+          type: integer
+        referencedObjects:
+          type: integer
+        orphanedObjects:
+          type: integer
+        eligibleObjects:
+          type: integer
+        eligibleObjectPaths:
+          type: array
+          items:
+            type: string
+        deletedObjectPaths:
+          type: array
+          items:
+            type: string
+        skippedReferencedObjectPaths:
+          type: array
+          items:
+            type: string
+        failedObjects:
+          type: array
+          items:
+            type: object
+            required: [objectPath, error]
+            properties:
+              objectPath:
+                type: string
+              error:
+                type: string
     ObjectDownloadUrlRequest:
       type: object
       additionalProperties: false
