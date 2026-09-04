@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { ArrowDownRight, Menu, X, ArrowRight, Globe2, Building2, Stethoscope, Truck, Tv, Briefcase, Factory } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
+import CorporateFleetSection from "@/components/corporate-fleet-section";
 
 // Make sure to use the generated image
 const HERO_BG = "/hero-bridge.jpg";
@@ -57,6 +58,9 @@ export default function Home() {
             <button onClick={() => scrollToSection("ecosystem")} className="hover:text-primary transition-colors">
               EKOSİSTEM
             </button>
+            <button onClick={() => scrollToSection("corporate-fleet")} className="hover:text-primary transition-colors">
+              KURUMSAL FİLO
+            </button>
             <button onClick={() => scrollToSection("contact")} className="hover:text-primary transition-colors">
               İLETİŞİM
             </button>
@@ -100,6 +104,9 @@ export default function Home() {
         </button>
         <button onClick={() => scrollToSection("ecosystem")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
           EKOSİSTEM
+        </button>
+        <button onClick={() => scrollToSection("corporate-fleet")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
+          KURUMSAL FİLO
         </button>
         <button onClick={() => scrollToSection("contact")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
           İLETİŞİM
@@ -279,6 +286,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Corporate Fleet Section */}
+      <CorporateFleetSection onContact={() => scrollToSection("contact")} />
 
       {/* CTA / Contact Section */}
       <section id="contact" className="relative py-24 md:py-32 px-6 md:px-12 bg-primary text-primary-foreground overflow-hidden">
