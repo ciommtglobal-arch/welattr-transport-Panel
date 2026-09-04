@@ -1,0 +1,151 @@
+from weasyprint import HTML
+
+html_icerik = """<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page {
+    size: A4;
+    margin: 14mm 12mm 14mm 12mm;
+    @bottom-right { content: "Sayfa " counter(page) " / " counter(pages); font-size: 8pt; color: #64748b; font-family: sans-serif; }
+    @bottom-left { content: "MMT GLOBAL | STRATEJİK YATIRIMCI BİLGİLENDİRME NOTU"; font-size: 8pt; color: #64748b; font-family: sans-serif; }
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1e293b; line-height: 1.45; font-size: 9pt; margin: 0; padding: 0; }
+  
+  .header-box { background: #0f172a; color: #ffffff; padding: 20px; border-radius: 6px; margin-bottom: 16px; border-bottom: 3px solid #0284c7; }
+  .header-badge { display: inline-block; background-color: #0369a1; color: #ffffff; font-size: 7.5pt; font-weight: bold; letter-spacing: 1px; padding: 2px 6px; border-radius: 3px; text-transform: uppercase; margin-bottom: 6px; }
+  .header-title { font-size: 16pt; font-weight: 800; margin: 0 0 4px 0; color: #f8fafc; }
+  .header-subtitle { font-size: 9.5pt; color: #94a3b8; margin: 0; }
+  
+  .meta-grid { display: table; width: 100%; margin-top: 12px; padding-top: 8px; border-top: 1px solid #334155; }
+  .meta-col { display: table-cell; width: 25%; font-size: 8pt; color: #cbd5e1; }
+  .meta-col strong { color: #38bdf8; display: block; font-size: 7.5pt; text-transform: uppercase; margin-bottom: 2px; }
+  
+  h2 { font-size: 11pt; color: #0f172a; border-left: 3px solid #0284c7; padding-left: 8px; margin: 14px 0 6px 0; text-transform: uppercase; }
+  p { margin: 0 0 8px 0; text-align: justify; }
+
+  /* Bilgi / Uyum Kutuları */
+  .notice-box { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px 12px; margin: 10px 0; }
+  .notice-title { font-weight: bold; font-size: 8.5pt; color: #0f172a; margin-bottom: 4px; text-transform: uppercase; }
+  
+  /* Tablolar */
+  table.data-table { width: 100%; border-collapse: collapse; margin: 8px 0 12px 0; font-size: 8pt; }
+  table.data-table th { background-color: #1e293b; color: #ffffff; font-weight: 600; text-align: left; padding: 6px 8px; border: 1px solid #1e293b; }
+  table.data-table td { padding: 6px 8px; border: 1px solid #e2e8f0; }
+  table.data-table tr:nth-child(even) td { background-color: #f8fafc; }
+
+  .corridor-box { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; margin: 10px 0; text-align: center; }
+  .corridor-step { display: inline-block; width: 28%; font-weight: bold; font-size: 8.5pt; color: #0f172a; }
+  .corridor-arrow { display: inline-block; width: 5%; color: #0284c7; font-weight: bold; }
+</style>
+</head>
+<body>
+
+  <div class="header-box">
+    <div class="header-badge">Yatırımcı Bilgilendirme Notu</div>
+    <div class="header-title">Özmal Filo Genişletme & Kıtalar Arası Lojistik Modeli</div>
+    <div class="header-subtitle">Varlık Odaklı Sermaye Tahsisi, Operasyonel Yapı ve Risk Çerçevesi</div>
+    <div class="meta-grid">
+      <div class="meta-col"><strong>Girişim</strong>MMT Lojistik & Finans</div>
+      <div class="meta-col"><strong>Model</strong>Ticari İş Ortaklığı / Borçlanma</div>
+      <div class="meta-col"><strong>Teminat Esası</strong>Noter Tescilli 1. Derece Rehin</div>
+      <div class="meta-col"><strong>Hedef Bütçe</strong>30.000.000 TL</div>
+    </div>
+  </div>
+
+  <div class="corridor-box">
+    <div class="corridor-step">AVRUPA / KÜRESEL LİMANLAR<br><span style="font-size:7.5pt; font-weight:normal; color:#64748b;">Tedarik & Yük Girişi</span></div>
+    <div class="corridor-arrow">➔</div>
+    <div class="corridor-step" style="color:#0284c7;">TÜRKİYE & MERSİN TRANSİT HUB<br><span style="font-size:7.5pt; font-weight:normal; color:#64748b;">Gümrük, Aktarma & Karayolu</span></div>
+    <div class="corridor-arrow">➔</div>
+    <div class="corridor-step">KÖRFEZ & ASYA KORİDORLARI<br><span style="font-size:7.5pt; font-weight:normal; color:#64748b;">Varış Noktaları</span></div>
+  </div>
+
+  <h2>1. Amaç ve Sermaye Dağılımı</h2>
+  <p>
+    Bu projenin temel hedefi; mevcut iş ortağı ve acente operasyon hacmini özmal araç altyapısıyla destekleyerek aracılık maliyetlerini azaltmak ve TİO/L2 lisanslama süreçleriyle uluslararası navlun sözleşmelerini doğrudan yönetmektir.
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Kullanım Alanı</th><th style="width:18%;">Bütçe Oranı</th><th style="width:25%;">Tahmini Tutar</th><th>Açıklama</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>Özmal Ağır Ticari Araç Alımı</b></td>
+        <td>%70 - %75</td>
+        <td>22.500.000 TL</td>
+        <td>Likit değeri yüksek Euro 6 çekici ve dorse yatırımı. Yatırımcı lehine noterden rehin tesisi.</td>
+      </tr>
+      <tr>
+        <td><b>Lisanslama (TİO & L2 Belgeleri)</b></td>
+        <td>%15</td>
+        <td>4.500.000 TL</td>
+        <td>Taşıma İşleri Organizatörlüğü ile kurumsal navlun sözleşmelerine doğrudan katılım.</td>
+      </tr>
+      <tr>
+        <td><b>İşletme ve Takip Altyapısı</b></td>
+        <td>%10 - %15</td>
+        <td>3.000.000 TL</td>
+        <td>Sınır geçiş teminatları ve Telegram tabanlı anlık telemetri/filo yönetim yazılımı.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>2. Teminat Yapısı ve Yatırımcı Koruması</h2>
+  <p>
+    Finansman modeli garanti kazanç vaat etmez; yatırımcının anapara riskini somut fiziki varlık mülkiyetiyle dengelemeyi hedefler:
+  </p>
+  <ul>
+    <li><b>Noter Onaylı Rehin / Şerh:</b> Satın alınan araçların ruhsatlarına, yatırım tutarı karşılığında ilgili yatırımcı lehine 1. Dereceden Rehin ve Satılamaz Şerhi konulur.</li>
+    <li><b>Sigorta Kapsamı:</b> Filo varlıkları kasko; taşınan yükler ise CMR ve uluslararası emtia sigortası kapsamında operasyona dahil edilir.</li>
+    <li><b>Çıkış Mekanizması:</b> Belirlenen vade sonunda (24-36 ay), tarafların mutabakatıyla araçların piyasa rayicinden satışı veya şirket geri alımı (buyback) opsiyonu uygulanır.</li>
+  </ul>
+
+  <h2>3. Operasyonel Nakit Akışı Senaryoları (Öngörü Simülasyonu)</h2>
+  <p>
+    Nakit akışı garanti edilmiş bir getiri olmayıp; navlun piyasası, sınır kapısı süreleri ve akaryakıt maliyetlerine bağlı olarak 3 senaryoda modellenmiştir:
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Piyasa Senaryosu</th><th>Aylık Sefer Öngörüsü (Araç Başı)</th><th>Öngörülen Net Marj / Sefer</th><th>Yıllık Nakit Akışı Eğilimi</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>Muhafazakâr Senaryo</b> (Uzun sınır beklemeleri, düşük navlun)</td>
+        <td>2 Sefer</td>
+        <td>$900 - $1.100</td>
+        <td>Sermaye koruma ve düşük işletme kârı</td>
+      </tr>
+      <tr>
+        <td><b>Baz Senaryo</b> (Mevcut piyasa ortalaması)</td>
+        <td>3 Sefer</td>
+        <td>$1.300 - $1.600</td>
+        <td>Dengeli nakit akışı ve planlanan amortisman</td>
+      </tr>
+      <tr>
+        <td><b>İyimser Senaryo</b> (Hızlı transit geçiş, yüksek talep)</td>
+        <td>4 Sefer</td>
+        <td>$1.700 - $2.100</td>
+        <td>Yüksek getiri ve hızlı özkaynak büyümesi</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>4. Risk Faktörleri ve Hukuki Beyan</h2>
+  <div class="notice-box">
+    <div class="notice-title">Mevzuat ve Risk Açıklaması</div>
+    <p style="margin: 0; font-size: 8pt; color: #475569;">
+      Bu doküman bir halka arz, kitle fonlaması çağrısı veya sermaye piyasası aracı izahnamesi niteliğinde değildir. İlgili taraflar arasında akdedilecek ikili ticari sözleşmelere ve Türk Ticaret Kanunu hükümlerine tabidir. Lojistik sektörü akaryakıt dalgalanmaları, jeopolitik gelişmeler ve gümrük süreçlerinden kaynaklı riskler barındırır. Kâr dağıtımı, net işletme bilançosu kesinleştikten sonra sözleşme şartlarına göre yapılır.
+    </p>
+  </div>
+
+</body>
+</html>
+"""
+
+HTML(string=html_icerik).write_pdf("kurumsal_yatirimci_bilgi_notu.pdf")
+print("Kurumsal ve mevzuata uygun PDF başarıyla oluşturuldu: kurumsal_yatirimci_bilgi_notu.pdf")
