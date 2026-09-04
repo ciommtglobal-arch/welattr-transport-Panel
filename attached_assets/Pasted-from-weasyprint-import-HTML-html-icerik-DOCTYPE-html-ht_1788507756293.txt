@@ -1,0 +1,109 @@
+from weasyprint import HTML
+
+html_icerik = """<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page {
+    size: A4;
+    margin: 14mm 12mm 14mm 12mm;
+    @bottom-right { content: "Sayfa " counter(page) " / " counter(pages); font-size: 8pt; color: #64748b; font-family: sans-serif; }
+    @bottom-left { content: "MMT GLOBAL LOJİSTİK & FİNANS | KITASAL TRANSİT DOSYASI"; font-size: 8pt; color: #64748b; font-family: sans-serif; }
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1e293b; line-height: 1.45; font-size: 9.5pt; margin: 0; padding: 0; }
+  .header-box { background: linear-gradient(135deg, #0b1329 0%, #1e293b 100%); color: #ffffff; padding: 22px 20px; border-radius: 8px; margin-bottom: 18px; border-bottom: 4px solid #0284c7; }
+  .header-badge { display: inline-block; background-color: #0284c7; color: #ffffff; font-size: 7.5pt; font-weight: bold; letter-spacing: 1.5px; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; margin-bottom: 8px; }
+  .header-title { font-size: 18pt; font-weight: 800; margin: 0 0 6px 0; color: #f8fafc; }
+  .header-subtitle { font-size: 10pt; color: #94a3b8; margin: 0; }
+  .meta-grid { display: table; width: 100%; margin-top: 14px; padding-top: 10px; border-top: 1px solid #334155; }
+  .meta-col { display: table-cell; width: 25%; font-size: 8.5pt; color: #cbd5e1; }
+  .meta-col strong { color: #38bdf8; display: block; font-size: 7.5pt; text-transform: uppercase; margin-bottom: 2px; }
+  h2 { font-size: 12pt; color: #0f172a; border-left: 4px solid #0284c7; padding-left: 8px; margin: 16px 0 8px 0; text-transform: uppercase; }
+  p { margin: 0 0 8px 0; text-align: justify; }
+  .visual-corridor-box { background-color: #0b1329; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 16px; margin: 12px 0 16px 0; color: #ffffff; }
+  .corridor-map-table { width: 100%; border-collapse: separate; border-spacing: 8px 0; margin: 10px 0 4px -8px; }
+  .corridor-node { background-color: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 10px 8px; text-align: center; vertical-align: middle; }
+  .corridor-node.hub { background-color: #0369a1; border-color: #38bdf8; }
+  .corridor-node .flag { font-size: 8pt; color: #38bdf8; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 3px; }
+  .corridor-node.hub .flag { color: #f8fafc; }
+  .corridor-node .name { font-size: 11pt; font-weight: 800; color: #ffffff; }
+  .corridor-arrow { text-align: center; vertical-align: middle; color: #38bdf8; font-size: 14pt; font-weight: bold; width: 24px; }
+  .callout-box { background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; padding: 10px 14px; margin: 10px 0 14px 0; }
+  .callout-box.security { background-color: #f0fdf4; border: 1px solid #bbf7d0; }
+  .callout-title { font-weight: bold; font-size: 9.5pt; color: #0369a1; margin-bottom: 4px; }
+  .callout-box.security .callout-title { color: #15803d; }
+  .metric-table { width: 100%; border-collapse: separate; border-spacing: 6px 0; margin: 8px 0 14px -6px; }
+  .metric-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; text-align: center; vertical-align: top; }
+  .metric-card .num { font-size: 14pt; font-weight: 800; color: #0284c7; margin-bottom: 2px; }
+  .metric-card .label { font-size: 7.5pt; color: #64748b; font-weight: 600; text-transform: uppercase; }
+  table.data-table { width: 100%; border-collapse: collapse; margin: 10px 0 14px 0; font-size: 8.5pt; }
+  table.data-table th { background-color: #1e293b; color: #ffffff; font-weight: bold; text-align: left; padding: 7px 9px; border: 1px solid #1e293b; }
+  table.data-table td { padding: 7px 9px; border: 1px solid #cbd5e1; }
+  table.data-table tr:nth-child(even) td { background-color: #f8fafc; }
+  .tag-green { background-color: #dcfce7; color: #166534; padding: 2px 5px; border-radius: 4px; font-size: 7.5pt; font-weight: bold; }
+  .tag-blue { background-color: #e0f2fe; color: #0369a1; padding: 2px 5px; border-radius: 4px; font-size: 7.5pt; font-weight: bold; }
+</style>
+</head>
+<body>
+  <div class="header-box">
+    <div class="header-badge">Kıtalar Arası Transit & Stratejik Büyüme Raporu</div>
+    <div class="header-title">Kıtalar Arası Lojistik Koridoru & Özmal Filo Genişletme Dosyası</div>
+    <div class="header-subtitle">Avrupa - Akdeniz - Asya / Orta Doğu Kıtalar Arası Aktarma Ağı, TİO/L2 Lisanslama Gücü ve Noter Varlık Teminatlı Fon Modeli</div>
+    <div class="meta-grid">
+      <div class="meta-col"><strong>Yönetim & Girişim</strong>MMT Global Lojistik & Finans</div>
+      <div class="meta-col"><strong>Hedef Fon Büyüklüğü</strong>30.000.000 TL (~$850.000)</div>
+      <div class="meta-col"><strong>Varlık Güvencesi</strong>Noter 1. Derece Rehin / Şerh</div>
+      <div class="meta-col"><strong>Yatırım Periyodu</strong>24 - 36 Ay (Çıkış Opsiyonlu)</div>
+    </div>
+  </div>
+
+  <div class="visual-corridor-box">
+    <div style="font-size: 9pt; font-weight: bold; color: #38bdf8; text-transform: uppercase; margin-bottom: 8px;">🌐 Kıtalar Arası Stratejik Lojistik Omurgası (Görsel Rota Akışı)</div>
+    <table class="corridor-map-table">
+      <tr>
+        <td class="corridor-node" style="width: 28%;"><span class="flag">KITA 1: AVRUPA</span><span class="name">Batı & Doğu Avrupa</span></td>
+        <td class="corridor-arrow">➔</td>
+        <td class="corridor-node hub" style="width: 36%;"><span class="flag" style="color: #fed7aa;">TRANSİT HUB</span><span class="name">TÜRKİYE & MERSİN HUB</span></td>
+        <td class="corridor-arrow">➔</td>
+        <td class="corridor-node" style="width: 28%;"><span class="flag">KITA 2: ASYA & ORTA DOĞU</span><span class="name">Körfez & Asya</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>1. Kıtalar Arası Yatırım Tezi ve Operasyonel Güç</h2>
+  <p>Türkiye’nin jeopolitik köprü avantajı ve Mersin Limanı üssü sayesinde oluşan hacim; 200 araçlık iş ortağı ağımızın gücüyle özmal filoya dönüştürülmektedir. Amaç, kıtalar arası navlun pastasındaki aracı komisyonlarını kaldırıp doğrudan özmal kâr marjını şirkete ve yatırımcıya aktarmaktır.</p>
+
+  <table class="metric-table">
+    <tr>
+      <td class="metric-card"><div class="num">%75</div><div class="label">Varlık / Araç Yatırımı</div></td>
+      <td class="metric-card"><div class="num">%25</div><div class="label">TİO/L2 Lisans & İşletme</div></td>
+      <td class="metric-card"><div class="num">14 - 18 Ay</div><div class="label">Hedef Geri Dönüş</div></td>
+      <td class="metric-card"><div class="num">%100</div><div class="label">Noter Varlık Teminatı</div></td>
+    </tr>
+  </table>
+
+  <h2>2. Fon Kullanım Planı ve Varlık Tahsisi</h2>
+  <table class="data-table">
+    <thead>
+      <tr><th>Harcama Kalemi</th><th>Bütçe Oranı</th><th>Hedef Bütçe</th><th>Açıklama</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><b>Özmal Kıtalar Arası Filo Alımı</b></td><td align="center"><span class="tag-blue">%70 - %75</span></td><td align="right"><b>22.500.000 TL</b></td><td>Euro 6 çekici ve treyler. Noterden yatırımcı adına doğrudan rehin şerhli tescil.</td></tr>
+      <tr><td><b>TİO & L2 Belgelendirme</b></td><td align="center"><span class="tag-blue">%15</span></td><td align="right"><b>4.500.000 TL</b></td><td>Uluslararası acentelerle aracısız doğrudan navlun sözleşmeleri.</td></tr>
+      <tr><td><b>Dijital Takip & İşletme</b></td><td align="center"><span class="tag-blue">%10 - %15</span></td><td align="right"><b>3.000.000 TL</b></td><td>Sınır teminatları ve Telegram tabanlı anlık filo takip modülü.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. Noter Onaylı Varlık Koruma</h2>
+  <div class="callout-box security">
+    <div class="callout-title">✓ Somut Varlık Rehin Güvencesi</div>
+    <p style="margin: 0;">Alınan araçların ruhsatlarına noter huzurunda yatırımcı lehine <b>1. Dereceden Rehin ve Satılamaz Şerhi</b> işlenir. Yatırımcı sermayesi doğrudan demirbaş mülkiyeti ile korunur.</p>
+  </div>
+</body>
+</html>
+"""
+
+HTML(string=html_icerik).write_pdf("kitalar_arasi_filo_yatirim_dosyasi.pdf")
+print("PDF başarıyla Replit ortamında oluşturuldu!")
