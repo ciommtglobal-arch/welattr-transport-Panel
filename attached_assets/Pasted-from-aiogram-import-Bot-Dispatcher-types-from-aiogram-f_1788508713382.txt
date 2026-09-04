@@ -1,0 +1,97 @@
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+import asyncio
+
+# Tokenını buraya tanımla
+BOT_TOKEN = "BURAYA_BOT_TOKEN_YAZ"
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher()
+
+# Hızlı menü klavyesi
+def cuzdan_klavyesi():
+    kb = [
+        [
+            InlineKeyboardButton(text="💰 Bakiye & Portföyüm", callback_data="cuzdan_goruntule"),
+            InlineKeyboardButton(text="⚡ Test Fonu Yükle ($50k)", callback_data="test_fon_yukle")
+        ],
+        [
+            InlineKeyboardButton(text="🚛 Filo Aracına Bağla ($35k)", callback_data="araca_bagla")
+        ],
+        [
+            InlineKeyboardButton(text="📄 Yatırım Bilgi Notu (PDF İndir)", callback_data="bilgi_notu_al")
+        ]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=kb)
+
+@dp.message(Command("start"))
+@dp.message(Command("cuzdan"))
+async def cmd_start(message: types.Message):
+    await message.answer(
+        f"👋 Merhaba {message.from_user.first_name},\n\n"
+        "**MMT Global Finans & Filo Yatırım Konsolu (Test Ağı)**\n"
+        "Aşağıdaki menüden test bakiyenizi yönetebilir ve araç varlık tahsisini simüle edebilirsiniz.",
+        reply_markup=cuzdan_klavyesi(),
+        parse_mode="Markdown"
+    )
+
+@dp.callback_query(lambda c: c.data == "test_fon_yukle")
+async def btn_fon_yukle(callback: types.CallbackQuery):
+    # Simülasyon: Kullanıcıya anında 50.000 USD test sermayesi tanımlar
+    await callback.message.edit_text(
+        "✅ **50.000 USDT Test Fonu Cüzdanınıza Aktarıldı!**\n\n"
+        "Kullanılabilir Nakit: **$50.000,00**\n"
+        "Rehinli / Tahsisli Fon: **$0,00**\n\n"
+        "Şimdi bu fonu kıtalar arası hatta çalışacak araca bağlayabilirsiniz.",
+        reply_markup=cuzdan_klavyesi(),
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "araca_bagla")
+async def btn_araca_bagla(callback: types.CallbackQuery):
+    # Simülasyon: 35.000 USD'yi araç noter şerhine kilitler
+    await callback.message.edit_text(
+        "🔒 **Fon Başarıyla Araç Varlığına Bağlandı!**\n\n"
+        "Tahsis Edilen Araç: `33-MMT-2026` (Euro 6 Çekici)\n"
+        "Teminat Modeli: Noter 1. Derece Rehin / Şerh\n"
+        "Tahsis Tutarı: **$35.000,00**\n"
+        "Kalan Nakit: **$15.000,00**\n"
+        "Operasyon Hattı: Mersin Hub ➔ Kıtalar Arası Koridor",
+        reply_markup=cuzdan_klavyesi(),
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "cuzdan_goruntule")
+async def btn_cuzdan(callback: types.CallbackQuery):
+    await callback.message.edit_text(
+        "📊 **GÜNCEL YATIRIMCI PORTFÖYÜ**\n\n"
+        "• Toplam Sermaye: **$50.000,00**\n"
+        "• Likit Nakit Rezervi: **$15.000,00**\n"
+        "• Rehinli Araç Payı (%70): **$35.000,00**\n"
+        "• Lisanslama / Altyapı Payı (%30): Aktif\n"
+        "• Canlı Telemetri: Sınır kapısı geçiş modu aktif",
+        reply_markup=cuzdan_klavyesi(),
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "bilgi_notu_al")
+async def btn_pdf(callback: types.CallbackQuery):
+    # Replit dizinindeki PDF'i doğrudan kullanıcıya yollar
+    try:
+        pdf_file = types.FSInputFile("kurumsal_yatirimci_bilgi_notu.pdf")
+        await callback.message.answer_document(
+            pdf_file, 
+            caption="📄 MMT Global Kıtalar Arası Filo Yatırımcı Bilgi Notu"
+        )
+    except Exception:
+        await callback.message.answer("⚠️ PDF henüz dizinde bulunamadı, önce üretim kodunu çalıştırın.")
+    await callback.answer()
+
+async def main():
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
