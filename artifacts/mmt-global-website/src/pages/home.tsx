@@ -474,6 +474,15 @@ function EcosystemCard({
       {card}
     </Link>
   ) : (
-    card
+    <button
+      type="button"
+      onClick={() => {
+        document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+      }}
+      className="block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      aria-label={`${title} hakkında iletişime geç`}
+    >
+      {card}
+    </button>
   );
 }
