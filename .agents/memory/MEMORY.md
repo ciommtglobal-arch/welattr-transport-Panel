@@ -1,2 +1,3 @@
 - [Vite publish environment](vite-publish-environment.md) — Static Vite builds may run without service environment variables; configs need safe build-time defaults.
 - [Workspace package installation](workspace-package-installation.md) — The package helper cannot target pnpm workspace filters; use a scoped pnpm fallback when root installation is rejected.
+- [Independent construction marketplace](independent-construction-marketplace.md) — Do not imply an authorized Piyadan distributorship; sell under an independent MMT marketplace brand.
