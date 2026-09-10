@@ -168,7 +168,7 @@ def topic_link(config: Config, chat_id: int, topic_id: int | None) -> str | None
 def has_label(text: str, aliases: tuple[str, ...]) -> bool:
     normalized = normalize_text(text)
     return any(
-        re.search(rf"(?m)^\s*{re.escape(alias)}\s*:", normalized)
+        re.search(rf"(?m)^\s*{re.escape(normalize_text(alias))}\s*:", normalized)
         for alias in aliases
     )
 
@@ -180,10 +180,14 @@ def is_formatted_listing(text: str) -> bool:
 def is_allowed_url(url: str, config: Config) -> bool:
     host_match = re.search(r"(?i)(?:https?://|www\.)([^/\s?#]+)", url)
     if not host_match:
-        host_match = re.search(r"(?i)(?:t\.me/|telegram\.me/)([^/\s?#]+)", url)
+        host_match = re.match(r"(?i)(?:t\.me/|telegram\.me/)", url)
     if not host_match:
         return False
-    host = host_match.group(1).lower().removeprefix("www.")
+    host = (
+        "t.me"
+        if re.match(r"(?i)(?:t\.me/|telegram\.me/)", url)
+        else host_match.group(1).lower().removeprefix("www.")
+    )
     return any(host == domain or host.endswith(f".{domain}") for domain in config.allowed_domains)
 
 
@@ -479,6 +483,8 @@ async def begin_vehicle(
 async def cancel_listing(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
+    if update.callback_query:
+        await update.callback_query.answer()
     chat = update.effective_chat
     user = update.effective_user
     if chat and user:
@@ -634,6 +640,7 @@ def build_application(config: Config) -> Application:
         group=0,
     )
     application.add_handler(CommandHandler("id", id_command))
+    application.add_handler(CommandHandler("start", help_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("links", links_command))
     application.add_handler(listing_conversation, group=1)
