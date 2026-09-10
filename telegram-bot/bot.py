@@ -219,8 +219,12 @@ def contains_profanity(text: str) -> bool:
 
 def is_target_group(update: Update, config: Config) -> bool:
     chat = update.effective_chat
-    return bool(chat and chat.type in {"group", "supergroup"} and
-                (config.group_id is None or chat.id == config.group_id))
+    return bool(
+        chat
+        and chat.type in {"group", "supergroup"}
+        and config.group_id is not None
+        and chat.id == config.group_id
+    )
 
 
 async def sender_is_admin(
