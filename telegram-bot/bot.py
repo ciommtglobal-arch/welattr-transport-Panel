@@ -45,7 +45,7 @@ for noisy_logger in ("httpx", "httpcore", "telegram.request"):
 logging.getLogger("telegram.ext").setLevel(logging.CRITICAL)
 
 
-ORIGIN, DESTINATION, TONNAGE, BODY_TYPE, CONTACT = range(5)
+ORIGIN, DESTINATION, CARGO, TONNAGE, BODY_TYPE, CONTACT = range(6)
 LISTING_LOAD: Final = "load"
 LISTING_VEHICLE: Final = "vehicle"
 CALLBACK_LOAD: Final = "listing:load"
@@ -508,7 +508,10 @@ async def collect_origin(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     context.user_data["origin"] = (update.effective_message.text or "").strip()
-    await update.effective_message.reply_text("2/5 — Varış noktası nedir?")
+    await update.effective_message.reply_text(
+        "2/6 — Varış noktası nedir? Şehir + ülke/bölge yazın. "
+        "Örnek: Erbil, Irak"
+    )
     return DESTINATION
 
 
@@ -516,7 +519,21 @@ async def collect_destination(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     context.user_data["destination"] = (update.effective_message.text or "").strip()
-    await update.effective_message.reply_text("3/5 — Tonaj nedir? Örnek: 24 ton")
+    listing_type = context.user_data.get("listing_type")
+    cargo_prompt = (
+        "3/6 — Yük cinsi nedir? Örnek: genel kargo, mermer, gıda"
+        if listing_type == LISTING_LOAD
+        else "3/6 — Hangi yük türüne uygun? Örnek: genel kargo, frigorifik, parsiyel"
+    )
+    await update.effective_message.reply_text(cargo_prompt)
+    return CARGO
+
+
+async def collect_cargo(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    context.user_data["cargo"] = (update.effective_message.text or "").strip()
+    await update.effective_message.reply_text("4/6 — Tonaj nedir? Örnek: 24 ton")
     return TONNAGE
 
 
@@ -525,7 +542,7 @@ async def collect_tonnage(
 ) -> int:
     context.user_data["tonnage"] = (update.effective_message.text or "").strip()
     await update.effective_message.reply_text(
-        "4/5 — Kasa tipi nedir? Örnek: tenteli, açık kasa, lowbed"
+        "5/6 — Dorse/kasa tipi nedir? Örnek: tenteli, frigorifik, açık kasa, lowbed"
     )
     return BODY_TYPE
 
@@ -535,7 +552,7 @@ async def collect_body_type(
 ) -> int:
     context.user_data["body_type"] = (update.effective_message.text or "").strip()
     await update.effective_message.reply_text(
-        "5/5 — İletişim bilgisini yazın. Telefon veya Telegram kullanıcı adı olabilir."
+        "6/6 — İletişim bilgisini yazın. Telefon veya Telegram kullanıcı adı olabilir."
     )
     return CONTACT
 
@@ -558,6 +575,7 @@ async def collect_contact(
         f"{title}\n\n"
         f"Çıkış: {context.user_data['origin']}\n"
         f"Varış: {context.user_data['destination']}\n"
+        f"Yük: {context.user_data['cargo']}\n"
         f"Tonaj: {context.user_data['tonnage']}\n"
         f"Kasa Tipi: {context.user_data['body_type']}\n"
         f"İletişim: {context.user_data['contact']}\n"
@@ -625,6 +643,7 @@ def build_application(config: Config) -> Application:
             DESTINATION: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, collect_destination)
             ],
+            CARGO: [MessageHandler(filters.TEXT & ~filters.COMMAND, collect_cargo)],
             TONNAGE: [MessageHandler(filters.TEXT & ~filters.COMMAND, collect_tonnage)],
             BODY_TYPE: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, collect_body_type)
