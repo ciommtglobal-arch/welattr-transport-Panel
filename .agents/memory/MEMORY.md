@@ -1,3 +1,4 @@
 - [Vite publish environment](vite-publish-environment.md) — Static Vite builds may run without service environment variables; configs need safe build-time defaults.
 - [Workspace package installation](workspace-package-installation.md) — The package helper cannot target pnpm workspace filters; use a scoped pnpm fallback when root installation is rejected.
 - [Mezopotamya Build marketplace](independent-construction-marketplace.md) — Use Mezopotamya Build by MMT Global; never imply an authorized Piyadan distributorship.
+- [Telegram bot log secrets](telegram-bot-log-secrets.md) — Bot API request URLs contain the token; keep HTTP request logs above INFO.

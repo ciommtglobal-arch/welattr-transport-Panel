@@ -40,6 +40,8 @@ logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
 )
 logger = logging.getLogger("mmt-telegram-bot")
+for noisy_logger in ("httpx", "httpcore", "telegram.request"):
+    logging.getLogger(noisy_logger).setLevel(logging.WARNING)
 
 
 ORIGIN, DESTINATION, TONNAGE, BODY_TYPE, CONTACT = range(5)
