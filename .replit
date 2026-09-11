@@ -50,3 +50,4 @@ defaultBucketID = "replit-objstore-05d149df-255d-4ae2-bda4-63075e8e0d71"
 
 [userenv.shared]
 TELEGRAM_GROUP_ID = "-1004481284132"
+LOADS_TOPIC_ID = "37"
