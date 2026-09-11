@@ -58,6 +58,7 @@ URL_RE = re.compile(
 LABELS = {
     "cikis": ("çıkış", "cikis"),
     "varis": ("varış", "varis"),
+    "yuk": ("yük", "yuk"),
     "tonaj": ("tonaj",),
     "kasa": ("kasa tipi", "kasa"),
     "iletisim": ("iletişim", "iletisim", "telefon", "tel"),
@@ -180,6 +181,24 @@ def has_label(text: str, aliases: tuple[str, ...]) -> bool:
 
 def is_formatted_listing(text: str) -> bool:
     return all(has_label(text, aliases) for aliases in LABELS.values())
+
+
+def is_listing_candidate(text: str) -> bool:
+    if ":" in text:
+        return True
+    normalized = normalize_text(text)
+    keywords = (
+        "cikis",
+        "varis",
+        "yuk",
+        "tonaj",
+        "dorse",
+        "kasa",
+        "parsiyel",
+        "frigorifik",
+        "tenteli",
+    )
+    return sum(keyword in normalized for keyword in keywords) >= 2
 
 
 def is_allowed_url(url: str, config: Config) -> bool:
@@ -338,14 +357,14 @@ async def moderate_and_validate(
     if thread_id not in tracked_topics or user.id in active_users:
         return
 
-    if not is_formatted_listing(text):
+    if is_listing_candidate(text) and not is_formatted_listing(text):
         try:
             await context.bot.send_message(
                 chat_id=message.chat.id,
                 message_thread_id=thread_id,
                 text=(
                     "İlanınızda eksik alan var. Lütfen ilanı şu alanlarla paylaşın:\n"
-                    "Çıkış · Varış · Tonaj · Kasa Tipi · İletişim\n\n"
+                    "Çıkış · Varış · Yük · Tonaj · Kasa Tipi · İletişim\n\n"
                     "İsterseniz aşağıdaki menüden formatlı ilan oluşturabilirsiniz."
                 ),
                 reply_markup=menu(),
