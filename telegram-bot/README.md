@@ -54,9 +54,11 @@ işaretiyle bulunmalıdır:
 ```text
 Çıkış: Cizre
 Varış: Erbil
+Yük: Genel kargo
 Tonaj: 24 ton
 Kasa Tipi: Tenteli
-İletişim: @kullanici
+Ücret: 1.200 USD
+İletişim: @kullanici veya bot
 ```
 
 ## Güvenlik notları

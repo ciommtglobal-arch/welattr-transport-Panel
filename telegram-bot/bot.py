@@ -45,7 +45,7 @@ for noisy_logger in ("httpx", "httpcore", "telegram.request"):
 logging.getLogger("telegram.ext").setLevel(logging.CRITICAL)
 
 
-ORIGIN, DESTINATION, CARGO, TONNAGE, BODY_TYPE, CONTACT = range(6)
+ORIGIN, DESTINATION, CARGO, TONNAGE, BODY_TYPE, FREIGHT_PRICE, CONTACT = range(7)
 LISTING_LOAD: Final = "load"
 LISTING_VEHICLE: Final = "vehicle"
 CALLBACK_LOAD: Final = "listing:load"
@@ -61,6 +61,7 @@ LABELS = {
     "yuk": ("yük", "yuk"),
     "tonaj": ("tonaj",),
     "kasa": ("kasa tipi", "kasa"),
+    "ucret": ("ücret", "ucret", "kira", "fiyat"),
     "iletisim": ("iletişim", "iletisim", "telefon", "tel"),
 }
 
@@ -364,7 +365,7 @@ async def moderate_and_validate(
                 message_thread_id=thread_id,
                 text=(
                     "İlanınızda eksik alan var. Lütfen ilanı şu alanlarla paylaşın:\n"
-                    "Çıkış · Varış · Yük · Tonaj · Kasa Tipi · İletişim\n\n"
+                    "Çıkış · Varış · Yük · Tonaj · Kasa Tipi · Ücret · İletişim\n\n"
                     "İsterseniz aşağıdaki menüden formatlı ilan oluşturabilirsiniz."
                 ),
                 reply_markup=menu(),
@@ -534,7 +535,7 @@ async def start_listing(
     title = "YÜK" if listing_type == LISTING_LOAD else "BOŞ ARAÇ"
     await message.reply_text(
         f"{title} ilanı oluşturuluyor.\n\n"
-        "1/6 — Çıkış noktası nedir? Şehir + ülke/bölge yazın. "
+        "1/7 — Çıkış noktası nedir? Şehir + ülke/bölge yazın. "
         "Örnek: Mersin, Türkiye"
     )
     return ORIGIN
@@ -585,7 +586,7 @@ async def collect_origin(
 ) -> int:
     context.user_data["origin"] = (update.effective_message.text or "").strip()
     await update.effective_message.reply_text(
-        "2/6 — Varış noktası nedir? Şehir + ülke/bölge yazın. "
+        "2/7 — Varış noktası nedir? Şehir + ülke/bölge yazın. "
         "Örnek: Erbil, Irak"
     )
     return DESTINATION
@@ -597,9 +598,9 @@ async def collect_destination(
     context.user_data["destination"] = (update.effective_message.text or "").strip()
     listing_type = context.user_data.get("listing_type")
     cargo_prompt = (
-        "3/6 — Yük cinsi nedir? Örnek: genel kargo, mermer, gıda"
+        "3/7 — Yük cinsi nedir? Örnek: genel kargo, mermer, gıda"
         if listing_type == LISTING_LOAD
-        else "3/6 — Hangi yük türüne uygun? Örnek: genel kargo, frigorifik, parsiyel"
+        else "3/7 — Hangi yük türüne uygun? Örnek: genel kargo, frigorifik, parsiyel"
     )
     await update.effective_message.reply_text(cargo_prompt)
     return CARGO
@@ -609,7 +610,7 @@ async def collect_cargo(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     context.user_data["cargo"] = (update.effective_message.text or "").strip()
-    await update.effective_message.reply_text("4/6 — Tonaj nedir? Örnek: 24 ton")
+    await update.effective_message.reply_text("4/7 — Tonaj nedir? Örnek: 24 ton")
     return TONNAGE
 
 
@@ -618,7 +619,7 @@ async def collect_tonnage(
 ) -> int:
     context.user_data["tonnage"] = (update.effective_message.text or "").strip()
     await update.effective_message.reply_text(
-        "5/6 — Dorse/kasa tipi nedir? Örnek: tenteli, frigorifik, açık kasa, lowbed"
+        "5/7 — Dorse/kasa tipi nedir? Örnek: tenteli, frigorifik, açık kasa, lowbed"
     )
     return BODY_TYPE
 
@@ -628,7 +629,18 @@ async def collect_body_type(
 ) -> int:
     context.user_data["body_type"] = (update.effective_message.text or "").strip()
     await update.effective_message.reply_text(
-        "6/6 — İletişim bilgisini yazın. Telefon veya Telegram kullanıcı adı "
+        "6/7 — Taşıma ücreti/kira bedeli nedir? Para birimiyle yazın. "
+        "Örnek: 1.200 USD veya 45.000 TL. Pazarlık ise 'Teklif' yazın."
+    )
+    return FREIGHT_PRICE
+
+
+async def collect_freight_price(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    context.user_data["freight_price"] = (update.effective_message.text or "").strip()
+    await update.effective_message.reply_text(
+        "7/7 — İletişim bilgisini yazın. Telefon veya Telegram kullanıcı adı "
         "olabilir. Numara paylaşmak istemiyorsanız 'bot' yazın."
     )
     return CONTACT
@@ -661,6 +673,7 @@ async def collect_contact(
         f"Yük: {context.user_data['cargo']}\n"
         f"Tonaj: {context.user_data['tonnage']}\n"
         f"Kasa Tipi: {context.user_data['body_type']}\n"
+        f"Ücret: {context.user_data['freight_price']}\n"
         f"{contact_line}\n"
         f"İlan sahibi: {owner}"
     )
@@ -730,6 +743,9 @@ def build_application(config: Config) -> Application:
             TONNAGE: [MessageHandler(filters.TEXT & ~filters.COMMAND, collect_tonnage)],
             BODY_TYPE: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, collect_body_type)
+            ],
+            FREIGHT_PRICE: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, collect_freight_price)
             ],
             CONTACT: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, collect_contact)
