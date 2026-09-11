@@ -45,7 +45,7 @@ for noisy_logger in ("httpx", "httpcore", "telegram.request"):
 logging.getLogger("telegram.ext").setLevel(logging.CRITICAL)
 
 
-ORIGIN, DESTINATION, CARGO, TONNAGE, BODY_TYPE, FREIGHT_PRICE, CONTACT = range(7)
+ORIGIN, DESTINATION, CARGO, TONNAGE, BODY_TYPE, FREIGHT_PRICE, CONTACT_PHONE, CONTACT = range(8)
 LISTING_LOAD: Final = "load"
 LISTING_VEHICLE: Final = "vehicle"
 CALLBACK_LOAD: Final = "listing:load"
@@ -55,6 +55,7 @@ CALLBACK_CANCEL: Final = "listing:cancel"
 URL_RE = re.compile(
     r"(?i)(?:(?:https?://|www\.|t\.me/|telegram\.me/)[^\s<>]+)"
 )
+PHONE_RE = re.compile(r"^[+0-9()\s.-]+$")
 LABELS = {
     "cikis": ("çıkış", "cikis"),
     "varis": ("varış", "varis"),
@@ -101,6 +102,12 @@ def normalize_text(value: str) -> str:
 
 def clean_username(value: str) -> str:
     return value.strip().removeprefix("@").removeprefix("https://t.me/").strip("/")
+
+
+def is_valid_phone(value: str) -> bool:
+    """Accept common international phone formats without storing or logging them."""
+    digits = re.sub(r"\D", "", value)
+    return bool(PHONE_RE.fullmatch(value)) and 7 <= len(digits) <= 15
 
 
 @dataclass(frozen=True)
@@ -535,7 +542,7 @@ async def start_listing(
     title = "YÜK" if listing_type == LISTING_LOAD else "BOŞ ARAÇ"
     await message.reply_text(
         f"{title} ilanı oluşturuluyor.\n\n"
-        "1/7 — Çıkış noktası nedir? Şehir + ülke/bölge yazın. "
+        "1/8 — Çıkış noktası nedir? Şehir + ülke/bölge yazın. "
         "Örnek: Mersin, Türkiye"
     )
     return ORIGIN
@@ -586,7 +593,7 @@ async def collect_origin(
 ) -> int:
     context.user_data["origin"] = (update.effective_message.text or "").strip()
     await update.effective_message.reply_text(
-        "2/7 — Varış noktası nedir? Şehir + ülke/bölge yazın. "
+        "2/8 — Varış noktası nedir? Şehir + ülke/bölge yazın. "
         "Örnek: Erbil, Irak"
     )
     return DESTINATION
@@ -598,9 +605,9 @@ async def collect_destination(
     context.user_data["destination"] = (update.effective_message.text or "").strip()
     listing_type = context.user_data.get("listing_type")
     cargo_prompt = (
-        "3/7 — Yük cinsi nedir? Örnek: genel kargo, mermer, gıda"
+        "3/8 — Yük cinsi nedir? Örnek: genel kargo, mermer, gıda"
         if listing_type == LISTING_LOAD
-        else "3/7 — Hangi yük türüne uygun? Örnek: genel kargo, frigorifik, parsiyel"
+        else "3/8 — Hangi yük türüne uygun? Örnek: genel kargo, frigorifik, parsiyel"
     )
     await update.effective_message.reply_text(cargo_prompt)
     return CARGO
@@ -610,7 +617,7 @@ async def collect_cargo(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     context.user_data["cargo"] = (update.effective_message.text or "").strip()
-    await update.effective_message.reply_text("4/7 — Tonaj nedir? Örnek: 24 ton")
+    await update.effective_message.reply_text("4/8 — Tonaj nedir? Örnek: 24 ton")
     return TONNAGE
 
 
@@ -619,7 +626,7 @@ async def collect_tonnage(
 ) -> int:
     context.user_data["tonnage"] = (update.effective_message.text or "").strip()
     await update.effective_message.reply_text(
-        "5/7 — Dorse/kasa tipi nedir? Örnek: tenteli, frigorifik, açık kasa, lowbed"
+        "5/8 — Dorse/kasa tipi nedir? Örnek: tenteli, frigorifik, açık kasa, lowbed"
     )
     return BODY_TYPE
 
@@ -629,7 +636,7 @@ async def collect_body_type(
 ) -> int:
     context.user_data["body_type"] = (update.effective_message.text or "").strip()
     await update.effective_message.reply_text(
-        "6/7 — Taşıma ücreti/kira bedeli nedir? Para birimiyle yazın. "
+        "6/8 — Taşıma ücreti/kira bedeli nedir? Para birimiyle yazın. "
         "Örnek: 1.200 USD veya 45.000 TL. Pazarlık ise 'Teklif' yazın."
     )
     return FREIGHT_PRICE
@@ -640,8 +647,31 @@ async def collect_freight_price(
 ) -> int:
     context.user_data["freight_price"] = (update.effective_message.text or "").strip()
     await update.effective_message.reply_text(
-        "7/7 — İletişim bilgisini yazın. Telefon veya Telegram kullanıcı adı "
-        "olabilir. Numara paylaşmak istemiyorsanız 'bot' yazın."
+        "7/8 — İlan sahibinin telefon numarasını ülke koduyla yazın. "
+        "Örnek: +90 532 123 45 67. Numara paylaşmak istemiyorsanız 'bot' yazın. "
+        "Telefon numarası ilan topic'inde yayınlanmaz; operasyon için gizli tutulur."
+    )
+    return CONTACT_PHONE
+
+
+async def collect_contact_phone(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    phone = (update.effective_message.text or "").strip()
+    if normalize_text(phone) in {"bot", "bot uzerinden", "operasyon"}:
+        context.user_data["contact_phone"] = ""
+    elif not is_valid_phone(phone):
+        await update.effective_message.reply_text(
+            "Geçerli bir telefon numarası yazın. Örnek: +90 532 123 45 67. "
+            "Numara paylaşmak istemiyorsanız 'bot' yazabilirsiniz."
+        )
+        return CONTACT_PHONE
+    else:
+        context.user_data["contact_phone"] = phone
+
+    await update.effective_message.reply_text(
+        "8/8 — İletişim tercihinizi yazın. Telegram kullanıcı adı yazabilir "
+        "veya bot üzerinden iletişim için 'bot' yazabilirsiniz."
     )
     return CONTACT
 
@@ -658,12 +688,15 @@ async def collect_contact(
 
     contact = (message.text or "").strip()
     context.user_data["contact"] = contact
+    phone = context.user_data.get("contact_phone", "")
     listing_type = context.user_data["listing_type"]
     title = "📦 YÜK İLANI" if listing_type == LISTING_LOAD else "🚚 BOŞ ARAÇ İLANI"
     owner = f"@{user.username}" if user.username else user.full_name
+    contact_normalized = normalize_text(contact)
     contact_line = (
         "İletişim: @MMTGlobalLogistics_Bot (operasyon üzerinden)"
-        if normalize_text(contact) in {"bot", "bot uzerinden", "operasyon"}
+        if contact_normalized in {"bot", "bot uzerinden", "operasyon"}
+        or is_valid_phone(contact)
         else f"İletişim: {contact}"
     )
     formatted = (
@@ -677,6 +710,13 @@ async def collect_contact(
         f"{contact_line}\n"
         f"İlan sahibi: {owner}"
     )
+    private_contact = (
+        "🔒 GİZLİ İLETİŞİM BİLGİSİ\n\n"
+        f"İlan sahibi: {owner}\n"
+        f"Telefon: {phone or 'Paylaşılmadı'}\n"
+        f"Telegram: {contact if contact_normalized not in {'bot', 'bot uzerinden', 'operasyon'} else 'Bot üzerinden'}\n\n"
+        f"{formatted}"
+    )
     target_topic = (
         config.loads_topic_id
         if listing_type == LISTING_LOAD
@@ -688,6 +728,19 @@ async def collect_contact(
             message_thread_id=target_topic,
             text=formatted,
         )
+        if config.contact_admin_ids:
+            for admin_id in config.contact_admin_ids:
+                try:
+                    await context.bot.send_message(
+                        chat_id=admin_id,
+                        text=private_contact,
+                    )
+                except TelegramError as exc:
+                    logger.warning(
+                        "Could not send private listing contact notification to %s: %s",
+                        admin_id,
+                        exc,
+                    )
         await message.reply_text("İlanınız ilgili topic'e formatlı olarak gönderildi.")
     except TelegramError as exc:
         logger.exception("Could not publish listing: %s", exc)
@@ -746,6 +799,9 @@ def build_application(config: Config) -> Application:
             ],
             FREIGHT_PRICE: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, collect_freight_price)
+            ],
+            CONTACT_PHONE: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, collect_contact_phone)
             ],
             CONTACT: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, collect_contact)

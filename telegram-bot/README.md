@@ -4,7 +4,10 @@ Bu bot, Telegram Topics/Forum kullanan MMT Global operasyon grubunda:
 
 - Yük İlanları ve Boş Araçlar topic'lerini denetler.
 - Eksik alanlı ilanlara nazikçe şablon uyarısı ve buton menüsü gösterir.
-- Butonlu form ile ilanı seçilen topic'e formatlı olarak gönderir.
+- Butonlu 8 adımlı form ile ilanı seçilen topic'e formatlı olarak gönderir.
+- İlan sahibinin telefonunu ayrı ve gizli bir alanda toplar; telefon numarası
+  ilan topic'inde yayınlanmaz, yalnızca `TELEGRAM_CONTACT_ADMIN_IDS` içindeki
+  operasyon hesaplarına özel bildirim olarak gönderilir.
 - İletişim alanında `bot` seçildiğinde, botun özel sohbetine gelen mesajları
   operasyon hesabına iletir.
 - İzinsiz dış bağlantıları, bot hesaplarını ve küfürlü içerikleri kaldırır.
@@ -58,6 +61,7 @@ Yük: Genel kargo
 Tonaj: 24 ton
 Kasa Tipi: Tenteli
 Ücret: 1.200 USD
+Telefon: +90 532 123 45 67 (gizli form alanı)
 İletişim: @kullanici veya bot
 ```
 
@@ -67,5 +71,7 @@ Kasa Tipi: Tenteli
 - Moderasyon sayaçları bellekte tutulur; workflow yeniden başlarsa sıfırlanır.
 - `ALLOWED_LINK_DOMAINS` değerini operasyon ihtiyacına göre dar tutun.
 - Botun yöneticilerin mesajlarını denetim dışında bırakması kasıtlıdır.
-- Bot üzerinden iletişim için operasyon hesabının Telegram ID'sini
-  `TELEGRAM_CONTACT_ADMIN_IDS` değişkenine ekleyin. Telefon numarası gerekmez.
+- Gizli telefon bildirimlerini alacak operasyon hesabının Telegram ID'sini
+  `TELEGRAM_CONTACT_ADMIN_IDS` değişkenine ekleyin.
+- Formda alınan telefon numarası ilan metninde yayınlanmaz; şoför ilgilendiğinde
+  paylaşım operasyon hesabı üzerinden yapılmalıdır.
