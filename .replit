@@ -45,3 +45,8 @@ packages = ["freetype", "gumbo", "harfbuzz", "jbig2dec", "libjpeg_turbo", "mupdf
 
 [objectStorage]
 defaultBucketID = "replit-objstore-05d149df-255d-4ae2-bda4-63075e8e0d71"
+
+[userenv]
+
+[userenv.shared]
+TELEGRAM_GROUP_ID = "-1004481284132"
