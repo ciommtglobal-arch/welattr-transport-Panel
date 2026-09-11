@@ -459,7 +459,9 @@ async def start_listing(
 
     title = "YÜK" if listing_type == LISTING_LOAD else "BOŞ ARAÇ"
     await message.reply_text(
-        f"{title} ilanı oluşturuluyor.\n\n1/5 — Çıkış noktası nedir?"
+        f"{title} ilanı oluşturuluyor.\n\n"
+        "1/6 — Çıkış noktası nedir? Şehir + ülke/bölge yazın. "
+        "Örnek: Mersin, Türkiye"
     )
     return ORIGIN
 
