@@ -5,6 +5,8 @@ Bu bot, Telegram Topics/Forum kullanan MMT Global operasyon grubunda:
 - Yük İlanları ve Boş Araçlar topic'lerini denetler.
 - Eksik alanlı ilanlara nazikçe şablon uyarısı ve buton menüsü gösterir.
 - Butonlu form ile ilanı seçilen topic'e formatlı olarak gönderir.
+- İletişim alanında `bot` seçildiğinde, botun özel sohbetine gelen mesajları
+  operasyon hesabına iletir.
 - İzinsiz dış bağlantıları, bot hesaplarını ve küfürlü içerikleri kaldırır.
 - İlk iki ihlalde uyarır, varsayılan olarak üçüncü ihlalde kullanıcıyı gruptan uzaklaştırır.
 - Yönetici `/links` komutu ile davet ve topic bağlantılarını üretir.
@@ -63,3 +65,5 @@ Kasa Tipi: Tenteli
 - Moderasyon sayaçları bellekte tutulur; workflow yeniden başlarsa sıfırlanır.
 - `ALLOWED_LINK_DOMAINS` değerini operasyon ihtiyacına göre dar tutun.
 - Botun yöneticilerin mesajlarını denetim dışında bırakması kasıtlıdır.
+- Bot üzerinden iletişim için operasyon hesabının Telegram ID'sini
+  `TELEGRAM_CONTACT_ADMIN_IDS` değişkenine ekleyin. Telefon numarası gerekmez.

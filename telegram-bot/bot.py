@@ -109,6 +109,7 @@ class Config:
     loads_topic_id: int | None
     vehicles_topic_id: int | None
     moderator_ids: frozenset[int]
+    contact_admin_ids: frozenset[int]
     allowed_domains: tuple[str, ...]
     ban_after_strikes: int
 
@@ -137,6 +138,7 @@ class Config:
             loads_topic_id=env_int("LOADS_TOPIC_ID"),
             vehicles_topic_id=env_int("EMPTY_VEHICLES_TOPIC_ID"),
             moderator_ids=env_int_list("TELEGRAM_MODERATOR_IDS"),
+            contact_admin_ids=env_int_list("TELEGRAM_CONTACT_ADMIN_IDS"),
             allowed_domains=domains,
             ban_after_strikes=max(1, env_int("BAN_AFTER_STRIKES") or 3),
         )
@@ -357,6 +359,14 @@ async def id_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     message = update.effective_message
     if not chat or not message:
         return
+    if chat.type == "private":
+        await message.reply_text(
+            "Bu sohbetin Telegram kullanıcı ID'si:\n"
+            f"{chat.id}\n\n"
+            "Bu numara telefon numarası değildir. Bot üzerinden gelen "
+            "iletişimleri operasyon hesabına bağlamak için kullanılır."
+        )
+        return
     thread_id = message.message_thread_id
     await message.reply_text(
         "Kimlik bilgileri:\n"
@@ -375,7 +385,52 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             "/load — yük ilanı oluşturur\n"
             "/vehicle — boş araç ilanı oluşturur\n"
             "/links — genel/davet/topic bağlantılarını gösterir (yönetici)\n"
+            "Özel sohbette /id — iletişim yönlendirmesi için Telegram ID'sini gösterir\n"
             "/cancel — aktif ilan formunu iptal eder"
+        )
+
+
+async def relay_private_contact(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
+    message = update.effective_message
+    user = update.effective_user
+    chat = update.effective_chat
+    config: Config = context.bot_data["config"]
+    if not message or not user or not chat or chat.type != "private":
+        return
+
+    if not config.contact_admin_ids:
+        await message.reply_text(
+            "İletişim yönlendirmesi henüz bağlanmadı. "
+            "Lütfen daha sonra tekrar deneyin."
+        )
+        return
+
+    sender = f"@{user.username}" if user.username else user.full_name
+    text = message.text or ""
+    relay_text = (
+        "Yeni bot iletişimi\n\n"
+        f"Gönderen: {sender}\n"
+        f"Telegram ID: {chat.id}\n\n"
+        f"Mesaj:\n{text}"
+    )
+    delivered = 0
+    for admin_id in config.contact_admin_ids:
+        try:
+            await context.bot.send_message(chat_id=admin_id, text=relay_text)
+            delivered += 1
+        except TelegramError as exc:
+            logger.warning("Could not relay private contact to %s: %s", admin_id, exc)
+
+    if delivered:
+        await message.reply_text(
+            "Mesajınız MMT Global operasyon ekibine iletildi."
+        )
+    else:
+        await message.reply_text(
+            "Mesajınız iletilemedi. Operasyon hesabı botla daha önce "
+            "özel sohbet başlatmış olmalı."
         )
 
 
@@ -554,7 +609,8 @@ async def collect_body_type(
 ) -> int:
     context.user_data["body_type"] = (update.effective_message.text or "").strip()
     await update.effective_message.reply_text(
-        "6/6 — İletişim bilgisini yazın. Telefon veya Telegram kullanıcı adı olabilir."
+        "6/6 — İletişim bilgisini yazın. Telefon veya Telegram kullanıcı adı "
+        "olabilir. Numara paylaşmak istemiyorsanız 'bot' yazın."
     )
     return CONTACT
 
@@ -569,10 +625,16 @@ async def collect_contact(
     if not message or not chat or not user:
         return ConversationHandler.END
 
-    context.user_data["contact"] = (message.text or "").strip()
+    contact = (message.text or "").strip()
+    context.user_data["contact"] = contact
     listing_type = context.user_data["listing_type"]
     title = "📦 YÜK İLANI" if listing_type == LISTING_LOAD else "🚚 BOŞ ARAÇ İLANI"
     owner = f"@{user.username}" if user.username else user.full_name
+    contact_line = (
+        "İletişim: @MMTGlobalLogistics_Bot (operasyon üzerinden)"
+        if normalize_text(contact) in {"bot", "bot uzerinden", "operasyon"}
+        else f"İletişim: {contact}"
+    )
     formatted = (
         f"{title}\n\n"
         f"Çıkış: {context.user_data['origin']}\n"
@@ -580,7 +642,7 @@ async def collect_contact(
         f"Yük: {context.user_data['cargo']}\n"
         f"Tonaj: {context.user_data['tonnage']}\n"
         f"Kasa Tipi: {context.user_data['body_type']}\n"
-        f"İletişim: {context.user_data['contact']}\n"
+        f"{contact_line}\n"
         f"İlan sahibi: {owner}"
     )
     target_topic = (
@@ -664,7 +726,17 @@ def build_application(config: Config) -> Application:
     )
 
     application.add_handler(
-        MessageHandler(filters.ALL & ~filters.COMMAND, moderate_and_validate),
+        MessageHandler(
+            filters.ChatType.GROUPS & filters.ALL & ~filters.COMMAND,
+            moderate_and_validate,
+        ),
+        group=0,
+    )
+    application.add_handler(
+        MessageHandler(
+            filters.ChatType.PRIVATE & filters.TEXT & ~filters.COMMAND,
+            relay_private_contact,
+        ),
         group=0,
     )
     application.add_handler(CommandHandler("id", id_command))
