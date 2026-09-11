@@ -23,7 +23,7 @@ from telegram import (
     Update,
 )
 from telegram.constants import ChatMemberStatus
-from telegram.error import TelegramError
+from telegram.error import InvalidToken, TelegramError
 from telegram.ext import (
     Application,
     CallbackQueryHandler,
@@ -42,6 +42,7 @@ logging.basicConfig(
 logger = logging.getLogger("mmt-telegram-bot")
 for noisy_logger in ("httpx", "httpcore", "telegram.request"):
     logging.getLogger(noisy_logger).setLevel(logging.WARNING)
+logging.getLogger("telegram.ext").setLevel(logging.CRITICAL)
 
 
 ORIGIN, DESTINATION, TONNAGE, BODY_TYPE, CONTACT = range(5)
@@ -662,10 +663,17 @@ def main() -> None:
         config.vehicles_topic_id,
         bool(config.public_username),
     )
-    build_application(config).run_polling(
-        allowed_updates=Update.ALL_TYPES,
-        drop_pending_updates=False,
-    )
+    try:
+        build_application(config).run_polling(
+            allowed_updates=Update.ALL_TYPES,
+            drop_pending_updates=False,
+        )
+    except InvalidToken:
+        logger.error(
+            "Telegram rejected TELEGRAM_BOT_TOKEN. Replace the Replit Secret "
+            "with a newly generated BotFather token."
+        )
+        raise SystemExit(1) from None
 
 
 if __name__ == "__main__":
