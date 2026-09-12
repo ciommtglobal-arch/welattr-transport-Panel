@@ -165,6 +165,23 @@ class MembershipStore:
                 (removed_at.isoformat(), membership_id),
             )
 
+    def report(self) -> tuple[int, list[sqlite3.Row]]:
+        with self._connect() as connection:
+            total = connection.execute(
+                "SELECT COUNT(*) AS total FROM memberships"
+            ).fetchone()["total"]
+            rows = list(
+                connection.execute(
+                    """
+                    SELECT user_id, paid_at, access_expires_at, removed_at
+                    FROM memberships
+                    ORDER BY paid_at DESC
+                    LIMIT 20
+                    """
+                )
+            )
+        return int(total), rows
+
 
 def payment_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
@@ -205,6 +222,53 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         parse_mode="HTML",
         reply_markup=payment_keyboard(),
     )
+
+
+async def vip_report(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
+    if update.effective_chat is None or update.effective_chat.type != "private":
+        return
+    if update.effective_user is None or update.message is None:
+        return
+
+    config: Config = context.application.bot_data["config"]
+    store: MembershipStore = context.application.bot_data["store"]
+    try:
+        channel_member = await context.bot.get_chat_member(
+            chat_id=config.channel_id,
+            user_id=update.effective_user.id,
+        )
+    except TelegramError:
+        await update.message.reply_text(
+            "Rapor alınamadı. VIP kanal yöneticiliği doğrulanamadı."
+        )
+        return
+
+    if channel_member.status not in {"creator", "administrator"}:
+        await update.message.reply_text(
+            "Bu komutu yalnızca VIP kanal yöneticileri kullanabilir."
+        )
+        return
+
+    total, rows = store.report()
+    lines = [
+        "📊 <b>MMT Global VIP ödeme raporu</b>",
+        f"Onaylanan ödeme: <b>{total}</b>",
+        f"Toplam Stars: <b>{total * config.price_stars} XTR</b>",
+        "",
+        "<b>Son ödemeler:</b>",
+    ]
+    if not rows:
+        lines.append("Henüz onaylanmış ödeme yok.")
+    else:
+        for row in rows:
+            status = "aktif" if row["removed_at"] is None else "sona erdi"
+            lines.append(
+                f"• Kullanıcı ID: <code>{row['user_id']}</code> — "
+                f"{row['paid_at'][:16].replace('T', ' ')} UTC — {status}"
+            )
+    await update.message.reply_text("\n".join(lines), parse_mode="HTML")
 
 
 async def choose_payment(
@@ -347,6 +411,7 @@ def main() -> None:
     application.bot_data["config"] = config
     application.bot_data["store"] = store
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("viprapor", vip_report))
     application.add_handler(CallbackQueryHandler(choose_payment, pattern=r"^vip:"))
     application.add_handler(PreCheckoutQueryHandler(pre_checkout))
     application.add_handler(
