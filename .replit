@@ -53,3 +53,15 @@ TELEGRAM_GROUP_ID = "-1004481284132"
 LOADS_TOPIC_ID = "37"
 EMPTY_VEHICLES_TOPIC_ID = "37"
 TELEGRAM_CONTACT_ADMIN_IDS = "8691874760"
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+
+[[ports]]
+localPort = 8081
+externalPort = 8081
+
+[[ports]]
+localPort = 25030
+externalPort = 3000
