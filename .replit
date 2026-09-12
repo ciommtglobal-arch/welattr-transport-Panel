@@ -20,6 +20,10 @@ author = "agent"
 task = "workflow.run"
 args = "MMT Global Telegram Bot"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "MMT Global VIP Bot"
+
 [[workflows.workflow]]
 name = "MMT Global Telegram Bot"
 author = "agent"
@@ -27,6 +31,17 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python3 telegram-bot/bot.py"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "MMT Global VIP Bot"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 telegram-bot/vip_bot.py"
 
 [workflows.workflow.metadata]
 outputType = "console"
@@ -53,6 +68,9 @@ TELEGRAM_GROUP_ID = "-1004481284132"
 LOADS_TOPIC_ID = "37"
 EMPTY_VEHICLES_TOPIC_ID = "37"
 TELEGRAM_CONTACT_ADMIN_IDS = "8691874760"
+TELEGRAM_VIP_CHANNEL_ID = "-1004409778193"
+VIP_ACCESS_DAYS = "30"
+VIP_PRICE_STARS = "250"
 
 [[ports]]
 localPort = 8080

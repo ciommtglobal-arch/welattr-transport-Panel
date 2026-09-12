@@ -2,3 +2,4 @@
 - [Workspace package installation](workspace-package-installation.md) — The package helper cannot target pnpm workspace filters; use a scoped pnpm fallback when root installation is rejected.
 - [Mezopotamya Build marketplace](independent-construction-marketplace.md) — Use Mezopotamya Build by MMT Global; never imply an authorized Piyadan distributorship.
 - [Telegram bot log secrets](telegram-bot-log-secrets.md) — Bot API request URLs contain the token; keep HTTP request logs above INFO.
+- [VIP payment split](vip-payment-split.md) — Keep VIP access on a separate bot; launch with Stars while Wallet Pay awaits merchant approval.
