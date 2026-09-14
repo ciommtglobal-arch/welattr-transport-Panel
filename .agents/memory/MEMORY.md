@@ -3,3 +3,4 @@
 - [Mezopotamya Build marketplace](independent-construction-marketplace.md) — Use Mezopotamya Build by MMT Global; never imply an authorized Piyadan distributorship.
 - [Telegram bot log secrets](telegram-bot-log-secrets.md) — Bot API request URLs contain the token; keep HTTP request logs above INFO.
 - [VIP payment split](vip-payment-split.md) — Keep VIP access on a separate bot; launch with Stars while Wallet Pay awaits merchant approval.
+- [Tami hosted payment](tami-hosted-payment.md) — Hosted token auth and payment-status query use different Tami signing materials.

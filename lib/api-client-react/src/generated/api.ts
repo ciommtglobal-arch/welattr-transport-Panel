@@ -32,6 +32,9 @@ import type {
   ObjectDownloadUrlResponse,
   OrphanUploadCleanupRequest,
   OrphanUploadCleanupResponse,
+  TamiHostedPaymentInput,
+  TamiHostedPaymentSession,
+  TamiPaymentStatus,
   UploadUrlRequest,
   UploadUrlResponse
 } from './api.schemas';
@@ -62,6 +65,166 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getCreateTamiHostedPaymentSessionUrl = () => {
+
+
+
+
+  return `/api/payments/tami/hosted-session`
+}
+
+/**
+ * Tami Common Payment Page için tek kullanımlık ödeme adresi üretir.
+ * Kart numarası ve güvenlik kodu bu API'ye gönderilmez; müşteri Tami'nin
+ * hosted ödeme sayfasına yönlendirilir.
+ * @summary Kart bilgilerini MMT sistemine almadan Tami ödeme sayfası oluşturur
+ */
+export const createTamiHostedPaymentSession = async (tamiHostedPaymentInput: TamiHostedPaymentInput, options?: Parameters<typeof customFetch>[1]): Promise<TamiHostedPaymentSession> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<TamiHostedPaymentSession>(getCreateTamiHostedPaymentSessionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(tamiHostedPaymentInput)
+  }
+);}
+
+
+
+
+
+export const getCreateTamiHostedPaymentSessionMutationKey = () => ['createTamiHostedPaymentSession'] as const;
+
+export const getCreateTamiHostedPaymentSessionMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTamiHostedPaymentSession>>, TError,CreateTamiHostedPaymentSessionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createTamiHostedPaymentSession>>, TError,CreateTamiHostedPaymentSessionMutationVariables, TContext> => {
+
+const mutationKey = getCreateTamiHostedPaymentSessionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTamiHostedPaymentSession>>, CreateTamiHostedPaymentSessionMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createTamiHostedPaymentSession(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateTamiHostedPaymentSessionMutationResult = NonNullable<Awaited<ReturnType<typeof createTamiHostedPaymentSession>>>
+    export type CreateTamiHostedPaymentSessionMutationBody = BodyType<TamiHostedPaymentInput>
+    export type CreateTamiHostedPaymentSessionMutationError = ErrorType<ErrorResponse>
+    export type CreateTamiHostedPaymentSessionMutationVariables = {data: BodyType<TamiHostedPaymentInput>}
+
+    /**
+ * @summary Kart bilgilerini MMT sistemine almadan Tami ödeme sayfası oluşturur
+ */
+export const useCreateTamiHostedPaymentSession = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTamiHostedPaymentSession>>, TError,CreateTamiHostedPaymentSessionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createTamiHostedPaymentSession>>,
+        TError,
+        CreateTamiHostedPaymentSessionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateTamiHostedPaymentSessionMutationOptions(options));
+    }
+
+export const getGetTamiPaymentStatusUrl = (orderId: string,) => {
+
+
+
+
+  return `/api/payments/tami/${orderId}`
+}
+
+/**
+ * @summary Tami ödeme durumunu sorgular
+ */
+export const getTamiPaymentStatus = async (orderId: string, options?: Parameters<typeof customFetch>[1]): Promise<TamiPaymentStatus> => {
+
+  return customFetch<TamiPaymentStatus>(getGetTamiPaymentStatusUrl(orderId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTamiPaymentStatusQueryKey = (orderId: string,) => {
+    return [
+    `/api/payments/tami/${orderId}`
+    ] as const;
+    }
+
+
+export const getGetTamiPaymentStatusQueryOptions = <TData = Awaited<ReturnType<typeof getTamiPaymentStatus>>, TError = ErrorType<ErrorResponse>>(orderId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTamiPaymentStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTamiPaymentStatusQueryKey(orderId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTamiPaymentStatus>>> = ({ signal }) => getTamiPaymentStatus(orderId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderId !== null && orderId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTamiPaymentStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTamiPaymentStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getTamiPaymentStatus>>>
+export type GetTamiPaymentStatusQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Tami ödeme durumunu sorgular
+ */
+
+export function useGetTamiPaymentStatus<TData = Awaited<ReturnType<typeof getTamiPaymentStatus>>, TError = ErrorType<ErrorResponse>>(
+ orderId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTamiPaymentStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTamiPaymentStatusQueryOptions(orderId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getRequestObjectDownloadUrlUrl = () => {
 

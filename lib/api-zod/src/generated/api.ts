@@ -9,6 +9,65 @@ import * as zod from 'zod';
 
 
 /**
+ * Tami Common Payment Page için tek kullanımlık ödeme adresi üretir.
+ * Kart numarası ve güvenlik kodu bu API'ye gönderilmez; müşteri Tami'nin
+ * hosted ödeme sayfasına yönlendirilir.
+ * @summary Kart bilgilerini MMT sistemine almadan Tami ödeme sayfası oluşturur
+ */
+export const createTamiHostedPaymentSessionBodyAmountMax = 10000000;
+
+export const createTamiHostedPaymentSessionBodyFullNameMin = 2;
+export const createTamiHostedPaymentSessionBodyFullNameMax = 160;
+
+export const createTamiHostedPaymentSessionBodyEmailMax = 254;
+
+export const createTamiHostedPaymentSessionBodyPhoneMin = 10;
+export const createTamiHostedPaymentSessionBodyPhoneMax = 20;
+
+export const createTamiHostedPaymentSessionBodyDescriptionMin = 2;
+export const createTamiHostedPaymentSessionBodyDescriptionMax = 160;
+
+
+
+export const CreateTamiHostedPaymentSessionBody = zod.object({
+  "amount": zod.number().min(1).max(createTamiHostedPaymentSessionBodyAmountMax).describe('Türk lirası cinsinden ödeme tutarı.'),
+  "fullName": zod.string().min(createTamiHostedPaymentSessionBodyFullNameMin).max(createTamiHostedPaymentSessionBodyFullNameMax),
+  "email": zod.email().max(createTamiHostedPaymentSessionBodyEmailMax),
+  "phone": zod.string().min(createTamiHostedPaymentSessionBodyPhoneMin).max(createTamiHostedPaymentSessionBodyPhoneMax).describe('Masterpass doğrulaması için 905xxxxxxxxx formatına dönüştürülebilen telefon.'),
+  "description": zod.string().min(createTamiHostedPaymentSessionBodyDescriptionMin).max(createTamiHostedPaymentSessionBodyDescriptionMax)
+})
+
+export const CreateTamiHostedPaymentSessionResponse = zod.object({
+  "orderId": zod.string(),
+  "paymentUrl": zod.url(),
+  "status": zod.enum(['pending', 'success', 'failed'])
+})
+
+
+/**
+ * @summary Tami ödeme durumunu sorgular
+ */
+export const getTamiPaymentStatusPathOrderIdMin = 2;
+export const getTamiPaymentStatusPathOrderIdMax = 36;
+
+
+
+export const GetTamiPaymentStatusParams = zod.object({
+  "orderId": zod.coerce.string().min(getTamiPaymentStatusPathOrderIdMin).max(getTamiPaymentStatusPathOrderIdMax)
+})
+
+export const GetTamiPaymentStatusResponse = zod.object({
+  "orderId": zod.string(),
+  "amount": zod.number(),
+  "currency": zod.enum(['TRY']),
+  "status": zod.enum(['pending', 'success', 'failed']),
+  "providerPaymentStatus": zod.string().nullish(),
+  "providerOrderStatus": zod.string().nullish(),
+  "errorMessage": zod.string().nullish()
+})
+
+
+/**
  * @summary Başvuru belgesi için kısa süreli imzalı okuma adresi oluşturur
  */
 export const requestObjectDownloadUrlBodyObjectPathRegExp = new RegExp('^/objects/uploads/[a-zA-Z0-9-]+$');

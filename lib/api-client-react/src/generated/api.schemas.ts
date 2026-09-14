@@ -5,6 +5,68 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface TamiHostedPaymentInput {
+  /**
+     * Türk lirası cinsinden ödeme tutarı.
+     * @minimum 1
+     * @maximum 10000000
+     */
+  amount: number;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  fullName: string;
+  /** @maxLength 254 */
+  email: string;
+  /**
+     * Masterpass doğrulaması için 905xxxxxxxxx formatına dönüştürülebilen telefon.
+     * @minLength 10
+     * @maxLength 20
+     */
+  phone: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  description: string;
+}
+
+export type TamiPaymentStatusValue = typeof TamiPaymentStatusValue[keyof typeof TamiPaymentStatusValue];
+
+
+export const TamiPaymentStatusValue = {
+  pending: 'pending',
+  success: 'success',
+  failed: 'failed',
+} as const;
+
+export interface TamiHostedPaymentSession {
+  orderId: string;
+  paymentUrl: string;
+  status: TamiPaymentStatusValue;
+}
+
+export type TamiPaymentStatusCurrency = typeof TamiPaymentStatusCurrency[keyof typeof TamiPaymentStatusCurrency];
+
+
+export const TamiPaymentStatusCurrency = {
+  TRY: 'TRY',
+} as const;
+
+export interface TamiPaymentStatus {
+  orderId: string;
+  amount: number;
+  currency: TamiPaymentStatusCurrency;
+  status: TamiPaymentStatusValue;
+  /** @nullable */
+  providerPaymentStatus?: string | null;
+  /** @nullable */
+  providerOrderStatus?: string | null;
+  /** @nullable */
+  errorMessage?: string | null;
+}
+
 export interface ErrorEnvelope {
   error: string;
 }

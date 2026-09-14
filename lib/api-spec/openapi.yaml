@@ -14,7 +14,87 @@ tags:
     description: Corporate limit application operations
   - name: Storage
     description: Özel başvuru belgeleri için güvenli depolama işlemleri
+  - name: payments
+    description: Tami hosted ödeme işlemleri
 paths:
+  /payments/tami/hosted-session:
+    post:
+      operationId: createTamiHostedPaymentSession
+      tags: [payments]
+      summary: Kart bilgilerini MMT sistemine almadan Tami ödeme sayfası oluşturur
+      description: |
+        Tami Common Payment Page için tek kullanımlık ödeme adresi üretir.
+        Kart numarası ve güvenlik kodu bu API'ye gönderilmez; müşteri Tami'nin
+        hosted ödeme sayfasına yönlendirilir.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TamiHostedPaymentInput"
+      responses:
+        "201":
+          description: Hosted ödeme oturumu oluşturuldu.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TamiHostedPaymentSession"
+        "400":
+          description: Geçersiz ödeme isteği.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Tami entegrasyonu yapılandırılmamış.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Tami token servisi yanıt vermedi veya hatalı yanıt verdi.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /payments/tami/{orderId}:
+    get:
+      operationId: getTamiPaymentStatus
+      tags: [payments]
+      summary: Tami ödeme durumunu sorgular
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 36
+      responses:
+        "200":
+          description: Ödeme durumu.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TamiPaymentStatus"
+        "404":
+          description: Ödeme oturumu bulunamadı.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Tami entegrasyonu yapılandırılmamış.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Tami sorgu servisi yanıt vermedi veya hatalı yanıt verdi.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /storage/objects/request-download-url:
     post:
       tags: [Storage]
@@ -268,6 +348,66 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
+    TamiHostedPaymentInput:
+      type: object
+      additionalProperties: false
+      required: [amount, fullName, email, phone, description]
+      properties:
+        amount:
+          type: number
+          minimum: 1
+          maximum: 10000000
+          description: Türk lirası cinsinden ödeme tutarı.
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 160
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone:
+          type: string
+          minLength: 10
+          maxLength: 20
+          description: Masterpass doğrulaması için 905xxxxxxxxx formatına dönüştürülebilen telefon.
+        description:
+          type: string
+          minLength: 2
+          maxLength: 160
+    TamiHostedPaymentSession:
+      type: object
+      required: [orderId, paymentUrl, status]
+      properties:
+        orderId:
+          type: string
+        paymentUrl:
+          type: string
+          format: uri
+        status:
+          $ref: "#/components/schemas/TamiPaymentStatusValue"
+    TamiPaymentStatus:
+      type: object
+      required: [orderId, amount, currency, status]
+      properties:
+        orderId:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+          enum: [TRY]
+        status:
+          $ref: "#/components/schemas/TamiPaymentStatusValue"
+        providerPaymentStatus:
+          type: [string, "null"]
+        providerOrderStatus:
+          type: [string, "null"]
+        errorMessage:
+          type: [string, "null"]
+    TamiPaymentStatusValue:
+      type: string
+      enum: [pending, success, failed]
     ErrorEnvelope:
       type: object
       required: [error]

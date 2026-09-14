@@ -81,6 +81,12 @@ export default function Home() {
               >
                 DEMO CÜZDAN
               </Link>
+              <Link
+                href="/odeme"
+                className="border border-foreground/30 px-5 py-2.5 text-foreground transition-colors hover:border-primary hover:text-primary rounded-none font-semibold uppercase tracking-wider text-xs"
+              >
+                KURUMSAL ÖDEME
+              </Link>
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -150,6 +156,12 @@ export default function Home() {
           className="mt-2 border border-primary px-8 py-4 text-primary transition-colors hover:bg-primary hover:text-white rounded-none font-semibold uppercase tracking-wider text-sm"
         >
           DEMO CÜZDAN
+        </Link>
+        <Link
+          href="/odeme"
+          className="mt-2 border border-foreground/30 px-8 py-4 text-foreground transition-colors hover:border-primary hover:text-primary rounded-none font-semibold uppercase tracking-wider text-sm"
+        >
+          KURUMSAL ÖDEME
         </Link>
       </div>
 

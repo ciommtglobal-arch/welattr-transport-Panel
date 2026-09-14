@@ -11,6 +11,7 @@ import Home from '@/pages/home';
 import Limit, { LimitChooser } from '@/pages/limit';
 import StaffApplications from '@/pages/staff-applications';
 import DemoWallet from '@/pages/demo-wallet';
+import PaymentPage, { PaymentResultPage } from '@/pages/payment';
 import {
   Route,
   Redirect,
@@ -120,6 +121,8 @@ function Router() {
         <Route path="/limit/konut" component={HousingLimit} />
         <Route path="/limit/tasit" component={VehicleLimit} />
         <Route path="/cuzdan-demo" component={DemoWallet} />
+        <Route path="/odeme" component={PaymentPage} />
+        <Route path="/odeme/sonuc" component={PaymentResultPage} />
         <Route path="/staff/applications" component={StaffApplications} />
         <Route path="/sign-in/*?" component={SignInPage} />
         <Route path="/sign-up/*?" component={SignUpPage} />
