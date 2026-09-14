@@ -5,13 +5,23 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type PaymentCurrency = typeof PaymentCurrency[keyof typeof PaymentCurrency];
+
+
+export const PaymentCurrency = {
+  TRY: 'TRY',
+  USD: 'USD',
+  EUR: 'EUR',
+} as const;
+
 export interface TamiHostedPaymentInput {
   /**
-     * Türk lirası cinsinden ödeme tutarı.
+     * Seçilen para birimindeki ödeme tutarı.
      * @minimum 1
      * @maximum 10000000
      */
   amount: number;
+  currency: PaymentCurrency;
   /**
      * @minLength 2
      * @maxLength 160
@@ -41,23 +51,26 @@ export const TamiPaymentStatusValue = {
   failed: 'failed',
 } as const;
 
+export type PaymentMode = typeof PaymentMode[keyof typeof PaymentMode];
+
+
+export const PaymentMode = {
+  mock: 'mock',
+  tami: 'tami',
+} as const;
+
 export interface TamiHostedPaymentSession {
   orderId: string;
   paymentUrl: string;
   status: TamiPaymentStatusValue;
+  currency: PaymentCurrency;
+  mode: PaymentMode;
 }
-
-export type TamiPaymentStatusCurrency = typeof TamiPaymentStatusCurrency[keyof typeof TamiPaymentStatusCurrency];
-
-
-export const TamiPaymentStatusCurrency = {
-  TRY: 'TRY',
-} as const;
 
 export interface TamiPaymentStatus {
   orderId: string;
   amount: number;
-  currency: TamiPaymentStatusCurrency;
+  currency: PaymentCurrency;
   status: TamiPaymentStatusValue;
   /** @nullable */
   providerPaymentStatus?: string | null;
@@ -65,6 +78,18 @@ export interface TamiPaymentStatus {
   providerOrderStatus?: string | null;
   /** @nullable */
   errorMessage?: string | null;
+}
+
+export type MockPaymentResultInputStatus = typeof MockPaymentResultInputStatus[keyof typeof MockPaymentResultInputStatus];
+
+
+export const MockPaymentResultInputStatus = {
+  success: 'success',
+  failed: 'failed',
+} as const;
+
+export interface MockPaymentResultInput {
+  status: MockPaymentResultInputStatus;
 }
 
 export interface ErrorEnvelope {

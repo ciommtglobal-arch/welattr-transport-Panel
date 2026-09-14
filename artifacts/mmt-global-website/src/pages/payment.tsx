@@ -12,7 +12,18 @@ import { Link } from "wouter";
 import {
   useCreateTamiHostedPaymentSession,
   useGetTamiPaymentStatus,
+  useSetMockPaymentResult,
 } from "@workspace/api-client-react";
+
+type Currency = "TRY" | "USD" | "EUR";
+type MockResult = "success" | "failed";
+
+function formatCurrency(amount: number, currency: Currency) {
+  return new Intl.NumberFormat("tr-TR", {
+    style: "currency",
+    currency,
+  }).format(amount);
+}
 
 function getApiErrorMessage(error: unknown) {
   if (!error || typeof error !== "object") {
@@ -57,6 +68,7 @@ function PaymentShell({ children }: { children: React.ReactNode }) {
 
 export default function PaymentPage() {
   const [amount, setAmount] = useState("1000");
+  const [currency, setCurrency] = useState<Currency>("TRY");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -69,6 +81,7 @@ export default function PaymentPage() {
       {
         data: {
           amount: Number(amount),
+          currency,
           fullName: fullName.trim(),
           email: email.trim(),
           phone: phone.trim(),
@@ -93,11 +106,12 @@ export default function PaymentPage() {
           </div>
           <h1 className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight md:text-8xl">
             Güvenli ödeme
-            <span className="block font-serif font-normal italic text-primary">Tami ile.</span>
+            <span className="block font-serif font-normal italic text-primary">test modunda.</span>
           </h1>
           <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-secondary-foreground/70">
             Ödeme adımında kart bilgilerinizi MMT Global sistemine girmeden,
-            Tami&apos;nin güvenli ortak ödeme sayfasına yönlendirilirsiniz.
+            güvenli test ödeme sayfasına yönlendirilirsiniz. Bu ortamda gerçek
+            tahsilat oluşmaz.
           </p>
         </div>
       </section>
@@ -138,8 +152,20 @@ export default function PaymentPage() {
               required
               autoComplete="tel"
             />
+            <label className="block text-sm">
+              <span className="mb-2 block text-foreground/60">Para birimi</span>
+              <select
+                value={currency}
+                onChange={(event) => setCurrency(event.target.value as Currency)}
+                className="w-full border border-border bg-background px-4 py-3 outline-none transition-colors focus:border-primary"
+              >
+                <option value="TRY">TRY — Türk lirası</option>
+                <option value="USD">USD — Amerikan doları</option>
+                <option value="EUR">EUR — Euro</option>
+              </select>
+            </label>
             <Field
-              label="Tutar (TL)"
+              label={`Tutar (${currency})`}
               type="number"
               min="1"
               step="0.01"
@@ -178,11 +204,11 @@ export default function PaymentPage() {
             {payment.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Ödeme sayfası hazırlanıyor
+                Test ödeme sayfası hazırlanıyor
               </>
             ) : (
               <>
-                Tami ödeme sayfasına geç
+                Test ödeme sayfasını aç
                 <ArrowRight size={16} />
               </>
             )}
@@ -194,14 +220,132 @@ export default function PaymentPage() {
           <h2 className="mt-6 text-2xl font-semibold">Kart bilgileri MMT&apos;ye gelmez</h2>
           <ul className="mt-6 space-y-4 text-sm leading-relaxed text-secondary-foreground/70">
             <li>• Kart numarası, son kullanma tarihi ve CVV bu siteye gönderilmez.</li>
-            <li>• Tami tek kullanımlık ödeme adresi üretir ve sizi kendi ödeme sayfasına yönlendirir.</li>
-            <li>• İşlem sonucu Tami üzerinden doğrulandıktan sonra ödeme durumu gösterilir.</li>
+            <li>• Test modu TRY, USD ve EUR tutarlarıyla çalışır.</li>
+            <li>• Test ekranında başarı veya başarısızlık sonucu simüle edilebilir.</li>
           </ul>
           <p className="mt-8 border-t border-secondary-foreground/15 pt-5 text-xs leading-relaxed text-secondary-foreground/50">
             Ödeme yapmadan önce tutar ve açıklamayı kontrol edin. İade ve hizmet koşulları
             için MMT Global ile iletişime geçin.
           </p>
         </aside>
+      </section>
+    </PaymentShell>
+  );
+}
+
+export function MockPaymentPage() {
+  const searchParams = useMemo(() => new URLSearchParams(window.location.search), []);
+  const orderId = searchParams.get("orderId") ?? "";
+  const statusQuery = useGetTamiPaymentStatus(orderId, {
+    query: {
+      queryKey: [`/api/payments/tami/${orderId}`],
+      enabled: Boolean(orderId),
+      refetchInterval: (query) =>
+        query.state.data?.status === "pending" ? 2000 : false,
+    },
+  });
+  const resultMutation = useSetMockPaymentResult();
+  const payment = statusQuery.data;
+
+  function simulate(status: MockResult) {
+    if (!orderId) return;
+    resultMutation.mutate(
+      { orderId, data: { status } },
+      {
+        onSuccess: () => {
+          window.location.assign(`/odeme/sonuc?orderId=${orderId}&result=${status}`);
+        },
+      },
+    );
+  }
+
+  return (
+    <PaymentShell>
+      <section className="border-b border-border/70 bg-secondary px-6 py-14 text-secondary-foreground md:px-12 md:py-20">
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-6 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            <ShieldCheck size={15} />
+            Test ödeme modu
+          </div>
+          <h1 className="max-w-3xl text-5xl font-semibold leading-[0.95] tracking-tight md:text-8xl">
+            Sonucu
+            <span className="block font-serif font-normal italic text-primary">simüle edin.</span>
+          </h1>
+          <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-secondary-foreground/70">
+            Bu ekran gerçek kart veya gerçek tahsilat kullanmaz. Test akışını
+            başarı ya da başarısızlık olarak tamamlayabilirsiniz.
+          </p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-3xl px-6 py-10 md:px-12 md:py-16">
+        <div className="border border-border/70 bg-card p-6 md:p-10">
+          {statusQuery.isLoading ? (
+            <div className="flex items-center gap-3 text-foreground/65">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Test ödeme oturumu yükleniyor
+            </div>
+          ) : statusQuery.isError ? (
+            <p className="flex gap-3 border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-700 dark:text-red-300">
+              <CircleAlert className="h-4 w-4 shrink-0" />
+              {getApiErrorMessage(statusQuery.error)}
+            </p>
+          ) : !payment ? (
+            <p className="text-foreground/65">Test ödeme oturumu bulunamadı.</p>
+          ) : (
+            <>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+                Test siparişi
+              </p>
+              <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+                <h2 className="text-4xl font-semibold">
+                  {formatCurrency(payment.amount, payment.currency)}
+                </h2>
+                <span className="font-mono text-xs text-foreground/45">{payment.orderId}</span>
+              </div>
+              <p className="mt-5 text-sm leading-relaxed text-foreground/65">
+                Aşağıdaki seçeneklerden biriyle sağlayıcı sonucunu simüle edin.
+                Bu işlem gerçek ödeme başlatmaz.
+              </p>
+
+              {payment.status !== "pending" ? (
+                <div className="mt-8 border border-primary/20 bg-primary/5 p-4 text-sm">
+                  Bu test oturumu zaten{" "}
+                  <strong>{payment.status === "success" ? "başarılı" : "başarısız"}</strong>{" "}
+                  olarak işaretlendi.
+                </div>
+              ) : (
+                <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => simulate("success")}
+                    disabled={resultMutation.isPending}
+                    className="flex items-center justify-center gap-2 bg-primary px-5 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <CheckCircle2 size={16} />
+                    Başarılı simüle et
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => simulate("failed")}
+                    disabled={resultMutation.isPending}
+                    className="flex items-center justify-center gap-2 border border-red-500/40 px-5 py-4 text-sm font-semibold uppercase tracking-wider text-red-700 transition-colors hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:text-red-300"
+                  >
+                    <CircleAlert size={16} />
+                    Başarısız simüle et
+                  </button>
+                </div>
+              )}
+
+              {resultMutation.isError && (
+                <p className="mt-5 flex gap-3 border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-700 dark:text-red-300">
+                  <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+                  {getApiErrorMessage(resultMutation.error)}
+                </p>
+              )}
+            </>
+          )}
+        </div>
       </section>
     </PaymentShell>
   );
@@ -244,11 +388,16 @@ export function PaymentResultPage() {
           {statusQuery.isError
             ? getApiErrorMessage(statusQuery.error)
             : isSuccess
-              ? "İşleminiz Tami tarafından başarılı olarak bildirildi."
-              : "Tami işlem sonucu henüz kesinleşmediyse bu sayfa birkaç saniye içinde yeniden kontrol edilir."}
+              ? "İşleminiz ödeme sağlayıcısı tarafından başarılı olarak bildirildi."
+              : "İşlem sonucu henüz kesinleşmediyse bu sayfa birkaç saniye içinde yeniden kontrol edilir."}
         </p>
         {orderId && (
           <p className="mt-7 font-mono text-xs text-foreground/45">Sipariş no: {orderId}</p>
+        )}
+        {statusQuery.data && (
+          <p className="mt-3 text-sm text-foreground/55">
+            Tutar: {formatCurrency(statusQuery.data.amount, statusQuery.data.currency)}
+          </p>
         )}
         {statusQuery.data?.errorMessage && (
           <p className="mx-auto mt-6 max-w-xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground/70">

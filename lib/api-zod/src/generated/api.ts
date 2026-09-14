@@ -9,10 +9,10 @@ import * as zod from 'zod';
 
 
 /**
- * Tami Common Payment Page için tek kullanımlık ödeme adresi üretir.
- * Kart numarası ve güvenlik kodu bu API'ye gönderilmez; müşteri Tami'nin
- * hosted ödeme sayfasına yönlendirilir.
- * @summary Kart bilgilerini MMT sistemine almadan Tami ödeme sayfası oluşturur
+ * PAYMENT_MODE=mock olduğunda gerçek tahsilat yapmadan test ödeme sayfası
+ * üretir. Canlı sağlayıcı modunda kart numarası ve güvenlik kodu bu API'ye
+ * gönderilmez; müşteri sağlayıcının hosted ödeme sayfasına yönlendirilir.
+ * @summary Kart bilgilerini MMT sistemine almadan ödeme oturumu oluşturur
  */
 export const createTamiHostedPaymentSessionBodyAmountMax = 10000000;
 
@@ -30,7 +30,8 @@ export const createTamiHostedPaymentSessionBodyDescriptionMax = 160;
 
 
 export const CreateTamiHostedPaymentSessionBody = zod.object({
-  "amount": zod.number().min(1).max(createTamiHostedPaymentSessionBodyAmountMax).describe('Türk lirası cinsinden ödeme tutarı.'),
+  "amount": zod.number().min(1).max(createTamiHostedPaymentSessionBodyAmountMax).describe('Seçilen para birimindeki ödeme tutarı.'),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']),
   "fullName": zod.string().min(createTamiHostedPaymentSessionBodyFullNameMin).max(createTamiHostedPaymentSessionBodyFullNameMax),
   "email": zod.email().max(createTamiHostedPaymentSessionBodyEmailMax),
   "phone": zod.string().min(createTamiHostedPaymentSessionBodyPhoneMin).max(createTamiHostedPaymentSessionBodyPhoneMax).describe('Masterpass doğrulaması için 905xxxxxxxxx formatına dönüştürülebilen telefon.'),
@@ -40,12 +41,14 @@ export const CreateTamiHostedPaymentSessionBody = zod.object({
 export const CreateTamiHostedPaymentSessionResponse = zod.object({
   "orderId": zod.string(),
   "paymentUrl": zod.url(),
-  "status": zod.enum(['pending', 'success', 'failed'])
+  "status": zod.enum(['pending', 'success', 'failed']),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']),
+  "mode": zod.enum(['mock', 'tami'])
 })
 
 
 /**
- * @summary Tami ödeme durumunu sorgular
+ * @summary Ödeme durumunu sorgular
  */
 export const getTamiPaymentStatusPathOrderIdMin = 2;
 export const getTamiPaymentStatusPathOrderIdMax = 36;
@@ -59,7 +62,34 @@ export const GetTamiPaymentStatusParams = zod.object({
 export const GetTamiPaymentStatusResponse = zod.object({
   "orderId": zod.string(),
   "amount": zod.number(),
-  "currency": zod.enum(['TRY']),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']),
+  "status": zod.enum(['pending', 'success', 'failed']),
+  "providerPaymentStatus": zod.string().nullish(),
+  "providerOrderStatus": zod.string().nullish(),
+  "errorMessage": zod.string().nullish()
+})
+
+
+/**
+ * @summary Test ödeme sonucunu başarı veya başarısızlık olarak simüle eder
+ */
+export const setMockPaymentResultPathOrderIdMin = 2;
+export const setMockPaymentResultPathOrderIdMax = 36;
+
+
+
+export const SetMockPaymentResultParams = zod.object({
+  "orderId": zod.coerce.string().min(setMockPaymentResultPathOrderIdMin).max(setMockPaymentResultPathOrderIdMax)
+})
+
+export const SetMockPaymentResultBody = zod.object({
+  "status": zod.enum(['success', 'failed'])
+})
+
+export const SetMockPaymentResultResponse = zod.object({
+  "orderId": zod.string(),
+  "amount": zod.number(),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']),
   "status": zod.enum(['pending', 'success', 'failed']),
   "providerPaymentStatus": zod.string().nullish(),
   "providerOrderStatus": zod.string().nullish(),

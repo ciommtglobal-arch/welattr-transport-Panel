@@ -28,6 +28,7 @@ import type {
   LimitApplicationInput,
   LimitApplicationPage,
   LimitApplicationStatusUpdate,
+  MockPaymentResultInput,
   ObjectDownloadUrlRequest,
   ObjectDownloadUrlResponse,
   OrphanUploadCleanupRequest,
@@ -75,10 +76,10 @@ export const getCreateTamiHostedPaymentSessionUrl = () => {
 }
 
 /**
- * Tami Common Payment Page için tek kullanımlık ödeme adresi üretir.
- * Kart numarası ve güvenlik kodu bu API'ye gönderilmez; müşteri Tami'nin
- * hosted ödeme sayfasına yönlendirilir.
- * @summary Kart bilgilerini MMT sistemine almadan Tami ödeme sayfası oluşturur
+ * PAYMENT_MODE=mock olduğunda gerçek tahsilat yapmadan test ödeme sayfası
+ * üretir. Canlı sağlayıcı modunda kart numarası ve güvenlik kodu bu API'ye
+ * gönderilmez; müşteri sağlayıcının hosted ödeme sayfasına yönlendirilir.
+ * @summary Kart bilgilerini MMT sistemine almadan ödeme oturumu oluşturur
  */
 export const createTamiHostedPaymentSession = async (tamiHostedPaymentInput: TamiHostedPaymentInput, options?: Parameters<typeof customFetch>[1]): Promise<TamiHostedPaymentSession> => {
 
@@ -136,7 +137,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type CreateTamiHostedPaymentSessionMutationVariables = {data: BodyType<TamiHostedPaymentInput>}
 
     /**
- * @summary Kart bilgilerini MMT sistemine almadan Tami ödeme sayfası oluşturur
+ * @summary Kart bilgilerini MMT sistemine almadan ödeme oturumu oluşturur
  */
 export const useCreateTamiHostedPaymentSession = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTamiHostedPaymentSession>>, TError,CreateTamiHostedPaymentSessionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -158,7 +159,7 @@ export const getGetTamiPaymentStatusUrl = (orderId: string,) => {
 }
 
 /**
- * @summary Tami ödeme durumunu sorgular
+ * @summary Ödeme durumunu sorgular
  */
 export const getTamiPaymentStatus = async (orderId: string, options?: Parameters<typeof customFetch>[1]): Promise<TamiPaymentStatus> => {
 
@@ -205,7 +206,7 @@ export type GetTamiPaymentStatusQueryError = ErrorType<ErrorResponse>
 
 
 /**
- * @summary Tami ödeme durumunu sorgular
+ * @summary Ödeme durumunu sorgular
  */
 
 export function useGetTamiPaymentStatus<TData = Awaited<ReturnType<typeof getTamiPaymentStatus>>, TError = ErrorType<ErrorResponse>>(
@@ -225,6 +226,87 @@ export function useGetTamiPaymentStatus<TData = Awaited<ReturnType<typeof getTam
 
 
 
+
+export const getSetMockPaymentResultUrl = (orderId: string,) => {
+
+
+
+
+  return `/api/payments/mock/${orderId}/result`
+}
+
+/**
+ * @summary Test ödeme sonucunu başarı veya başarısızlık olarak simüle eder
+ */
+export const setMockPaymentResult = async (orderId: string,
+    mockPaymentResultInput: MockPaymentResultInput, options?: Parameters<typeof customFetch>[1]): Promise<TamiPaymentStatus> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<TamiPaymentStatus>(getSetMockPaymentResultUrl(orderId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(mockPaymentResultInput)
+  }
+);}
+
+
+
+
+
+export const getSetMockPaymentResultMutationKey = () => ['setMockPaymentResult'] as const;
+
+export const getSetMockPaymentResultMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setMockPaymentResult>>, TError,SetMockPaymentResultMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setMockPaymentResult>>, TError,SetMockPaymentResultMutationVariables, TContext> => {
+
+const mutationKey = getSetMockPaymentResultMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setMockPaymentResult>>, SetMockPaymentResultMutationVariables> = (props) => {
+          const {orderId,data} = props ?? {};
+
+          return  setMockPaymentResult(orderId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetMockPaymentResultMutationResult = NonNullable<Awaited<ReturnType<typeof setMockPaymentResult>>>
+    export type SetMockPaymentResultMutationBody = BodyType<MockPaymentResultInput>
+    export type SetMockPaymentResultMutationError = ErrorType<ErrorResponse>
+    export type SetMockPaymentResultMutationVariables = {orderId: string;data: BodyType<MockPaymentResultInput>}
+
+    /**
+ * @summary Test ödeme sonucunu başarı veya başarısızlık olarak simüle eder
+ */
+export const useSetMockPaymentResult = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setMockPaymentResult>>, TError,SetMockPaymentResultMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setMockPaymentResult>>,
+        TError,
+        SetMockPaymentResultMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSetMockPaymentResultMutationOptions(options));
+    }
 
 export const getRequestObjectDownloadUrlUrl = () => {
 

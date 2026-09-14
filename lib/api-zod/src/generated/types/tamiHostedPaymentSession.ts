@@ -5,10 +5,14 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { PaymentCurrency } from './paymentCurrency';
+import type { PaymentMode } from './paymentMode';
 import type { TamiPaymentStatusValue } from './tamiPaymentStatusValue';
 
 export interface TamiHostedPaymentSession {
   orderId: string;
   paymentUrl: string;
   status: TamiPaymentStatusValue;
+  currency: PaymentCurrency;
+  mode: PaymentMode;
 }

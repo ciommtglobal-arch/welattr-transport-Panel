@@ -1,10 +1,19 @@
 import { createHash, createHmac, randomBytes, randomUUID } from "node:crypto";
 import { Router, type IRouter, type Request } from "express";
 import { eq } from "drizzle-orm";
-import { CreateTamiHostedPaymentSessionBody } from "@workspace/api-zod";
+import {
+  CreateTamiHostedPaymentSessionBody,
+  SetMockPaymentResultBody,
+} from "@workspace/api-zod";
 import { db, paymentSessionsTable } from "@workspace/db";
 
 const router: IRouter = Router();
+
+type PaymentMode = "mock" | "tami";
+
+function getPaymentMode(): PaymentMode {
+  return process.env.PAYMENT_MODE?.trim().toLowerCase() === "tami" ? "tami" : "mock";
+}
 
 function getTamiEnvironment() {
   return process.env.TAMI_ENVIRONMENT === "sandbox" ? "sandbox" : "production";
@@ -92,6 +101,12 @@ function getCallbackUrl(req: Request, orderId: string, result: "success" | "fail
   return url.toString();
 }
 
+function getMockPaymentUrl(req: Request, orderId: string) {
+  const url = new URL("/odeme/test", getCallbackBaseUrl(req));
+  url.searchParams.set("orderId", orderId);
+  return url.toString();
+}
+
 function readProviderMessage(payload: unknown) {
   if (!payload || typeof payload !== "object") return null;
   const data = payload as Record<string, unknown>;
@@ -154,10 +169,11 @@ router.post("/payments/tami/hosted-session", async (req, res) => {
     return;
   }
 
-  const headers = getTamiHeaders();
-  if (!headers) {
+  const mode = getPaymentMode();
+  const tamiHeaders = mode === "tami" ? getTamiHeaders() : null;
+  if (mode === "tami" && !tamiHeaders) {
     res.status(503).json({
-      error: "Tami ödeme altyapısı henüz yapılandırılmadı.",
+      error: "Canlı ödeme altyapısı henüz yapılandırılmadı.",
     });
     return;
   }
@@ -174,18 +190,36 @@ router.post("/payments/tami/hosted-session", async (req, res) => {
   try {
     await db.insert(paymentSessionsTable).values({
       orderId,
+      provider: mode,
       amount: amount.toFixed(2),
+      currency: parsed.data.currency,
       fullName: parsed.data.fullName.trim(),
       email: parsed.data.email.trim().toLowerCase(),
       phone: phoneNumber,
       description: parsed.data.description.trim(),
     });
 
+    if (mode === "mock") {
+      res.status(201).json({
+        orderId,
+        paymentUrl: getMockPaymentUrl(req, orderId),
+        status: "pending",
+        currency: parsed.data.currency,
+        mode: "mock",
+      });
+      return;
+    }
+
+    if (!tamiHeaders) {
+      res.status(503).json({ error: "Canlı ödeme altyapısı henüz yapılandırılmadı." });
+      return;
+    }
+
     const response = await fetch(
       `${getTamiBaseUrl()}/hosted/create-one-time-hosted-token`,
       {
         method: "POST",
-        headers,
+        headers: tamiHeaders,
         body: JSON.stringify({
           amount,
           orderId,
@@ -234,6 +268,8 @@ router.post("/payments/tami/hosted-session", async (req, res) => {
       orderId,
       paymentUrl: paymentUrl.toString(),
       status: "pending",
+      currency: parsed.data.currency,
+      mode: "tami",
     });
   } catch (error) {
     req.log?.error({ err: error, orderId }, "Tami hosted payment creation failed");
@@ -246,6 +282,62 @@ router.post("/payments/tami/hosted-session", async (req, res) => {
   }
 });
 
+router.post("/payments/mock/:orderId/result", async (req, res) => {
+  if (getPaymentMode() !== "mock") {
+    res.status(409).json({ error: "Test ödeme modu aktif değil." });
+    return;
+  }
+
+  const parsed = SetMockPaymentResultBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({
+      error: parsed.error.issues[0]?.message ?? "Test ödeme sonucu geçersiz.",
+    });
+    return;
+  }
+
+  const [session] = await db
+    .select()
+    .from(paymentSessionsTable)
+    .where(eq(paymentSessionsTable.orderId, req.params.orderId))
+    .limit(1);
+
+  if (!session) {
+    res.status(404).json({ error: "Ödeme oturumu bulunamadı." });
+    return;
+  }
+
+  if (session.provider !== "mock") {
+    res.status(409).json({ error: "Bu ödeme oturumu test oturumu değil." });
+    return;
+  }
+
+  const status = parsed.data.status;
+  const providerPaymentStatus = `MOCK_${status.toUpperCase()}`;
+  const errorMessage = status === "failed" ? "Test başarısızlık simülasyonu." : null;
+
+  await db
+    .update(paymentSessionsTable)
+    .set({
+      status,
+      providerPaymentStatus,
+      providerOrderStatus: "MOCK",
+      errorMessage,
+      lastCheckedAt: new Date(),
+    })
+    .where(eq(paymentSessionsTable.orderId, session.orderId));
+
+  res.json({
+    orderId: session.orderId,
+    amount: Number(session.amount),
+    currency: session.currency,
+    status,
+    providerPaymentStatus,
+    providerOrderStatus: "MOCK",
+    errorMessage,
+  });
+});
+
 router.get("/payments/tami/:orderId", async (req, res) => {
   const [session] = await db
     .select()
@@ -255,6 +347,19 @@ router.get("/payments/tami/:orderId", async (req, res) => {
 
   if (!session) {
     res.status(404).json({ error: "Ödeme oturumu bulunamadı." });
+    return;
+  }
+
+  if (session.provider === "mock") {
+    res.json({
+      orderId: session.orderId,
+      amount: Number(session.amount),
+      currency: session.currency,
+      status: session.status,
+      providerPaymentStatus: session.providerPaymentStatus,
+      providerOrderStatus: session.providerOrderStatus,
+      errorMessage: session.errorMessage,
+    });
     return;
   }
 

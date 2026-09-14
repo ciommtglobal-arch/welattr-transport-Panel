@@ -5,14 +5,16 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { PaymentCurrency } from './paymentCurrency';
 
 export interface TamiHostedPaymentInput {
   /**
-     * Türk lirası cinsinden ödeme tutarı.
+     * Seçilen para birimindeki ödeme tutarı.
      * @minimum 1
      * @maximum 10000000
      */
   amount: number;
+  currency: PaymentCurrency;
   /**
      * @minLength 2
      * @maxLength 160

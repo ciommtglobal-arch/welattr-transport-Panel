@@ -15,17 +15,17 @@ tags:
   - name: Storage
     description: Özel başvuru belgeleri için güvenli depolama işlemleri
   - name: payments
-    description: Tami hosted ödeme işlemleri
+    description: Test ve Tami hosted ödeme işlemleri
 paths:
   /payments/tami/hosted-session:
     post:
       operationId: createTamiHostedPaymentSession
       tags: [payments]
-      summary: Kart bilgilerini MMT sistemine almadan Tami ödeme sayfası oluşturur
+      summary: Kart bilgilerini MMT sistemine almadan ödeme oturumu oluşturur
       description: |
-        Tami Common Payment Page için tek kullanımlık ödeme adresi üretir.
-        Kart numarası ve güvenlik kodu bu API'ye gönderilmez; müşteri Tami'nin
-        hosted ödeme sayfasına yönlendirilir.
+        PAYMENT_MODE=mock olduğunda gerçek tahsilat yapmadan test ödeme sayfası
+        üretir. Canlı sağlayıcı modunda kart numarası ve güvenlik kodu bu API'ye
+        gönderilmez; müşteri sağlayıcının hosted ödeme sayfasına yönlendirilir.
       requestBody:
         required: true
         content:
@@ -46,13 +46,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "503":
-          description: Tami entegrasyonu yapılandırılmamış.
+          description: Canlı ödeme entegrasyonu yapılandırılmamış.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "502":
-          description: Tami token servisi yanıt vermedi veya hatalı yanıt verdi.
+          description: Canlı ödeme sağlayıcısı yanıt vermedi veya hatalı yanıt verdi.
           content:
             application/json:
               schema:
@@ -61,7 +61,7 @@ paths:
     get:
       operationId: getTamiPaymentStatus
       tags: [payments]
-      summary: Tami ödeme durumunu sorgular
+      summary: Ödeme durumunu sorgular
       parameters:
         - in: path
           name: orderId
@@ -84,13 +84,57 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "503":
-          description: Tami entegrasyonu yapılandırılmamış.
+          description: Canlı ödeme entegrasyonu yapılandırılmamış.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "502":
-          description: Tami sorgu servisi yanıt vermedi veya hatalı yanıt verdi.
+          description: Canlı ödeme sorgu servisi yanıt vermedi veya hatalı yanıt verdi.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /payments/mock/{orderId}/result:
+    post:
+      operationId: setMockPaymentResult
+      tags: [payments]
+      summary: Test ödeme sonucunu başarı veya başarısızlık olarak simüle eder
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 36
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MockPaymentResultInput"
+      responses:
+        "200":
+          description: Test ödeme sonucu kaydedildi.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TamiPaymentStatus"
+        "400":
+          description: Geçersiz test ödeme sonucu.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Ödeme oturumu bulunamadı.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Test ödeme modu aktif değil.
           content:
             application/json:
               schema:
@@ -351,13 +395,15 @@ components:
     TamiHostedPaymentInput:
       type: object
       additionalProperties: false
-      required: [amount, fullName, email, phone, description]
+      required: [amount, currency, fullName, email, phone, description]
       properties:
         amount:
           type: number
           minimum: 1
           maximum: 10000000
-          description: Türk lirası cinsinden ödeme tutarı.
+          description: Seçilen para birimindeki ödeme tutarı.
+        currency:
+          $ref: "#/components/schemas/PaymentCurrency"
         fullName:
           type: string
           minLength: 2
@@ -377,7 +423,7 @@ components:
           maxLength: 160
     TamiHostedPaymentSession:
       type: object
-      required: [orderId, paymentUrl, status]
+      required: [orderId, paymentUrl, status, currency, mode]
       properties:
         orderId:
           type: string
@@ -386,6 +432,10 @@ components:
           format: uri
         status:
           $ref: "#/components/schemas/TamiPaymentStatusValue"
+        currency:
+          $ref: "#/components/schemas/PaymentCurrency"
+        mode:
+          $ref: "#/components/schemas/PaymentMode"
     TamiPaymentStatus:
       type: object
       required: [orderId, amount, currency, status]
@@ -395,8 +445,7 @@ components:
         amount:
           type: number
         currency:
-          type: string
-          enum: [TRY]
+          $ref: "#/components/schemas/PaymentCurrency"
         status:
           $ref: "#/components/schemas/TamiPaymentStatusValue"
         providerPaymentStatus:
@@ -408,6 +457,20 @@ components:
     TamiPaymentStatusValue:
       type: string
       enum: [pending, success, failed]
+    PaymentCurrency:
+      type: string
+      enum: [TRY, USD, EUR]
+    PaymentMode:
+      type: string
+      enum: [mock, tami]
+    MockPaymentResultInput:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [success, failed]
     ErrorEnvelope:
       type: object
       required: [error]
