@@ -224,8 +224,15 @@ export default function PaymentPage() {
             <li>• Test ekranında başarı veya başarısızlık sonucu simüle edilebilir.</li>
           </ul>
           <p className="mt-8 border-t border-secondary-foreground/15 pt-5 text-xs leading-relaxed text-secondary-foreground/50">
-            Ödeme yapmadan önce tutar ve açıklamayı kontrol edin. İade ve hizmet koşulları
-            için MMT Global ile iletişime geçin.
+            Ödeme yapmadan önce tutar ve açıklamayı kontrol edin.{" "}
+            <Link href="/iade" className="underline hover:text-primary">
+              İade koşullarını
+            </Link>{" "}
+            ve{" "}
+            <Link href="/hizmet-kosullari" className="underline hover:text-primary">
+              hizmet koşullarını
+            </Link>{" "}
+            inceleyebilirsiniz.
           </p>
         </aside>
       </section>

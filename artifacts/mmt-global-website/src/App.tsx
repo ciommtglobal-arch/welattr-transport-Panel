@@ -13,6 +13,15 @@ import StaffApplications from '@/pages/staff-applications';
 import DemoWallet from '@/pages/demo-wallet';
 import PaymentPage, { MockPaymentPage, PaymentResultPage } from '@/pages/payment';
 import {
+  CareersPage,
+  CookiePage,
+  InvestmentsPage,
+  KvkkPage,
+  PrivacyPage,
+  RefundPage,
+  ServiceTermsPage,
+} from '@/pages/site-pages';
+import {
   Route,
   Redirect,
   Switch,
@@ -124,6 +133,13 @@ function Router() {
         <Route path="/odeme" component={PaymentPage} />
         <Route path="/odeme/test" component={MockPaymentPage} />
         <Route path="/odeme/sonuc" component={PaymentResultPage} />
+        <Route path="/hizmet-kosullari" component={ServiceTermsPage} />
+        <Route path="/iade" component={RefundPage} />
+        <Route path="/gizlilik" component={PrivacyPage} />
+        <Route path="/cerez" component={CookiePage} />
+        <Route path="/kvkk" component={KvkkPage} />
+        <Route path="/yatirimlar" component={InvestmentsPage} />
+        <Route path="/kariyer" component={CareersPage} />
         <Route path="/staff/applications" component={StaffApplications} />
         <Route path="/sign-in/*?" component={SignInPage} />
         <Route path="/sign-up/*?" component={SignUpPage} />
