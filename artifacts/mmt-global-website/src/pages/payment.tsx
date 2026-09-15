@@ -106,11 +106,11 @@ export default function PaymentPage() {
           </div>
           <h1 className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight md:text-8xl">
             Güvenli ödeme
-            <span className="block font-serif font-normal italic text-primary">test modunda.</span>
+            <span className="block font-serif font-normal italic text-primary">sağlayıcınızla.</span>
           </h1>
           <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-secondary-foreground/70">
             Ödeme adımında kart bilgilerinizi MMT Global sistemine girmeden,
-            güvenli test ödeme sayfasına yönlendirilirsiniz. Bu ortamda gerçek
+            güvenli ödeme sağlayıcısına yönlendirilirsiniz. Test ortamında gerçek
             tahsilat oluşmaz.
           </p>
         </div>
@@ -163,6 +163,11 @@ export default function PaymentPage() {
                 <option value="USD">USD — Amerikan doları</option>
                 <option value="EUR">EUR — Euro</option>
               </select>
+              <span className="mt-2 block text-xs leading-relaxed text-foreground/50">
+                Test modunda TRY, USD ve EUR kullanılabilir. Mevcut Tami canlı hesabında
+                yalnızca TRY desteklenir; USD/EUR için çoklu para birimi destekleyen
+                sağlayıcı gerekir.
+              </span>
             </label>
             <Field
               label={`Tutar (${currency})`}
@@ -204,11 +209,11 @@ export default function PaymentPage() {
             {payment.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Test ödeme sayfası hazırlanıyor
+                Ödeme sayfası hazırlanıyor
               </>
             ) : (
               <>
-                Test ödeme sayfasını aç
+                Ödeme sayfasını aç
                 <ArrowRight size={16} />
               </>
             )}
@@ -221,6 +226,7 @@ export default function PaymentPage() {
           <ul className="mt-6 space-y-4 text-sm leading-relaxed text-secondary-foreground/70">
             <li>• Kart numarası, son kullanma tarihi ve CVV bu siteye gönderilmez.</li>
             <li>• Test modu TRY, USD ve EUR tutarlarıyla çalışır.</li>
+            <li>• Tami canlı hesabında yabancı para tahsilatı yapılmaz; işlem TRY olmalıdır.</li>
             <li>• Test ekranında başarı veya başarısızlık sonucu simüle edilebilir.</li>
           </ul>
           <p className="mt-8 border-t border-secondary-foreground/15 pt-5 text-xs leading-relaxed text-secondary-foreground/50">

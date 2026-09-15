@@ -170,6 +170,14 @@ router.post("/payments/tami/hosted-session", async (req, res) => {
   }
 
   const mode = getPaymentMode();
+  if (mode === "tami" && parsed.data.currency !== "TRY") {
+    res.status(400).json({
+      error:
+        "Mevcut Tami hesabı yalnızca TRY destekliyor. USD veya EUR tahsilatı için çoklu para birimi destekleyen bir sağlayıcı gerekir.",
+    });
+    return;
+  }
+
   const tamiHeaders = mode === "tami" ? getTamiHeaders() : null;
   if (mode === "tami" && !tamiHeaders) {
     res.status(503).json({
