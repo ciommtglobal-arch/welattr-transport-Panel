@@ -226,7 +226,7 @@ export default function PaymentPage() {
           <ul className="mt-6 space-y-4 text-sm leading-relaxed text-secondary-foreground/70">
             <li>• Kart numarası, son kullanma tarihi ve CVV bu siteye gönderilmez.</li>
             <li>• Test modu TRY, USD ve EUR tutarlarıyla çalışır.</li>
-            <li>• Tami canlı hesabında yabancı para tahsilatı yapılmaz; işlem TRY olmalıdır.</li>
+            <li>• Tami canlı hesabında ticari işlem TRY olur; yabancı kartın dönüşümünü kartı veren banka yapabilir.</li>
             <li>• Test ekranında başarı veya başarısızlık sonucu simüle edilebilir.</li>
           </ul>
           <p className="mt-8 border-t border-secondary-foreground/15 pt-5 text-xs leading-relaxed text-secondary-foreground/50">
