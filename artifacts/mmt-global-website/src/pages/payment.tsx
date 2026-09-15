@@ -227,6 +227,7 @@ export default function PaymentPage() {
             <li>• Kart numarası, son kullanma tarihi ve CVV bu siteye gönderilmez.</li>
             <li>• Test modu TRY, USD ve EUR tutarlarıyla çalışır.</li>
             <li>• Tami canlı hesabında ticari işlem TRY olur; yabancı kartın dönüşümünü kartı veren banka yapabilir.</li>
+            <li>• Yabancı kartlarda oluşabilecek kur farkı veya banka işlem ücreti müşteriye ait olabilir.</li>
             <li>• Test ekranında başarı veya başarısızlık sonucu simüle edilebilir.</li>
           </ul>
           <p className="mt-8 border-t border-secondary-foreground/15 pt-5 text-xs leading-relaxed text-secondary-foreground/50">

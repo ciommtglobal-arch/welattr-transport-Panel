@@ -267,6 +267,11 @@ export function ServiceTermsPage() {
           canlı kullanımda yetkili ödeme sağlayıcının güvenli ödeme sayfasında
           tamamlanır. Test ödeme modu gerçek tahsilat oluşturmaz.
         </p>
+        <p>
+          Tami üzerinden yapılan canlı işlemlerde ticari tahsilat TRY olarak
+          gerçekleşir. Yabancı kart kullanımında kartı veren bankanın uyguladığı kur
+          farkı veya işlem ücretleri müşteriye ait olabilir.
+        </p>
       </ContentSection>
       <ContentSection title="İletişim">
         <p>
