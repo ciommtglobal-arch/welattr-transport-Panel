@@ -12,6 +12,7 @@ import Limit, { LimitChooser } from '@/pages/limit';
 import StaffApplications from '@/pages/staff-applications';
 import DemoWallet from '@/pages/demo-wallet';
 import PaymentPage, { MockPaymentPage, PaymentResultPage } from '@/pages/payment';
+import FreeB2BNetworkPage from '@/pages/free-b2b-network';
 import {
   CareersPage,
   CookiePage,
@@ -130,6 +131,7 @@ function Router() {
         <Route path="/limit/konut" component={HousingLimit} />
         <Route path="/limit/tasit" component={VehicleLimit} />
         <Route path="/cuzdan-demo" component={DemoWallet} />
+        <Route path="/b2b-agi" component={FreeB2BNetworkPage} />
         <Route path="/odeme" component={PaymentPage} />
         <Route path="/odeme/test" component={MockPaymentPage} />
         <Route path="/odeme/sonuc" component={PaymentResultPage} />

@@ -64,6 +64,9 @@ export default function Home() {
             <button onClick={() => scrollToSection("contact")} className="hover:text-primary transition-colors">
               İLETİŞİM
             </button>
+            <Link href="/b2b-agi" className="hover:text-primary transition-colors">
+              ÜCRETSİZ B2B AĞI
+            </Link>
               <Link
                 href="/limit"
                 onClick={() =>
@@ -123,6 +126,9 @@ export default function Home() {
         <button onClick={() => scrollToSection("contact")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
           İLETİŞİM
         </button>
+        <Link href="/b2b-agi" className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
+          ÜCRETSİZ B2B AĞI
+        </Link>
         <div className="mt-4 grid w-[min(20rem,calc(100vw-3rem))] grid-cols-2 gap-3 border-t border-border/60 pt-6">
           <p className="col-span-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-foreground/50">
             Başvuru kategorileri
@@ -207,6 +213,13 @@ export default function Home() {
                 <strong className="font-semibold text-foreground">Üreticiyi, alıcıyı ve hizmet taraflarını buluşturuyoruz.</strong><br/>
                 Üretici tanıtımı, alıcı talepleri ve temel B2B bağlantı hizmetlerimiz ücretsizdir. Güvenle büyüyen bir iş ağı kuruyoruz.
               </p>
+              <Link
+                href="/b2b-agi"
+                className="mt-8 inline-flex w-fit items-center gap-2 border border-primary px-5 py-3 text-xs font-semibold uppercase tracking-wider text-primary transition-colors hover:bg-primary hover:text-white"
+              >
+                Ücretsiz ağa katılın
+                <ArrowRight size={15} />
+              </Link>
             </div>
             
             <button 
