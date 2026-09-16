@@ -181,25 +181,36 @@ function App() {
 }
 
 function ClerkApp() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const clerkRoute =
+    location === '/staff/applications' ||
+    location.startsWith('/sign-in') ||
+    location.startsWith('/sign-up');
+  const routedContent = (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Router />
+        <Toaster />
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
 
   return (
-    <ClerkProvider
-      publishableKey={clerkPubKey}
-      proxyUrl={clerkProxyUrl}
-      appearance={clerkAppearance}
-      signInUrl={`${basePath}/sign-in`}
-      signUpUrl={`${basePath}/sign-up`}
-      routerPush={(to) => setLocation(stripBase(to))}
-      routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
-    >
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Router />
-          <Toaster />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ClerkProvider>
+    clerkRoute ? (
+      <ClerkProvider
+        publishableKey={clerkPubKey}
+        proxyUrl={clerkProxyUrl}
+        appearance={clerkAppearance}
+        signInUrl={`${basePath}/sign-in`}
+        signUpUrl={`${basePath}/sign-up`}
+        routerPush={(to) => setLocation(stripBase(to))}
+        routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
+      >
+        {routedContent}
+      </ClerkProvider>
+    ) : (
+      routedContent
+    )
   );
 }
 
