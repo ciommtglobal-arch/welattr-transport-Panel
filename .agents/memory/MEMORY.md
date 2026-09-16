@@ -4,3 +4,4 @@
 - [Telegram bot log secrets](telegram-bot-log-secrets.md) — Bot API request URLs contain the token; keep HTTP request logs above INFO.
 - [VIP payment split](vip-payment-split.md) — Keep VIP access on a separate bot; launch with Stars while Wallet Pay awaits merchant approval.
 - [Tami hosted payment](tami-hosted-payment.md) — Hosted token auth and payment-status query use different Tami signing materials.
+- [MMT Global free B2B network](mmt-global-free-b2b-network.md) — Keep producer promotion, buyer requests, and core matching/services free; grow trust and reach before monetization.
