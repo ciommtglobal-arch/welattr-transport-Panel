@@ -211,7 +211,7 @@ export default function Home() {
             <div className="max-w-xl opacity-0 animate-slide-up-fade delay-1000">
               <p className="text-lg md:text-xl leading-relaxed text-foreground/80 font-light">
                 <strong className="font-semibold text-foreground">Üreticiyi, alıcıyı ve hizmet taraflarını buluşturuyoruz.</strong><br/>
-                Üretici tanıtımı, alıcı talepleri ve temel B2B bağlantı hizmetlerimiz ücretsizdir. Güvenle büyüyen bir iş ağı kuruyoruz.
+                 Üretici tanıtımı, alıcı talepleri ve temel B2B bağlantı hizmetlerimiz ücretsizdir. Güvenle büyüyen bir iş ekosistemi kuruyoruz.
               </p>
               <Link
                 href="/b2b-agi"
