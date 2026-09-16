@@ -102,16 +102,16 @@ export default function PaymentPage() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-6 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
             <ShieldCheck size={15} />
-            Kurumsal ödeme
+            MMT Global ticari işlemleri
           </div>
           <h1 className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight md:text-8xl">
-            Güvenli ödeme
-            <span className="block font-serif font-normal italic text-primary">sağlayıcınızla.</span>
+            Ticari ödeme
+            <span className="block font-serif font-normal italic text-primary">güvenle ayrı.</span>
           </h1>
           <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-secondary-foreground/70">
-            Ödeme adımında kart bilgilerinizi MMT Global sistemine girmeden,
-            güvenli ödeme sağlayıcısına yönlendirilirsiniz. Test ortamında gerçek
-            tahsilat oluşmaz.
+            Bu kanal MMT Global&apos;in kendi ticari faaliyetleri ve yetkilendirilmiş
+            hizmet tahsilatları içindir. Ücretsiz B2B ağımızdaki temel tanıtım ve
+            bağlantı hizmetleri için ödeme gerekmez.
           </p>
         </div>
       </section>
@@ -120,7 +120,7 @@ export default function PaymentPage() {
         <form onSubmit={submit} className="border border-border/70 bg-card p-6 md:p-10">
           <div className="mb-8">
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
-              Ödeme talebi
+               Ticari ödeme talebi
             </p>
             <h2 className="mt-2 text-3xl font-semibold">Bilgilerinizi girin</h2>
           </div>
@@ -185,7 +185,7 @@ export default function PaymentPage() {
             <textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="Hizmet veya sipariş açıklaması"
+               placeholder="Ticari hizmet veya sipariş açıklaması"
               required
               minLength={2}
               maxLength={160}
@@ -222,8 +222,10 @@ export default function PaymentPage() {
 
         <aside className="h-fit border border-border/70 bg-secondary p-6 text-secondary-foreground md:p-8">
           <ShieldCheck className="h-8 w-8 text-primary" />
-          <h2 className="mt-6 text-2xl font-semibold">Kart bilgileri MMT&apos;ye gelmez</h2>
+           <h2 className="mt-6 text-2xl font-semibold">Ücretsiz ağ ayrı, ticari ödeme ayrı</h2>
           <ul className="mt-6 space-y-4 text-sm leading-relaxed text-secondary-foreground/70">
+             <li>• Üretici tanıtımı, alıcı talepleri ve temel B2B bağlantı hizmetleri için ödeme istenmez.</li>
+             <li>• Bu sayfa yalnızca MMT Global&apos;in kendi ticari işlemleri veya yetkilendirilmiş ücretli hizmetleri içindir.</li>
             <li>• Kart numarası, son kullanma tarihi ve CVV bu siteye gönderilmez.</li>
             <li>• Test modu TRY, USD ve EUR tutarlarıyla çalışır.</li>
             <li>• Tami canlı hesabında ticari işlem TRY olur; yabancı kartın dönüşümünü kartı veren banka yapabilir.</li>

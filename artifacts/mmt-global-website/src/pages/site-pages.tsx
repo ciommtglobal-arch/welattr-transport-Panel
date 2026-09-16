@@ -245,16 +245,23 @@ export function KvkkPage() {
 export function ServiceTermsPage() {
   return (
     <PageShell
-      eyebrow="Ödeme ve hizmet"
-      title="Koşullar"
-      highlight="açık olsun."
-      description="Ödeme talebi oluşturmadan önce hizmet kapsamını, tutarı ve tarafların sorumluluklarını inceleyin."
+      eyebrow="Ticari ödeme"
+      title="Ticari işlemler"
+      highlight="ayrı yürür."
+      description="Bu koşullar MMT Global'in kendi ticari faaliyetleri ve yetkilendirilmiş ücretli hizmet tahsilatları içindir. Ücretsiz B2B ağımızın temel tanıtım ve bağlantı hizmetleri için ödeme gerekmez."
       meta={{
-        title: "Ödeme ve Hizmet Koşulları | MMT Global",
-        description: "MMT Global ödeme talepleri ve hizmet sunumu için genel koşullar.",
+        title: "Ticari Ödeme Koşulları | MMT Global",
+        description: "MMT Global ticari işlemleri ve yetkilendirilmiş hizmet tahsilatları için ödeme koşulları.",
       }}
     >
-      <ContentSection title="Ödeme talebi">
+      <ContentSection title="Ücretsiz B2B ağımız">
+        <p>
+          Üretici tanıtımı, alıcı talepleri ve temel B2B bağlantı hizmetlerimiz
+          ücretsizdir. Bu sayfadaki ödeme koşulları, ücretsiz ağ erişimi için ücret
+          oluşturmaz.
+        </p>
+      </ContentSection>
+      <ContentSection title="Ticari ödeme talebi">
         <p>
           Ödeme formunda girilen tutar ve açıklama, talep edilen hizmet veya işlem için
           ön bilgi niteliğindedir. Hizmet kapsamı, fiyatı ve teslim koşulları gerektiğinde

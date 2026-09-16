@@ -81,11 +81,11 @@ export default function Home() {
               >
                 DEMO CÜZDAN
               </Link>
-              <Link
+                <Link
                 href="/odeme"
                 className="border border-foreground/30 px-5 py-2.5 text-foreground transition-colors hover:border-primary hover:text-primary rounded-none font-semibold uppercase tracking-wider text-xs"
               >
-                KURUMSAL ÖDEME
+                  TİCARİ ÖDEME
               </Link>
           </div>
 
@@ -161,7 +161,7 @@ export default function Home() {
           href="/odeme"
           className="mt-2 border border-foreground/30 px-8 py-4 text-foreground transition-colors hover:border-primary hover:text-primary rounded-none font-semibold uppercase tracking-wider text-sm"
         >
-          KURUMSAL ÖDEME
+          TİCARİ ÖDEME
         </Link>
       </div>
 
@@ -183,7 +183,7 @@ export default function Home() {
           <div className="flex items-center gap-4 opacity-0 animate-slide-up-fade delay-150">
             <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
             <p className="text-xs md:text-sm tracking-[0.2em] font-medium text-foreground/80 uppercase">
-              MMT GLOBAL / FİNANS EKOSİSTEMİ ALTYAPISIYLA BÜYÜYEN GÜÇ
+              MMT GLOBAL / ÜCRETSİZ B2B İŞ AĞI
             </p>
           </div>
 
@@ -204,8 +204,8 @@ export default function Home() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-12 mt-8 md:mt-16">
             <div className="max-w-xl opacity-0 animate-slide-up-fade delay-1000">
               <p className="text-lg md:text-xl leading-relaxed text-foreground/80 font-light">
-                <strong className="font-semibold text-foreground">Sınır tanımayan güç: MMT Global.</strong><br/>
-                İlerlemenin arkasındaki insanları, sermayeyi ve yetkinliği sektörler, sınırlar ve nesiller arasında birbirine bağlarız.
+                <strong className="font-semibold text-foreground">Üreticiyi, alıcıyı ve hizmet taraflarını buluşturuyoruz.</strong><br/>
+                Üretici tanıtımı, alıcı talepleri ve temel B2B bağlantı hizmetlerimiz ücretsizdir. Güvenle büyüyen bir iş ağı kuruyoruz.
               </p>
             </div>
             
@@ -244,12 +244,12 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24">
             <div className="flex flex-col justify-center">
               <h3 className="text-4xl md:text-5xl lg:text-6xl font-serif italic mb-8 leading-tight">
-                Geleceği <br/><span className="font-sans font-semibold not-italic text-secondary-foreground">İnşa Ediyoruz</span>
+                 Birlikte <br/><span className="font-sans font-semibold not-italic text-secondary-foreground">Büyüyoruz</span>
               </h3>
               <p className="text-lg text-secondary-foreground/70 leading-relaxed font-light mb-8">
-                MMT Global olarak, sadece bugünün ihtiyaçlarına cevap vermiyor, yarının fırsatlarını da öngörüyoruz. Güçlü finansal yapımız ve çok uluslu uzmanlığımızla, faaliyet gösterdiğimiz her sektörde sürdürülebilir bir değer yaratıyoruz.
+                 MMT Global olarak üreticilerin, alıcıların, lojistik ekiplerinin ve hizmet verenlerin birbirini bulabildiği ücretsiz bir B2B ağı kuruyoruz. Önce güvenilir bağlantılar ve sosyal fayda; sonra birlikte büyüyen sürdürülebilir bir marka.
               </p>
-              <button className="flex items-center gap-3 text-sm font-semibold tracking-wider uppercase w-fit group">
+               <button onClick={() => scrollToSection("ecosystem")} className="flex items-center gap-3 text-sm font-semibold tracking-wider uppercase w-fit group">
                 <span className="border-b border-primary pb-1 group-hover:text-primary transition-colors">Hikayemizi Keşfet</span>
                 <ArrowRight size={16} className="text-primary group-hover:translate-x-2 transition-transform" />
               </button>
@@ -258,6 +258,36 @@ export default function Home() {
                {/* Decorative architectural/abstract placeholder for approach */}
                <div className="absolute inset-0 bg-gradient-to-tr from-background/40 to-transparent z-10" />
                <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center" />
+            </div>
+          </div>
+
+          <div className="mt-20 border-t border-border/40 pt-12 md:mt-28 md:pt-16">
+            <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="font-mono text-xs tracking-[0.2em] text-primary">YOL HARİTAMIZ</p>
+                <h3 className="mt-3 text-3xl font-semibold md:text-4xl">Üret. Tanıt. Sat.</h3>
+              </div>
+              <p className="max-w-xl text-sm leading-7 text-secondary-foreground/65">
+                Takipçilerimiz ve üyelerimiz için adım adım ilerliyoruz. Temel tanıtım ve
+                bağlantı hizmetlerine erişim ücretsiz kalır.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <RoadmapStep
+                number="01"
+                title="Üret"
+                text="Üreticilerin ve hizmet verenlerin kendilerini, ürünlerini ve yetkinliklerini görünür kılmasına yardımcı oluruz."
+              />
+              <RoadmapStep
+                number="02"
+                title="Tanıt"
+                text="Üretici tanıtımlarını ve alıcı taleplerini güvenilir bilgilerle paylaşır, doğru kişilerin birbirini bulmasını kolaylaştırırız."
+              />
+              <RoadmapStep
+                number="03"
+                title="Sat"
+                text="Alıcı, üretici ve lojistik taraflarını buluşturarak şeffaf ve gerçekçi ticari bağlantıların kurulmasına zemin hazırlarız."
+              />
             </div>
           </div>
         </div>
@@ -277,7 +307,7 @@ export default function Home() {
             <EcosystemCard 
               icon={<Truck className="w-8 h-8" />}
               title="Lojistik"
-              desc="Küresel tedarik zincirinde kesintisiz, hızlı ve güvenilir çözümlerle kıtaları birbirine bağlıyoruz."
+              desc="Üretici ve alıcıların lojistik taraflarıyla daha güvenilir biçimde buluşmasına yardımcı oluyoruz."
             />
             <EcosystemCard 
               icon={<Stethoscope className="w-8 h-8" />}
@@ -292,12 +322,12 @@ export default function Home() {
             <EcosystemCard 
               icon={<Tv className="w-8 h-8" />}
               title="Medya & Markalaşma"
-              desc="Etkili iletişim stratejileri ve yenilikçi medya çözümleriyle markaların küresel sesini yükseltiyoruz."
+              desc="Üreticilerin ve alıcıların ücretsiz tanıtımını destekleyerek markaların görünürlüğünü artırıyoruz."
             />
             <EcosystemCard 
               icon={<Briefcase className="w-8 h-8" />}
-              title="Finansal Hizmetler"
-              desc="Kurumsal büyüme için stratejik danışmanlık, yatırım yönetimi ve yapısal finansman çözümleri sunuyoruz."
+              title="Ticari faaliyetler"
+              desc="MMT Global'in kendi ticari işlemleri ve yetkilendirilmiş hizmet süreçleri, ücretsiz B2B ağından ayrı yürütülür."
               href="/limit"
               analyticsLocation="ecosystem_card"
             />
@@ -333,15 +363,15 @@ export default function Home() {
             Küresel Büyümeye <br/> <span className="font-serif italic font-normal">Hazır Mısınız?</span>
           </h2>
           <p className="text-lg md:text-xl opacity-90 max-w-2xl mb-12 font-light">
-            Sınırları aşan projelerde ve stratejik yatırımlarda güvenilir iş ortağınız olmak için buradayız.
+            Üreticiler, alıcılar ve hizmet verenler için ücretsiz B2B bağlantı ağı kuruyoruz. Birlikte büyüyelim.
           </p>
            <div className="flex flex-col sm:flex-row gap-6">
               <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="px-8 py-4 bg-background text-foreground hover:bg-background/90 transition-colors font-semibold uppercase tracking-wider text-sm">
                WHATSAPP'TAN YAZIN
               </a>
-              <a href={`tel:${BUSINESS_PHONE_LINK}`} className="px-8 py-4 bg-transparent border border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2">
-               {BUSINESS_PHONE}
-              </a>
+               <Link href="/odeme" className="px-8 py-4 bg-transparent border border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+                TİCARİ ÖDEME
+               </Link>
           </div>
         </div>
       </section>
@@ -360,7 +390,7 @@ export default function Home() {
                 </span>
               </Link>
               <p className="text-sm text-foreground/60 font-light leading-relaxed">
-                İlerlemenin arkasındaki insanları, sermayeyi ve yetkinliği sektörler, sınırlar ve nesiller arasında birbirine bağlarız.
+                 Üreticileri, alıcıları, lojistik ve hizmet taraflarını ücretsiz B2B bağlantı ağıyla buluştururuz.
               </p>
             </div>
             
@@ -371,6 +401,7 @@ export default function Home() {
                 <li><button onClick={() => scrollToSection("ecosystem")} className="hover:text-primary transition-colors">Ekosistem</button></li>
                 <li><Link href="/yatirimlar" className="hover:text-primary transition-colors">Yatırımlarımız</Link></li>
                 <li><Link href="/kariyer" className="hover:text-primary transition-colors">Kariyer</Link></li>
+                <li><Link href="/odeme" className="hover:text-primary transition-colors">Ticari ödeme</Link></li>
               </ul>
             </div>
 
@@ -440,6 +471,24 @@ export default function Home() {
         </div>
       </button>
     </div>
+  );
+}
+
+function RoadmapStep({
+  number,
+  title,
+  text,
+}: {
+  number: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <article className="border border-border/50 bg-background/40 p-6 md:p-7">
+      <p className="font-mono text-xs tracking-[0.2em] text-primary">{number}</p>
+      <h4 className="mt-5 text-2xl font-semibold">{title}</h4>
+      <p className="mt-4 text-sm leading-7 text-secondary-foreground/65">{text}</p>
+    </article>
   );
 }
 
