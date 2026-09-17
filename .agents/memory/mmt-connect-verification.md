@@ -50,3 +50,9 @@ MMT Connect should become MMT Global's own branded trade network; Instagram, Fac
 **Why:** The user wants to protect and grow the MMT brand through an owned network instead of depending permanently on external social platforms.
 
 **How to apply:** Use external channels to attract attention and traffic, but keep business profiles, buyer demand, listings, trust decisions, conversations, and network relationships on MMT-owned infrastructure.
+
+During the initial MMT Global launch, use a stricter editorial mode: even verified-business submissions should enter a staff review queue before public publication. This is a launch-phase quality-control rule, not a permanent removal of the verified-business self-publishing model.
+
+**Why:** The first public impression will be built from MMT-controlled real visuals and approved content, so consistency and authenticity matter more than maximum submission speed.
+
+**How to apply:** Prepare real branded content as drafts, review it internally, publish selected items, and only later consider returning verified businesses to direct routine publishing after the launch process is proven.
