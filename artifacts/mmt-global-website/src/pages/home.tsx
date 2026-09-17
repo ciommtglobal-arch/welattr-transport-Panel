@@ -439,6 +439,15 @@ export default function Home() {
                Instagram&apos;da bizi takip edin
                <span className="opacity-70">@mmtglobalofficialtr</span>
              </a>
+             <a
+               href="https://www.tiktok.com/@mmtglobalofficialtr"
+               target="_blank"
+               rel="noreferrer"
+               className="inline-flex items-center gap-2 border border-primary-foreground px-5 py-3 text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-primary-foreground hover:text-primary"
+             >
+               TikTok&apos;ta bizi takip edin
+               <span className="opacity-70">@mmtglobalofficialtr</span>
+             </a>
            </div>
         </div>
       </section>
