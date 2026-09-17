@@ -20,29 +20,21 @@ import {
   useCreateB2BReport,
   useGetB2BListing,
   getGetB2BListingQueryKey,
-  type B2BEmploymentType,
   type B2BReportCategory,
   type B2BListingRole,
 } from "@workspace/api-client-react";
 import { B2BShareButtons } from "../components/b2b-share-buttons";
+import { useI18n } from "@/lib/i18n";
 
-const roleLabels: Record<B2BListingRole, { label: string; icon: any }> = {
-  producer: { label: "Üretici", icon: Factory },
-  buyer: { label: "Alıcı", icon: Building2 },
-  logistics: { label: "Lojistik / Hizmet", icon: Truck },
-  employer: { label: "İşveren / İş ilanı", icon: BriefcaseBusiness },
-};
-const employmentTypeLabels: Record<B2BEmploymentType, string> = {
-  full_time: "Tam zamanlı",
-  part_time: "Yarı zamanlı",
-  contract: "Sözleşmeli",
-  seasonal: "Sezonluk",
-  internship: "Staj",
-  remote: "Uzaktan",
+const roleIcons: Record<B2BListingRole, any> = {
+  producer: Factory,
+  buyer: Building2,
+  logistics: Truck,
+  employer: BriefcaseBusiness,
 };
 
-function formatDate(dateStr: string) {
-  return new Intl.DateTimeFormat("tr-TR", {
+function formatDate(dateStr: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -50,6 +42,7 @@ function formatDate(dateStr: string) {
 }
 
 export default function B2BListingDetail() {
+  const { t, locale } = useI18n();
   const [match, params] = useRoute("/b2b-agi/ilan/:id");
   const id = match && params?.id ? Number(params.id) : 0;
 
@@ -81,7 +74,7 @@ export default function B2BListingDetail() {
               className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/65 transition-colors hover:text-primary"
             >
               <ArrowLeft size={15} />
-              Ağa Dön
+              {t("back_to_network")}
             </Link>
           </div>
         </header>
@@ -108,23 +101,22 @@ export default function B2BListingDetail() {
         </header>
         <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
           <Info className="mb-4 h-12 w-12 text-primary/50" />
-          <h1 className="text-3xl font-semibold">İlan Bulunamadı</h1>
+           <h1 className="text-3xl font-semibold">{t("listing_not_found")}</h1>
           <p className="mt-4 text-foreground/60">
-            Aradığınız ilan yayından kaldırılmış veya henüz onaylanmamış olabilir.
+             {t("listing_not_found_description")}
           </p>
           <Link
             href="/b2b-agi"
             className="mt-8 inline-flex items-center gap-2 bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-primary/90"
           >
-            Ağa Dön
+             {t("back_to_network")}
           </Link>
         </div>
       </main>
     );
   }
 
-  const roleInfo = roleLabels[listing.role];
-  const RoleIcon = roleInfo.icon;
+  const RoleIcon = roleIcons[listing.role];
 
   return (
     <main className="min-h-[100dvh] bg-background text-foreground">
@@ -143,7 +135,7 @@ export default function B2BListingDetail() {
             className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/65 transition-colors hover:text-primary"
           >
             <ArrowLeft size={15} />
-            Ağa Dön
+             {t("back_to_network")}
           </Link>
         </div>
       </header>
@@ -154,7 +146,7 @@ export default function B2BListingDetail() {
             <div className="flex items-center gap-3">
               <span className="inline-flex items-center gap-1.5 border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary">
                 <RoleIcon size={12} />
-                {roleInfo.label}
+                {t(`role_${listing.role}`)}
               </span>
               <span className="text-xs font-mono tracking-wider text-secondary-foreground/40">
                 REF: {listing.referenceCode}
@@ -184,13 +176,13 @@ export default function B2BListingDetail() {
               {listing.publishedAt && (
                 <div className="flex items-center gap-2">
                   <Calendar size={16} className="text-primary" />
-                  <span>{formatDate(listing.publishedAt)}</span>
+                 <span>{formatDate(listing.publishedAt, locale)}</span>
                 </div>
               )}
             </div>
             {listing.role === "employer" ? (
               <div className="mt-6 flex flex-wrap gap-3 text-xs text-secondary-foreground/70">
-                {listing.employmentType ? <span className="border border-primary/30 px-3 py-2">{employmentTypeLabels[listing.employmentType]}</span> : null}
+                {listing.employmentType ? <span className="border border-primary/30 px-3 py-2">{t(`employment_${listing.employmentType}`)}</span> : null}
                 {listing.salary ? <span className="border border-primary/30 px-3 py-2">{listing.salary}</span> : null}
                 {listing.experience ? <span className="border border-primary/30 px-3 py-2">Deneyim: {listing.experience}</span> : null}
               </div>
@@ -203,7 +195,7 @@ export default function B2BListingDetail() {
             <div className="space-y-10">
               <div>
                 <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-                  İlan Detayı
+                  {t("listing_detail")}
                 </h2>
                 <div className="mt-6 prose prose-invert prose-p:text-foreground/80 prose-p:leading-relaxed max-w-none">
                   {listing.description.split("\n").map((para, i) => (
@@ -216,10 +208,10 @@ export default function B2BListingDetail() {
             <div>
               <div className="border border-border/70 bg-card p-6 md:p-8 sticky top-8">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-                  İletişim Bilgileri
+                   {t("contact_intro")}
                 </h3>
                 <p className="mt-2 text-xs text-foreground/50">
-                  Bu ilanla ilgileniyorsanız, doğrudan yetkili kişiyle iletişime geçebilirsiniz.
+                   {t("contact_details")}
                 </p>
 
                 <dl className="mt-8 space-y-6">
@@ -304,6 +296,7 @@ const reportCategories: Array<[B2BReportCategory, string]> = [
 ];
 
 function ReportBox({ listingId }: { listingId: number }) {
+  const { t } = useI18n();
   const { isLoaded, isSignedIn } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [category, setCategory] =
@@ -327,11 +320,11 @@ function ReportBox({ listingId }: { listingId: number }) {
       <div className="mt-8 border-t border-border/70 pt-6">
         <p className="flex items-center gap-2 text-xs text-foreground/55">
           <ShieldAlert size={14} className="text-primary" />
-          Bu ilanla ilgili sorun mu var?
+          {t("report_problem")}
         </p>
         <SignInButton mode="modal">
           <button className="mt-3 text-xs font-semibold uppercase tracking-wider text-primary hover:underline">
-            Giriş yaparak MMT’ye bildir
+            {t("report_sign_in")}
           </button>
         </SignInButton>
       </div>
@@ -342,11 +335,11 @@ function ReportBox({ listingId }: { listingId: number }) {
     <div className="mt-8 border-t border-border/70 pt-6">
       <p className="flex items-center gap-2 text-xs text-foreground/55">
         <ShieldAlert size={14} className="text-primary" />
-        İlanı MMT Global incelemesine gönderin.
+        {t("listing_report")}
       </p>
       {submitted ? (
         <p className="mt-3 text-xs leading-relaxed text-primary">
-          Bildiriminiz MMT Global ekibine iletildi. Teşekkür ederiz.
+          {t("report_submitted")}
         </p>
       ) : !isOpen ? (
         <button
@@ -354,7 +347,7 @@ function ReportBox({ listingId }: { listingId: number }) {
           onClick={() => setIsOpen(true)}
           className="mt-3 text-xs font-semibold uppercase tracking-wider text-primary hover:underline"
         >
-          Şikâyet / bildirim gönder
+          {t("report_open")}
         </button>
       ) : (
         <form

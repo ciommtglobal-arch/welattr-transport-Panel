@@ -4,6 +4,7 @@ import { ClerkProvider, SignIn, SignUp } from '@clerk/react';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { I18nProvider, LanguageSelector } from '@/lib/i18n';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
@@ -188,9 +189,12 @@ function RoutedErrorBoundary({ children }: { children: ReactNode }) {
 
 function App() {
   return (
-    <WouterRouter base={basePath}>
-      <ClerkApp />
-    </WouterRouter>
+    <I18nProvider>
+      <WouterRouter base={basePath}>
+        <LanguageSelector />
+        <ClerkApp />
+      </WouterRouter>
+    </I18nProvider>
   );
 }
 
