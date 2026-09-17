@@ -14,3 +14,9 @@ The rollout priority is media and audience growth first; commerce, checkout, and
 **Why:** The user explicitly wants the near-term effort concentrated on media before converting the network into a commercial channel.
 
 **How to apply:** Prioritize content distribution, social/media links, audience acquisition, discoverability, and traffic back to MMT Global properties before building marketplace payments or shopping flows.
+
+All MMT Connect business-account decisions must pass through MMT staff: verification acceptance/rejection, suspension, listing review where applicable, and user complaints.
+
+**Why:** The user wants MMT to retain trust and quality control while allowing verified businesses to publish without waiting for approval on every routine listing.
+
+**How to apply:** Keep staff-only queues protected by Clerk plus the active staff table. Store reviewer identity, decision status, timestamps, and internal notes. Never expose verification documents or internal review data publicly.

@@ -837,3 +837,114 @@ export const UpdateB2BListingStatusResponse = zod.object({
 })
 
 
+/**
+ * @summary Report an approved B2B listing to MMT staff
+ */
+export const CreateB2BReportParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const createB2BReportBodyDetailsMin = 10;
+export const createB2BReportBodyDetailsMax = 2000;
+
+
+
+export const CreateB2BReportBody = zod.object({
+  "category": zod.enum(['misleading_information', 'fraud_or_scam', 'inappropriate_content', 'spam', 'contact_issue', 'other']),
+  "details": zod.string().min(createB2BReportBodyDetailsMin).max(createB2BReportBodyDetailsMax)
+})
+
+export const CreateB2BReportResponse = zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "listingId": zod.int().nullish(),
+  "businessProfileId": zod.int().nullish(),
+  "listingReferenceCode": zod.string(),
+  "listingTitle": zod.string(),
+  "organization": zod.string(),
+  "category": zod.enum(['misleading_information', 'fraud_or_scam', 'inappropriate_content', 'spam', 'contact_issue', 'other']),
+  "details": zod.string(),
+  "status": zod.enum(['pending', 'reviewing', 'resolved', 'dismissed']),
+  "internalNote": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List B2B reports for authorized MMT staff
+ */
+export const getB2BReportReviewQueueQueryPageDefault = 1;
+
+export const getB2BReportReviewQueueQueryPageSizeDefault = 25;
+export const getB2BReportReviewQueueQueryPageSizeMax = 100;
+
+
+
+export const GetB2BReportReviewQueueQueryParams = zod.object({
+  "status": zod.enum(['pending', 'reviewing', 'resolved', 'dismissed']).optional(),
+  "page": zod.coerce.number().int().min(1).default(getB2BReportReviewQueueQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getB2BReportReviewQueueQueryPageSizeMax).default(getB2BReportReviewQueueQueryPageSizeDefault)
+})
+
+export const GetB2BReportReviewQueueResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "listingId": zod.int().nullish(),
+  "businessProfileId": zod.int().nullish(),
+  "listingReferenceCode": zod.string(),
+  "listingTitle": zod.string(),
+  "organization": zod.string(),
+  "category": zod.enum(['misleading_information', 'fraud_or_scam', 'inappropriate_content', 'spam', 'contact_issue', 'other']),
+  "details": zod.string(),
+  "status": zod.enum(['pending', 'reviewing', 'resolved', 'dismissed']),
+  "internalNote": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "total": zod.int()
+})
+
+
+/**
+ * @summary Update a B2B report decision
+ */
+export const UpdateB2BReportStatusParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateB2BReportStatusBodyInternalNoteMax = 4000;
+
+
+
+export const UpdateB2BReportStatusBody = zod.object({
+  "status": zod.enum(['pending', 'reviewing', 'resolved', 'dismissed']),
+  "internalNote": zod.string().max(updateB2BReportStatusBodyInternalNoteMax).optional()
+})
+
+export const UpdateB2BReportStatusResponse = zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "listingId": zod.int().nullish(),
+  "businessProfileId": zod.int().nullish(),
+  "listingReferenceCode": zod.string(),
+  "listingTitle": zod.string(),
+  "organization": zod.string(),
+  "category": zod.enum(['misleading_information', 'fraud_or_scam', 'inappropriate_content', 'spam', 'contact_issue', 'other']),
+  "details": zod.string(),
+  "status": zod.enum(['pending', 'reviewing', 'resolved', 'dismissed']),
+  "internalNote": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+

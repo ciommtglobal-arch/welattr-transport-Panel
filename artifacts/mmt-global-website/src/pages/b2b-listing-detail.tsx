@@ -1,5 +1,6 @@
 import { useEffect, useState, FormEvent } from "react";
 import { useRoute, Link } from "wouter";
+import { SignInButton, useAuth } from "@clerk/react";
 import {
   ArrowLeft,
   Building2,
@@ -12,10 +13,13 @@ import {
   ExternalLink,
   ChevronRight,
   Info
+  , ShieldAlert
 } from "lucide-react";
 import {
+  useCreateB2BReport,
   useGetB2BListing,
   getGetB2BListingQueryKey,
+  type B2BReportCategory,
   type B2BListingRole,
 } from "@workspace/api-client-react";
 
@@ -250,11 +254,135 @@ export default function B2BListingDetail() {
                     </div>
                   )}
                 </dl>
+                  <ReportBox listingId={listing.id} />
               </div>
             </div>
           </div>
         </section>
       </article>
     </main>
+  );
+}
+
+const reportCategories: Array<[B2BReportCategory, string]> = [
+  ["misleading_information", "Yanıltıcı işletme bilgisi"],
+  ["fraud_or_scam", "Dolandırıcılık / sahte teklif"],
+  ["inappropriate_content", "Uygunsuz içerik"],
+  ["spam", "Spam / tekrarlı ilan"],
+  ["contact_issue", "İletişim bilgisi çalışmıyor"],
+  ["other", "Diğer"],
+];
+
+function ReportBox({ listingId }: { listingId: number }) {
+  const { isLoaded, isSignedIn } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
+  const [category, setCategory] =
+    useState<B2BReportCategory>("misleading_information");
+  const [details, setDetails] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const report = useCreateB2BReport({
+    mutation: {
+      onSuccess: () => {
+        setSubmitted(true);
+        setIsOpen(false);
+        setDetails("");
+      },
+    },
+  });
+
+  if (!isLoaded) return null;
+
+  if (!isSignedIn) {
+    return (
+      <div className="mt-8 border-t border-border/70 pt-6">
+        <p className="flex items-center gap-2 text-xs text-foreground/55">
+          <ShieldAlert size={14} className="text-primary" />
+          Bu ilanla ilgili sorun mu var?
+        </p>
+        <SignInButton mode="modal">
+          <button className="mt-3 text-xs font-semibold uppercase tracking-wider text-primary hover:underline">
+            Giriş yaparak MMT’ye bildir
+          </button>
+        </SignInButton>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-8 border-t border-border/70 pt-6">
+      <p className="flex items-center gap-2 text-xs text-foreground/55">
+        <ShieldAlert size={14} className="text-primary" />
+        İlanı MMT Global incelemesine gönderin.
+      </p>
+      {submitted ? (
+        <p className="mt-3 text-xs leading-relaxed text-primary">
+          Bildiriminiz MMT Global ekibine iletildi. Teşekkür ederiz.
+        </p>
+      ) : !isOpen ? (
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="mt-3 text-xs font-semibold uppercase tracking-wider text-primary hover:underline"
+        >
+          Şikâyet / bildirim gönder
+        </button>
+      ) : (
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            report.mutate({
+              id: listingId,
+              data: { category, details: details.trim() },
+            });
+          }}
+          className="mt-4 space-y-3"
+        >
+          <select
+            value={category}
+            onChange={(event) =>
+              setCategory(event.target.value as B2BReportCategory)
+            }
+            className="h-10 w-full border border-border bg-background px-3 text-xs outline-none focus:border-primary"
+          >
+            {reportCategories.map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <textarea
+            required
+            minLength={10}
+            maxLength={2000}
+            rows={4}
+            value={details}
+            onChange={(event) => setDetails(event.target.value)}
+            placeholder="Sorunu ve mümkünse kanıtı kısaca açıklayın."
+            className="w-full resize-y border border-border bg-background p-3 text-xs outline-none focus:border-primary"
+          />
+          {report.isError ? (
+            <p className="text-xs text-red-600">
+              Bildirim gönderilemedi. Lütfen tekrar deneyin.
+            </p>
+          ) : null}
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={report.isPending}
+              className="bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white disabled:opacity-60"
+            >
+              {report.isPending ? "Gönderiliyor..." : "MMT’ye gönder"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider"
+            >
+              Vazgeç
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
   );
 }

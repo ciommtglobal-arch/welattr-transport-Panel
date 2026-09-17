@@ -28,11 +28,16 @@ import type {
   B2BListingInput,
   B2BListingPage,
   B2BListingStatusUpdate,
+  B2BReport,
+  B2BReportInput,
+  B2BReportPage,
+  B2BReportStatusUpdate,
   ErrorEnvelope,
   ErrorResponse,
   GetB2BBusinessProfileReviewQueueParams,
   GetB2BListingReviewQueueParams,
   GetB2BListingsParams,
+  GetB2BReportReviewQueueParams,
   GetLimitApplicationsParams,
   HealthStatus,
   LimitApplication,
@@ -1692,5 +1697,251 @@ export const useUpdateB2BListingStatus = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getUpdateB2BListingStatusMutationOptions(options));
+    }
+
+export const getCreateB2BReportUrl = (id: number,) => {
+
+
+
+
+  return `/api/b2b-listings/${id}/reports`
+}
+
+/**
+ * @summary Report an approved B2B listing to MMT staff
+ */
+export const createB2BReport = async (id: number,
+    b2BReportInput: B2BReportInput, options?: Parameters<typeof customFetch>[1]): Promise<B2BReport> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BReport>(getCreateB2BReportUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BReportInput)
+  }
+);}
+
+
+
+
+
+export const getCreateB2BReportMutationKey = () => ['createB2BReport'] as const;
+
+export const getCreateB2BReportMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createB2BReport>>, TError,CreateB2BReportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createB2BReport>>, TError,CreateB2BReportMutationVariables, TContext> => {
+
+const mutationKey = getCreateB2BReportMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createB2BReport>>, CreateB2BReportMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  createB2BReport(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateB2BReportMutationResult = NonNullable<Awaited<ReturnType<typeof createB2BReport>>>
+    export type CreateB2BReportMutationBody = BodyType<B2BReportInput>
+    export type CreateB2BReportMutationError = ErrorType<ErrorResponse>
+    export type CreateB2BReportMutationVariables = {id: number;data: BodyType<B2BReportInput>}
+
+    /**
+ * @summary Report an approved B2B listing to MMT staff
+ */
+export const useCreateB2BReport = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createB2BReport>>, TError,CreateB2BReportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createB2BReport>>,
+        TError,
+        CreateB2BReportMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateB2BReportMutationOptions(options));
+    }
+
+export const getGetB2BReportReviewQueueUrl = (params?: GetB2BReportReviewQueueParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/b2b-reports/review?${stringifiedParams}` : `/api/b2b-reports/review`
+}
+
+/**
+ * @summary List B2B reports for authorized MMT staff
+ */
+export const getB2BReportReviewQueue = async (params?: GetB2BReportReviewQueueParams, options?: Parameters<typeof customFetch>[1]): Promise<B2BReportPage> => {
+
+  return customFetch<B2BReportPage>(getGetB2BReportReviewQueueUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetB2BReportReviewQueueQueryKey = (params?: GetB2BReportReviewQueueParams,) => {
+    return [
+    `/api/b2b-reports/review`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetB2BReportReviewQueueQueryOptions = <TData = Awaited<ReturnType<typeof getB2BReportReviewQueue>>, TError = ErrorType<ErrorResponse>>(params?: GetB2BReportReviewQueueParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BReportReviewQueue>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetB2BReportReviewQueueQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getB2BReportReviewQueue>>> = ({ signal }) => getB2BReportReviewQueue(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getB2BReportReviewQueue>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetB2BReportReviewQueueQueryResult = NonNullable<Awaited<ReturnType<typeof getB2BReportReviewQueue>>>
+export type GetB2BReportReviewQueueQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List B2B reports for authorized MMT staff
+ */
+
+export function useGetB2BReportReviewQueue<TData = Awaited<ReturnType<typeof getB2BReportReviewQueue>>, TError = ErrorType<ErrorResponse>>(
+ params?: GetB2BReportReviewQueueParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BReportReviewQueue>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetB2BReportReviewQueueQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateB2BReportStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/b2b-reports/${id}/status`
+}
+
+/**
+ * @summary Update a B2B report decision
+ */
+export const updateB2BReportStatus = async (id: number,
+    b2BReportStatusUpdate: B2BReportStatusUpdate, options?: Parameters<typeof customFetch>[1]): Promise<B2BReport> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BReport>(getUpdateB2BReportStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BReportStatusUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateB2BReportStatusMutationKey = () => ['updateB2BReportStatus'] as const;
+
+export const getUpdateB2BReportStatusMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateB2BReportStatus>>, TError,UpdateB2BReportStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateB2BReportStatus>>, TError,UpdateB2BReportStatusMutationVariables, TContext> => {
+
+const mutationKey = getUpdateB2BReportStatusMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateB2BReportStatus>>, UpdateB2BReportStatusMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateB2BReportStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateB2BReportStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateB2BReportStatus>>>
+    export type UpdateB2BReportStatusMutationBody = BodyType<B2BReportStatusUpdate>
+    export type UpdateB2BReportStatusMutationError = ErrorType<ErrorResponse>
+    export type UpdateB2BReportStatusMutationVariables = {id: number;data: BodyType<B2BReportStatusUpdate>}
+
+    /**
+ * @summary Update a B2B report decision
+ */
+export const useUpdateB2BReportStatus = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateB2BReportStatus>>, TError,UpdateB2BReportStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateB2BReportStatus>>,
+        TError,
+        UpdateB2BReportStatusMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateB2BReportStatusMutationOptions(options));
     }
 

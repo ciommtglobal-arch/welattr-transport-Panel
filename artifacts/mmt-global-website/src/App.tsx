@@ -12,6 +12,7 @@ import Limit, { LimitChooser } from '@/pages/limit';
 import StaffApplications from '@/pages/staff-applications';
 import StaffB2BListings from '@/pages/staff-b2b-listings';
 import StaffB2BVerifications from '@/pages/staff-b2b-verifications';
+import StaffB2BReports from '@/pages/staff-b2b-reports';
 import DemoWallet from '@/pages/demo-wallet';
 import PaymentPage, { MockPaymentPage, PaymentResultPage } from '@/pages/payment';
 import FreeB2BNetworkPage from '@/pages/free-b2b-network';
@@ -151,6 +152,7 @@ function Router() {
         <Route path="/staff/applications" component={StaffApplications} />
         <Route path="/staff/ilanlar" component={StaffB2BListings} />
         <Route path="/staff/b2b-dogrulamalar" component={StaffB2BVerifications} />
+        <Route path="/staff/b2b-sikayetler" component={StaffB2BReports} />
         <Route path="/sign-in/*?" component={SignInPage} />
         <Route path="/sign-up/*?" component={SignUpPage} />
         <Route component={NotFound} />
@@ -194,6 +196,8 @@ function ClerkApp() {
     location === '/staff/applications' ||
     location === '/staff/ilanlar' ||
     location === '/staff/b2b-dogrulamalar' ||
+    location === '/staff/b2b-sikayetler' ||
+    location.startsWith('/b2b-agi/ilan/') ||
     location === '/b2b-agi/katil' ||
     location.startsWith('/sign-in') ||
     location.startsWith('/sign-up');

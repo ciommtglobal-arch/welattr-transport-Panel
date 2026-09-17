@@ -441,6 +441,73 @@ export interface B2BListingPage {
   total: number;
 }
 
+export type B2BReportCategory = typeof B2BReportCategory[keyof typeof B2BReportCategory];
+
+
+export const B2BReportCategory = {
+  misleading_information: 'misleading_information',
+  fraud_or_scam: 'fraud_or_scam',
+  inappropriate_content: 'inappropriate_content',
+  spam: 'spam',
+  contact_issue: 'contact_issue',
+  other: 'other',
+} as const;
+
+export type B2BReportStatus = typeof B2BReportStatus[keyof typeof B2BReportStatus];
+
+
+export const B2BReportStatus = {
+  pending: 'pending',
+  reviewing: 'reviewing',
+  resolved: 'resolved',
+  dismissed: 'dismissed',
+} as const;
+
+export interface B2BReportInput {
+  category: B2BReportCategory;
+  /**
+     * @minLength 10
+     * @maxLength 2000
+     */
+  details: string;
+}
+
+export interface B2BReport {
+  id: number;
+  referenceCode: string;
+  /** @nullable */
+  listingId?: number | null;
+  /** @nullable */
+  businessProfileId?: number | null;
+  listingReferenceCode: string;
+  listingTitle: string;
+  organization: string;
+  category: B2BReportCategory;
+  details: string;
+  status: B2BReportStatus;
+  /** @nullable */
+  internalNote?: string | null;
+  /** @nullable */
+  reviewerClerkUserId?: string | null;
+  /** @nullable */
+  reviewedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface B2BReportStatusUpdate {
+  status: B2BReportStatus;
+  /** @maxLength 4000 */
+  internalNote?: string;
+}
+
+export interface B2BReportPage {
+  items: B2BReport[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
 export type B2BBusinessProfileStatus = typeof B2BBusinessProfileStatus[keyof typeof B2BBusinessProfileStatus];
 
 
@@ -602,6 +669,19 @@ pageSize?: number;
 
 export type GetB2BListingReviewQueueParams = {
 status?: B2BListingStatus;
+/**
+ * @minimum 1
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+pageSize?: number;
+};
+
+export type GetB2BReportReviewQueueParams = {
+status?: B2BReportStatus;
 /**
  * @minimum 1
  */
