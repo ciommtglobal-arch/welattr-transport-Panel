@@ -32,3 +32,9 @@ The network must support both supply and demand: verified businesses can publish
 **Why:** A trade network cannot depend only on sellers; visible buyer demand gives producers and service providers a concrete reason to participate and lets the public benefit from the network.
 
 **How to apply:** Keep approved buyer requests publicly searchable, protect request submission with account identity, and give MMT staff a dedicated review queue with approve, reject, and close decisions.
+
+MMT Connect should become MMT Global's own branded trade network; Instagram, Facebook, TikTok, and Telegram are distribution channels rather than the core product.
+
+**Why:** The user wants to protect and grow the MMT brand through an owned network instead of depending permanently on external social platforms.
+
+**How to apply:** Use external channels to attract attention and traffic, but keep business profiles, buyer demand, listings, trust decisions, conversations, and network relationships on MMT-owned infrastructure.
