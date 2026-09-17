@@ -8,3 +8,4 @@
 - [Clerk public route isolation](clerk-public-route-isolation.md) — Keep public pages usable without Clerk; Replit dev previews may fail loading Clerk JS while auth routes still work.
 - [MMT Connect verification](mmt-connect-verification.md) — Use one-time business verification, then let verified firms publish their own free B2B listings.
 - [MMT Global language rollout](mmt-global-i18n.md) — Use TR/EN/AR/RU UI translations with Arabic RTL; translate user-generated content only as a separate feature.
+- [Authentic MMT Global launch](authentic-mmt-launch.md) — Use only real business contact/social identities; begin organic audience growth after accounts are complete.
