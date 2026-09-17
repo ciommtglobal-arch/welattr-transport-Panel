@@ -4,14 +4,100 @@ import { ArrowDownRight, Menu, X, ArrowRight, Globe2, Building2, Stethoscope, Tr
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import CorporateFleetSection from "@/components/corporate-fleet-section";
+import { useI18n, type Locale } from "@/lib/i18n";
 
 // Make sure to use the generated image
 const HERO_BG = "/hero-bridge.jpg";
-const BUSINESS_PHONE = "+44 114 352 1434";
-const BUSINESS_PHONE_LINK = "+441143521434";
-const WHATSAPP_LINK = "https://wa.me/441143521434";
+const BUSINESS_CONTACTS_READY = false;
+
+const homeCopy: Record<Locale, {
+  navApproach: string;
+  navEcosystem: string;
+  navFleet: string;
+  navContact: string;
+  navB2B: string;
+  portal: string;
+  wallet: string;
+  payment: string;
+  categories: string;
+  categoryCommercial: string;
+  categoryHousing: string;
+  categoryVehicle: string;
+  categoryIndividual: string;
+  allApplications: string;
+  heroKicker: string;
+  produce: string;
+  promote: string;
+  sell: string;
+  heroDescriptionStrong: string;
+  heroDescription: string;
+  joinNetwork: string;
+  discover: string;
+  approach: string;
+  approachTitle: string;
+  approachDescription: string;
+  discoverStory: string;
+  roadmap: string;
+  roadmapTitle: string;
+  roadmapDescription: string;
+  ecosystem: string;
+  contactTitle: string;
+  contactTitleEmphasis: string;
+  contactDescription: string;
+  whatsapp: string;
+  pageShare: string;
+  officialChannels: string;
+  officialChannelsDescription: string;
+  officialChannelsPending: string;
+  quickLinks: string;
+  investments: string;
+  career: string;
+  ecosystemTitle: string;
+  logistics: string;
+  healthTourism: string;
+  construction: string;
+  financeMedia: string;
+  footerDescription: string;
+  contact: string;
+  contactPending: string;
+  privacy: string;
+  cookies: string;
+  kvkk: string;
+  floatingAction: string;
+}> = {
+  tr: {
+    navApproach: "BAKIŞ AÇIMIZ", navEcosystem: "EKOSİSTEM", navFleet: "KURUMSAL FİLO", navContact: "İLETİŞİM", navB2B: "ÜCRETSİZ B2B AĞI", portal: "PORTALA GİRİŞ", wallet: "DEMO CÜZDAN", payment: "TİCARİ ÖDEME",
+    categories: "Başvuru kategorileri", categoryCommercial: "Ticari", categoryHousing: "Konut", categoryVehicle: "Taşıt", categoryIndividual: "Bireysel", allApplications: "TÜM BAŞVURULAR",
+    heroKicker: "MMT GLOBAL / ÜCRETSİZ B2B İŞ AĞI", produce: "Üret.", promote: "Tanıt.", sell: "Sat.", heroDescriptionStrong: "Üreticiyi, alıcıyı ve hizmet taraflarını buluşturuyoruz.", heroDescription: "Üretici tanıtımı, alıcı talepleri ve temel B2B bağlantı hizmetlerimiz ücretsizdir. Güvenle büyüyen bir iş ekosistemi kuruyoruz.", joinNetwork: "ÜCRETSİZ AĞA KATILIN", discover: "KEŞFETMEK İÇİN KAYDIR",
+    approach: "BAKIŞ AÇIMIZ", approachTitle: "Birlikte Büyüyoruz", approachDescription: "MMT Global olarak üreticilerin, alıcıların, lojistik ekiplerinin ve hizmet verenlerin birbirini bulabildiği ücretsiz bir B2B ağı kuruyoruz. Önce güvenilir bağlantılar ve sosyal fayda; sonra birlikte büyüyen sürdürülebilir bir marka.", discoverStory: "HİKAYEMİZİ KEŞFET", roadmap: "YOL HARİTAMIZ", roadmapTitle: "Üret. Tanıt. Sat.", roadmapDescription: "Takipçilerimiz ve üyelerimiz için adım adım ilerliyoruz. Temel tanıtım ve bağlantı hizmetlerine erişim ücretsiz kalır.",
+    ecosystem: "EKOSİSTEM", contactTitle: "Küresel Büyümeye", contactTitleEmphasis: "Hazır Mısınız?", contactDescription: "Üreticiler, alıcılar ve hizmet verenler için ücretsiz B2B bağlantı ağı kuruyoruz. Birlikte büyüyelim.", whatsapp: "WHATSAPP'TAN YAZIN", pageShare: "BU SAYFAYI PAYLAŞIN", officialChannels: "RESMİ KANALLAR", officialChannelsDescription: "MMT Global’in doğrulanmış sosyal medya hesapları ve gerçek kurumsal görselleri hazırlandığında bu alanda gösterilecektir.", officialChannelsPending: "Resmi hesaplar hazırlanıyor", quickLinks: "HIZLI BAĞLANTILAR", investments: "Yatırımlarımız", career: "Kariyer", ecosystemTitle: "EKOSİSTEM", logistics: "Lojistik", healthTourism: "Sağlık Turizmi", construction: "İnşaat & Gelişim", financeMedia: "Finans & Medya", footerDescription: "Üreticileri, alıcıları, lojistik ve hizmet taraflarını ücretsiz B2B bağlantı ağıyla buluştururuz.", contact: "İLETİŞİM", contactPending: "Resmi iletişim hattı hazırlanıyor.", privacy: "Gizlilik Politikası", cookies: "Çerez Politikası", kvkk: "KVKK", floatingAction: "Hızlı işlemler",
+  },
+  en: {
+    navApproach: "OUR APPROACH", navEcosystem: "ECOSYSTEM", navFleet: "CORPORATE FLEET", navContact: "CONTACT", navB2B: "FREE B2B NETWORK", portal: "OPEN PORTAL", wallet: "DEMO WALLET", payment: "BUSINESS PAYMENT",
+    categories: "Application categories", categoryCommercial: "Commercial", categoryHousing: "Housing", categoryVehicle: "Vehicle", categoryIndividual: "Individual", allApplications: "ALL APPLICATIONS",
+    heroKicker: "MMT GLOBAL / FREE B2B NETWORK", produce: "Produce.", promote: "Promote.", sell: "Sell.", heroDescriptionStrong: "We connect producers, buyers and service providers.", heroDescription: "Producer promotion, buyer requests and core B2B connection services are free. We are building a business ecosystem that grows on trust.", joinNetwork: "JOIN THE FREE NETWORK", discover: "SCROLL TO EXPLORE",
+    approach: "OUR APPROACH", approachTitle: "Growing Together", approachDescription: "MMT Global is building a free B2B network where producers, buyers, logistics teams and service providers can find one another. Reliable connections and social value first; a sustainable brand that grows together next.", discoverStory: "DISCOVER OUR STORY", roadmap: "OUR ROADMAP", roadmapTitle: "Produce. Promote. Sell.", roadmapDescription: "We move forward step by step for our followers and members. Core promotion and connection services remain free.",
+    ecosystem: "ECOSYSTEM", contactTitle: "Ready for", contactTitleEmphasis: "Global Growth?", contactDescription: "We are building a free B2B connection network for producers, buyers and service providers. Let’s grow together.", whatsapp: "MESSAGE ON WHATSAPP", pageShare: "SHARE THIS PAGE", officialChannels: "OFFICIAL CHANNELS", officialChannelsDescription: "Verified MMT Global social accounts and real corporate visuals will appear here once they are prepared and approved.", officialChannelsPending: "Official channels are being prepared", quickLinks: "QUICK LINKS", investments: "Investments", career: "Careers", ecosystemTitle: "ECOSYSTEM", logistics: "Logistics", healthTourism: "Health tourism", construction: "Construction & development", financeMedia: "Finance & media", footerDescription: "We connect producers, buyers, logistics and service providers through a free B2B network.", contact: "CONTACT", contactPending: "The official business contact line is being prepared.", privacy: "Privacy policy", cookies: "Cookie policy", kvkk: "KVKK", floatingAction: "Quick actions",
+  },
+  ar: {
+    navApproach: "نهجنا", navEcosystem: "المنظومة", navFleet: "الأسطول المؤسسي", navContact: "اتصل بنا", navB2B: "شبكة B2B المجانية", portal: "دخول البوابة", wallet: "محفظة تجريبية", payment: "الدفع التجاري",
+    categories: "فئات الطلب", categoryCommercial: "تجاري", categoryHousing: "سكني", categoryVehicle: "مركبات", categoryIndividual: "فردي", allApplications: "كل الطلبات",
+    heroKicker: "MMT GLOBAL / شبكة B2B مجانية", produce: "أنتج.", promote: "روّج.", sell: "بع.", heroDescriptionStrong: "نربط المنتجين بالمشترين ومقدمي الخدمات.", heroDescription: "الترويج للمنتجين وطلبات المشترين وخدمات الربط الأساسية مجانية. نبني منظومة أعمال تنمو بالثقة.", joinNetwork: "انضم إلى الشبكة المجانية", discover: "مرر للاستكشاف",
+    approach: "نهجنا", approachTitle: "ننمو معاً", approachDescription: "تبني MMT Global شبكة B2B مجانية تتيح للمنتجين والمشترين وفرق الخدمات اللوجستية ومقدمي الخدمات العثور على بعضهم. نبدأ بالروابط الموثوقة والقيمة الاجتماعية، ثم نبني علامة مستدامة تنمو معاً.", discoverStory: "اكتشف قصتنا", roadmap: "خريطة الطريق", roadmapTitle: "أنتج. روّج. بع.", roadmapDescription: "نتقدم خطوة بخطوة من أجل متابعينا وأعضائنا. تبقى خدمات التعريف والربط الأساسية مجانية.",
+    ecosystem: "المنظومة", contactTitle: "هل أنتم مستعدون", contactTitleEmphasis: "للنمو العالمي؟", contactDescription: "نبني شبكة B2B مجانية لربط المنتجين والمشترين ومقدمي الخدمات. لِنَنْمُ معاً.", whatsapp: "اكتبوا عبر واتساب", pageShare: "شاركوا هذه الصفحة", officialChannels: "القنوات الرسمية", officialChannelsDescription: "ستظهر حسابات MMT Global الاجتماعية الموثقة والصور المؤسسية الحقيقية هنا بعد إعدادها واعتمادها.", officialChannelsPending: "يجري إعداد القنوات الرسمية", quickLinks: "روابط سريعة", investments: "استثماراتنا", career: "الوظائف", ecosystemTitle: "المنظومة", logistics: "الخدمات اللوجستية", healthTourism: "السياحة الصحية", construction: "الإنشاء والتطوير", financeMedia: "المال والإعلام", footerDescription: "نربط المنتجين والمشترين والخدمات اللوجستية ومقدمي الخدمات عبر شبكة B2B مجانية.", contact: "اتصل بنا", contactPending: "يجري إعداد خط الاتصال التجاري الرسمي.", privacy: "سياسة الخصوصية", cookies: "سياسة ملفات الارتباط", kvkk: "KVKK", floatingAction: "إجراءات سريعة",
+  },
+  ru: {
+    navApproach: "НАШ ПОДХОД", navEcosystem: "ЭКОСИСТЕМА", navFleet: "КОРПОРАТИВНЫЙ АВТОПАРК", navContact: "КОНТАКТЫ", navB2B: "БЕСПЛАТНАЯ B2B-СЕТЬ", portal: "ВОЙТИ В ПОРТАЛ", wallet: "ДЕМО-КОШЕЛЁК", payment: "КОММЕРЧЕСКАЯ ОПЛАТА",
+    categories: "Категории заявок", categoryCommercial: "Коммерция", categoryHousing: "Жильё", categoryVehicle: "Транспорт", categoryIndividual: "Для частных лиц", allApplications: "ВСЕ ЗАЯВКИ",
+    heroKicker: "MMT GLOBAL / БЕСПЛАТНАЯ B2B-СЕТЬ", produce: "Производи.", promote: "Продвигай.", sell: "Продавай.", heroDescriptionStrong: "Мы соединяем производителей, покупателей и поставщиков услуг.", heroDescription: "Продвижение производителей, запросы покупателей и базовые B2B-связи бесплатны. Мы строим деловую экосистему, которая растёт на доверии.", joinNetwork: "ПРИСОЕДИНИТЬСЯ К СЕТИ", discover: "ЛИСТАЙТЕ ДЛЯ ОБЗОРА",
+    approach: "НАШ ПОДХОД", approachTitle: "Растём вместе", approachDescription: "MMT Global создаёт бесплатную B2B-сеть, где производители, покупатели, логистические команды и поставщики услуг находят друг друга. Сначала надёжные связи и социальная польза, затем устойчивый бренд, который растёт вместе.", discoverStory: "УЗНАТЬ НАШУ ИСТОРИЮ", roadmap: "НАША ДОРОЖНАЯ КАРТА", roadmapTitle: "Производи. Продвигай. Продавай.", roadmapDescription: "Мы двигаемся шаг за шагом для наших подписчиков и участников. Базовые услуги продвижения и связи остаются бесплатными.",
+    ecosystem: "ЭКОСИСТЕМА", contactTitle: "Готовы к", contactTitleEmphasis: "глобальному росту?", contactDescription: "Мы создаём бесплатную B2B-сеть для производителей, покупателей и поставщиков услуг. Давайте расти вместе.", whatsapp: "НАПИСАТЬ В WHATSAPP", pageShare: "ПОДЕЛИТЬСЯ СТРАНИЦЕЙ", officialChannels: "ОФИЦИАЛЬНЫЕ КАНАЛЫ", officialChannelsDescription: "Проверенные социальные аккаунты MMT Global и реальные корпоративные изображения появятся здесь после подготовки и утверждения.", officialChannelsPending: "Официальные каналы готовятся", quickLinks: "БЫСТРЫЕ ССЫЛКИ", investments: "Наши инвестиции", career: "Карьера", ecosystemTitle: "ЭКОСИСТЕМА", logistics: "Логистика", healthTourism: "Медицинский туризм", construction: "Строительство и развитие", financeMedia: "Финансы и медиа", footerDescription: "Мы соединяем производителей, покупателей, логистические и сервисные компании через бесплатную B2B-сеть.", contact: "КОНТАКТЫ", contactPending: "Официальная бизнес-линия готовится.", privacy: "Политика конфиденциальности", cookies: "Политика cookie", kvkk: "KVKK", floatingAction: "Быстрые действия",
+  },
+};
 
 export default function Home() {
+  const { locale } = useI18n();
+  const copy = homeCopy[locale];
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -32,7 +118,7 @@ export default function Home() {
   };
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const shareText = "MMT Global | Üret. Tanıt. Sat. Ücretsiz B2B iş ağı";
+  const shareText = `MMT Global | ${copy.heroDescriptionStrong}`;
   const encodedShareUrl = encodeURIComponent(shareUrl);
   const encodedShareText = encodeURIComponent(shareText);
 
@@ -58,19 +144,19 @@ export default function Home() {
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8 text-sm font-medium tracking-wide">
             <button onClick={() => scrollToSection("approach")} className="hover:text-primary transition-colors">
-              BAKIŞ AÇIMIZ
+              {copy.navApproach}
             </button>
             <button onClick={() => scrollToSection("ecosystem")} className="hover:text-primary transition-colors">
-              EKOSİSTEM
+              {copy.navEcosystem}
             </button>
             <button onClick={() => scrollToSection("corporate-fleet")} className="hover:text-primary transition-colors">
-              KURUMSAL FİLO
+              {copy.navFleet}
             </button>
             <button onClick={() => scrollToSection("contact")} className="hover:text-primary transition-colors">
-              İLETİŞİM
+              {copy.navContact}
             </button>
             <Link href="/b2b-agi" className="hover:text-primary transition-colors">
-              ÜCRETSİZ B2B AĞI
+              {copy.navB2B}
             </Link>
               <Link
                 href="/limit"
@@ -81,19 +167,19 @@ export default function Home() {
                 }
                 className="px-5 py-2.5 bg-primary text-white hover:bg-primary/90 transition-colors rounded-none font-semibold uppercase tracking-wider text-xs"
               >
-              PORTALA GİRİŞ
+                {copy.portal}
               </Link>
               <Link
                 href="/cuzdan-demo"
                 className="border border-primary px-5 py-2.5 text-primary transition-colors hover:bg-primary hover:text-white rounded-none font-semibold uppercase tracking-wider text-xs"
               >
-                DEMO CÜZDAN
+                {copy.wallet}
               </Link>
                 <Link
                 href="/odeme"
                 className="border border-foreground/30 px-5 py-2.5 text-foreground transition-colors hover:border-primary hover:text-primary rounded-none font-semibold uppercase tracking-wider text-xs"
               >
-                  TİCARİ ÖDEME
+                  {copy.payment}
               </Link>
           </div>
 
@@ -120,35 +206,35 @@ export default function Home() {
         )}
       >
         <button onClick={() => scrollToSection("approach")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
-          BAKIŞ AÇIMIZ
+          {copy.navApproach}
         </button>
         <button onClick={() => scrollToSection("ecosystem")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
-          EKOSİSTEM
+          {copy.navEcosystem}
         </button>
         <button onClick={() => scrollToSection("corporate-fleet")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
-          KURUMSAL FİLO
+          {copy.navFleet}
         </button>
         <button onClick={() => scrollToSection("contact")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
-          İLETİŞİM
+          {copy.navContact}
         </button>
         <Link href="/b2b-agi" className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
-          ÜCRETSİZ B2B AĞI
+          {copy.navB2B}
         </Link>
         <div className="mt-4 grid w-[min(20rem,calc(100vw-3rem))] grid-cols-2 gap-3 border-t border-border/60 pt-6">
           <p className="col-span-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-foreground/50">
-            Başvuru kategorileri
+            {copy.categories}
           </p>
           <Link href="/limit/ticari" className="border border-border px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider hover:border-primary hover:text-primary">
-            Ticari
+            {copy.categoryCommercial}
           </Link>
           <Link href="/limit/konut" className="border border-border px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider hover:border-primary hover:text-primary">
-            Konut
+            {copy.categoryHousing}
           </Link>
           <Link href="/limit/tasit" className="border border-border px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider hover:border-primary hover:text-primary">
-            Taşıt
+            {copy.categoryVehicle}
           </Link>
           <Link href="/limit/bireysel" className="border border-border px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider hover:border-primary hover:text-primary">
-            Bireysel
+            {copy.categoryIndividual}
           </Link>
         </div>
         <Link
@@ -160,19 +246,19 @@ export default function Home() {
           }
           className="mt-2 px-8 py-4 bg-primary text-white transition-colors rounded-none font-semibold uppercase tracking-wider text-sm"
         >
-          TÜM BAŞVURULAR
+          {copy.allApplications}
         </Link>
         <Link
           href="/cuzdan-demo"
           className="mt-2 border border-primary px-8 py-4 text-primary transition-colors hover:bg-primary hover:text-white rounded-none font-semibold uppercase tracking-wider text-sm"
         >
-          DEMO CÜZDAN
+          {copy.wallet}
         </Link>
         <Link
           href="/odeme"
           className="mt-2 border border-foreground/30 px-8 py-4 text-foreground transition-colors hover:border-primary hover:text-primary rounded-none font-semibold uppercase tracking-wider text-sm"
         >
-          TİCARİ ÖDEME
+          {copy.payment}
         </Link>
       </div>
 
@@ -194,20 +280,20 @@ export default function Home() {
           <div className="flex items-center gap-4 opacity-0 animate-slide-up-fade delay-150">
             <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
             <p className="text-xs md:text-sm tracking-[0.2em] font-medium text-foreground/80 uppercase">
-              MMT GLOBAL / ÜCRETSİZ B2B İŞ AĞI
+              {copy.heroKicker}
             </p>
           </div>
 
           {/* Headline */}
           <h1 className="flex flex-col gap-1 md:gap-2 text-[5.5rem] md:text-[8rem] lg:text-[10rem] leading-[0.85] tracking-tight">
             <span className="font-semibold opacity-0 animate-slide-up-fade delay-300">
-              Üret.
+              {copy.produce}
             </span>
             <span className="font-serif italic text-primary font-normal opacity-0 animate-slide-up-fade delay-500">
-              Tanıt.
+              {copy.promote}
             </span>
             <span className="font-semibold opacity-0 animate-slide-up-fade delay-700">
-              Sat.
+              {copy.sell}
             </span>
           </h1>
 
@@ -215,14 +301,14 @@ export default function Home() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-12 mt-8 md:mt-16">
             <div className="max-w-xl opacity-0 animate-slide-up-fade delay-1000">
               <p className="text-lg md:text-xl leading-relaxed text-foreground/80 font-light">
-                <strong className="font-semibold text-foreground">Üreticiyi, alıcıyı ve hizmet taraflarını buluşturuyoruz.</strong><br/>
-                 Üretici tanıtımı, alıcı talepleri ve temel B2B bağlantı hizmetlerimiz ücretsizdir. Güvenle büyüyen bir iş ekosistemi kuruyoruz.
+                <strong className="font-semibold text-foreground">{copy.heroDescriptionStrong}</strong><br/>
+                 {copy.heroDescription}
               </p>
               <Link
                 href="/b2b-agi"
                 className="mt-8 inline-flex w-fit items-center gap-2 border border-primary px-5 py-3 text-xs font-semibold uppercase tracking-wider text-primary transition-colors hover:bg-primary hover:text-white"
               >
-                Ücretsiz ağa katılın
+                {copy.joinNetwork}
                 <ArrowRight size={15} />
               </Link>
             </div>
@@ -230,7 +316,7 @@ export default function Home() {
             <button 
               onClick={() => scrollToSection("approach")}
               className="group flex-shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-full border border-primary/40 flex items-center justify-center hover:bg-primary hover:border-primary transition-all duration-500 opacity-0 animate-slide-up-fade delay-1000"
-              aria-label="Aşağı kaydır"
+                aria-label={copy.discover}
             >
               <ArrowDownRight className="w-8 h-8 text-primary group-hover:text-white transition-colors duration-500 group-hover:translate-x-1 group-hover:translate-y-1" />
             </button>
@@ -238,7 +324,7 @@ export default function Home() {
 
           {/* Scroll Cue */}
           <div className="absolute bottom-8 left-6 md:left-12 flex items-center gap-6 opacity-0 animate-slide-up-fade delay-1000">
-            <span className="text-[10px] md:text-xs tracking-[0.3em] text-foreground/60 font-medium">KEŞFETMEK İÇİN KAYDIR</span>
+            <span className="text-[10px] md:text-xs tracking-[0.3em] text-foreground/60 font-medium">{copy.discover}</span>
             <div className="w-16 md:w-24 h-[1px] bg-foreground/20 relative overflow-hidden">
               <div className="absolute inset-0 bg-primary w-full origin-left animate-[scale-x_2s_ease-in-out_infinite]" />
             </div>
@@ -252,7 +338,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-6 mb-16 md:mb-24">
             <span className="text-primary font-mono text-sm tracking-widest">01</span>
-            <h2 className="text-xs tracking-[0.2em] uppercase font-bold text-secondary-foreground/60">BAKIŞ AÇIMIZ</h2>
+            <h2 className="text-xs tracking-[0.2em] uppercase font-bold text-secondary-foreground/60">{copy.approach}</h2>
             <div className="flex-1 h-[1px] bg-border/40" />
             <div className="w-12 h-12 bg-background flex items-center justify-center rounded-tl-xl rounded-br-xl text-primary">
               <Globe2 size={20} />
@@ -262,13 +348,13 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24">
             <div className="flex flex-col justify-center">
               <h3 className="text-4xl md:text-5xl lg:text-6xl font-serif italic mb-8 leading-tight">
-                 Birlikte <br/><span className="font-sans font-semibold not-italic text-secondary-foreground">Büyüyoruz</span>
+                 {copy.approachTitle}
               </h3>
               <p className="text-lg text-secondary-foreground/70 leading-relaxed font-light mb-8">
-                 MMT Global olarak üreticilerin, alıcıların, lojistik ekiplerinin ve hizmet verenlerin birbirini bulabildiği ücretsiz bir B2B ağı kuruyoruz. Önce güvenilir bağlantılar ve sosyal fayda; sonra birlikte büyüyen sürdürülebilir bir marka.
+                 {copy.approachDescription}
               </p>
                <button onClick={() => scrollToSection("ecosystem")} className="flex items-center gap-3 text-sm font-semibold tracking-wider uppercase w-fit group">
-                <span className="border-b border-primary pb-1 group-hover:text-primary transition-colors">Hikayemizi Keşfet</span>
+                 <span className="border-b border-primary pb-1 group-hover:text-primary transition-colors">{copy.discoverStory}</span>
                 <ArrowRight size={16} className="text-primary group-hover:translate-x-2 transition-transform" />
               </button>
             </div>
@@ -282,28 +368,27 @@ export default function Home() {
           <div className="mt-20 border-t border-border/40 pt-12 md:mt-28 md:pt-16">
             <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="font-mono text-xs tracking-[0.2em] text-primary">YOL HARİTAMIZ</p>
-                <h3 className="mt-3 text-3xl font-semibold md:text-4xl">Üret. Tanıt. Sat.</h3>
+                <p className="font-mono text-xs tracking-[0.2em] text-primary">{copy.roadmap}</p>
+                <h3 className="mt-3 text-3xl font-semibold md:text-4xl">{copy.roadmapTitle}</h3>
               </div>
               <p className="max-w-xl text-sm leading-7 text-secondary-foreground/65">
-                Takipçilerimiz ve üyelerimiz için adım adım ilerliyoruz. Temel tanıtım ve
-                bağlantı hizmetlerine erişim ücretsiz kalır.
+                 {copy.roadmapDescription}
               </p>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               <RoadmapStep
                 number="01"
-                title="Üret"
+                 title={copy.produce}
                 text="Üreticilerin ve hizmet verenlerin kendilerini, ürünlerini ve yetkinliklerini görünür kılmasına yardımcı oluruz."
               />
               <RoadmapStep
                 number="02"
-                title="Tanıt"
+                 title={copy.promote}
                 text="Üretici tanıtımlarını ve alıcı taleplerini güvenilir bilgilerle paylaşır, doğru kişilerin birbirini bulmasını kolaylaştırırız."
               />
               <RoadmapStep
                 number="03"
-                title="Sat"
+                 title={copy.sell}
                 text="Alıcı, üretici ve lojistik taraflarını buluşturarak şeffaf ve gerçekçi ticari bağlantıların kurulmasına zemin hazırlarız."
               />
             </div>
@@ -316,7 +401,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-6 mb-16 md:mb-24">
             <span className="text-primary font-mono text-sm tracking-widest">02</span>
-            <h2 className="text-xs tracking-[0.2em] uppercase font-bold text-foreground/60">EKOSİSTEM</h2>
+            <h2 className="text-xs tracking-[0.2em] uppercase font-bold text-foreground/60">{copy.ecosystem}</h2>
             <div className="flex-1 h-[1px] bg-border/40" />
           </div>
 
@@ -324,35 +409,35 @@ export default function Home() {
             
             <EcosystemCard 
               icon={<Truck className="w-8 h-8" />}
-              title="Lojistik"
-              desc="Üretici ve alıcıların lojistik taraflarıyla daha güvenilir biçimde buluşmasına yardımcı oluyoruz."
+               title={copy.logistics}
+               desc={copy.heroDescription}
             />
             <EcosystemCard 
               icon={<Stethoscope className="w-8 h-8" />}
-              title="Sağlık Turizmi"
-              desc="Dünya standartlarında sağlık hizmetlerini, modern tesisler ve alanında uzman profesyonellerle sunuyoruz."
+               title={copy.healthTourism}
+               desc={copy.approachDescription}
             />
             <EcosystemCard 
               icon={<Building2 className="w-8 h-8" />}
-              title="İnşaat & Bölgesel Gelişim"
-              desc="Geleceğin şehirlerini modern, çevreci ve sürdürülebilir mimari projelerle bugünden inşa ediyoruz."
+               title={copy.construction}
+               desc={copy.approachDescription}
             />
             <EcosystemCard 
               icon={<Tv className="w-8 h-8" />}
-              title="Medya & Markalaşma"
-              desc="Üreticilerin ve alıcıların ücretsiz tanıtımını destekleyerek markaların görünürlüğünü artırıyoruz."
+               title={copy.financeMedia}
+               desc={copy.officialChannelsDescription}
             />
             <EcosystemCard 
               icon={<Briefcase className="w-8 h-8" />}
-              title="Ticari faaliyetler"
-              desc="MMT Global'in kendi ticari işlemleri ve yetkilendirilmiş hizmet süreçleri, ücretsiz B2B ağından ayrı yürütülür."
+               title={copy.payment}
+               desc={copy.heroDescription}
               href="/limit"
               analyticsLocation="ecosystem_card"
             />
             <EcosystemCard 
               icon={<Factory className="w-8 h-8" />}
-              title="Sanayi Ticareti"
-              desc="Üretimden pazarlamaya kadar endüstriyel ticaretin her aşamasında güçlü bir köprü görevi görüyoruz."
+               title={copy.ecosystemTitle}
+               desc={copy.roadmapDescription}
             />
 
           </div>
@@ -378,23 +463,29 @@ export default function Home() {
 
         <div className="relative z-10 max-w-5xl mx-auto text-center flex flex-col items-center">
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-semibold mb-8 tracking-tight leading-tight">
-            Küresel Büyümeye <br/> <span className="font-serif italic font-normal">Hazır Mısınız?</span>
+            {copy.contactTitle} <br/> <span className="font-serif italic font-normal">{copy.contactTitleEmphasis}</span>
           </h2>
           <p className="text-lg md:text-xl opacity-90 max-w-2xl mb-12 font-light">
-            Üreticiler, alıcılar ve hizmet verenler için ücretsiz B2B bağlantı ağı kuruyoruz. Birlikte büyüyelim.
+            {copy.contactDescription}
           </p>
            <div className="flex flex-col sm:flex-row gap-6">
-              <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="px-8 py-4 bg-background text-foreground hover:bg-background/90 transition-colors font-semibold uppercase tracking-wider text-sm">
-               WHATSAPP'TAN YAZIN
-              </a>
+               {BUSINESS_CONTACTS_READY ? (
+                 <a href="#" target="_blank" rel="noreferrer" className="px-8 py-4 bg-background text-foreground hover:bg-background/90 transition-colors font-semibold uppercase tracking-wider text-sm">
+                  {copy.whatsapp}
+                 </a>
+               ) : (
+                 <div className="px-8 py-4 border border-primary-foreground/60 font-semibold uppercase tracking-wider text-sm">
+                  {copy.contactPending}
+                 </div>
+               )}
                <Link href="/odeme" className="px-8 py-4 bg-transparent border border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2">
-                TİCARİ ÖDEME
+                 {copy.payment}
                </Link>
           </div>
            <div className="mt-12 flex flex-col items-center gap-4">
              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] opacity-80">
                <Share2 size={15} />
-               <span>Bu sayfayı paylaşın</span>
+                <span>{copy.pageShare}</span>
              </div>
              <div className="flex flex-wrap justify-center gap-2">
                <a
@@ -430,24 +521,16 @@ export default function Home() {
                  LinkedIn
                </a>
              </div>
-             <a
-               href="https://www.instagram.com/mmtglobalofficialtr/"
-               target="_blank"
-               rel="noreferrer"
-               className="inline-flex items-center gap-2 border border-primary-foreground px-5 py-3 text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-primary-foreground hover:text-primary"
-             >
-               Instagram&apos;da bizi takip edin
-               <span className="opacity-70">@mmtglobalofficialtr</span>
-             </a>
-             <a
-               href="https://www.tiktok.com/@mmtglobalofficialtr"
-               target="_blank"
-               rel="noreferrer"
-               className="inline-flex items-center gap-2 border border-primary-foreground px-5 py-3 text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-primary-foreground hover:text-primary"
-             >
-               TikTok&apos;ta bizi takip edin
-               <span className="opacity-70">@mmtglobalofficialtr</span>
-             </a>
+              <div className="mt-3 flex w-full max-w-xl items-center gap-4 border border-primary-foreground/70 bg-background/10 px-5 py-5 text-left">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-br-xl rounded-tl-xl bg-background text-xl font-bold text-primary">
+                  M
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em]">{copy.officialChannels}</p>
+                  <p className="mt-2 text-sm leading-relaxed opacity-80">{copy.officialChannelsDescription}</p>
+                  <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] opacity-70">{copy.officialChannelsPending}</p>
+                </div>
+              </div>
            </div>
         </div>
       </section>
@@ -465,28 +548,28 @@ export default function Home() {
                   MMT <span className="font-light opacity-80">GLOBAL</span>
                 </span>
               </Link>
-              <p className="text-sm text-foreground/60 font-light leading-relaxed">
-                 Üreticileri, alıcıları, lojistik ve hizmet taraflarını ücretsiz B2B bağlantı ağıyla buluştururuz.
-              </p>
+               <p className="text-sm text-foreground/60 font-light leading-relaxed">
+                  {copy.footerDescription}
+               </p>
             </div>
             
             <div>
-              <h4 className="font-semibold text-sm mb-6 uppercase tracking-wider">Hızlı Bağlantılar</h4>
+               <h4 className="font-semibold text-sm mb-6 uppercase tracking-wider">{copy.quickLinks}</h4>
               <ul className="space-y-4 text-sm text-foreground/60">
-                <li><button onClick={() => scrollToSection("approach")} className="hover:text-primary transition-colors">Bakış Açımız</button></li>
-                <li><button onClick={() => scrollToSection("ecosystem")} className="hover:text-primary transition-colors">Ekosistem</button></li>
-                <li><Link href="/yatirimlar" className="hover:text-primary transition-colors">Yatırımlarımız</Link></li>
-                <li><Link href="/kariyer" className="hover:text-primary transition-colors">Kariyer</Link></li>
-                <li><Link href="/odeme" className="hover:text-primary transition-colors">Ticari ödeme</Link></li>
+                 <li><button onClick={() => scrollToSection("approach")} className="hover:text-primary transition-colors">{copy.navApproach}</button></li>
+                 <li><button onClick={() => scrollToSection("ecosystem")} className="hover:text-primary transition-colors">{copy.navEcosystem}</button></li>
+                 <li><Link href="/yatirimlar" className="hover:text-primary transition-colors">{copy.investments}</Link></li>
+                 <li><Link href="/kariyer" className="hover:text-primary transition-colors">{copy.career}</Link></li>
+                 <li><Link href="/odeme" className="hover:text-primary transition-colors">{copy.payment}</Link></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-semibold text-sm mb-6 uppercase tracking-wider">Ekosistem</h4>
+               <h4 className="font-semibold text-sm mb-6 uppercase tracking-wider">{copy.ecosystemTitle}</h4>
               <ul className="space-y-4 text-sm text-foreground/60">
-                <li><span className="hover:text-primary transition-colors cursor-pointer">Lojistik</span></li>
-                <li><span className="hover:text-primary transition-colors cursor-pointer">Sağlık Turizmi</span></li>
-                <li><span className="hover:text-primary transition-colors cursor-pointer">İnşaat & Gelişim</span></li>
+                 <li><span className="hover:text-primary transition-colors cursor-pointer">{copy.logistics}</span></li>
+                 <li><span className="hover:text-primary transition-colors cursor-pointer">{copy.healthTourism}</span></li>
+                 <li><span className="hover:text-primary transition-colors cursor-pointer">{copy.construction}</span></li>
                 <li>
                   <Link
                     href="/limit"
@@ -497,29 +580,26 @@ export default function Home() {
                     }
                     className="hover:text-primary transition-colors"
                   >
-                    Finans & Medya
+                     {copy.financeMedia}
                   </Link>
                 </li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-semibold text-sm mb-6 uppercase tracking-wider">İletişim</h4>
+               <h4 className="font-semibold text-sm mb-6 uppercase tracking-wider">{copy.contact}</h4>
               <ul className="space-y-4 text-sm text-foreground/60">
-                <li>Büyükdere Cad. No:123<br/>Şişli, İstanbul / Türkiye</li>
-                <li><a href="mailto:info@mmtglobal.com" className="hover:text-primary transition-colors">info@mmtglobal.com</a></li>
-                <li><a href={`tel:${BUSINESS_PHONE_LINK}`} className="hover:text-primary transition-colors">{BUSINESS_PHONE}</a></li>
-                <li><a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">WhatsApp</a></li>
+                 <li>{copy.contactPending}</li>
               </ul>
             </div>
           </div>
           
           <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-foreground/40 font-light">
-            <p>© {new Date().getFullYear()} MMT Global Finance. Tüm hakları saklıdır.</p>
+             <p>© {new Date().getFullYear()} MMT Global. MMT Global</p>
             <div className="flex gap-6">
-              <Link href="/gizlilik" className="hover:text-foreground transition-colors">Gizlilik Politikası</Link>
-              <Link href="/cerez" className="hover:text-foreground transition-colors">Çerez Politikası</Link>
-              <Link href="/kvkk" className="hover:text-foreground transition-colors">KVKK</Link>
+               <Link href="/gizlilik" className="hover:text-foreground transition-colors">{copy.privacy}</Link>
+               <Link href="/cerez" className="hover:text-foreground transition-colors">{copy.cookies}</Link>
+               <Link href="/kvkk" className="hover:text-foreground transition-colors">{copy.kvkk}</Link>
             </div>
           </div>
         </div>
@@ -536,7 +616,7 @@ export default function Home() {
       `}} />
 
       {/* Floating Action Button */}
-       <button onClick={() => scrollToSection("contact")} className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 w-12 h-12 md:w-14 md:h-14 bg-card rounded-full shadow-lg shadow-black/20 flex flex-col items-center justify-center gap-0.5 border border-border group hover:scale-105 transition-transform" aria-label="Hızlı İşlemler">
+       <button onClick={() => scrollToSection("contact")} className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 w-12 h-12 md:w-14 md:h-14 bg-card rounded-full shadow-lg shadow-black/20 flex flex-col items-center justify-center gap-0.5 border border-border group hover:scale-105 transition-transform" aria-label={copy.floatingAction}>
         <div className="flex gap-0.5">
           <div className="w-1.5 h-1.5 bg-primary rounded-full group-hover:bg-primary/80" />
           <div className="w-1.5 h-1.5 bg-primary rounded-full group-hover:bg-primary/80" />
