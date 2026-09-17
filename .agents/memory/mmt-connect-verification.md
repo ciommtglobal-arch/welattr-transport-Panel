@@ -20,3 +20,9 @@ All MMT Connect business-account decisions must pass through MMT staff: verifica
 **Why:** The user wants MMT to retain trust and quality control while allowing verified businesses to publish without waiting for approval on every routine listing.
 
 **How to apply:** Keep staff-only queues protected by Clerk plus the active staff table. Store reviewer identity, decision status, timestamps, and internal notes. Never expose verification documents or internal review data publicly.
+
+MMT Global should feel corporate and modern without becoming exclusive: anyone should be able to discover the network, while businesses, buyers, workers, and the public can benefit from free core access.
+
+**Why:** The user wants a trusted international trade network that serves both established business people and people with limited resources, with broad public satisfaction rather than a closed premium club.
+
+**How to apply:** Keep public browsing open, make basic participation free, use clear trust and satisfaction signals, support mobile/low-bandwidth access and plain language, and design separate paths for businesses, buyers, and the public.
