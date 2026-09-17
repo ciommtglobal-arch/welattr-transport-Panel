@@ -75,6 +75,10 @@ onlyBuiltDependencies:
   - unrs-resolver
 
 overrides:
+  # Keep transitive packages on versions containing the current security fixes.
+  js-yaml: 4.3.2
+  qs: 6.16.0
+  uuid: 11.1.1
   # replit uses linux-x64 only, we can exclude all other platforms
   "esbuild>@esbuild/darwin-arm64": "-"
   "esbuild>@esbuild/darwin-x64": "-"
@@ -158,7 +162,7 @@ overrides:
   # drizzle-kit uses esbuild internally on an older version that's vulnerable, this overrides it
   "@esbuild-kit/esm-loader": "npm:tsx@^4.21.0"
   esbuild: "0.28.2"
-  js-yaml: "4.3.1"
+  # Kept at the patched version above; do not add a second js-yaml override here.
   fast-uri: "3.1.6"
   brace-expansion: "5.0.9"
   nanoid: "3.3.18"
