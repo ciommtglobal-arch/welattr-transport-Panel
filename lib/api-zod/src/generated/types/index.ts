@@ -6,6 +6,13 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './b2BBusinessProfile';
+export * from './b2BBusinessProfileInput';
+export * from './b2BBusinessProfilePage';
+export * from './b2BBusinessProfileStatus';
+export * from './b2BBusinessProfileStatusUpdate';
+export * from './b2BBusinessVerificationDocumentInput';
+export * from './b2BBusinessVerificationDocumentInputContentType';
 export * from './b2BListing';
 export * from './b2BListingInput';
 export * from './b2BListingPage';
@@ -15,6 +22,7 @@ export * from './b2BListingStatus';
 export * from './b2BListingStatusUpdate';
 export * from './errorEnvelope';
 export * from './errorResponse';
+export * from './getB2BBusinessProfileReviewQueueParams';
 export * from './getB2BListingReviewQueueParams';
 export * from './getB2BListingsParams';
 export * from './getLimitApplicationsParams';

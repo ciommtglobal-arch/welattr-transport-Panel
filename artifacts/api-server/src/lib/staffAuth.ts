@@ -3,12 +3,19 @@ import { and, eq } from "drizzle-orm";
 import { db, staffUsersTable } from "@workspace/db";
 import { type Request, type Response } from "express";
 
-export async function requireStaff(req: Request, res: Response) {
+export function requireUser(req: Request, res: Response) {
   const { userId } = getAuth(req);
   if (!userId) {
     res.status(401).json({ error: "Oturum açmanız gerekiyor." });
     return null;
   }
+
+  return userId;
+}
+
+export async function requireStaff(req: Request, res: Response) {
+  const userId = requireUser(req, res);
+  if (!userId) return null;
 
   const [staff] = await db
     .select()

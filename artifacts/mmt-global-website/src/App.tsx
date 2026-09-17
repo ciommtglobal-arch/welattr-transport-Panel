@@ -11,10 +11,12 @@ import Home from '@/pages/home';
 import Limit, { LimitChooser } from '@/pages/limit';
 import StaffApplications from '@/pages/staff-applications';
 import StaffB2BListings from '@/pages/staff-b2b-listings';
+import StaffB2BVerifications from '@/pages/staff-b2b-verifications';
 import DemoWallet from '@/pages/demo-wallet';
 import PaymentPage, { MockPaymentPage, PaymentResultPage } from '@/pages/payment';
 import FreeB2BNetworkPage from '@/pages/free-b2b-network';
 import B2BListingDetail from '@/pages/b2b-listing-detail';
+import B2BJoinPage from '@/pages/b2b-join';
 import {
   CareersPage,
   CookiePage,
@@ -134,6 +136,7 @@ function Router() {
         <Route path="/limit/tasit" component={VehicleLimit} />
         <Route path="/cuzdan-demo" component={DemoWallet} />
         <Route path="/b2b-agi" component={FreeB2BNetworkPage} />
+        <Route path="/b2b-agi/katil" component={B2BJoinPage} />
         <Route path="/b2b-agi/ilan/:id" component={B2BListingDetail} />
         <Route path="/odeme" component={PaymentPage} />
         <Route path="/odeme/test" component={MockPaymentPage} />
@@ -147,6 +150,7 @@ function Router() {
         <Route path="/kariyer" component={CareersPage} />
         <Route path="/staff/applications" component={StaffApplications} />
         <Route path="/staff/ilanlar" component={StaffB2BListings} />
+        <Route path="/staff/b2b-dogrulamalar" component={StaffB2BVerifications} />
         <Route path="/sign-in/*?" component={SignInPage} />
         <Route path="/sign-up/*?" component={SignUpPage} />
         <Route component={NotFound} />
@@ -189,6 +193,8 @@ function ClerkApp() {
   const clerkRoute =
     location === '/staff/applications' ||
     location === '/staff/ilanlar' ||
+    location === '/staff/b2b-dogrulamalar' ||
+    location === '/b2b-agi/katil' ||
     location.startsWith('/sign-in') ||
     location.startsWith('/sign-up');
   const routedContent = (

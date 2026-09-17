@@ -67,6 +67,12 @@ export default function StaffB2BListings() {
               <ArrowLeft size={15} />
               Ana sayfa
             </Link>
+            <Link
+              href="/staff/b2b-dogrulamalar"
+              className="text-xs font-semibold uppercase tracking-[0.14em] text-primary hover:text-primary/80"
+            >
+              İşletme doğrulamaları
+            </Link>
             {isSignedIn ? <UserButton /> : null}
           </div>
         </div>

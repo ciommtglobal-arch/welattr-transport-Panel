@@ -20,12 +20,17 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  B2BBusinessProfile,
+  B2BBusinessProfileInput,
+  B2BBusinessProfilePage,
+  B2BBusinessProfileStatusUpdate,
   B2BListing,
   B2BListingInput,
   B2BListingPage,
   B2BListingStatusUpdate,
   ErrorEnvelope,
   ErrorResponse,
+  GetB2BBusinessProfileReviewQueueParams,
   GetB2BListingReviewQueueParams,
   GetB2BListingsParams,
   GetLimitApplicationsParams,
@@ -879,6 +884,408 @@ export const useUpdateLimitApplicationStatus = <TError = ErrorType<ErrorResponse
         TContext
       > => {
       return useMutation(getUpdateLimitApplicationStatusMutationOptions(options));
+    }
+
+export const getGetMyB2BBusinessProfileUrl = () => {
+
+
+
+
+  return `/api/b2b/business-profile/me`
+}
+
+/**
+ * @summary Get the signed-in user's B2B business profile
+ */
+export const getMyB2BBusinessProfile = async ( options?: Parameters<typeof customFetch>[1]): Promise<B2BBusinessProfile> => {
+
+  return customFetch<B2BBusinessProfile>(getGetMyB2BBusinessProfileUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyB2BBusinessProfileQueryKey = () => {
+    return [
+    `/api/b2b/business-profile/me`
+    ] as const;
+    }
+
+
+export const getGetMyB2BBusinessProfileQueryOptions = <TData = Awaited<ReturnType<typeof getMyB2BBusinessProfile>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyB2BBusinessProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyB2BBusinessProfileQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyB2BBusinessProfile>>> = ({ signal }) => getMyB2BBusinessProfile({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyB2BBusinessProfile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyB2BBusinessProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getMyB2BBusinessProfile>>>
+export type GetMyB2BBusinessProfileQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get the signed-in user's B2B business profile
+ */
+
+export function useGetMyB2BBusinessProfile<TData = Awaited<ReturnType<typeof getMyB2BBusinessProfile>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyB2BBusinessProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyB2BBusinessProfileQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateMyB2BBusinessProfileUrl = () => {
+
+
+
+
+  return `/api/b2b/business-profile/me`
+}
+
+/**
+ * @summary Create a business profile for verification
+ */
+export const createMyB2BBusinessProfile = async (b2BBusinessProfileInput: B2BBusinessProfileInput, options?: Parameters<typeof customFetch>[1]): Promise<B2BBusinessProfile> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BBusinessProfile>(getCreateMyB2BBusinessProfileUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BBusinessProfileInput)
+  }
+);}
+
+
+
+
+
+export const getCreateMyB2BBusinessProfileMutationKey = () => ['createMyB2BBusinessProfile'] as const;
+
+export const getCreateMyB2BBusinessProfileMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMyB2BBusinessProfile>>, TError,CreateMyB2BBusinessProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createMyB2BBusinessProfile>>, TError,CreateMyB2BBusinessProfileMutationVariables, TContext> => {
+
+const mutationKey = getCreateMyB2BBusinessProfileMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createMyB2BBusinessProfile>>, CreateMyB2BBusinessProfileMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createMyB2BBusinessProfile(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateMyB2BBusinessProfileMutationResult = NonNullable<Awaited<ReturnType<typeof createMyB2BBusinessProfile>>>
+    export type CreateMyB2BBusinessProfileMutationBody = BodyType<B2BBusinessProfileInput>
+    export type CreateMyB2BBusinessProfileMutationError = ErrorType<ErrorResponse>
+    export type CreateMyB2BBusinessProfileMutationVariables = {data: BodyType<B2BBusinessProfileInput>}
+
+    /**
+ * @summary Create a business profile for verification
+ */
+export const useCreateMyB2BBusinessProfile = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMyB2BBusinessProfile>>, TError,CreateMyB2BBusinessProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createMyB2BBusinessProfile>>,
+        TError,
+        CreateMyB2BBusinessProfileMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateMyB2BBusinessProfileMutationOptions(options));
+    }
+
+export const getRequestB2BBusinessVerificationUploadUrlUrl = () => {
+
+
+
+
+  return `/api/b2b/business-profile/verification-upload-url`
+}
+
+/**
+ * @summary Request a protected upload URL for a business verification document
+ */
+export const requestB2BBusinessVerificationUploadUrl = async (uploadUrlRequest: UploadUrlRequest, options?: Parameters<typeof customFetch>[1]): Promise<UploadUrlResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<UploadUrlResponse>(getRequestB2BBusinessVerificationUploadUrlUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(uploadUrlRequest)
+  }
+);}
+
+
+
+
+
+export const getRequestB2BBusinessVerificationUploadUrlMutationKey = () => ['requestB2BBusinessVerificationUploadUrl'] as const;
+
+export const getRequestB2BBusinessVerificationUploadUrlMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestB2BBusinessVerificationUploadUrl>>, TError,RequestB2BBusinessVerificationUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestB2BBusinessVerificationUploadUrl>>, TError,RequestB2BBusinessVerificationUploadUrlMutationVariables, TContext> => {
+
+const mutationKey = getRequestB2BBusinessVerificationUploadUrlMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestB2BBusinessVerificationUploadUrl>>, RequestB2BBusinessVerificationUploadUrlMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestB2BBusinessVerificationUploadUrl(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestB2BBusinessVerificationUploadUrlMutationResult = NonNullable<Awaited<ReturnType<typeof requestB2BBusinessVerificationUploadUrl>>>
+    export type RequestB2BBusinessVerificationUploadUrlMutationBody = BodyType<UploadUrlRequest>
+    export type RequestB2BBusinessVerificationUploadUrlMutationError = ErrorType<ErrorResponse>
+    export type RequestB2BBusinessVerificationUploadUrlMutationVariables = {data: BodyType<UploadUrlRequest>}
+
+    /**
+ * @summary Request a protected upload URL for a business verification document
+ */
+export const useRequestB2BBusinessVerificationUploadUrl = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestB2BBusinessVerificationUploadUrl>>, TError,RequestB2BBusinessVerificationUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestB2BBusinessVerificationUploadUrl>>,
+        TError,
+        RequestB2BBusinessVerificationUploadUrlMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestB2BBusinessVerificationUploadUrlMutationOptions(options));
+    }
+
+export const getGetB2BBusinessProfileReviewQueueUrl = (params?: GetB2BBusinessProfileReviewQueueParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/b2b/business-profiles/review?${stringifiedParams}` : `/api/b2b/business-profiles/review`
+}
+
+/**
+ * @summary List business profiles for staff verification
+ */
+export const getB2BBusinessProfileReviewQueue = async (params?: GetB2BBusinessProfileReviewQueueParams, options?: Parameters<typeof customFetch>[1]): Promise<B2BBusinessProfilePage> => {
+
+  return customFetch<B2BBusinessProfilePage>(getGetB2BBusinessProfileReviewQueueUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetB2BBusinessProfileReviewQueueQueryKey = (params?: GetB2BBusinessProfileReviewQueueParams,) => {
+    return [
+    `/api/b2b/business-profiles/review`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetB2BBusinessProfileReviewQueueQueryOptions = <TData = Awaited<ReturnType<typeof getB2BBusinessProfileReviewQueue>>, TError = ErrorType<ErrorResponse>>(params?: GetB2BBusinessProfileReviewQueueParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BBusinessProfileReviewQueue>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetB2BBusinessProfileReviewQueueQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getB2BBusinessProfileReviewQueue>>> = ({ signal }) => getB2BBusinessProfileReviewQueue(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getB2BBusinessProfileReviewQueue>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetB2BBusinessProfileReviewQueueQueryResult = NonNullable<Awaited<ReturnType<typeof getB2BBusinessProfileReviewQueue>>>
+export type GetB2BBusinessProfileReviewQueueQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List business profiles for staff verification
+ */
+
+export function useGetB2BBusinessProfileReviewQueue<TData = Awaited<ReturnType<typeof getB2BBusinessProfileReviewQueue>>, TError = ErrorType<ErrorResponse>>(
+ params?: GetB2BBusinessProfileReviewQueueParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BBusinessProfileReviewQueue>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetB2BBusinessProfileReviewQueueQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateB2BBusinessProfileStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/b2b/business-profiles/${id}/status`
+}
+
+/**
+ * @summary Verify, reject, or suspend a business profile
+ */
+export const updateB2BBusinessProfileStatus = async (id: number,
+    b2BBusinessProfileStatusUpdate: B2BBusinessProfileStatusUpdate, options?: Parameters<typeof customFetch>[1]): Promise<B2BBusinessProfile> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BBusinessProfile>(getUpdateB2BBusinessProfileStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BBusinessProfileStatusUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateB2BBusinessProfileStatusMutationKey = () => ['updateB2BBusinessProfileStatus'] as const;
+
+export const getUpdateB2BBusinessProfileStatusMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateB2BBusinessProfileStatus>>, TError,UpdateB2BBusinessProfileStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateB2BBusinessProfileStatus>>, TError,UpdateB2BBusinessProfileStatusMutationVariables, TContext> => {
+
+const mutationKey = getUpdateB2BBusinessProfileStatusMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateB2BBusinessProfileStatus>>, UpdateB2BBusinessProfileStatusMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateB2BBusinessProfileStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateB2BBusinessProfileStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateB2BBusinessProfileStatus>>>
+    export type UpdateB2BBusinessProfileStatusMutationBody = BodyType<B2BBusinessProfileStatusUpdate>
+    export type UpdateB2BBusinessProfileStatusMutationError = ErrorType<ErrorResponse>
+    export type UpdateB2BBusinessProfileStatusMutationVariables = {id: number;data: BodyType<B2BBusinessProfileStatusUpdate>}
+
+    /**
+ * @summary Verify, reject, or suspend a business profile
+ */
+export const useUpdateB2BBusinessProfileStatus = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateB2BBusinessProfileStatus>>, TError,UpdateB2BBusinessProfileStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateB2BBusinessProfileStatus>>,
+        TError,
+        UpdateB2BBusinessProfileStatusMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateB2BBusinessProfileStatusMutationOptions(options));
     }
 
 export const getGetB2BListingsUrl = (params?: GetB2BListingsParams,) => {

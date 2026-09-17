@@ -441,8 +441,137 @@ export interface B2BListingPage {
   total: number;
 }
 
+export type B2BBusinessProfileStatus = typeof B2BBusinessProfileStatus[keyof typeof B2BBusinessProfileStatus];
+
+
+export const B2BBusinessProfileStatus = {
+  pending: 'pending',
+  verified: 'verified',
+  rejected: 'rejected',
+  suspended: 'suspended',
+} as const;
+
+export type B2BBusinessVerificationDocumentInputContentType = typeof B2BBusinessVerificationDocumentInputContentType[keyof typeof B2BBusinessVerificationDocumentInputContentType];
+
+
+export const B2BBusinessVerificationDocumentInputContentType = {
+  'application/pdf': 'application/pdf',
+  'image/jpeg': 'image/jpeg',
+  'image/png': 'image/png',
+} as const;
+
+export interface B2BBusinessVerificationDocumentInput {
+  /** @pattern ^/objects/uploads/[a-zA-Z0-9-]+$ */
+  objectPath: string;
+  /**
+     * @minLength 1
+     * @maxLength 255
+     */
+  fileName: string;
+  contentType: B2BBusinessVerificationDocumentInputContentType;
+  /**
+     * @minimum 1
+     * @maximum 10485760
+     */
+  size: number;
+}
+
+export interface B2BBusinessProfileInput {
+  /**
+     * @minLength 2
+     * @maxLength 240
+     */
+  legalName: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  publicName: string;
+  /**
+     * @minLength 2
+     * @maxLength 80
+     */
+  country: string;
+  /**
+     * @minLength 2
+     * @maxLength 80
+     */
+  registrationNumber: string;
+  /**
+     * @minLength 2
+     * @maxLength 100
+     */
+  businessType: string;
+  /**
+     * @minLength 2
+     * @maxLength 140
+     */
+  field: string;
+  website?: string;
+  /**
+     * @minLength 5
+     * @maxLength 180
+     */
+  contact: string;
+  verificationDocument: B2BBusinessVerificationDocumentInput;
+}
+
+export interface B2BBusinessProfile {
+  id: number;
+  legalName: string;
+  publicName: string;
+  country: string;
+  registrationNumber: string;
+  businessType: string;
+  field: string;
+  /** @nullable */
+  website?: string | null;
+  contact: string;
+  verificationDocumentObjectPath: string;
+  verificationDocumentFileName: string;
+  verificationDocumentContentType: string;
+  verificationDocumentSize: number;
+  status: B2BBusinessProfileStatus;
+  /** @nullable */
+  internalNote?: string | null;
+  /** @nullable */
+  reviewerClerkUserId?: string | null;
+  /** @nullable */
+  reviewedAt?: string | null;
+  /** @nullable */
+  verifiedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface B2BBusinessProfileStatusUpdate {
+  status: B2BBusinessProfileStatus;
+  /** @maxLength 4000 */
+  internalNote?: string;
+}
+
+export interface B2BBusinessProfilePage {
+  items: B2BBusinessProfile[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
 export type GetLimitApplicationsParams = {
 status?: LimitApplicationStatus;
+/**
+ * @minimum 1
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+pageSize?: number;
+};
+
+export type GetB2BBusinessProfileReviewQueueParams = {
+status?: B2BBusinessProfileStatus;
 /**
  * @minimum 1
  */

@@ -18,6 +18,8 @@ tags:
     description: Test ve Tami hosted ödeme işlemleri
   - name: b2b-listings
     description: Moderated free B2B listing operations
+  - name: b2b-businesses
+    description: Verified business profile and B2B network operations
 paths:
   /payments/tami/hosted-session:
     post:
@@ -388,6 +390,191 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profile/me:
+    get:
+      operationId: getMyB2BBusinessProfile
+      tags: [b2b-businesses]
+      summary: Get the signed-in user's B2B business profile
+      responses:
+        "200":
+          description: Business profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BBusinessProfile"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Business profile not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createMyB2BBusinessProfile
+      tags: [b2b-businesses]
+      summary: Create a business profile for verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BBusinessProfileInput"
+      responses:
+        "201":
+          description: Business profile submitted for verification
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BBusinessProfile"
+        "400":
+          description: Invalid business profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Business profile already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profile/verification-upload-url:
+    post:
+      operationId: requestB2BBusinessVerificationUploadUrl
+      tags: [b2b-businesses]
+      summary: Request a protected upload URL for a business verification document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadUrlRequest"
+      responses:
+        "200":
+          description: Upload URL created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlResponse"
+        "400":
+          description: Invalid file metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Upload URL could not be created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profiles/review:
+    get:
+      operationId: getB2BBusinessProfileReviewQueue
+      tags: [b2b-businesses]
+      summary: List business profiles for staff verification
+      parameters:
+        - in: query
+          name: status
+          schema:
+            $ref: "#/components/schemas/B2BBusinessProfileStatus"
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        "200":
+          description: Business profiles for verification
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BBusinessProfilePage"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profiles/{id}/status:
+    patch:
+      operationId: updateB2BBusinessProfileStatus
+      tags: [b2b-businesses]
+      summary: Verify, reject, or suspend a business profile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BBusinessProfileStatusUpdate"
+      responses:
+        "200":
+          description: Updated business profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BBusinessProfile"
+        "400":
+          description: Invalid status update
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Business profile not found
           content:
             application/json:
               schema:
@@ -1122,6 +1309,162 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/B2BListing"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    B2BBusinessProfileStatus:
+      type: string
+      enum: [pending, verified, rejected, suspended]
+    B2BBusinessVerificationDocumentInput:
+      type: object
+      additionalProperties: false
+      required: [objectPath, fileName, contentType, size]
+      properties:
+        objectPath:
+          type: string
+          pattern: "^/objects/uploads/[a-zA-Z0-9-]+$"
+        fileName:
+          type: string
+          minLength: 1
+          maxLength: 255
+        contentType:
+          type: string
+          enum: [application/pdf, image/jpeg, image/png]
+        size:
+          type: integer
+          minimum: 1
+          maximum: 10485760
+    B2BBusinessProfileInput:
+      type: object
+      additionalProperties: false
+      required:
+        - legalName
+        - publicName
+        - country
+        - registrationNumber
+        - businessType
+        - field
+        - contact
+        - verificationDocument
+      properties:
+        legalName:
+          type: string
+          minLength: 2
+          maxLength: 240
+        publicName:
+          type: string
+          minLength: 2
+          maxLength: 160
+        country:
+          type: string
+          minLength: 2
+          maxLength: 80
+        registrationNumber:
+          type: string
+          minLength: 2
+          maxLength: 80
+        businessType:
+          type: string
+          minLength: 2
+          maxLength: 100
+        field:
+          type: string
+          minLength: 2
+          maxLength: 140
+        website:
+          type: string
+          format: uri
+        contact:
+          type: string
+          minLength: 5
+          maxLength: 180
+        verificationDocument:
+          $ref: "#/components/schemas/B2BBusinessVerificationDocumentInput"
+    B2BBusinessProfile:
+      type: object
+      required:
+        - id
+        - legalName
+        - publicName
+        - country
+        - registrationNumber
+        - businessType
+        - field
+        - contact
+        - verificationDocumentObjectPath
+        - verificationDocumentFileName
+        - verificationDocumentContentType
+        - verificationDocumentSize
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+        legalName:
+          type: string
+        publicName:
+          type: string
+        country:
+          type: string
+        registrationNumber:
+          type: string
+        businessType:
+          type: string
+        field:
+          type: string
+        website:
+          type: [string, "null"]
+          format: uri
+        contact:
+          type: string
+        verificationDocumentObjectPath:
+          type: string
+        verificationDocumentFileName:
+          type: string
+        verificationDocumentContentType:
+          type: string
+        verificationDocumentSize:
+          type: integer
+        status:
+          $ref: "#/components/schemas/B2BBusinessProfileStatus"
+        internalNote:
+          type: [string, "null"]
+        reviewerClerkUserId:
+          type: [string, "null"]
+        reviewedAt:
+          type: [string, "null"]
+          format: date-time
+        verifiedAt:
+          type: [string, "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    B2BBusinessProfileStatusUpdate:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          $ref: "#/components/schemas/B2BBusinessProfileStatus"
+        internalNote:
+          type: string
+          maxLength: 4000
+    B2BBusinessProfilePage:
+      type: object
+      required: [items, page, pageSize, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/B2BBusinessProfile"
         page:
           type: integer
         pageSize:

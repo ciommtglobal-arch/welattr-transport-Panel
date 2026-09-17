@@ -6,7 +6,11 @@ import {
   RequestUploadUrlResponse,
   CleanupOrphanUploadsBody,
 } from "@workspace/api-zod";
-import { db, limitApplicationDocumentsTable } from "@workspace/db";
+import {
+  b2bBusinessProfilesTable,
+  db,
+  limitApplicationDocumentsTable,
+} from "@workspace/db";
 import { eq, inArray } from "drizzle-orm";
 import {
   ObjectNotFoundError,
@@ -43,7 +47,22 @@ async function getReferencedObjectPaths(objectPaths: string[]) {
     .from(limitApplicationDocumentsTable)
     .where(inArray(limitApplicationDocumentsTable.objectPath, objectPaths));
 
-  return new Set(documents.map((document) => document.objectPath));
+  const businessProfiles = await db
+    .select({
+      objectPath: b2bBusinessProfilesTable.verificationDocumentObjectPath,
+    })
+    .from(b2bBusinessProfilesTable)
+    .where(
+      inArray(
+        b2bBusinessProfilesTable.verificationDocumentObjectPath,
+        objectPaths,
+      ),
+    );
+
+  return new Set([
+    ...documents.map((document) => document.objectPath),
+    ...businessProfiles.map((profile) => profile.objectPath),
+  ]);
 }
 
 router.post("/storage/objects/request-download-url", async (req, res) => {
@@ -63,7 +82,20 @@ router.post("/storage/objects/request-download-url", async (req, res) => {
     )
     .limit(1);
 
-  if (!document) {
+  const [businessProfile] = await db
+    .select({
+      objectPath: b2bBusinessProfilesTable.verificationDocumentObjectPath,
+    })
+    .from(b2bBusinessProfilesTable)
+    .where(
+      eq(
+        b2bBusinessProfilesTable.verificationDocumentObjectPath,
+        parsed.data.objectPath,
+      ),
+    )
+    .limit(1);
+
+  if (!document && !businessProfile) {
     res.status(404).json({ error: "Belge bulunamadı." });
     return;
   }

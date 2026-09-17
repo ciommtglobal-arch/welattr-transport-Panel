@@ -6,3 +6,4 @@
 - [Tami hosted payment](tami-hosted-payment.md) — Hosted token auth and payment-status query use different Tami signing materials.
 - [MMT Global free B2B network](mmt-global-free-b2b-network.md) — Keep producer promotion, buyer requests, and core matching/services free; grow trust and reach before monetization.
 - [Clerk public route isolation](clerk-public-route-isolation.md) — Keep public pages usable without Clerk; Replit dev previews may fail loading Clerk JS while auth routes still work.
+- [MMT Connect verification](mmt-connect-verification.md) — Use one-time business verification, then let verified firms publish their own free B2B listings.

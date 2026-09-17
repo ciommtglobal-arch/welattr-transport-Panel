@@ -1,0 +1,662 @@
+import { FormEvent, useState } from "react";
+import { Link } from "wouter";
+import { SignInButton, SignUpButton, useAuth } from "@clerk/react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  CircleAlert,
+  FileCheck2,
+  Loader2,
+  Upload,
+} from "lucide-react";
+import {
+  createMyB2BBusinessProfile,
+  getGetB2BListingsQueryKey,
+  getGetMyB2BBusinessProfileQueryKey,
+  requestB2BBusinessVerificationUploadUrl,
+  useCreateB2BListing,
+  useGetMyB2BBusinessProfile,
+  type B2BListing,
+  type B2BListingRole,
+  type B2BBusinessProfile,
+  type B2BBusinessProfileInput,
+} from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
+
+type DocumentContentType = "application/pdf" | "image/jpeg" | "image/png";
+
+const statusCopy: Record<
+  B2BBusinessProfile["status"],
+  { title: string; description: string }
+> = {
+  pending: {
+    title: "Doğrulama bekliyor",
+    description:
+      "Resmi belgeniz MMT Global ekibi tarafından inceleniyor. Profiliniz doğrulandığında yeni ilanlarınız doğrudan yayınlanabilecek.",
+  },
+  verified: {
+    title: "İşletmeniz doğrulandı",
+    description:
+      "Artık kendi alanınızda ücretsiz ilan yayınlayabilir, web sitenize ve medya kanallarınıza trafik çekebilirsiniz.",
+  },
+  rejected: {
+    title: "Ek bilgi gerekiyor",
+    description:
+      "Doğrulama tamamlanamadı. MMT Global ekibinin notlarını kontrol edip yeni başvuru için bize ulaşın.",
+  },
+  suspended: {
+    title: "Profil geçici olarak askıda",
+    description:
+      "Profilinizin yayın yetkisi geçici olarak durduruldu. Destek için MMT Global ekibiyle iletişime geçin.",
+  },
+};
+
+export default function B2BJoinPage() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const profileQuery = useGetMyB2BBusinessProfile({
+    query: {
+      queryKey: getGetMyB2BBusinessProfileQueryKey(),
+      enabled: isLoaded && Boolean(isSignedIn),
+      retry: false,
+    },
+  });
+
+  if (!isLoaded) {
+    return <LoadingState />;
+  }
+
+  return (
+    <main className="min-h-[100dvh] bg-background text-foreground">
+      <Header />
+      <section className="border-b border-border/70 bg-secondary px-6 py-14 text-secondary-foreground md:px-12 md:py-20">
+        <div className="mx-auto max-w-7xl">
+          <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            MMT Connect / Uluslararası B2B ağı
+          </p>
+          <h1 className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight md:text-7xl">
+            İşletmenizi tanıtın.
+            <span className="block font-serif font-normal italic text-primary">
+              Yeni bağlantılar kurun.
+            </span>
+          </h1>
+          <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-secondary-foreground/70 md:text-xl">
+            İşletmenizi bir kez doğrulayın; üretici, alıcı, lojistik veya hizmet
+            sağlayıcı olarak kendi ilanlarınızı ücretsiz yayınlayın.
+          </p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-16">
+        {!isSignedIn ? (
+          <SignInPrompt />
+        ) : profileQuery.isLoading ? (
+          <LoadingState />
+        ) : profileQuery.data ? (
+          profileQuery.data.status === "verified" ? (
+            <VerifiedPublisher profile={profileQuery.data} />
+          ) : profileQuery.data.status === "rejected" ? (
+            <VerificationForm initialProfile={profileQuery.data} />
+          ) : (
+            <ProfileStatus profile={profileQuery.data} />
+          )
+        ) : (
+          <VerificationForm />
+        )}
+      </section>
+    </main>
+  );
+}
+
+function Header() {
+  return (
+    <header className="border-b border-border/70 bg-background/95">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-12">
+        <Link href="/b2b-agi" className="group flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-br-xl rounded-tl-xl bg-primary text-lg font-bold text-primary-foreground transition-transform group-hover:scale-95">
+            M
+          </span>
+          <span className="text-lg font-semibold tracking-wider">
+            MMT <span className="font-light opacity-80">CONNECT</span>
+          </span>
+        </Link>
+        <Link
+          href="/b2b-agi"
+          className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/65 transition-colors hover:text-primary"
+        >
+          <ArrowLeft size={15} />
+          Ağa dön
+        </Link>
+      </div>
+    </header>
+  );
+}
+
+function SignInPrompt() {
+  return (
+    <div className="mx-auto grid max-w-4xl gap-10 border border-border/70 bg-card p-8 md:grid-cols-[1fr_auto] md:p-12">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+          Ücretsiz katılım
+        </p>
+        <h2 className="mt-4 text-3xl font-semibold">
+          Önce ücretsiz hesabınızı oluşturun.
+        </h2>
+        <p className="mt-4 max-w-xl leading-relaxed text-foreground/65">
+          Hesabınız işletme profilinizi ve ilanlarınızı yönetmeniz için
+          kullanılacak. MMT Connect’e katılım ve ilan yayınlamak ücretsizdir.
+        </p>
+      </div>
+      <div className="flex flex-col justify-center gap-3 sm:flex-row md:flex-col">
+        <SignUpButton mode="modal">
+          <button className="bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-primary/90">
+            Hesap oluştur
+          </button>
+        </SignUpButton>
+        <SignInButton mode="modal">
+          <button className="border border-border/70 px-6 py-3 text-sm font-semibold uppercase tracking-wider transition-colors hover:border-primary hover:text-primary">
+            Giriş yap
+          </button>
+        </SignInButton>
+      </div>
+    </div>
+  );
+}
+
+function VerificationForm({
+  initialProfile,
+}: {
+  initialProfile?: B2BBusinessProfile;
+}) {
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState({
+    legalName: initialProfile?.legalName ?? "",
+    publicName: initialProfile?.publicName ?? "",
+    country: initialProfile?.country ?? "",
+    registrationNumber: initialProfile?.registrationNumber ?? "",
+    businessType: initialProfile?.businessType ?? "",
+    field: initialProfile?.field ?? "",
+    website: initialProfile?.website ?? "",
+    contact: initialProfile?.contact ?? "",
+  });
+  const [document, setDocument] = useState<File | null>(null);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function updateField(name: keyof typeof form, value: string) {
+    setForm((current) => ({ ...current, [name]: value }));
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    if (!document) {
+      setError("Vergi levhası veya ülkenizdeki eşdeğer resmi belgeyi yükleyin.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const contentType = document.type as DocumentContentType;
+      const upload = await requestB2BBusinessVerificationUploadUrl({
+        name: document.name,
+        size: document.size,
+        contentType,
+      });
+      const uploadResponse = await fetch(upload.uploadURL, {
+        method: "PUT",
+        headers: { "Content-Type": document.type },
+        body: document,
+      });
+      if (!uploadResponse.ok) {
+        throw new Error("Belge yüklenemedi.");
+      }
+
+      const input: B2BBusinessProfileInput = {
+        legalName: form.legalName.trim(),
+        publicName: form.publicName.trim(),
+        country: form.country.trim(),
+        registrationNumber: form.registrationNumber.trim(),
+        businessType: form.businessType.trim(),
+        field: form.field.trim(),
+        website: form.website.trim() || undefined,
+        contact: form.contact.trim(),
+        verificationDocument: {
+          objectPath: upload.objectPath,
+          fileName: document.name,
+          contentType,
+          size: document.size,
+        },
+      };
+      await createMyB2BBusinessProfile(input);
+      await queryClient.invalidateQueries({
+        queryKey: getGetMyB2BBusinessProfileQueryKey(),
+      });
+    } catch (submissionError) {
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "Başvuru gönderilemedi. Bilgilerinizi kontrol edip tekrar deneyin.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="grid gap-12 lg:grid-cols-[0.7fr_1.3fr] lg:gap-24">
+      <aside>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+          Tek seferlik doğrulama
+        </p>
+        <h2 className="mt-5 text-3xl font-semibold leading-tight md:text-4xl">
+          Gerçek işletmeler,
+          <span className="block font-serif font-normal italic text-primary">
+            güçlü bağlantılar.
+          </span>
+        </h2>
+        <div className="mt-8 space-y-5 text-sm leading-relaxed text-foreground/65">
+          <p>
+            Firma bilgilerinizi ve resmi belgenizi bir kez gönderin. MMT Global
+            ekibi kontrol ettikten sonra her ilanınız doğrudan yayınlanır.
+          </p>
+          <p>
+            Belgeniz public gösterilmez. İlanlarda yalnızca doğrulanmış işletme
+            işareti, sizin seçtiğiniz iletişim bilgileri ve bağlantılar görünür.
+          </p>
+        </div>
+        <div className="mt-8 space-y-4 border-l-2 border-primary pl-4 text-sm">
+          <p className="flex items-start gap-3">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            Ücretsiz profil ve ilan yayınlama
+          </p>
+          <p className="flex items-start gap-3">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            Uluslararası ülke ve faaliyet alanı desteği
+          </p>
+          <p className="flex items-start gap-3">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            Web sitesi ve medya kanallarınıza trafik
+          </p>
+        </div>
+      </aside>
+
+      <form
+        onSubmit={handleSubmit}
+        className="border border-border/70 bg-card p-6 md:p-10"
+      >
+        <div className="mb-8 flex items-center gap-3 border-b border-border/70 pb-6">
+          <FileCheck2 className="h-6 w-6 text-primary" />
+          <div>
+            <h3 className="font-semibold">İşletme doğrulama profili</h3>
+            <p className="text-xs text-foreground/55">
+              Bilgileriniz yalnızca doğrulama ve iletişim için kullanılır.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2">
+          <Field label="Yasal unvan" value={form.legalName} onChange={(v) => updateField("legalName", v)} required />
+          <Field label="Yayınlanacak işletme adı" value={form.publicName} onChange={(v) => updateField("publicName", v)} required />
+          <Field label="Ülke" value={form.country} onChange={(v) => updateField("country", v)} required placeholder="Türkiye, Birleşik Krallık..." />
+          <Field label="Vergi / şirket kayıt numarası" value={form.registrationNumber} onChange={(v) => updateField("registrationNumber", v)} required />
+          <Field label="İşletme türü" value={form.businessType} onChange={(v) => updateField("businessType", v)} required placeholder="Üretici, fabrika, esnaf..." />
+          <Field label="Faaliyet alanı" value={form.field} onChange={(v) => updateField("field", v)} required placeholder="Tekstil, gıda, lojistik..." />
+          <Field label="Web sitesi" value={form.website} onChange={(v) => updateField("website", v)} placeholder="https://" />
+          <Field label="İletişim bilgisi" value={form.contact} onChange={(v) => updateField("contact", v)} required placeholder="E-posta veya telefon" />
+        </div>
+
+        <label className="mt-6 block">
+          <span className="mb-2 block text-sm text-foreground/70">
+            Vergi levhası veya eşdeğer resmi belge <span className="text-primary">*</span>
+          </span>
+          <span className="flex cursor-pointer items-center gap-3 border border-dashed border-border/80 bg-background px-4 py-4 text-sm transition-colors hover:border-primary">
+            <Upload className="h-5 w-5 text-primary" />
+            <span className="min-w-0 flex-1 truncate">
+              {document?.name ?? "PDF, JPG veya PNG — en fazla 10 MB"}
+            </span>
+            <input
+              type="file"
+              accept="application/pdf,image/jpeg,image/png"
+              className="sr-only"
+              onChange={(event) => setDocument(event.target.files?.[0] ?? null)}
+            />
+          </span>
+        </label>
+
+        {error ? (
+          <p className="mt-5 border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-700 dark:text-red-300">
+            {error}
+          </p>
+        ) : null}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="mt-8 flex w-full items-center justify-center gap-2 bg-primary px-5 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-primary/90 disabled:opacity-70"
+        >
+          {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : null}
+          {isSubmitting ? "Gönderiliyor..." : "Doğrulama için gönder"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function ProfileStatus({ profile }: { profile: B2BBusinessProfile }) {
+  const copy = statusCopy[profile.status];
+  return (
+    <div className="mx-auto max-w-3xl border border-primary/30 bg-primary/5 p-8 md:p-12">
+      <CheckCircle2 className="h-12 w-12 text-primary" />
+      <p className="mt-8 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+        {profile.publicName}
+      </p>
+      <h2 className="mt-3 text-3xl font-semibold">{copy.title}</h2>
+      <p className="mt-4 max-w-2xl leading-relaxed text-foreground/65">
+        {copy.description}
+      </p>
+      {profile.internalNote ? (
+        <p className="mt-6 border-l-2 border-primary pl-4 text-sm text-foreground/70">
+          MMT Global notu: {profile.internalNote}
+        </p>
+      ) : null}
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Link
+          href="/b2b-agi"
+          className="bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white"
+        >
+          B2B ağını keşfet
+        </Link>
+        {profile.status === "verified" ? (
+          <Link
+            href="/b2b-agi"
+            className="border border-border/70 px-6 py-3 text-sm font-semibold uppercase tracking-wider hover:border-primary hover:text-primary"
+          >
+            Yeni ilan yayınla
+          </Link>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
+  const queryClient = useQueryClient();
+  const [role, setRole] = useState<B2BListingRole>("producer");
+  const [title, setTitle] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [location, setLocation] = useState("");
+  const [contact, setContact] = useState(profile.contact);
+  const [description, setDescription] = useState("");
+  const [website, setWebsite] = useState(profile.website ?? "");
+  const [socials, setSocials] = useState({
+    instagram: "",
+    facebook: "",
+    linkedin: "",
+    telegram: "",
+    tiktok: "",
+  });
+  const [publishedListing, setPublishedListing] = useState<B2BListing | null>(
+    null,
+  );
+
+  const createListing = useCreateB2BListing({
+    mutation: {
+      onSuccess: async (listing) => {
+        setPublishedListing(listing);
+        await queryClient.invalidateQueries({
+          queryKey: getGetB2BListingsQueryKey(),
+        });
+      },
+    },
+  });
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const cleanedSocials = {
+      instagram: socials.instagram.trim() || undefined,
+      facebook: socials.facebook.trim() || undefined,
+      linkedin: socials.linkedin.trim() || undefined,
+      telegram: socials.telegram.trim() || undefined,
+      tiktok: socials.tiktok.trim() || undefined,
+    };
+    const hasSocials = Object.values(cleanedSocials).some(Boolean);
+
+    createListing.mutate({
+      data: {
+        role,
+        title: title.trim(),
+        fullName: fullName.trim(),
+        organization: profile.publicName,
+        location: location.trim(),
+        contact: contact.trim(),
+        description: description.trim(),
+        website: website.trim() || undefined,
+        socialLinks: hasSocials ? cleanedSocials : undefined,
+      },
+    });
+  }
+
+  if (publishedListing) {
+    return (
+      <div className="mx-auto max-w-3xl border border-primary/30 bg-primary/5 p-8 md:p-12">
+        <CheckCircle2 className="h-12 w-12 text-primary" />
+        <p className="mt-8 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+          {profile.publicName}
+        </p>
+        <h2 className="mt-3 text-3xl font-semibold">İlanınız yayınlandı</h2>
+        <p className="mt-4 max-w-2xl leading-relaxed text-foreground/65">
+          İlanınız MMT Connect ağında herkese açık olarak yayınlandı. Web
+          siteniz ve medya bağlantılarınız bu ilan üzerinden görünür.
+        </p>
+        <div className="mt-6 border border-border/70 bg-card px-5 py-4">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
+            Referans kodu
+          </p>
+          <p className="mt-1 font-mono text-lg font-bold tracking-wider">
+            {publishedListing.referenceCode}
+          </p>
+        </div>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            href={`/b2b-agi/ilan/${publishedListing.id}`}
+            className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white"
+          >
+            İlanı görüntüle
+            <ArrowRight size={16} />
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              setPublishedListing(null);
+              setTitle("");
+              setDescription("");
+            }}
+            className="border border-border/70 px-6 py-3 text-sm font-semibold uppercase tracking-wider hover:border-primary hover:text-primary"
+          >
+            Yeni ilan yayınla
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-12 lg:grid-cols-[0.7fr_1.3fr] lg:gap-24">
+      <aside>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+          Doğrulanmış işletme
+        </p>
+        <h2 className="mt-5 text-3xl font-semibold leading-tight md:text-4xl">
+          {profile.publicName}
+          <span className="block font-serif font-normal italic text-primary">
+            artık yayında.
+          </span>
+        </h2>
+        <p className="mt-8 leading-relaxed text-foreground/65">
+          Ürün, alım talebi, lojistik veya hizmet ilanınızı oluşturun. İlanınız
+          ek bir MMT onayı beklemeden doğrudan yayınlanır.
+        </p>
+        <div className="mt-8 border-l-2 border-primary pl-4 text-sm leading-relaxed text-foreground/70">
+          <strong className="block text-foreground">Ücretsiz görünürlük</strong>
+          Web sitenizi ve sosyal medya kanallarınızı ekleyerek ağ trafiğini
+          kendi kanallarınıza yönlendirin.
+        </div>
+      </aside>
+
+      <form
+        onSubmit={handleSubmit}
+        className="border border-border/70 bg-card p-6 md:p-10"
+      >
+        <div className="mb-8 border-b border-border/70 pb-6">
+          <h3 className="text-2xl font-semibold">Yeni ilan yayınla</h3>
+          <p className="mt-2 text-sm text-foreground/55">
+            İlanınız doğrulanmış işletme profilinizle yayınlanır.
+          </p>
+        </div>
+
+        <div>
+          <label className="mb-3 block text-sm font-semibold">İlan türü</label>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {(
+              [
+                ["producer", "Üretici"],
+                ["buyer", "Alıcı"],
+                ["logistics", "Lojistik / Hizmet"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setRole(value)}
+                className={`border p-4 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                  role === value
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border/70 text-foreground/60 hover:border-primary/50"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-7 grid gap-5 md:grid-cols-2">
+          <Field
+            label="İlan başlığı"
+            value={title}
+            onChange={setTitle}
+            required
+            placeholder="Örn: Pamuk ipliği tedariki"
+          />
+          <Field
+            label="Yetkili kişi"
+            value={fullName}
+            onChange={setFullName}
+            required
+          />
+          <Field
+            label="Şehir / ülke"
+            value={location}
+            onChange={setLocation}
+            required
+          />
+          <Field
+            label="İletişim"
+            value={contact}
+            onChange={setContact}
+            required
+          />
+          <Field
+            label="Web sitesi"
+            value={website}
+            onChange={setWebsite}
+            placeholder="https://"
+          />
+        </div>
+
+        <label className="mt-6 block text-sm">
+          <span className="mb-2 block text-foreground/70">
+            Açıklama <span className="text-primary">*</span>
+          </span>
+          <textarea
+            required
+            minLength={20}
+            rows={5}
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder="Ürününüzü, arayışınızı veya hizmet detaylarınızı yazın..."
+            className="w-full resize-y border border-border/70 bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary"
+          />
+        </label>
+
+        <div className="mt-7 border-t border-border/70 pt-7">
+          <h4 className="mb-4 text-sm font-semibold">Medya kanalları</h4>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="LinkedIn" value={socials.linkedin} onChange={(v) => setSocials({ ...socials, linkedin: v })} placeholder="Profil URL'si" />
+            <Field label="Instagram" value={socials.instagram} onChange={(v) => setSocials({ ...socials, instagram: v })} placeholder="Profil URL'si" />
+            <Field label="Facebook" value={socials.facebook} onChange={(v) => setSocials({ ...socials, facebook: v })} placeholder="Profil URL'si" />
+            <Field label="Telegram" value={socials.telegram} onChange={(v) => setSocials({ ...socials, telegram: v })} placeholder="t.me/kullaniciadi" />
+            <Field label="TikTok" value={socials.tiktok} onChange={(v) => setSocials({ ...socials, tiktok: v })} placeholder="Profil URL'si" />
+          </div>
+        </div>
+
+        {createListing.isError ? (
+          <div className="mt-6 flex gap-3 border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-700 dark:text-red-300">
+            <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+            İlan yayınlanamadı. Bilgilerinizi kontrol edip tekrar deneyin.
+          </div>
+        ) : null}
+
+        <button
+          type="submit"
+          disabled={createListing.isPending}
+          className="mt-7 flex w-full items-center justify-center gap-2 bg-primary px-5 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-primary/90 disabled:opacity-70"
+        >
+          {createListing.isPending ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : null}
+          İlanı yayınla
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="flex min-h-56 items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  required = false,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+  placeholder?: string;
+}) {
+  return (
+    <label className="block text-sm">
+      <span className="mb-2 block text-foreground/70">
+        {label} {required && <span className="text-primary">*</span>}
+      </span>
+      <input
+        type="text"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        required={required}
+        placeholder={placeholder}
+        className="w-full border border-border/70 bg-background px-4 py-3 outline-none transition-colors focus:border-primary"
+      />
+    </label>
+  );
+}

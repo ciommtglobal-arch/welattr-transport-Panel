@@ -1,5 +1,6 @@
 import {
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -10,6 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { b2bBusinessProfilesTable } from "./b2b-business-profiles";
 
 export const b2bListingStatusEnum = pgEnum("b2b_listing_status", [
   "pending",
@@ -37,6 +39,10 @@ export const b2bListingsTable = pgTable(
     id: serial("id").primaryKey(),
     referenceCode: text("reference_code").notNull(),
     submitterClerkUserId: text("submitter_clerk_user_id"),
+    businessProfileId: integer("business_profile_id").references(
+      () => b2bBusinessProfilesTable.id,
+      { onDelete: "set null" },
+    ),
     role: b2bListingRoleEnum("role").notNull(),
     title: text("title").notNull(),
     fullName: text("full_name").notNull(),
@@ -61,6 +67,7 @@ export const b2bListingsTable = pgTable(
   },
   (table) => [
     uniqueIndex("b2b_listings_reference_code_idx").on(table.referenceCode),
+    index("b2b_listings_business_profile_idx").on(table.businessProfileId),
     index("b2b_listings_status_idx").on(table.status),
     index("b2b_listings_role_idx").on(table.role),
     index("b2b_listings_created_at_idx").on(table.createdAt),

@@ -1,5 +1,4 @@
 import { Router, type IRouter } from "express";
-import { getAuth } from "@clerk/express";
 import {
   CreateB2BListingBody,
   GetB2BListingParams,
@@ -9,13 +8,14 @@ import {
   UpdateB2BListingStatusParams,
 } from "@workspace/api-zod";
 import {
+  b2bBusinessProfilesTable,
   b2bListingsTable,
   db,
   type B2BListing,
   type B2BListingSocialLinks,
 } from "@workspace/db";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
-import { requireStaff } from "../lib/staffAuth";
+import { requireStaff, requireUser } from "../lib/staffAuth";
 import { randomBytes } from "node:crypto";
 
 const router: IRouter = Router();
@@ -106,6 +106,9 @@ router.get("/b2b-listings", async (req, res): Promise<void> => {
 });
 
 router.post("/b2b-listings", async (req, res): Promise<void> => {
+  const submitterClerkUserId = requireUser(req, res);
+  if (!submitterClerkUserId) return;
+
   const parsed = CreateB2BListingBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({
@@ -115,12 +118,40 @@ router.post("/b2b-listings", async (req, res): Promise<void> => {
   }
 
   const input = parsed.data;
-  const submitterClerkUserId = getAuth(req).userId ?? null;
+  const [businessProfile] = await db
+    .select()
+    .from(b2bBusinessProfilesTable)
+    .where(
+      eq(b2bBusinessProfilesTable.ownerClerkUserId, submitterClerkUserId),
+    )
+    .limit(1);
+
+  if (!businessProfile) {
+    res.status(403).json({
+      error:
+        "İlan yayınlamak için önce MMT Connect işletme profilinizi oluşturup doğrulatın.",
+    });
+    return;
+  }
+
+  if (businessProfile.status !== "verified") {
+    const statusMessage =
+      businessProfile.status === "pending"
+        ? "İşletme profiliniz doğrulama bekliyor."
+        : businessProfile.status === "rejected"
+          ? "İşletme profiliniz doğrulanmadı. Bilgilerinizi güncelleyip yeniden başvurun."
+          : "İşletme profiliniz askıya alınmış durumda.";
+    res.status(403).json({ error: statusMessage });
+    return;
+  }
+
+  const publishedAt = new Date();
   const [listing] = await db
     .insert(b2bListingsTable)
     .values({
       referenceCode: createReferenceCode(),
       submitterClerkUserId,
+      businessProfileId: businessProfile.id,
       role: input.role,
       title: input.title.trim(),
       fullName: input.fullName.trim(),
@@ -130,12 +161,14 @@ router.post("/b2b-listings", async (req, res): Promise<void> => {
       description: input.description.trim(),
       website: input.website?.trim() || null,
       socialLinks: cleanSocialLinks(input.socialLinks),
+      status: "approved",
+      publishedAt,
     })
     .returning();
 
   req.log.info(
     { listingId: listing.id, referenceCode: listing.referenceCode },
-    "B2B listing submitted for moderation",
+    "B2B listing published by verified business",
   );
   res.status(201).json(serializeListing(listing, true));
 });

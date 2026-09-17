@@ -383,6 +383,222 @@ export const UpdateLimitApplicationStatusResponse = zod.object({
 
 
 /**
+ * @summary Get the signed-in user's B2B business profile
+ */
+export const GetMyB2BBusinessProfileResponse = zod.object({
+  "id": zod.int(),
+  "legalName": zod.string(),
+  "publicName": zod.string(),
+  "country": zod.string(),
+  "registrationNumber": zod.string(),
+  "businessType": zod.string(),
+  "field": zod.string(),
+  "website": zod.url().nullish(),
+  "contact": zod.string(),
+  "verificationDocumentObjectPath": zod.string(),
+  "verificationDocumentFileName": zod.string(),
+  "verificationDocumentContentType": zod.string(),
+  "verificationDocumentSize": zod.int(),
+  "status": zod.enum(['pending', 'verified', 'rejected', 'suspended']),
+  "internalNote": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "verifiedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Create a business profile for verification
+ */
+export const createMyB2BBusinessProfileBodyLegalNameMin = 2;
+export const createMyB2BBusinessProfileBodyLegalNameMax = 240;
+
+export const createMyB2BBusinessProfileBodyPublicNameMin = 2;
+export const createMyB2BBusinessProfileBodyPublicNameMax = 160;
+
+export const createMyB2BBusinessProfileBodyCountryMin = 2;
+export const createMyB2BBusinessProfileBodyCountryMax = 80;
+
+export const createMyB2BBusinessProfileBodyRegistrationNumberMin = 2;
+export const createMyB2BBusinessProfileBodyRegistrationNumberMax = 80;
+
+export const createMyB2BBusinessProfileBodyBusinessTypeMin = 2;
+export const createMyB2BBusinessProfileBodyBusinessTypeMax = 100;
+
+export const createMyB2BBusinessProfileBodyFieldMin = 2;
+export const createMyB2BBusinessProfileBodyFieldMax = 140;
+
+export const createMyB2BBusinessProfileBodyContactMin = 5;
+export const createMyB2BBusinessProfileBodyContactMax = 180;
+
+export const createMyB2BBusinessProfileBodyVerificationDocumentObjectPathRegExp = new RegExp('^/objects/uploads/[a-zA-Z0-9-]+$');
+export const createMyB2BBusinessProfileBodyVerificationDocumentFileNameMax = 255;
+
+export const createMyB2BBusinessProfileBodyVerificationDocumentSizeMax = 10485760;
+
+
+
+export const CreateMyB2BBusinessProfileBody = zod.object({
+  "legalName": zod.string().min(createMyB2BBusinessProfileBodyLegalNameMin).max(createMyB2BBusinessProfileBodyLegalNameMax),
+  "publicName": zod.string().min(createMyB2BBusinessProfileBodyPublicNameMin).max(createMyB2BBusinessProfileBodyPublicNameMax),
+  "country": zod.string().min(createMyB2BBusinessProfileBodyCountryMin).max(createMyB2BBusinessProfileBodyCountryMax),
+  "registrationNumber": zod.string().min(createMyB2BBusinessProfileBodyRegistrationNumberMin).max(createMyB2BBusinessProfileBodyRegistrationNumberMax),
+  "businessType": zod.string().min(createMyB2BBusinessProfileBodyBusinessTypeMin).max(createMyB2BBusinessProfileBodyBusinessTypeMax),
+  "field": zod.string().min(createMyB2BBusinessProfileBodyFieldMin).max(createMyB2BBusinessProfileBodyFieldMax),
+  "website": zod.url().optional(),
+  "contact": zod.string().min(createMyB2BBusinessProfileBodyContactMin).max(createMyB2BBusinessProfileBodyContactMax),
+  "verificationDocument": zod.object({
+  "objectPath": zod.string().regex(createMyB2BBusinessProfileBodyVerificationDocumentObjectPathRegExp),
+  "fileName": zod.string().min(1).max(createMyB2BBusinessProfileBodyVerificationDocumentFileNameMax),
+  "contentType": zod.enum(['application/pdf', 'image/jpeg', 'image/png']),
+  "size": zod.int().min(1).max(createMyB2BBusinessProfileBodyVerificationDocumentSizeMax)
+})
+})
+
+export const CreateMyB2BBusinessProfileResponse = zod.object({
+  "id": zod.int(),
+  "legalName": zod.string(),
+  "publicName": zod.string(),
+  "country": zod.string(),
+  "registrationNumber": zod.string(),
+  "businessType": zod.string(),
+  "field": zod.string(),
+  "website": zod.url().nullish(),
+  "contact": zod.string(),
+  "verificationDocumentObjectPath": zod.string(),
+  "verificationDocumentFileName": zod.string(),
+  "verificationDocumentContentType": zod.string(),
+  "verificationDocumentSize": zod.int(),
+  "status": zod.enum(['pending', 'verified', 'rejected', 'suspended']),
+  "internalNote": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "verifiedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Request a protected upload URL for a business verification document
+ */
+export const requestB2BBusinessVerificationUploadUrlBodyNameMax = 255;
+
+export const requestB2BBusinessVerificationUploadUrlBodySizeMax = 10485760;
+
+
+
+export const RequestB2BBusinessVerificationUploadUrlBody = zod.object({
+  "name": zod.string().min(1).max(requestB2BBusinessVerificationUploadUrlBodyNameMax),
+  "size": zod.int().min(1).max(requestB2BBusinessVerificationUploadUrlBodySizeMax),
+  "contentType": zod.enum(['application/pdf', 'image/jpeg', 'image/png'])
+})
+
+export const requestB2BBusinessVerificationUploadUrlResponseMetadataNameMax = 255;
+
+export const requestB2BBusinessVerificationUploadUrlResponseMetadataSizeMax = 10485760;
+
+
+
+export const RequestB2BBusinessVerificationUploadUrlResponse = zod.object({
+  "uploadURL": zod.url(),
+  "objectPath": zod.string(),
+  "metadata": zod.object({
+  "name": zod.string().min(1).max(requestB2BBusinessVerificationUploadUrlResponseMetadataNameMax),
+  "size": zod.int().min(1).max(requestB2BBusinessVerificationUploadUrlResponseMetadataSizeMax),
+  "contentType": zod.enum(['application/pdf', 'image/jpeg', 'image/png'])
+}).optional()
+})
+
+
+/**
+ * @summary List business profiles for staff verification
+ */
+export const getB2BBusinessProfileReviewQueueQueryPageDefault = 1;
+
+export const getB2BBusinessProfileReviewQueueQueryPageSizeDefault = 25;
+export const getB2BBusinessProfileReviewQueueQueryPageSizeMax = 100;
+
+
+
+export const GetB2BBusinessProfileReviewQueueQueryParams = zod.object({
+  "status": zod.enum(['pending', 'verified', 'rejected', 'suspended']).optional(),
+  "page": zod.coerce.number().int().min(1).default(getB2BBusinessProfileReviewQueueQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getB2BBusinessProfileReviewQueueQueryPageSizeMax).default(getB2BBusinessProfileReviewQueueQueryPageSizeDefault)
+})
+
+export const GetB2BBusinessProfileReviewQueueResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "legalName": zod.string(),
+  "publicName": zod.string(),
+  "country": zod.string(),
+  "registrationNumber": zod.string(),
+  "businessType": zod.string(),
+  "field": zod.string(),
+  "website": zod.url().nullish(),
+  "contact": zod.string(),
+  "verificationDocumentObjectPath": zod.string(),
+  "verificationDocumentFileName": zod.string(),
+  "verificationDocumentContentType": zod.string(),
+  "verificationDocumentSize": zod.int(),
+  "status": zod.enum(['pending', 'verified', 'rejected', 'suspended']),
+  "internalNote": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "verifiedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "total": zod.int()
+})
+
+
+/**
+ * @summary Verify, reject, or suspend a business profile
+ */
+export const UpdateB2BBusinessProfileStatusParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateB2BBusinessProfileStatusBodyInternalNoteMax = 4000;
+
+
+
+export const UpdateB2BBusinessProfileStatusBody = zod.object({
+  "status": zod.enum(['pending', 'verified', 'rejected', 'suspended']),
+  "internalNote": zod.string().max(updateB2BBusinessProfileStatusBodyInternalNoteMax).optional()
+})
+
+export const UpdateB2BBusinessProfileStatusResponse = zod.object({
+  "id": zod.int(),
+  "legalName": zod.string(),
+  "publicName": zod.string(),
+  "country": zod.string(),
+  "registrationNumber": zod.string(),
+  "businessType": zod.string(),
+  "field": zod.string(),
+  "website": zod.url().nullish(),
+  "contact": zod.string(),
+  "verificationDocumentObjectPath": zod.string(),
+  "verificationDocumentFileName": zod.string(),
+  "verificationDocumentContentType": zod.string(),
+  "verificationDocumentSize": zod.int(),
+  "status": zod.enum(['pending', 'verified', 'rejected', 'suspended']),
+  "internalNote": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "verifiedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
  * @summary List approved B2B listings
  */
 export const getB2BListingsQueryQueryMax = 120;
