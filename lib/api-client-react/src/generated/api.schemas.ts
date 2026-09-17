@@ -351,6 +351,19 @@ export const B2BListingRole = {
   producer: 'producer',
   buyer: 'buyer',
   logistics: 'logistics',
+  employer: 'employer',
+} as const;
+
+export type B2BEmploymentType = typeof B2BEmploymentType[keyof typeof B2BEmploymentType];
+
+
+export const B2BEmploymentType = {
+  full_time: 'full_time',
+  part_time: 'part_time',
+  contract: 'contract',
+  seasonal: 'seasonal',
+  internship: 'internship',
+  remote: 'remote',
 } as const;
 
 export type B2BListingStatus = typeof B2BListingStatus[keyof typeof B2BListingStatus];
@@ -380,6 +393,11 @@ export interface B2BListing {
   location: string;
   contact: string;
   description: string;
+  employmentType?: B2BEmploymentType | null;
+  /** @nullable */
+  salary?: string | null;
+  /** @nullable */
+  experience?: string | null;
   /** @nullable */
   website?: string | null;
   socialLinks?: B2BListingSocialLinks | null;
@@ -424,6 +442,11 @@ export interface B2BListingInput {
      * @maxLength 2000
      */
   description: string;
+  employmentType?: B2BEmploymentType;
+  /** @maxLength 120 */
+  salary?: string;
+  /** @maxLength 160 */
+  experience?: string;
   website?: string;
   socialLinks?: B2BListingSocialLinks;
 }
@@ -449,6 +472,7 @@ export const B2BRequestCategory = {
   service: 'service',
   logistics: 'logistics',
   partnership: 'partnership',
+  employment: 'employment',
   other: 'other',
 } as const;
 
@@ -491,6 +515,11 @@ export interface B2BRequestInput {
      * @maxLength 2000
      */
   description: string;
+  employmentType?: B2BEmploymentType;
+  /** @maxLength 120 */
+  salary?: string;
+  /** @maxLength 160 */
+  experience?: string;
 }
 
 export interface B2BRequest {
@@ -504,6 +533,11 @@ export interface B2BRequest {
   location: string;
   contact: string;
   description: string;
+  employmentType?: B2BEmploymentType | null;
+  /** @nullable */
+  salary?: string | null;
+  /** @nullable */
+  experience?: string | null;
   status: B2BRequestStatus;
   /** @nullable */
   internalNote?: string | null;

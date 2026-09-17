@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { B2BEmploymentType } from './b2BEmploymentType';
 import type { B2BListingRole } from './b2BListingRole';
 import type { B2BListingSocialLinks } from './b2BListingSocialLinks';
 import type { B2BListingStatus } from './b2BListingStatus';
@@ -19,6 +20,11 @@ export interface B2BListing {
   location: string;
   contact: string;
   description: string;
+  employmentType?: B2BEmploymentType | null;
+  /** @nullable */
+  salary?: string | null;
+  /** @nullable */
+  experience?: string | null;
   /** @nullable */
   website?: string | null;
   socialLinks?: B2BListingSocialLinks | null;

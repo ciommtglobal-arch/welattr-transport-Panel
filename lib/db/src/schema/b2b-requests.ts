@@ -16,6 +16,7 @@ export const b2bRequestCategoryEnum = pgEnum("b2b_request_category", [
   "service",
   "logistics",
   "partnership",
+  "employment",
   "other",
 ]);
 
@@ -39,6 +40,9 @@ export const b2bRequestsTable = pgTable(
     location: text("location").notNull(),
     contact: text("contact").notNull(),
     description: text("description").notNull(),
+    employmentType: text("employment_type"),
+    salary: text("salary"),
+    experience: text("experience"),
     status: b2bRequestStatusEnum("status").notNull().default("pending"),
     internalNote: text("internal_note"),
     reviewerClerkUserId: text("reviewer_clerk_user_id"),

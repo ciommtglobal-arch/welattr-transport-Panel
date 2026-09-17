@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { B2BEmploymentType } from './b2BEmploymentType';
 import type { B2BRequestCategory } from './b2BRequestCategory';
 
 export interface B2BRequestInput {
@@ -36,4 +37,9 @@ export interface B2BRequestInput {
      * @maxLength 2000
      */
   description: string;
+  employmentType?: B2BEmploymentType;
+  /** @maxLength 120 */
+  salary?: string;
+  /** @maxLength 160 */
+  experience?: string;
 }

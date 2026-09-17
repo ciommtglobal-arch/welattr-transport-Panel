@@ -23,6 +23,7 @@ export const b2bListingRoleEnum = pgEnum("b2b_listing_role", [
   "producer",
   "buyer",
   "logistics",
+  "employer",
 ]);
 
 export type B2BListingSocialLinks = {
@@ -50,6 +51,9 @@ export const b2bListingsTable = pgTable(
     location: text("location").notNull(),
     contact: text("contact").notNull(),
     description: text("description").notNull(),
+    employmentType: text("employment_type"),
+    salary: text("salary"),
+    experience: text("experience"),
     website: text("website"),
     socialLinks: jsonb("social_links").$type<B2BListingSocialLinks>(),
     status: b2bListingStatusEnum("status").notNull().default("pending"),

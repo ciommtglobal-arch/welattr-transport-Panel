@@ -611,7 +611,7 @@ export const getB2BListingsQueryPageSizeMax = 50;
 
 
 export const GetB2BListingsQueryParams = zod.object({
-  "role": zod.enum(['producer', 'buyer', 'logistics']).optional(),
+  "role": zod.enum(['producer', 'buyer', 'logistics', 'employer']).optional(),
   "query": zod.coerce.string().max(getB2BListingsQueryQueryMax).optional(),
   "page": zod.coerce.number().int().min(1).default(getB2BListingsQueryPageDefault),
   "pageSize": zod.coerce.number().int().min(1).max(getB2BListingsQueryPageSizeMax).default(getB2BListingsQueryPageSizeDefault)
@@ -621,13 +621,16 @@ export const GetB2BListingsResponse = zod.object({
   "items": zod.array(zod.object({
   "id": zod.int(),
   "referenceCode": zod.string(),
-  "role": zod.enum(['producer', 'buyer', 'logistics']),
+  "role": zod.enum(['producer', 'buyer', 'logistics', 'employer']),
   "title": zod.string(),
   "fullName": zod.string(),
   "organization": zod.string(),
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
+  "salary": zod.string().nullish(),
+  "experience": zod.string().nullish(),
   "website": zod.url().nullish(),
   "socialLinks": zod.union([zod.object({
   "instagram": zod.url().optional(),
@@ -669,16 +672,23 @@ export const createB2BListingBodyContactMax = 180;
 export const createB2BListingBodyDescriptionMin = 20;
 export const createB2BListingBodyDescriptionMax = 2000;
 
+export const createB2BListingBodySalaryMax = 120;
+
+export const createB2BListingBodyExperienceMax = 160;
+
 
 
 export const CreateB2BListingBody = zod.object({
-  "role": zod.enum(['producer', 'buyer', 'logistics']),
+  "role": zod.enum(['producer', 'buyer', 'logistics', 'employer']),
   "title": zod.string().min(createB2BListingBodyTitleMin).max(createB2BListingBodyTitleMax),
   "fullName": zod.string().min(createB2BListingBodyFullNameMin).max(createB2BListingBodyFullNameMax),
   "organization": zod.string().min(createB2BListingBodyOrganizationMin).max(createB2BListingBodyOrganizationMax),
   "location": zod.string().min(createB2BListingBodyLocationMin).max(createB2BListingBodyLocationMax),
   "contact": zod.string().min(createB2BListingBodyContactMin).max(createB2BListingBodyContactMax),
   "description": zod.string().min(createB2BListingBodyDescriptionMin).max(createB2BListingBodyDescriptionMax),
+  "employmentType": zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']).optional(),
+  "salary": zod.string().max(createB2BListingBodySalaryMax).optional(),
+  "experience": zod.string().max(createB2BListingBodyExperienceMax).optional(),
   "website": zod.url().optional(),
   "socialLinks": zod.object({
   "instagram": zod.url().optional(),
@@ -692,13 +702,16 @@ export const CreateB2BListingBody = zod.object({
 export const CreateB2BListingResponse = zod.object({
   "id": zod.int(),
   "referenceCode": zod.string(),
-  "role": zod.enum(['producer', 'buyer', 'logistics']),
+  "role": zod.enum(['producer', 'buyer', 'logistics', 'employer']),
   "title": zod.string(),
   "fullName": zod.string(),
   "organization": zod.string(),
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
+  "salary": zod.string().nullish(),
+  "experience": zod.string().nullish(),
   "website": zod.url().nullish(),
   "socialLinks": zod.union([zod.object({
   "instagram": zod.url().optional(),
@@ -735,13 +748,16 @@ export const GetB2BListingReviewQueueResponse = zod.object({
   "items": zod.array(zod.object({
   "id": zod.int(),
   "referenceCode": zod.string(),
-  "role": zod.enum(['producer', 'buyer', 'logistics']),
+  "role": zod.enum(['producer', 'buyer', 'logistics', 'employer']),
   "title": zod.string(),
   "fullName": zod.string(),
   "organization": zod.string(),
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
+  "salary": zod.string().nullish(),
+  "experience": zod.string().nullish(),
   "website": zod.url().nullish(),
   "socialLinks": zod.union([zod.object({
   "instagram": zod.url().optional(),
@@ -772,13 +788,16 @@ export const GetB2BListingParams = zod.object({
 export const GetB2BListingResponse = zod.object({
   "id": zod.int(),
   "referenceCode": zod.string(),
-  "role": zod.enum(['producer', 'buyer', 'logistics']),
+  "role": zod.enum(['producer', 'buyer', 'logistics', 'employer']),
   "title": zod.string(),
   "fullName": zod.string(),
   "organization": zod.string(),
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
+  "salary": zod.string().nullish(),
+  "experience": zod.string().nullish(),
   "website": zod.url().nullish(),
   "socialLinks": zod.union([zod.object({
   "instagram": zod.url().optional(),
@@ -814,13 +833,16 @@ export const UpdateB2BListingStatusBody = zod.object({
 export const UpdateB2BListingStatusResponse = zod.object({
   "id": zod.int(),
   "referenceCode": zod.string(),
-  "role": zod.enum(['producer', 'buyer', 'logistics']),
+  "role": zod.enum(['producer', 'buyer', 'logistics', 'employer']),
   "title": zod.string(),
   "fullName": zod.string(),
   "organization": zod.string(),
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
+  "salary": zod.string().nullish(),
+  "experience": zod.string().nullish(),
   "website": zod.url().nullish(),
   "socialLinks": zod.union([zod.object({
   "instagram": zod.url().optional(),
@@ -850,7 +872,7 @@ export const getB2BRequestsQueryPageSizeMax = 50;
 
 
 export const GetB2BRequestsQueryParams = zod.object({
-  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'other']).optional(),
+  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'employment', 'other']).optional(),
   "query": zod.coerce.string().max(getB2BRequestsQueryQueryMax).optional(),
   "page": zod.coerce.number().int().min(1).default(getB2BRequestsQueryPageDefault),
   "pageSize": zod.coerce.number().int().min(1).max(getB2BRequestsQueryPageSizeMax).default(getB2BRequestsQueryPageSizeDefault)
@@ -860,13 +882,16 @@ export const GetB2BRequestsResponse = zod.object({
   "items": zod.array(zod.object({
   "id": zod.int(),
   "referenceCode": zod.string(),
-  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'other']),
+  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'employment', 'other']),
   "title": zod.string(),
   "requesterName": zod.string(),
   "organization": zod.string().nullish(),
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
+  "salary": zod.string().nullish(),
+  "experience": zod.string().nullish(),
   "status": zod.enum(['pending', 'approved', 'rejected', 'closed']),
   "internalNote": zod.string().nullish(),
   "reviewerClerkUserId": zod.string().nullish(),
@@ -901,28 +926,38 @@ export const createB2BRequestBodyContactMax = 180;
 export const createB2BRequestBodyDescriptionMin = 20;
 export const createB2BRequestBodyDescriptionMax = 2000;
 
+export const createB2BRequestBodySalaryMax = 120;
+
+export const createB2BRequestBodyExperienceMax = 160;
+
 
 
 export const CreateB2BRequestBody = zod.object({
-  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'other']),
+  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'employment', 'other']),
   "title": zod.string().min(createB2BRequestBodyTitleMin).max(createB2BRequestBodyTitleMax),
   "requesterName": zod.string().min(createB2BRequestBodyRequesterNameMin).max(createB2BRequestBodyRequesterNameMax),
   "organization": zod.string().max(createB2BRequestBodyOrganizationMax).optional(),
   "location": zod.string().min(createB2BRequestBodyLocationMin).max(createB2BRequestBodyLocationMax),
   "contact": zod.string().min(createB2BRequestBodyContactMin).max(createB2BRequestBodyContactMax),
-  "description": zod.string().min(createB2BRequestBodyDescriptionMin).max(createB2BRequestBodyDescriptionMax)
+  "description": zod.string().min(createB2BRequestBodyDescriptionMin).max(createB2BRequestBodyDescriptionMax),
+  "employmentType": zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']).optional(),
+  "salary": zod.string().max(createB2BRequestBodySalaryMax).optional(),
+  "experience": zod.string().max(createB2BRequestBodyExperienceMax).optional()
 })
 
 export const CreateB2BRequestResponse = zod.object({
   "id": zod.int(),
   "referenceCode": zod.string(),
-  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'other']),
+  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'employment', 'other']),
   "title": zod.string(),
   "requesterName": zod.string(),
   "organization": zod.string().nullish(),
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
+  "salary": zod.string().nullish(),
+  "experience": zod.string().nullish(),
   "status": zod.enum(['pending', 'approved', 'rejected', 'closed']),
   "internalNote": zod.string().nullish(),
   "reviewerClerkUserId": zod.string().nullish(),
@@ -953,13 +988,16 @@ export const GetB2BRequestReviewQueueResponse = zod.object({
   "items": zod.array(zod.object({
   "id": zod.int(),
   "referenceCode": zod.string(),
-  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'other']),
+  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'employment', 'other']),
   "title": zod.string(),
   "requesterName": zod.string(),
   "organization": zod.string().nullish(),
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
+  "salary": zod.string().nullish(),
+  "experience": zod.string().nullish(),
   "status": zod.enum(['pending', 'approved', 'rejected', 'closed']),
   "internalNote": zod.string().nullish(),
   "reviewerClerkUserId": zod.string().nullish(),
@@ -993,13 +1031,16 @@ export const UpdateB2BRequestStatusBody = zod.object({
 export const UpdateB2BRequestStatusResponse = zod.object({
   "id": zod.int(),
   "referenceCode": zod.string(),
-  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'other']),
+  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'employment', 'other']),
   "title": zod.string(),
   "requesterName": zod.string(),
   "organization": zod.string().nullish(),
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
+  "salary": zod.string().nullish(),
+  "experience": zod.string().nullish(),
   "status": zod.enum(['pending', 'approved', 'rejected', 'closed']),
   "internalNote": zod.string().nullish(),
   "reviewerClerkUserId": zod.string().nullish(),

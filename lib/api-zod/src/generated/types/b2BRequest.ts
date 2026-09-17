@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { B2BEmploymentType } from './b2BEmploymentType';
 import type { B2BRequestCategory } from './b2BRequestCategory';
 import type { B2BRequestStatus } from './b2BRequestStatus';
 
@@ -19,6 +20,11 @@ export interface B2BRequest {
   location: string;
   contact: string;
   description: string;
+  employmentType?: B2BEmploymentType | null;
+  /** @nullable */
+  salary?: string | null;
+  /** @nullable */
+  experience?: string | null;
   status: B2BRequestStatus;
   /** @nullable */
   internalNote?: string | null;

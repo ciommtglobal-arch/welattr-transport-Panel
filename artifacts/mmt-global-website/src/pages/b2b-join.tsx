@@ -18,6 +18,7 @@ import {
   useCreateB2BListing,
   useGetMyB2BBusinessProfile,
   type B2BListing,
+  type B2BEmploymentType,
   type B2BListingRole,
   type B2BBusinessProfile,
   type B2BBusinessProfileInput,
@@ -51,6 +52,14 @@ const statusCopy: Record<
       "Profilinizin yayın yetkisi geçici olarak durduruldu. Destek için MMT Global ekibiyle iletişime geçin.",
   },
 };
+const employmentTypeLabels: Record<B2BEmploymentType, string> = {
+  full_time: "Tam zamanlı",
+  part_time: "Yarı zamanlı",
+  contract: "Sözleşmeli",
+  seasonal: "Sezonluk",
+  internship: "Staj",
+  remote: "Uzaktan",
+};
 
 export default function B2BJoinPage() {
   const { isLoaded, isSignedIn } = useAuth();
@@ -81,8 +90,8 @@ export default function B2BJoinPage() {
             </span>
           </h1>
           <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-secondary-foreground/70 md:text-xl">
-            İşletmenizi bir kez doğrulayın; üretici, alıcı, lojistik veya hizmet
-            sağlayıcı olarak kendi ilanlarınızı ücretsiz yayınlayın.
+             İşletmenizi bir kez doğrulayın; üretici, alıcı, lojistik, hizmet
+             sağlayıcı veya işveren olarak kendi ilanlarınızı ücretsiz yayınlayın.
           </p>
         </div>
       </section>
@@ -388,6 +397,10 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
   const [location, setLocation] = useState("");
   const [contact, setContact] = useState(profile.contact);
   const [description, setDescription] = useState("");
+  const [employmentType, setEmploymentType] =
+    useState<B2BEmploymentType>("full_time");
+  const [salary, setSalary] = useState("");
+  const [experience, setExperience] = useState("");
   const [website, setWebsite] = useState(profile.website ?? "");
   const [socials, setSocials] = useState({
     instagram: "",
@@ -431,6 +444,9 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
         location: location.trim(),
         contact: contact.trim(),
         description: description.trim(),
+        employmentType: role === "employer" ? employmentType : undefined,
+        salary: role === "employer" ? salary.trim() || undefined : undefined,
+        experience: role === "employer" ? experience.trim() || undefined : undefined,
         website: website.trim() || undefined,
         socialLinks: hasSocials ? cleanedSocials : undefined,
       },
@@ -493,9 +509,9 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
             artık yayında.
           </span>
         </h2>
-        <p className="mt-8 leading-relaxed text-foreground/65">
-          Ürün, alım talebi, lojistik veya hizmet ilanınızı oluşturun. İlanınız
-          ek bir MMT onayı beklemeden doğrudan yayınlanır.
+           <p className="mt-8 leading-relaxed text-foreground/65">
+             Ürün, alım talebi, lojistik, hizmet veya iş ilanınızı oluşturun.
+             İlanınız ek bir MMT onayı beklemeden doğrudan yayınlanır.
         </p>
         <div className="mt-8 border-l-2 border-primary pl-4 text-sm leading-relaxed text-foreground/70">
           <strong className="block text-foreground">Ücretsiz görünürlük</strong>
@@ -517,12 +533,13 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
 
         <div>
           <label className="mb-3 block text-sm font-semibold">İlan türü</label>
-          <div className="grid gap-3 sm:grid-cols-3">
+           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {(
               [
                 ["producer", "Üretici"],
                 ["buyer", "Alıcı"],
                 ["logistics", "Lojistik / Hizmet"],
+                 ["employer", "İşveren / İş ilanı"],
               ] as const
             ).map(([value, label]) => (
               <button
@@ -547,7 +564,7 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
             value={title}
             onChange={setTitle}
             required
-            placeholder="Örn: Pamuk ipliği tedariki"
+             placeholder={role === "employer" ? "Örn: Mermer ustası aranıyor" : "Örn: Pamuk ipliği tedariki"}
           />
           <Field
             label="Yetkili kişi"
@@ -574,6 +591,26 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
             placeholder="https://"
           />
         </div>
+        {role === "employer" ? (
+          <div className="mt-6 grid gap-5 md:grid-cols-3">
+            <label className="flex flex-col gap-2 text-sm font-semibold">
+              Çalışma şekli
+              <select
+                value={employmentType}
+                onChange={(event) =>
+                  setEmploymentType(event.target.value as B2BEmploymentType)
+                }
+                className="h-12 border border-border/70 bg-background px-4 text-sm font-normal outline-none focus:border-primary"
+              >
+                {Object.entries(employmentTypeLabels).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </label>
+            <Field label="Ücret / maaş" value={salary} onChange={setSalary} placeholder="Örn. 35.000 TL" />
+            <Field label="Deneyim şartı" value={experience} onChange={setExperience} placeholder="Örn. 2 yıl" />
+          </div>
+        ) : null}
 
         <label className="mt-6 block text-sm">
           <span className="mb-2 block text-foreground/70">
@@ -585,7 +622,7 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
             rows={5}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            placeholder="Ürününüzü, arayışınızı veya hizmet detaylarınızı yazın..."
+             placeholder={role === "employer" ? "Pozisyon, görevler, deneyim şartı, çalışma şekli ve ücret bilgisini yazın..." : "Ürününüzü, arayışınızı veya hizmet detaylarınızı yazın..."}
             className="w-full resize-y border border-border/70 bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary"
           />
         </label>

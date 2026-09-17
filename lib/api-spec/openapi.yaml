@@ -1458,7 +1458,10 @@ components:
           type: string
     B2BListingRole:
       type: string
-      enum: [producer, buyer, logistics]
+      enum: [producer, buyer, logistics, employer]
+    B2BEmploymentType:
+      type: string
+      enum: [full_time, part_time, contract, seasonal, internship, remote]
     B2BListingStatus:
       type: string
       enum: [pending, approved, rejected]
@@ -1515,6 +1518,14 @@ components:
           type: string
         description:
           type: string
+        employmentType:
+          oneOf:
+            - $ref: "#/components/schemas/B2BEmploymentType"
+            - type: "null"
+        salary:
+          type: [string, "null"]
+        experience:
+          type: [string, "null"]
         website:
           type: [string, "null"]
           format: uri
@@ -1573,6 +1584,14 @@ components:
           type: string
           minLength: 20
           maxLength: 2000
+        employmentType:
+          $ref: "#/components/schemas/B2BEmploymentType"
+        salary:
+          type: string
+          maxLength: 120
+        experience:
+          type: string
+          maxLength: 160
         website:
           type: string
           format: uri
@@ -1609,7 +1628,7 @@ components:
           type: integer
     B2BRequestCategory:
       type: string
-      enum: [product, service, logistics, partnership, other]
+      enum: [product, service, logistics, partnership, employment, other]
     B2BRequestStatus:
       type: string
       enum: [pending, approved, rejected, closed]
@@ -1649,6 +1668,14 @@ components:
           type: string
           minLength: 20
           maxLength: 2000
+        employmentType:
+          $ref: "#/components/schemas/B2BEmploymentType"
+        salary:
+          type: string
+          maxLength: 120
+        experience:
+          type: string
+          maxLength: 160
     B2BRequest:
       type: object
       required:
@@ -1682,6 +1709,14 @@ components:
           type: string
         description:
           type: string
+        employmentType:
+          oneOf:
+            - $ref: "#/components/schemas/B2BEmploymentType"
+            - type: "null"
+        salary:
+          type: [string, "null"]
+        experience:
+          type: [string, "null"]
         status:
           $ref: "#/components/schemas/B2BRequestStatus"
         internalNote:

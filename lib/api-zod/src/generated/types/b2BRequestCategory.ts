@@ -14,5 +14,6 @@ export const B2BRequestCategory = {
   service: 'service',
   logistics: 'logistics',
   partnership: 'partnership',
+  employment: 'employment',
   other: 'other',
 } as const;

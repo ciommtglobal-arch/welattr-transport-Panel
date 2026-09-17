@@ -13,4 +13,5 @@ export const B2BListingRole = {
   producer: 'producer',
   buyer: 'buyer',
   logistics: 'logistics',
+  employer: 'employer',
 } as const;

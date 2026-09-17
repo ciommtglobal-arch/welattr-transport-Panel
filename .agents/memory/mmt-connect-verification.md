@@ -33,6 +33,12 @@ The network must support both supply and demand: verified businesses can publish
 
 **How to apply:** Keep approved buyer requests publicly searchable, protect request submission with account identity, and give MMT staff a dedicated review queue with approve, reject, and close decisions.
 
+MMT Connect employment uses two paths: signed-in people submit moderated “İş arıyorum” requests, while verified businesses publish “İşveren / İş ilanı” listings with employment details.
+
+**Why:** Employment demand and employer supply need different trust controls: individuals need MMT review before publication, while a verified business can publish its own vacancy through the existing business-account model.
+
+**How to apply:** Keep employment requests under the staff request queue; keep employer listings under verified-business publishing and the public listing filters. Preserve employment type, salary, and experience fields through API, moderation, and public detail views.
+
 MMT Connect should become MMT Global's own branded trade network; Instagram, Facebook, TikTok, and Telegram are distribution channels rather than the core product.
 
 **Why:** The user wants to protect and grow the MMT brand through an owned network instead of depending permanently on external social platforms.

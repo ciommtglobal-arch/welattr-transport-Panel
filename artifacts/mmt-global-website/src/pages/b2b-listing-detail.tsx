@@ -6,6 +6,7 @@ import {
   Building2,
   Factory,
   Truck,
+  BriefcaseBusiness,
   MapPin,
   Globe,
   Calendar,
@@ -19,6 +20,7 @@ import {
   useCreateB2BReport,
   useGetB2BListing,
   getGetB2BListingQueryKey,
+  type B2BEmploymentType,
   type B2BReportCategory,
   type B2BListingRole,
 } from "@workspace/api-client-react";
@@ -27,6 +29,15 @@ const roleLabels: Record<B2BListingRole, { label: string; icon: any }> = {
   producer: { label: "Üretici", icon: Factory },
   buyer: { label: "Alıcı", icon: Building2 },
   logistics: { label: "Lojistik / Hizmet", icon: Truck },
+  employer: { label: "İşveren / İş ilanı", icon: BriefcaseBusiness },
+};
+const employmentTypeLabels: Record<B2BEmploymentType, string> = {
+  full_time: "Tam zamanlı",
+  part_time: "Yarı zamanlı",
+  contract: "Sözleşmeli",
+  seasonal: "Sezonluk",
+  internship: "Staj",
+  remote: "Uzaktan",
 };
 
 function formatDate(dateStr: string) {
@@ -169,6 +180,13 @@ export default function B2BListingDetail() {
                 </div>
               )}
             </div>
+            {listing.role === "employer" ? (
+              <div className="mt-6 flex flex-wrap gap-3 text-xs text-secondary-foreground/70">
+                {listing.employmentType ? <span className="border border-primary/30 px-3 py-2">{employmentTypeLabels[listing.employmentType]}</span> : null}
+                {listing.salary ? <span className="border border-primary/30 px-3 py-2">{listing.salary}</span> : null}
+                {listing.experience ? <span className="border border-primary/30 px-3 py-2">Deneyim: {listing.experience}</span> : null}
+              </div>
+            ) : null}
           </div>
         </section>
 

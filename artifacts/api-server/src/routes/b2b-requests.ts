@@ -33,6 +33,9 @@ function serializeRequest(request: B2BRequest, includeInternalNote = false) {
     location: request.location,
     contact: request.contact,
     description: request.description,
+    employmentType: request.employmentType,
+    salary: request.salary,
+    experience: request.experience,
     status: request.status,
     internalNote: includeInternalNote ? request.internalNote : null,
     reviewerClerkUserId: includeInternalNote
@@ -115,6 +118,9 @@ router.post("/b2b-requests", async (req, res): Promise<void> => {
       location: input.location.trim(),
       contact: input.contact.trim(),
       description: input.description.trim(),
+      employmentType: input.employmentType ?? null,
+      salary: input.salary?.trim() || null,
+      experience: input.experience?.trim() || null,
     })
     .returning();
 

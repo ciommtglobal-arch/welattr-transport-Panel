@@ -6,6 +6,7 @@ import {
   Building2,
   Factory,
   Truck,
+  BriefcaseBusiness,
   CheckCircle2,
   Search,
   MapPin,
@@ -25,6 +26,7 @@ const roleLabels: Record<B2BListingRole, { label: string; icon: any }> = {
   producer: { label: "Üretici", icon: Factory },
   buyer: { label: "Alıcı", icon: Building2 },
   logistics: { label: "Lojistik / Hizmet", icon: Truck },
+  employer: { label: "İşveren", icon: BriefcaseBusiness },
 };
 
 function formatDate(dateStr: string) {
@@ -252,7 +254,16 @@ const requestCategoryLabels: Record<B2BRequestCategory, string> = {
   service: "Hizmet",
   logistics: "Lojistik",
   partnership: "İş ortaklığı",
+  employment: "İş arayanlar",
   other: "Diğer",
+};
+const employmentTypeLabels: Record<string, string> = {
+  full_time: "Tam zamanlı",
+  part_time: "Yarı zamanlı",
+  contract: "Sözleşmeli",
+  seasonal: "Sezonluk",
+  internship: "Staj",
+  remote: "Uzaktan",
 };
 
 function RequestsView() {
@@ -371,6 +382,14 @@ function RequestsView() {
                     <MapPin size={13} className="text-primary/70" />
                     {request.location}
                   </p>
+                   {request.category === "employment" ? (
+                     <p className="mt-3 text-foreground/60">
+                       {request.employmentType
+                         ? employmentTypeLabels[request.employmentType]
+                         : null}
+                       {request.salary ? ` · ${request.salary}` : ""}
+                     </p>
+                   ) : null}
                   <p className="mt-3 text-primary">{request.contact}</p>
                 </div>
               </article>

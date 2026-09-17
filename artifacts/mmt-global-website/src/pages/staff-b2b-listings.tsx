@@ -33,6 +33,7 @@ const roleLabels: Record<B2BListingRole, string> = {
   producer: "Üretici",
   buyer: "Alıcı",
   logistics: "Lojistik / Hizmet",
+  employer: "İşveren / İş ilanı",
 };
 
 const statusOptions = ["pending", "approved", "rejected"] as const;
@@ -300,6 +301,15 @@ function ReviewInbox() {
                   <Info label="Yetkili Kişi" value={selectedApplication.fullName} />
                   <Info label="Şehir / Ülke" value={selectedApplication.location} />
                   <Info label="İletişim" value={selectedApplication.contact} />
+                   {selectedApplication.role === "employer" && selectedApplication.employmentType ? (
+                     <Info label="Çalışma şekli" value={selectedApplication.employmentType} />
+                   ) : null}
+                   {selectedApplication.role === "employer" && selectedApplication.salary ? (
+                     <Info label="Ücret / maaş" value={selectedApplication.salary} />
+                   ) : null}
+                   {selectedApplication.role === "employer" && selectedApplication.experience ? (
+                     <Info label="Deneyim şartı" value={selectedApplication.experience} />
+                   ) : null}
                   
                   {selectedApplication.website && (
                     <Info label="Web Sitesi" value={selectedApplication.website} link />

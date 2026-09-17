@@ -23,6 +23,7 @@ const categoryLabels: Record<B2BRequestCategory, string> = {
   service: "Hizmet",
   logistics: "Lojistik",
   partnership: "İş ortaklığı",
+  employment: "İş arıyorum",
   other: "Diğer",
 };
 
@@ -192,6 +193,15 @@ function Inbox() {
               <div className="mt-7 grid gap-5 text-sm sm:grid-cols-2">
                 <Info label="Tür" value={categoryLabels[selected.category]} />
                 <Info label="Gönderilme" value={date(selected.createdAt)} />
+                  {selected.category === "employment" && selected.employmentType ? (
+                    <Info label="Çalışma şekli" value={selected.employmentType} />
+                  ) : null}
+                  {selected.category === "employment" && selected.salary ? (
+                    <Info label="Ücret / maaş" value={selected.salary} />
+                  ) : null}
+                  {selected.category === "employment" && selected.experience ? (
+                    <Info label="Deneyim şartı" value={selected.experience} />
+                  ) : null}
               </div>
               <div className="mt-7 flex-1">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-foreground/40">Talep açıklaması</p>
