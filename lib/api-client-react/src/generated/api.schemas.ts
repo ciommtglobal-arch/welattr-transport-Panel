@@ -344,8 +344,135 @@ export interface ErrorResponse {
   error: string;
 }
 
+export type B2BListingRole = typeof B2BListingRole[keyof typeof B2BListingRole];
+
+
+export const B2BListingRole = {
+  producer: 'producer',
+  buyer: 'buyer',
+  logistics: 'logistics',
+} as const;
+
+export type B2BListingStatus = typeof B2BListingStatus[keyof typeof B2BListingStatus];
+
+
+export const B2BListingStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface B2BListingSocialLinks {
+  instagram?: string;
+  facebook?: string;
+  linkedin?: string;
+  telegram?: string;
+  tiktok?: string;
+}
+
+export interface B2BListing {
+  id: number;
+  referenceCode: string;
+  role: B2BListingRole;
+  title: string;
+  fullName: string;
+  organization: string;
+  location: string;
+  contact: string;
+  description: string;
+  /** @nullable */
+  website?: string | null;
+  socialLinks?: B2BListingSocialLinks | null;
+  status: B2BListingStatus;
+  /** @nullable */
+  internalNote?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** @nullable */
+  publishedAt?: string | null;
+}
+
+export interface B2BListingInput {
+  role: B2BListingRole;
+  /**
+     * @minLength 5
+     * @maxLength 140
+     */
+  title: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  fullName: string;
+  /**
+     * @minLength 2
+     * @maxLength 200
+     */
+  organization: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  location: string;
+  /**
+     * @minLength 5
+     * @maxLength 180
+     */
+  contact: string;
+  /**
+     * @minLength 20
+     * @maxLength 2000
+     */
+  description: string;
+  website?: string;
+  socialLinks?: B2BListingSocialLinks;
+}
+
+export interface B2BListingStatusUpdate {
+  status: B2BListingStatus;
+  /** @maxLength 4000 */
+  internalNote?: string;
+}
+
+export interface B2BListingPage {
+  items: B2BListing[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
 export type GetLimitApplicationsParams = {
 status?: LimitApplicationStatus;
+/**
+ * @minimum 1
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+pageSize?: number;
+};
+
+export type GetB2BListingsParams = {
+role?: B2BListingRole;
+/**
+ * @maxLength 120
+ */
+query?: string;
+/**
+ * @minimum 1
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+pageSize?: number;
+};
+
+export type GetB2BListingReviewQueueParams = {
+status?: B2BListingStatus;
 /**
  * @minimum 1
  */

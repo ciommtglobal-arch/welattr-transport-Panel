@@ -382,3 +382,242 @@ export const UpdateLimitApplicationStatusResponse = zod.object({
 })
 
 
+/**
+ * @summary List approved B2B listings
+ */
+export const getB2BListingsQueryQueryMax = 120;
+
+export const getB2BListingsQueryPageDefault = 1;
+
+export const getB2BListingsQueryPageSizeDefault = 12;
+export const getB2BListingsQueryPageSizeMax = 50;
+
+
+
+export const GetB2BListingsQueryParams = zod.object({
+  "role": zod.enum(['producer', 'buyer', 'logistics']).optional(),
+  "query": zod.coerce.string().max(getB2BListingsQueryQueryMax).optional(),
+  "page": zod.coerce.number().int().min(1).default(getB2BListingsQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getB2BListingsQueryPageSizeMax).default(getB2BListingsQueryPageSizeDefault)
+})
+
+export const GetB2BListingsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "role": zod.enum(['producer', 'buyer', 'logistics']),
+  "title": zod.string(),
+  "fullName": zod.string(),
+  "organization": zod.string(),
+  "location": zod.string(),
+  "contact": zod.string(),
+  "description": zod.string(),
+  "website": zod.url().nullish(),
+  "socialLinks": zod.union([zod.object({
+  "instagram": zod.url().optional(),
+  "facebook": zod.url().optional(),
+  "linkedin": zod.url().optional(),
+  "telegram": zod.url().optional(),
+  "tiktok": zod.url().optional()
+}),zod.null()]).optional(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "internalNote": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullish()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "total": zod.int()
+})
+
+
+/**
+ * @summary Submit a B2B listing for moderation
+ */
+export const createB2BListingBodyTitleMin = 5;
+export const createB2BListingBodyTitleMax = 140;
+
+export const createB2BListingBodyFullNameMin = 2;
+export const createB2BListingBodyFullNameMax = 160;
+
+export const createB2BListingBodyOrganizationMin = 2;
+export const createB2BListingBodyOrganizationMax = 200;
+
+export const createB2BListingBodyLocationMin = 2;
+export const createB2BListingBodyLocationMax = 160;
+
+export const createB2BListingBodyContactMin = 5;
+export const createB2BListingBodyContactMax = 180;
+
+export const createB2BListingBodyDescriptionMin = 20;
+export const createB2BListingBodyDescriptionMax = 2000;
+
+
+
+export const CreateB2BListingBody = zod.object({
+  "role": zod.enum(['producer', 'buyer', 'logistics']),
+  "title": zod.string().min(createB2BListingBodyTitleMin).max(createB2BListingBodyTitleMax),
+  "fullName": zod.string().min(createB2BListingBodyFullNameMin).max(createB2BListingBodyFullNameMax),
+  "organization": zod.string().min(createB2BListingBodyOrganizationMin).max(createB2BListingBodyOrganizationMax),
+  "location": zod.string().min(createB2BListingBodyLocationMin).max(createB2BListingBodyLocationMax),
+  "contact": zod.string().min(createB2BListingBodyContactMin).max(createB2BListingBodyContactMax),
+  "description": zod.string().min(createB2BListingBodyDescriptionMin).max(createB2BListingBodyDescriptionMax),
+  "website": zod.url().optional(),
+  "socialLinks": zod.object({
+  "instagram": zod.url().optional(),
+  "facebook": zod.url().optional(),
+  "linkedin": zod.url().optional(),
+  "telegram": zod.url().optional(),
+  "tiktok": zod.url().optional()
+}).optional()
+})
+
+export const CreateB2BListingResponse = zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "role": zod.enum(['producer', 'buyer', 'logistics']),
+  "title": zod.string(),
+  "fullName": zod.string(),
+  "organization": zod.string(),
+  "location": zod.string(),
+  "contact": zod.string(),
+  "description": zod.string(),
+  "website": zod.url().nullish(),
+  "socialLinks": zod.union([zod.object({
+  "instagram": zod.url().optional(),
+  "facebook": zod.url().optional(),
+  "linkedin": zod.url().optional(),
+  "telegram": zod.url().optional(),
+  "tiktok": zod.url().optional()
+}),zod.null()]).optional(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "internalNote": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullish()
+})
+
+
+/**
+ * @summary List B2B listings for authorized staff review
+ */
+export const getB2BListingReviewQueueQueryPageDefault = 1;
+
+export const getB2BListingReviewQueueQueryPageSizeDefault = 25;
+export const getB2BListingReviewQueueQueryPageSizeMax = 100;
+
+
+
+export const GetB2BListingReviewQueueQueryParams = zod.object({
+  "status": zod.enum(['pending', 'approved', 'rejected']).optional(),
+  "page": zod.coerce.number().int().min(1).default(getB2BListingReviewQueueQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getB2BListingReviewQueueQueryPageSizeMax).default(getB2BListingReviewQueueQueryPageSizeDefault)
+})
+
+export const GetB2BListingReviewQueueResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "role": zod.enum(['producer', 'buyer', 'logistics']),
+  "title": zod.string(),
+  "fullName": zod.string(),
+  "organization": zod.string(),
+  "location": zod.string(),
+  "contact": zod.string(),
+  "description": zod.string(),
+  "website": zod.url().nullish(),
+  "socialLinks": zod.union([zod.object({
+  "instagram": zod.url().optional(),
+  "facebook": zod.url().optional(),
+  "linkedin": zod.url().optional(),
+  "telegram": zod.url().optional(),
+  "tiktok": zod.url().optional()
+}),zod.null()]).optional(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "internalNote": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullish()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "total": zod.int()
+})
+
+
+/**
+ * @summary Get an approved B2B listing
+ */
+export const GetB2BListingParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const GetB2BListingResponse = zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "role": zod.enum(['producer', 'buyer', 'logistics']),
+  "title": zod.string(),
+  "fullName": zod.string(),
+  "organization": zod.string(),
+  "location": zod.string(),
+  "contact": zod.string(),
+  "description": zod.string(),
+  "website": zod.url().nullish(),
+  "socialLinks": zod.union([zod.object({
+  "instagram": zod.url().optional(),
+  "facebook": zod.url().optional(),
+  "linkedin": zod.url().optional(),
+  "telegram": zod.url().optional(),
+  "tiktok": zod.url().optional()
+}),zod.null()]).optional(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "internalNote": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullish()
+})
+
+
+/**
+ * @summary Approve or reject a B2B listing
+ */
+export const UpdateB2BListingStatusParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateB2BListingStatusBodyInternalNoteMax = 4000;
+
+
+
+export const UpdateB2BListingStatusBody = zod.object({
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "internalNote": zod.string().max(updateB2BListingStatusBodyInternalNoteMax).optional()
+})
+
+export const UpdateB2BListingStatusResponse = zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "role": zod.enum(['producer', 'buyer', 'logistics']),
+  "title": zod.string(),
+  "fullName": zod.string(),
+  "organization": zod.string(),
+  "location": zod.string(),
+  "contact": zod.string(),
+  "description": zod.string(),
+  "website": zod.url().nullish(),
+  "socialLinks": zod.union([zod.object({
+  "instagram": zod.url().optional(),
+  "facebook": zod.url().optional(),
+  "linkedin": zod.url().optional(),
+  "telegram": zod.url().optional(),
+  "tiktok": zod.url().optional()
+}),zod.null()]).optional(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "internalNote": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullish()
+})
+
+

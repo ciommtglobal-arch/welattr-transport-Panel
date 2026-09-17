@@ -3,6 +3,7 @@ import healthRouter from "./health";
 import limitApplicationsRouter from "./limit-applications";
 import storageRouter from "./storage";
 import tamiPaymentsRouter from "./tami-payments";
+import b2bListingsRouter from "./b2b-listings";
 
 const router: IRouter = Router();
 
@@ -10,5 +11,6 @@ router.use(healthRouter);
 router.use(limitApplicationsRouter);
 router.use(storageRouter);
 router.use(tamiPaymentsRouter);
+router.use(b2bListingsRouter);
 
 export default router;

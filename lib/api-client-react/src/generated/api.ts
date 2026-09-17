@@ -20,8 +20,14 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  B2BListing,
+  B2BListingInput,
+  B2BListingPage,
+  B2BListingStatusUpdate,
   ErrorEnvelope,
   ErrorResponse,
+  GetB2BListingReviewQueueParams,
+  GetB2BListingsParams,
   GetLimitApplicationsParams,
   HealthStatus,
   LimitApplication,
@@ -873,5 +879,411 @@ export const useUpdateLimitApplicationStatus = <TError = ErrorType<ErrorResponse
         TContext
       > => {
       return useMutation(getUpdateLimitApplicationStatusMutationOptions(options));
+    }
+
+export const getGetB2BListingsUrl = (params?: GetB2BListingsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/b2b-listings?${stringifiedParams}` : `/api/b2b-listings`
+}
+
+/**
+ * @summary List approved B2B listings
+ */
+export const getB2BListings = async (params?: GetB2BListingsParams, options?: Parameters<typeof customFetch>[1]): Promise<B2BListingPage> => {
+
+  return customFetch<B2BListingPage>(getGetB2BListingsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetB2BListingsQueryKey = (params?: GetB2BListingsParams,) => {
+    return [
+    `/api/b2b-listings`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetB2BListingsQueryOptions = <TData = Awaited<ReturnType<typeof getB2BListings>>, TError = ErrorType<ErrorResponse>>(params?: GetB2BListingsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BListings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetB2BListingsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getB2BListings>>> = ({ signal }) => getB2BListings(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getB2BListings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetB2BListingsQueryResult = NonNullable<Awaited<ReturnType<typeof getB2BListings>>>
+export type GetB2BListingsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List approved B2B listings
+ */
+
+export function useGetB2BListings<TData = Awaited<ReturnType<typeof getB2BListings>>, TError = ErrorType<ErrorResponse>>(
+ params?: GetB2BListingsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BListings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetB2BListingsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateB2BListingUrl = () => {
+
+
+
+
+  return `/api/b2b-listings`
+}
+
+/**
+ * @summary Submit a B2B listing for moderation
+ */
+export const createB2BListing = async (b2BListingInput: B2BListingInput, options?: Parameters<typeof customFetch>[1]): Promise<B2BListing> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BListing>(getCreateB2BListingUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BListingInput)
+  }
+);}
+
+
+
+
+
+export const getCreateB2BListingMutationKey = () => ['createB2BListing'] as const;
+
+export const getCreateB2BListingMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createB2BListing>>, TError,CreateB2BListingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createB2BListing>>, TError,CreateB2BListingMutationVariables, TContext> => {
+
+const mutationKey = getCreateB2BListingMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createB2BListing>>, CreateB2BListingMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createB2BListing(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateB2BListingMutationResult = NonNullable<Awaited<ReturnType<typeof createB2BListing>>>
+    export type CreateB2BListingMutationBody = BodyType<B2BListingInput>
+    export type CreateB2BListingMutationError = ErrorType<ErrorResponse>
+    export type CreateB2BListingMutationVariables = {data: BodyType<B2BListingInput>}
+
+    /**
+ * @summary Submit a B2B listing for moderation
+ */
+export const useCreateB2BListing = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createB2BListing>>, TError,CreateB2BListingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createB2BListing>>,
+        TError,
+        CreateB2BListingMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateB2BListingMutationOptions(options));
+    }
+
+export const getGetB2BListingReviewQueueUrl = (params?: GetB2BListingReviewQueueParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/b2b-listings/review?${stringifiedParams}` : `/api/b2b-listings/review`
+}
+
+/**
+ * @summary List B2B listings for authorized staff review
+ */
+export const getB2BListingReviewQueue = async (params?: GetB2BListingReviewQueueParams, options?: Parameters<typeof customFetch>[1]): Promise<B2BListingPage> => {
+
+  return customFetch<B2BListingPage>(getGetB2BListingReviewQueueUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetB2BListingReviewQueueQueryKey = (params?: GetB2BListingReviewQueueParams,) => {
+    return [
+    `/api/b2b-listings/review`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetB2BListingReviewQueueQueryOptions = <TData = Awaited<ReturnType<typeof getB2BListingReviewQueue>>, TError = ErrorType<ErrorResponse>>(params?: GetB2BListingReviewQueueParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BListingReviewQueue>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetB2BListingReviewQueueQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getB2BListingReviewQueue>>> = ({ signal }) => getB2BListingReviewQueue(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getB2BListingReviewQueue>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetB2BListingReviewQueueQueryResult = NonNullable<Awaited<ReturnType<typeof getB2BListingReviewQueue>>>
+export type GetB2BListingReviewQueueQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List B2B listings for authorized staff review
+ */
+
+export function useGetB2BListingReviewQueue<TData = Awaited<ReturnType<typeof getB2BListingReviewQueue>>, TError = ErrorType<ErrorResponse>>(
+ params?: GetB2BListingReviewQueueParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BListingReviewQueue>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetB2BListingReviewQueueQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetB2BListingUrl = (id: number,) => {
+
+
+
+
+  return `/api/b2b-listings/${id}`
+}
+
+/**
+ * @summary Get an approved B2B listing
+ */
+export const getB2BListing = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<B2BListing> => {
+
+  return customFetch<B2BListing>(getGetB2BListingUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetB2BListingQueryKey = (id: number,) => {
+    return [
+    `/api/b2b-listings/${id}`
+    ] as const;
+    }
+
+
+export const getGetB2BListingQueryOptions = <TData = Awaited<ReturnType<typeof getB2BListing>>, TError = ErrorType<ErrorResponse>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BListing>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetB2BListingQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getB2BListing>>> = ({ signal }) => getB2BListing(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getB2BListing>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetB2BListingQueryResult = NonNullable<Awaited<ReturnType<typeof getB2BListing>>>
+export type GetB2BListingQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get an approved B2B listing
+ */
+
+export function useGetB2BListing<TData = Awaited<ReturnType<typeof getB2BListing>>, TError = ErrorType<ErrorResponse>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BListing>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetB2BListingQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateB2BListingStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/b2b-listings/${id}/status`
+}
+
+/**
+ * @summary Approve or reject a B2B listing
+ */
+export const updateB2BListingStatus = async (id: number,
+    b2BListingStatusUpdate: B2BListingStatusUpdate, options?: Parameters<typeof customFetch>[1]): Promise<B2BListing> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BListing>(getUpdateB2BListingStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BListingStatusUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateB2BListingStatusMutationKey = () => ['updateB2BListingStatus'] as const;
+
+export const getUpdateB2BListingStatusMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateB2BListingStatus>>, TError,UpdateB2BListingStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateB2BListingStatus>>, TError,UpdateB2BListingStatusMutationVariables, TContext> => {
+
+const mutationKey = getUpdateB2BListingStatusMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateB2BListingStatus>>, UpdateB2BListingStatusMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateB2BListingStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateB2BListingStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateB2BListingStatus>>>
+    export type UpdateB2BListingStatusMutationBody = BodyType<B2BListingStatusUpdate>
+    export type UpdateB2BListingStatusMutationError = ErrorType<ErrorResponse>
+    export type UpdateB2BListingStatusMutationVariables = {id: number;data: BodyType<B2BListingStatusUpdate>}
+
+    /**
+ * @summary Approve or reject a B2B listing
+ */
+export const useUpdateB2BListingStatus = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateB2BListingStatus>>, TError,UpdateB2BListingStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateB2BListingStatus>>,
+        TError,
+        UpdateB2BListingStatusMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateB2BListingStatusMutationOptions(options));
     }
 

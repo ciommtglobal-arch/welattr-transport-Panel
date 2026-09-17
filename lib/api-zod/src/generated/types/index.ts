@@ -6,8 +6,17 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './b2BListing';
+export * from './b2BListingInput';
+export * from './b2BListingPage';
+export * from './b2BListingRole';
+export * from './b2BListingSocialLinks';
+export * from './b2BListingStatus';
+export * from './b2BListingStatusUpdate';
 export * from './errorEnvelope';
 export * from './errorResponse';
+export * from './getB2BListingReviewQueueParams';
+export * from './getB2BListingsParams';
 export * from './getLimitApplicationsParams';
 export * from './healthStatus';
 export * from './limitApplication';
