@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { ArrowDownRight, Menu, X, ArrowRight, Globe2, Building2, Stethoscope, Truck, Tv, Briefcase, Factory } from "lucide-react";
+import { ArrowDownRight, Menu, X, ArrowRight, Globe2, Building2, Stethoscope, Truck, Tv, Briefcase, Factory, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import CorporateFleetSection from "@/components/corporate-fleet-section";
@@ -30,6 +30,11 @@ export default function Home() {
       element.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const shareText = "MMT Global | Üret. Tanıt. Sat. Ücretsiz B2B iş ağı";
+  const encodedShareUrl = encodeURIComponent(shareUrl);
+  const encodedShareText = encodeURIComponent(shareText);
 
   return (
     <div className="relative w-full min-h-[100dvh] bg-background text-foreground selection:bg-primary selection:text-white overflow-x-hidden">
@@ -386,6 +391,46 @@ export default function Home() {
                 TİCARİ ÖDEME
                </Link>
           </div>
+           <div className="mt-12 flex flex-col items-center gap-4">
+             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] opacity-80">
+               <Share2 size={15} />
+               <span>Bu sayfayı paylaşın</span>
+             </div>
+             <div className="flex flex-wrap justify-center gap-2">
+               <a
+                 href={`https://wa.me/?text=${encodedShareText}%20${encodedShareUrl}`}
+                 target="_blank"
+                 rel="noreferrer"
+                 className="border border-primary-foreground/50 px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-primary-foreground hover:text-primary"
+               >
+                 WhatsApp
+               </a>
+               <a
+                 href={`https://t.me/share/url?url=${encodedShareUrl}&text=${encodedShareText}`}
+                 target="_blank"
+                 rel="noreferrer"
+                 className="border border-primary-foreground/50 px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-primary-foreground hover:text-primary"
+               >
+                 Telegram
+               </a>
+               <a
+                 href={`https://www.facebook.com/sharer/sharer.php?u=${encodedShareUrl}`}
+                 target="_blank"
+                 rel="noreferrer"
+                 className="border border-primary-foreground/50 px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-primary-foreground hover:text-primary"
+               >
+                 Facebook
+               </a>
+               <a
+                 href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodedShareUrl}`}
+                 target="_blank"
+                 rel="noreferrer"
+                 className="border border-primary-foreground/50 px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-primary-foreground hover:text-primary"
+               >
+                 LinkedIn
+               </a>
+             </div>
+           </div>
         </div>
       </section>
 
