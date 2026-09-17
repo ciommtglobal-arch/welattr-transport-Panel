@@ -26,3 +26,9 @@ MMT Global should feel corporate and modern without becoming exclusive: anyone s
 **Why:** The user wants a trusted international trade network that serves both established business people and people with limited resources, with broad public satisfaction rather than a closed premium club.
 
 **How to apply:** Keep public browsing open, make basic participation free, use clear trust and satisfaction signals, support mobile/low-bandwidth access and plain language, and design separate paths for businesses, buyers, and the public.
+
+The network must support both supply and demand: verified businesses can publish offers, while signed-in individuals or organizations can submit buyer requests that MMT reviews before public publication.
+
+**Why:** A trade network cannot depend only on sellers; visible buyer demand gives producers and service providers a concrete reason to participate and lets the public benefit from the network.
+
+**How to apply:** Keep approved buyer requests publicly searchable, protect request submission with account identity, and give MMT staff a dedicated review queue with approve, reject, and close decisions.

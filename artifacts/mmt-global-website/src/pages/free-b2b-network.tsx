@@ -11,11 +11,14 @@ import {
   MapPin,
   Loader2,
   Info,
+  MessageSquareText,
 } from "lucide-react";
 import {
+  useGetB2BRequests,
   useGetB2BListings,
   type B2BListingRole,
-  type B2BListing
+  type B2BListing,
+  type B2BRequestCategory,
 } from "@workspace/api-client-react";
 
 const roleLabels: Record<B2BListingRole, { label: string; icon: any }> = {
@@ -33,7 +36,9 @@ function formatDate(dateStr: string) {
 }
 
 export default function FreeB2BNetworkPage() {
-  const [activeTab, setActiveTab] = useState<"explore" | "submit">("explore");
+  const [activeTab, setActiveTab] = useState<
+    "explore" | "requests" | "submit"
+  >("explore");
 
   useEffect(() => {
     document.title = "Global B2B Ağı | MMT Global";
@@ -96,6 +101,16 @@ export default function FreeB2BNetworkPage() {
               Ağı Keşfet
             </button>
             <button
+              onClick={() => setActiveTab("requests")}
+              className={`whitespace-nowrap pb-3 text-sm font-semibold tracking-[0.15em] uppercase transition-colors border-b-2 ${
+                activeTab === "requests"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-foreground/50 hover:text-foreground"
+              }`}
+            >
+              Alıcı talepleri
+            </button>
+            <button
               onClick={() => setActiveTab("submit")}
               className={`whitespace-nowrap pb-3 text-sm font-semibold tracking-[0.15em] uppercase transition-colors border-b-2 ${
                 activeTab === "submit"
@@ -108,7 +123,13 @@ export default function FreeB2BNetworkPage() {
           </div>
 
           <div className="animate-slide-up-fade">
-            {activeTab === "explore" ? <ExploreView /> : <SubmitView />}
+            {activeTab === "explore" ? (
+              <ExploreView />
+            ) : activeTab === "requests" ? (
+              <RequestsView />
+            ) : (
+              <SubmitView />
+            )}
           </div>
         </section>
       </div>
@@ -220,6 +241,150 @@ function ExploreView() {
               </button>
             </div>
           )}
+        </>
+      )}
+    </div>
+  );
+}
+
+const requestCategoryLabels: Record<B2BRequestCategory, string> = {
+  product: "Ürün",
+  service: "Hizmet",
+  logistics: "Lojistik",
+  partnership: "İş ortaklığı",
+  other: "Diğer",
+};
+
+function RequestsView() {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<B2BRequestCategory | "all">("all");
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isError } = useGetB2BRequests({
+    query: query.trim() || undefined,
+    category: category === "all" ? undefined : category,
+    page,
+    pageSize: 12,
+  });
+
+  return (
+    <div className="space-y-10">
+      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            İhtiyacınızı görünür kılın
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold font-serif">
+            Alıcıların ve halkın talepleri
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-foreground/60">
+            Onaylanmış talepleri inceleyin. Aradığınız ürün, hizmet veya iş
+            ortağı sizde olabilir.
+          </p>
+        </div>
+        <Link
+          href="/b2b-agi/talep"
+          className="inline-flex items-center justify-center gap-2 bg-primary px-5 py-3 text-xs font-semibold uppercase tracking-wider text-white"
+        >
+          <MessageSquareText size={15} />
+          Talep paylaş
+        </Link>
+      </div>
+
+      <div className="flex flex-col gap-4 md:flex-row">
+        <div className="relative max-w-md flex-1">
+          <Search
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/40"
+            size={18}
+          />
+          <input
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setPage(1);
+            }}
+            placeholder="Ürün, hizmet veya şehir ara..."
+            className="h-12 w-full border border-border/70 bg-card pl-12 pr-4 text-sm outline-none focus:border-primary"
+          />
+        </div>
+        <select
+          value={category}
+          onChange={(event) => {
+            setCategory(event.target.value as B2BRequestCategory | "all");
+            setPage(1);
+          }}
+          className="h-12 border border-border/70 bg-card px-4 text-sm outline-none focus:border-primary"
+        >
+          <option value="all">Tüm talepler</option>
+          {Object.entries(requestCategoryLabels).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {isLoading ? (
+        <div className="flex min-h-[35vh] items-center justify-center">
+          <Loader2 className="animate-spin text-primary" size={30} />
+        </div>
+      ) : isError ? (
+        <div className="border border-border/70 bg-card py-20 text-center text-foreground/60">
+          Talepler yüklenirken bir hata oluştu.
+        </div>
+      ) : data?.items.length === 0 ? (
+        <div className="border border-border/70 bg-card py-20 text-center">
+          <Info className="mx-auto mb-4 h-10 w-10 text-primary/50" />
+          <h3 className="text-lg font-semibold">Henüz talep bulunmuyor</h3>
+          <p className="mx-auto mt-2 max-w-md text-sm text-foreground/60">
+            Aradığınız ihtiyacı siz de paylaşabilir, ilk bağlantıyı
+            başlatabilirsiniz.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {data?.items.map((request) => (
+              <article
+                key={request.id}
+                className="flex flex-col border border-border/70 bg-card p-6"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-1.5 border border-primary/20 bg-primary/5 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                    <MessageSquareText size={12} />
+                    {requestCategoryLabels[request.category]}
+                  </span>
+                  <span className="font-mono text-[10px] text-foreground/40">
+                    {request.referenceCode}
+                  </span>
+                </div>
+                <h3 className="mt-5 text-xl font-semibold leading-snug font-serif">
+                  {request.title}
+                </h3>
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-foreground/60 line-clamp-4">
+                  {request.description}
+                </p>
+                <div className="mt-5 border-t border-border/70 pt-4 text-xs text-foreground/55">
+                  <p className="font-medium text-foreground/75">
+                    {request.organization || request.requesterName}
+                  </p>
+                  <p className="mt-1 flex items-center gap-1.5">
+                    <MapPin size={13} className="text-primary/70" />
+                    {request.location}
+                  </p>
+                  <p className="mt-3 text-primary">{request.contact}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          {data && data.page * data.pageSize < data.total ? (
+            <button
+              type="button"
+              onClick={() => setPage((current) => current + 1)}
+              className="w-full border border-border/70 py-3 text-xs font-semibold uppercase tracking-wider text-primary hover:bg-primary/5"
+            >
+              Daha fazla talep
+            </button>
+          ) : null}
         </>
       )}
     </div>

@@ -32,12 +32,18 @@ import type {
   B2BReportInput,
   B2BReportPage,
   B2BReportStatusUpdate,
+  B2BRequest,
+  B2BRequestInput,
+  B2BRequestPage,
+  B2BRequestStatusUpdate,
   ErrorEnvelope,
   ErrorResponse,
   GetB2BBusinessProfileReviewQueueParams,
   GetB2BListingReviewQueueParams,
   GetB2BListingsParams,
   GetB2BReportReviewQueueParams,
+  GetB2BRequestReviewQueueParams,
+  GetB2BRequestsParams,
   GetLimitApplicationsParams,
   HealthStatus,
   LimitApplication,
@@ -1697,6 +1703,335 @@ export const useUpdateB2BListingStatus = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getUpdateB2BListingStatusMutationOptions(options));
+    }
+
+export const getGetB2BRequestsUrl = (params?: GetB2BRequestsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/b2b-requests?${stringifiedParams}` : `/api/b2b-requests`
+}
+
+/**
+ * @summary List approved buyer requests
+ */
+export const getB2BRequests = async (params?: GetB2BRequestsParams, options?: Parameters<typeof customFetch>[1]): Promise<B2BRequestPage> => {
+
+  return customFetch<B2BRequestPage>(getGetB2BRequestsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetB2BRequestsQueryKey = (params?: GetB2BRequestsParams,) => {
+    return [
+    `/api/b2b-requests`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetB2BRequestsQueryOptions = <TData = Awaited<ReturnType<typeof getB2BRequests>>, TError = ErrorType<ErrorResponse>>(params?: GetB2BRequestsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetB2BRequestsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getB2BRequests>>> = ({ signal }) => getB2BRequests(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getB2BRequests>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetB2BRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof getB2BRequests>>>
+export type GetB2BRequestsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List approved buyer requests
+ */
+
+export function useGetB2BRequests<TData = Awaited<ReturnType<typeof getB2BRequests>>, TError = ErrorType<ErrorResponse>>(
+ params?: GetB2BRequestsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetB2BRequestsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateB2BRequestUrl = () => {
+
+
+
+
+  return `/api/b2b-requests`
+}
+
+/**
+ * @summary Submit a buyer request for MMT review
+ */
+export const createB2BRequest = async (b2BRequestInput: B2BRequestInput, options?: Parameters<typeof customFetch>[1]): Promise<B2BRequest> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BRequest>(getCreateB2BRequestUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BRequestInput)
+  }
+);}
+
+
+
+
+
+export const getCreateB2BRequestMutationKey = () => ['createB2BRequest'] as const;
+
+export const getCreateB2BRequestMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createB2BRequest>>, TError,CreateB2BRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createB2BRequest>>, TError,CreateB2BRequestMutationVariables, TContext> => {
+
+const mutationKey = getCreateB2BRequestMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createB2BRequest>>, CreateB2BRequestMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createB2BRequest(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateB2BRequestMutationResult = NonNullable<Awaited<ReturnType<typeof createB2BRequest>>>
+    export type CreateB2BRequestMutationBody = BodyType<B2BRequestInput>
+    export type CreateB2BRequestMutationError = ErrorType<ErrorResponse>
+    export type CreateB2BRequestMutationVariables = {data: BodyType<B2BRequestInput>}
+
+    /**
+ * @summary Submit a buyer request for MMT review
+ */
+export const useCreateB2BRequest = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createB2BRequest>>, TError,CreateB2BRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createB2BRequest>>,
+        TError,
+        CreateB2BRequestMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateB2BRequestMutationOptions(options));
+    }
+
+export const getGetB2BRequestReviewQueueUrl = (params?: GetB2BRequestReviewQueueParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/b2b-requests/review?${stringifiedParams}` : `/api/b2b-requests/review`
+}
+
+/**
+ * @summary List buyer requests for authorized MMT staff
+ */
+export const getB2BRequestReviewQueue = async (params?: GetB2BRequestReviewQueueParams, options?: Parameters<typeof customFetch>[1]): Promise<B2BRequestPage> => {
+
+  return customFetch<B2BRequestPage>(getGetB2BRequestReviewQueueUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetB2BRequestReviewQueueQueryKey = (params?: GetB2BRequestReviewQueueParams,) => {
+    return [
+    `/api/b2b-requests/review`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetB2BRequestReviewQueueQueryOptions = <TData = Awaited<ReturnType<typeof getB2BRequestReviewQueue>>, TError = ErrorType<ErrorResponse>>(params?: GetB2BRequestReviewQueueParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BRequestReviewQueue>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetB2BRequestReviewQueueQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getB2BRequestReviewQueue>>> = ({ signal }) => getB2BRequestReviewQueue(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getB2BRequestReviewQueue>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetB2BRequestReviewQueueQueryResult = NonNullable<Awaited<ReturnType<typeof getB2BRequestReviewQueue>>>
+export type GetB2BRequestReviewQueueQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List buyer requests for authorized MMT staff
+ */
+
+export function useGetB2BRequestReviewQueue<TData = Awaited<ReturnType<typeof getB2BRequestReviewQueue>>, TError = ErrorType<ErrorResponse>>(
+ params?: GetB2BRequestReviewQueueParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BRequestReviewQueue>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetB2BRequestReviewQueueQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateB2BRequestStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/b2b-requests/${id}/status`
+}
+
+/**
+ * @summary Update a buyer request decision
+ */
+export const updateB2BRequestStatus = async (id: number,
+    b2BRequestStatusUpdate: B2BRequestStatusUpdate, options?: Parameters<typeof customFetch>[1]): Promise<B2BRequest> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BRequest>(getUpdateB2BRequestStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BRequestStatusUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateB2BRequestStatusMutationKey = () => ['updateB2BRequestStatus'] as const;
+
+export const getUpdateB2BRequestStatusMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateB2BRequestStatus>>, TError,UpdateB2BRequestStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateB2BRequestStatus>>, TError,UpdateB2BRequestStatusMutationVariables, TContext> => {
+
+const mutationKey = getUpdateB2BRequestStatusMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateB2BRequestStatus>>, UpdateB2BRequestStatusMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateB2BRequestStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateB2BRequestStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateB2BRequestStatus>>>
+    export type UpdateB2BRequestStatusMutationBody = BodyType<B2BRequestStatusUpdate>
+    export type UpdateB2BRequestStatusMutationError = ErrorType<ErrorResponse>
+    export type UpdateB2BRequestStatusMutationVariables = {id: number;data: BodyType<B2BRequestStatusUpdate>}
+
+    /**
+ * @summary Update a buyer request decision
+ */
+export const useUpdateB2BRequestStatus = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateB2BRequestStatus>>, TError,UpdateB2BRequestStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateB2BRequestStatus>>,
+        TError,
+        UpdateB2BRequestStatusMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateB2BRequestStatusMutationOptions(options));
     }
 
 export const getCreateB2BReportUrl = (id: number,) => {

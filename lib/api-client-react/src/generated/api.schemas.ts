@@ -441,6 +441,95 @@ export interface B2BListingPage {
   total: number;
 }
 
+export type B2BRequestCategory = typeof B2BRequestCategory[keyof typeof B2BRequestCategory];
+
+
+export const B2BRequestCategory = {
+  product: 'product',
+  service: 'service',
+  logistics: 'logistics',
+  partnership: 'partnership',
+  other: 'other',
+} as const;
+
+export type B2BRequestStatus = typeof B2BRequestStatus[keyof typeof B2BRequestStatus];
+
+
+export const B2BRequestStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+  closed: 'closed',
+} as const;
+
+export interface B2BRequestInput {
+  category: B2BRequestCategory;
+  /**
+     * @minLength 5
+     * @maxLength 140
+     */
+  title: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  requesterName: string;
+  /** @maxLength 200 */
+  organization?: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  location: string;
+  /**
+     * @minLength 5
+     * @maxLength 180
+     */
+  contact: string;
+  /**
+     * @minLength 20
+     * @maxLength 2000
+     */
+  description: string;
+}
+
+export interface B2BRequest {
+  id: number;
+  referenceCode: string;
+  category: B2BRequestCategory;
+  title: string;
+  requesterName: string;
+  /** @nullable */
+  organization?: string | null;
+  location: string;
+  contact: string;
+  description: string;
+  status: B2BRequestStatus;
+  /** @nullable */
+  internalNote?: string | null;
+  /** @nullable */
+  reviewerClerkUserId?: string | null;
+  /** @nullable */
+  reviewedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** @nullable */
+  publishedAt?: string | null;
+}
+
+export interface B2BRequestStatusUpdate {
+  status: B2BRequestStatus;
+  /** @maxLength 4000 */
+  internalNote?: string;
+}
+
+export interface B2BRequestPage {
+  items: B2BRequest[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
 export type B2BReportCategory = typeof B2BReportCategory[keyof typeof B2BReportCategory];
 
 
@@ -669,6 +758,36 @@ pageSize?: number;
 
 export type GetB2BListingReviewQueueParams = {
 status?: B2BListingStatus;
+/**
+ * @minimum 1
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+pageSize?: number;
+};
+
+export type GetB2BRequestsParams = {
+category?: B2BRequestCategory;
+/**
+ * @maxLength 120
+ */
+query?: string;
+/**
+ * @minimum 1
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+pageSize?: number;
+};
+
+export type GetB2BRequestReviewQueueParams = {
+status?: B2BRequestStatus;
 /**
  * @minimum 1
  */

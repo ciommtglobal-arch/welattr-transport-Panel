@@ -838,6 +838,179 @@ export const UpdateB2BListingStatusResponse = zod.object({
 
 
 /**
+ * @summary List approved buyer requests
+ */
+export const getB2BRequestsQueryQueryMax = 120;
+
+export const getB2BRequestsQueryPageDefault = 1;
+
+export const getB2BRequestsQueryPageSizeDefault = 12;
+export const getB2BRequestsQueryPageSizeMax = 50;
+
+
+
+export const GetB2BRequestsQueryParams = zod.object({
+  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'other']).optional(),
+  "query": zod.coerce.string().max(getB2BRequestsQueryQueryMax).optional(),
+  "page": zod.coerce.number().int().min(1).default(getB2BRequestsQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getB2BRequestsQueryPageSizeMax).default(getB2BRequestsQueryPageSizeDefault)
+})
+
+export const GetB2BRequestsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'other']),
+  "title": zod.string(),
+  "requesterName": zod.string(),
+  "organization": zod.string().nullish(),
+  "location": zod.string(),
+  "contact": zod.string(),
+  "description": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'closed']),
+  "internalNote": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullish()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "total": zod.int()
+})
+
+
+/**
+ * @summary Submit a buyer request for MMT review
+ */
+export const createB2BRequestBodyTitleMin = 5;
+export const createB2BRequestBodyTitleMax = 140;
+
+export const createB2BRequestBodyRequesterNameMin = 2;
+export const createB2BRequestBodyRequesterNameMax = 160;
+
+export const createB2BRequestBodyOrganizationMax = 200;
+
+export const createB2BRequestBodyLocationMin = 2;
+export const createB2BRequestBodyLocationMax = 160;
+
+export const createB2BRequestBodyContactMin = 5;
+export const createB2BRequestBodyContactMax = 180;
+
+export const createB2BRequestBodyDescriptionMin = 20;
+export const createB2BRequestBodyDescriptionMax = 2000;
+
+
+
+export const CreateB2BRequestBody = zod.object({
+  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'other']),
+  "title": zod.string().min(createB2BRequestBodyTitleMin).max(createB2BRequestBodyTitleMax),
+  "requesterName": zod.string().min(createB2BRequestBodyRequesterNameMin).max(createB2BRequestBodyRequesterNameMax),
+  "organization": zod.string().max(createB2BRequestBodyOrganizationMax).optional(),
+  "location": zod.string().min(createB2BRequestBodyLocationMin).max(createB2BRequestBodyLocationMax),
+  "contact": zod.string().min(createB2BRequestBodyContactMin).max(createB2BRequestBodyContactMax),
+  "description": zod.string().min(createB2BRequestBodyDescriptionMin).max(createB2BRequestBodyDescriptionMax)
+})
+
+export const CreateB2BRequestResponse = zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'other']),
+  "title": zod.string(),
+  "requesterName": zod.string(),
+  "organization": zod.string().nullish(),
+  "location": zod.string(),
+  "contact": zod.string(),
+  "description": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'closed']),
+  "internalNote": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullish()
+})
+
+
+/**
+ * @summary List buyer requests for authorized MMT staff
+ */
+export const getB2BRequestReviewQueueQueryPageDefault = 1;
+
+export const getB2BRequestReviewQueueQueryPageSizeDefault = 25;
+export const getB2BRequestReviewQueueQueryPageSizeMax = 100;
+
+
+
+export const GetB2BRequestReviewQueueQueryParams = zod.object({
+  "status": zod.enum(['pending', 'approved', 'rejected', 'closed']).optional(),
+  "page": zod.coerce.number().int().min(1).default(getB2BRequestReviewQueueQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getB2BRequestReviewQueueQueryPageSizeMax).default(getB2BRequestReviewQueueQueryPageSizeDefault)
+})
+
+export const GetB2BRequestReviewQueueResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'other']),
+  "title": zod.string(),
+  "requesterName": zod.string(),
+  "organization": zod.string().nullish(),
+  "location": zod.string(),
+  "contact": zod.string(),
+  "description": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'closed']),
+  "internalNote": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullish()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "total": zod.int()
+})
+
+
+/**
+ * @summary Update a buyer request decision
+ */
+export const UpdateB2BRequestStatusParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateB2BRequestStatusBodyInternalNoteMax = 4000;
+
+
+
+export const UpdateB2BRequestStatusBody = zod.object({
+  "status": zod.enum(['pending', 'approved', 'rejected', 'closed']),
+  "internalNote": zod.string().max(updateB2BRequestStatusBodyInternalNoteMax).optional()
+})
+
+export const UpdateB2BRequestStatusResponse = zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "category": zod.enum(['product', 'service', 'logistics', 'partnership', 'other']),
+  "title": zod.string(),
+  "requesterName": zod.string(),
+  "organization": zod.string().nullish(),
+  "location": zod.string(),
+  "contact": zod.string(),
+  "description": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'closed']),
+  "internalNote": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullish()
+})
+
+
+/**
  * @summary Report an approved B2B listing to MMT staff
  */
 export const CreateB2BReportParams = zod.object({
