@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { SignInButton, SignUpButton, useAuth } from "@clerk/react";
 import {
   ArrowLeft,
-  ArrowRight,
   CheckCircle2,
   CircleAlert,
   FileCheck2,
@@ -25,7 +24,6 @@ import {
   type B2BBusinessProfileInput,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { B2BShareButtons } from "../components/b2b-share-buttons";
 
 type DocumentContentType = "application/pdf" | "image/jpeg" | "image/png";
 
@@ -414,7 +412,7 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState("");
-  const [publishedListing, setPublishedListing] = useState<B2BListing | null>(
+  const [submittedListing, setSubmittedListing] = useState<B2BListing | null>(
     null,
   );
 
@@ -432,7 +430,7 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
   const createListing = useCreateB2BListing({
     mutation: {
       onSuccess: async (listing) => {
-        setPublishedListing(listing);
+        setSubmittedListing(listing);
         await queryClient.invalidateQueries({
           queryKey: getGetB2BListingsQueryKey(),
         });
@@ -497,38 +495,37 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
     }
   }
 
-  if (publishedListing) {
+  if (submittedListing) {
     return (
       <div className="mx-auto max-w-3xl border border-primary/30 bg-primary/5 p-8 md:p-12">
         <CheckCircle2 className="h-12 w-12 text-primary" />
         <p className="mt-8 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
           {profile.publicName}
         </p>
-        <h2 className="mt-3 text-3xl font-semibold">İlanınız yayınlandı</h2>
+        <h2 className="mt-3 text-3xl font-semibold">İlanınız incelemeye alındı</h2>
         <p className="mt-4 max-w-2xl leading-relaxed text-foreground/65">
-          İlanınız MMT Connect ağında herkese açık olarak yayınlandı. Web
-          siteniz ve medya bağlantılarınız bu ilan üzerinden görünür.
+          İçeriğiniz MMT Global ekibi tarafından kontrol edilecek. Onaylandıktan
+          sonra MMT Connect ağında herkese açık olarak yayınlanacak.
         </p>
         <div className="mt-6 border border-border/70 bg-card px-5 py-4">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
             Referans kodu
           </p>
           <p className="mt-1 font-mono text-lg font-bold tracking-wider">
-            {publishedListing.referenceCode}
+            {submittedListing.referenceCode}
           </p>
         </div>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
-            href={`/b2b-agi/ilan/${publishedListing.id}`}
-            className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white"
+            href="/b2b-agi"
+            className="bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white"
           >
-            İlanı görüntüle
-            <ArrowRight size={16} />
+            Ağa dön
           </Link>
           <button
             type="button"
             onClick={() => {
-              setPublishedListing(null);
+              setSubmittedListing(null);
               setTitle("");
               setDescription("");
                setImage(null);
@@ -539,10 +536,6 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
             Yeni ilan yayınla
           </button>
         </div>
-        <B2BShareButtons
-          title={publishedListing.title}
-          url={`${window.location.origin}/b2b-agi/ilan/${publishedListing.id}`}
-        />
       </div>
     );
   }
@@ -559,9 +552,9 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
             artık yayında.
           </span>
         </h2>
-           <p className="mt-8 leading-relaxed text-foreground/65">
-             Ürün, alım talebi, lojistik, hizmet veya iş ilanınızı oluşturun.
-             İlanınız ek bir MMT onayı beklemeden doğrudan yayınlanır.
+        <p className="mt-8 leading-relaxed text-foreground/65">
+          Ürün, alım talebi, lojistik, hizmet veya iş ilanınızı oluşturun.
+          İlanınız MMT Global ekibinin kontrolünden sonra yayınlanır.
         </p>
         <div className="mt-8 border-l-2 border-primary pl-4 text-sm leading-relaxed text-foreground/70">
           <strong className="block text-foreground">Ücretsiz görünürlük</strong>
@@ -575,9 +568,9 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
         className="border border-border/70 bg-card p-6 md:p-10"
       >
         <div className="mb-8 border-b border-border/70 pb-6">
-          <h3 className="text-2xl font-semibold">Yeni ilan yayınla</h3>
+          <h3 className="text-2xl font-semibold">Yeni ilan gönder</h3>
           <p className="mt-2 text-sm text-foreground/55">
-            İlanınız doğrulanmış işletme profilinizle yayınlanır.
+            İlanınız doğrulanmış işletme profilinizle MMT Global incelemesine gönderilir.
           </p>
         </div>
 
@@ -742,7 +735,7 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
           {createListing.isPending ? (
             <Loader2 size={16} className="animate-spin" />
           ) : null}
-          İlanı yayınla
+           İlanı incelemeye gönder
         </button>
       </form>
     </div>

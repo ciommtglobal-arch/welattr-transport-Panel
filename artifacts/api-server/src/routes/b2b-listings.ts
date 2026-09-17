@@ -236,7 +236,6 @@ router.post("/b2b-listings", async (req, res): Promise<void> => {
     return;
   }
 
-  const publishedAt = new Date();
   const [listing] = await db
     .insert(b2bListingsTable)
     .values({
@@ -256,14 +255,14 @@ router.post("/b2b-listings", async (req, res): Promise<void> => {
       experience: input.experience?.trim() || null,
       website: input.website?.trim() || null,
       socialLinks: cleanSocialLinks(input.socialLinks),
-      status: "approved",
-      publishedAt,
+      status: "pending",
+      publishedAt: null,
     })
     .returning();
 
   req.log.info(
     { listingId: listing.id, referenceCode: listing.referenceCode },
-    "B2B listing published by verified business",
+    "B2B listing submitted for MMT review",
   );
   res.status(201).json(serializeListing(listing, true));
 });
