@@ -599,6 +599,38 @@ export const UpdateB2BBusinessProfileStatusResponse = zod.object({
 
 
 /**
+ * @summary Create an upload URL for a B2B listing cover image
+ */
+export const requestB2BListingImageUploadUrlBodyNameMax = 255;
+
+export const requestB2BListingImageUploadUrlBodySizeMax = 5242880;
+
+
+
+export const RequestB2BListingImageUploadUrlBody = zod.object({
+  "name": zod.string().min(1).max(requestB2BListingImageUploadUrlBodyNameMax),
+  "size": zod.int().min(1).max(requestB2BListingImageUploadUrlBodySizeMax),
+  "contentType": zod.enum(['image/jpeg', 'image/png'])
+})
+
+export const requestB2BListingImageUploadUrlResponseMetadataNameMax = 255;
+
+export const requestB2BListingImageUploadUrlResponseMetadataSizeMax = 10485760;
+
+
+
+export const RequestB2BListingImageUploadUrlResponse = zod.object({
+  "uploadURL": zod.url(),
+  "objectPath": zod.string(),
+  "metadata": zod.object({
+  "name": zod.string().min(1).max(requestB2BListingImageUploadUrlResponseMetadataNameMax),
+  "size": zod.int().min(1).max(requestB2BListingImageUploadUrlResponseMetadataSizeMax),
+  "contentType": zod.enum(['application/pdf', 'image/jpeg', 'image/png'])
+}).optional()
+})
+
+
+/**
  * @summary List approved B2B listings
  */
 export const getB2BListingsQueryQueryMax = 120;
@@ -628,6 +660,7 @@ export const GetB2BListingsResponse = zod.object({
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "imageUrl": zod.string().nullish(),
   "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
   "salary": zod.string().nullish(),
   "experience": zod.string().nullish(),
@@ -672,6 +705,7 @@ export const createB2BListingBodyContactMax = 180;
 export const createB2BListingBodyDescriptionMin = 20;
 export const createB2BListingBodyDescriptionMax = 2000;
 
+export const createB2BListingBodyImageObjectPathRegExp = new RegExp('^/objects/uploads/[a-zA-Z0-9-]+$');
 export const createB2BListingBodySalaryMax = 120;
 
 export const createB2BListingBodyExperienceMax = 160;
@@ -686,6 +720,7 @@ export const CreateB2BListingBody = zod.object({
   "location": zod.string().min(createB2BListingBodyLocationMin).max(createB2BListingBodyLocationMax),
   "contact": zod.string().min(createB2BListingBodyContactMin).max(createB2BListingBodyContactMax),
   "description": zod.string().min(createB2BListingBodyDescriptionMin).max(createB2BListingBodyDescriptionMax),
+  "imageObjectPath": zod.string().regex(createB2BListingBodyImageObjectPathRegExp).optional(),
   "employmentType": zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']).optional(),
   "salary": zod.string().max(createB2BListingBodySalaryMax).optional(),
   "experience": zod.string().max(createB2BListingBodyExperienceMax).optional(),
@@ -709,6 +744,7 @@ export const CreateB2BListingResponse = zod.object({
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "imageUrl": zod.string().nullish(),
   "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
   "salary": zod.string().nullish(),
   "experience": zod.string().nullish(),
@@ -755,6 +791,7 @@ export const GetB2BListingReviewQueueResponse = zod.object({
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "imageUrl": zod.string().nullish(),
   "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
   "salary": zod.string().nullish(),
   "experience": zod.string().nullish(),
@@ -795,6 +832,7 @@ export const GetB2BListingResponse = zod.object({
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "imageUrl": zod.string().nullish(),
   "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
   "salary": zod.string().nullish(),
   "experience": zod.string().nullish(),
@@ -840,6 +878,7 @@ export const UpdateB2BListingStatusResponse = zod.object({
   "location": zod.string(),
   "contact": zod.string(),
   "description": zod.string(),
+  "imageUrl": zod.string().nullish(),
   "employmentType": zod.union([zod.enum(['full_time', 'part_time', 'contract', 'seasonal', 'internship', 'remote']),zod.null()]).optional(),
   "salary": zod.string().nullish(),
   "experience": zod.string().nullish(),

@@ -41,6 +41,8 @@ export interface B2BListingInput {
      * @maxLength 2000
      */
   description: string;
+  /** @pattern ^/objects/uploads/[a-zA-Z0-9-]+$ */
+  imageObjectPath?: string;
   employmentType?: B2BEmploymentType;
   /** @maxLength 120 */
   salary?: string;

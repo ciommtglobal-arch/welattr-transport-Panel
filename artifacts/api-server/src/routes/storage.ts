@@ -8,6 +8,7 @@ import {
 } from "@workspace/api-zod";
 import {
   b2bBusinessProfilesTable,
+  b2bListingsTable,
   db,
   limitApplicationDocumentsTable,
 } from "@workspace/db";
@@ -59,9 +60,15 @@ async function getReferencedObjectPaths(objectPaths: string[]) {
       ),
     );
 
+  const listings = await db
+    .select({ objectPath: b2bListingsTable.imageObjectPath })
+    .from(b2bListingsTable)
+    .where(inArray(b2bListingsTable.imageObjectPath, objectPaths));
+
   return new Set([
     ...documents.map((document) => document.objectPath),
     ...businessProfiles.map((profile) => profile.objectPath),
+    ...listings.map((listing) => listing.objectPath).filter(Boolean),
   ]);
 }
 

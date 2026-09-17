@@ -20,6 +20,8 @@ export interface B2BListing {
   location: string;
   contact: string;
   description: string;
+  /** @nullable */
+  imageUrl?: string | null;
   employmentType?: B2BEmploymentType | null;
   /** @nullable */
   salary?: string | null;

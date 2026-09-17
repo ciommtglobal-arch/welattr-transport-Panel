@@ -25,6 +25,7 @@ import type {
   B2BBusinessProfilePage,
   B2BBusinessProfileStatusUpdate,
   B2BListing,
+  B2BListingImageUploadInput,
   B2BListingInput,
   B2BListingPage,
   B2BListingStatusUpdate,
@@ -1297,6 +1298,86 @@ export const useUpdateB2BBusinessProfileStatus = <TError = ErrorType<ErrorRespon
         TContext
       > => {
       return useMutation(getUpdateB2BBusinessProfileStatusMutationOptions(options));
+    }
+
+export const getRequestB2BListingImageUploadUrlUrl = () => {
+
+
+
+
+  return `/api/b2b-listings/image-upload-url`
+}
+
+/**
+ * @summary Create an upload URL for a B2B listing cover image
+ */
+export const requestB2BListingImageUploadUrl = async (b2BListingImageUploadInput: B2BListingImageUploadInput, options?: Parameters<typeof customFetch>[1]): Promise<UploadUrlResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<UploadUrlResponse>(getRequestB2BListingImageUploadUrlUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BListingImageUploadInput)
+  }
+);}
+
+
+
+
+
+export const getRequestB2BListingImageUploadUrlMutationKey = () => ['requestB2BListingImageUploadUrl'] as const;
+
+export const getRequestB2BListingImageUploadUrlMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestB2BListingImageUploadUrl>>, TError,RequestB2BListingImageUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestB2BListingImageUploadUrl>>, TError,RequestB2BListingImageUploadUrlMutationVariables, TContext> => {
+
+const mutationKey = getRequestB2BListingImageUploadUrlMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestB2BListingImageUploadUrl>>, RequestB2BListingImageUploadUrlMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestB2BListingImageUploadUrl(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestB2BListingImageUploadUrlMutationResult = NonNullable<Awaited<ReturnType<typeof requestB2BListingImageUploadUrl>>>
+    export type RequestB2BListingImageUploadUrlMutationBody = BodyType<B2BListingImageUploadInput>
+    export type RequestB2BListingImageUploadUrlMutationError = ErrorType<ErrorResponse>
+    export type RequestB2BListingImageUploadUrlMutationVariables = {data: BodyType<B2BListingImageUploadInput>}
+
+    /**
+ * @summary Create an upload URL for a B2B listing cover image
+ */
+export const useRequestB2BListingImageUploadUrl = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestB2BListingImageUploadUrl>>, TError,RequestB2BListingImageUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestB2BListingImageUploadUrl>>,
+        TError,
+        RequestB2BListingImageUploadUrlMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestB2BListingImageUploadUrlMutationOptions(options));
     }
 
 export const getGetB2BListingsUrl = (params?: GetB2BListingsParams,) => {

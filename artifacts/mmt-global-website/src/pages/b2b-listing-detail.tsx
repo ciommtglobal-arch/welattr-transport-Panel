@@ -24,6 +24,7 @@ import {
   type B2BReportCategory,
   type B2BListingRole,
 } from "@workspace/api-client-react";
+import { B2BShareButtons } from "../components/b2b-share-buttons";
 
 const roleLabels: Record<B2BListingRole, { label: string; icon: any }> = {
   producer: { label: "Üretici", icon: Factory },
@@ -163,6 +164,13 @@ export default function B2BListingDetail() {
             <h1 className="mt-8 max-w-4xl text-4xl font-semibold leading-[1.1] tracking-tight md:text-6xl font-serif">
               {listing.title}
             </h1>
+            {listing.imageUrl ? (
+              <img
+                src={listing.imageUrl}
+                alt={`${listing.organization} — ${listing.title}`}
+                className="mt-10 max-h-[28rem] w-full max-w-5xl object-cover"
+              />
+            ) : null}
             
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4 text-sm text-secondary-foreground/75">
               <div className="flex items-center gap-2">
@@ -272,7 +280,11 @@ export default function B2BListingDetail() {
                     </div>
                   )}
                 </dl>
-                  <ReportBox listingId={listing.id} />
+                <B2BShareButtons
+                  title={listing.title}
+                  url={window.location.href}
+                />
+                <ReportBox listingId={listing.id} />
               </div>
             </div>
           </div>

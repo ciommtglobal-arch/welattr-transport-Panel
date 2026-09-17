@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import {
   CreateB2BListingBody,
+  RequestB2BListingImageUploadUrlBody,
   GetB2BListingParams,
   GetB2BListingsQueryParams,
   GetB2BListingReviewQueueQueryParams,
@@ -16,9 +17,11 @@ import {
 } from "@workspace/db";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { requireStaff, requireUser } from "../lib/staffAuth";
+import { ObjectStorageService } from "../lib/objectStorage";
 import { randomBytes } from "node:crypto";
 
 const router: IRouter = Router();
+const objectStorageService = new ObjectStorageService();
 
 function createReferenceCode() {
   const year = new Date().getUTCFullYear();
@@ -49,6 +52,9 @@ function serializeListing(listing: B2BListing, includeInternalNote = false) {
     location: listing.location,
     contact: listing.contact,
     description: listing.description,
+    imageUrl: listing.imageObjectPath
+      ? `/api/b2b-listings/${listing.id}/image`
+      : null,
     employmentType: listing.employmentType,
     salary: listing.salary,
     experience: listing.experience,
@@ -61,6 +67,88 @@ function serializeListing(listing: B2BListing, includeInternalNote = false) {
     publishedAt: listing.publishedAt?.toISOString() ?? null,
   };
 }
+
+router.post(
+  "/b2b-listings/image-upload-url",
+  async (req, res): Promise<void> => {
+    const userId = requireUser(req, res);
+    if (!userId) return;
+
+    const parsed = RequestB2BListingImageUploadUrlBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "İlan görseli geçersiz." });
+      return;
+    }
+
+    const [businessProfile] = await db
+      .select({ status: b2bBusinessProfilesTable.status })
+      .from(b2bBusinessProfilesTable)
+      .where(
+        eq(b2bBusinessProfilesTable.ownerClerkUserId, userId),
+      )
+      .limit(1);
+
+    if (businessProfile?.status !== "verified") {
+      res.status(403).json({
+        error: "İlan görseli yüklemek için doğrulanmış işletme profili gerekiyor.",
+      });
+      return;
+    }
+
+    try {
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      const objectPath =
+        objectStorageService.normalizeObjectEntityPath(uploadURL);
+
+      res.json({
+        uploadURL,
+        objectPath,
+        metadata: parsed.data,
+      });
+    } catch (error) {
+      req.log.error({ err: error }, "B2B ilan görseli yükleme adresi oluşturulamadı");
+      res.status(500).json({
+        error: "İlan görseli yükleme adresi oluşturulamadı.",
+      });
+    }
+  },
+);
+
+router.get("/b2b-listings/:id/image", async (req, res): Promise<void> => {
+  const params = GetB2BListingParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: "İlan numarası geçersiz." });
+    return;
+  }
+
+  const [listing] = await db
+    .select({
+      imageObjectPath: b2bListingsTable.imageObjectPath,
+    })
+    .from(b2bListingsTable)
+    .where(
+      and(
+        eq(b2bListingsTable.id, params.data.id),
+        eq(b2bListingsTable.status, "approved"),
+      ),
+    )
+    .limit(1);
+
+  if (!listing?.imageObjectPath) {
+    res.status(404).json({ error: "İlan görseli bulunamadı." });
+    return;
+  }
+
+  try {
+    const download = await objectStorageService.getObjectEntityDownloadURL(
+      listing.imageObjectPath,
+    );
+    res.redirect(download.downloadURL);
+  } catch (error) {
+    req.log.error({ err: error }, "B2B ilan görseli açılamadı");
+    res.status(404).json({ error: "İlan görseli bulunamadı." });
+  }
+});
 
 router.get("/b2b-listings", async (req, res): Promise<void> => {
   const parsed = GetB2BListingsQueryParams.safeParse(req.query);
@@ -162,6 +250,7 @@ router.post("/b2b-listings", async (req, res): Promise<void> => {
       location: input.location.trim(),
       contact: input.contact.trim(),
       description: input.description.trim(),
+      imageObjectPath: input.imageObjectPath ?? null,
       employmentType: input.employmentType ?? null,
       salary: input.salary?.trim() || null,
       experience: input.experience?.trim() || null,

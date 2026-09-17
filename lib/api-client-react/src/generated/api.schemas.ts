@@ -383,6 +383,28 @@ export interface B2BListingSocialLinks {
   tiktok?: string;
 }
 
+export type B2BListingImageUploadInputContentType = typeof B2BListingImageUploadInputContentType[keyof typeof B2BListingImageUploadInputContentType];
+
+
+export const B2BListingImageUploadInputContentType = {
+  'image/jpeg': 'image/jpeg',
+  'image/png': 'image/png',
+} as const;
+
+export interface B2BListingImageUploadInput {
+  /**
+     * @minLength 1
+     * @maxLength 255
+     */
+  name: string;
+  /**
+     * @minimum 1
+     * @maximum 5242880
+     */
+  size: number;
+  contentType: B2BListingImageUploadInputContentType;
+}
+
 export interface B2BListing {
   id: number;
   referenceCode: string;
@@ -393,6 +415,8 @@ export interface B2BListing {
   location: string;
   contact: string;
   description: string;
+  /** @nullable */
+  imageUrl?: string | null;
   employmentType?: B2BEmploymentType | null;
   /** @nullable */
   salary?: string | null;
@@ -442,6 +466,8 @@ export interface B2BListingInput {
      * @maxLength 2000
      */
   description: string;
+  /** @pattern ^/objects/uploads/[a-zA-Z0-9-]+$ */
+  imageObjectPath?: string;
   employmentType?: B2BEmploymentType;
   /** @maxLength 120 */
   salary?: string;

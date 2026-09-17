@@ -579,6 +579,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /b2b-listings/image-upload-url:
+    post:
+      operationId: requestB2BListingImageUploadUrl
+      tags: [b2b-listings]
+      summary: Create an upload URL for a B2B listing cover image
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BListingImageUploadInput"
+      responses:
+        "200":
+          description: Listing image upload URL created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlResponse"
+        "400":
+          description: Invalid image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: A verified business profile is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /b2b-listings:
     get:
       operationId: getB2BListings
@@ -1484,6 +1520,22 @@ components:
         tiktok:
           type: string
           format: uri
+    B2BListingImageUploadInput:
+      type: object
+      additionalProperties: false
+      required: [name, size, contentType]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        size:
+          type: integer
+          minimum: 1
+          maximum: 5242880
+        contentType:
+          type: string
+          enum: [image/jpeg, image/png]
     B2BListing:
       type: object
       required:
@@ -1518,6 +1570,8 @@ components:
           type: string
         description:
           type: string
+        imageUrl:
+          type: [string, "null"]
         employmentType:
           oneOf:
             - $ref: "#/components/schemas/B2BEmploymentType"
@@ -1584,6 +1638,9 @@ components:
           type: string
           minLength: 20
           maxLength: 2000
+        imageObjectPath:
+          type: string
+          pattern: "^/objects/uploads/[a-zA-Z0-9-]+$"
         employmentType:
           $ref: "#/components/schemas/B2BEmploymentType"
         salary:

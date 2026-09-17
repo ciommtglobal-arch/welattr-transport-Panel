@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Link } from "wouter";
 import { SignInButton, SignUpButton, useAuth } from "@clerk/react";
 import {
@@ -15,6 +15,7 @@ import {
   getGetB2BListingsQueryKey,
   getGetMyB2BBusinessProfileQueryKey,
   requestB2BBusinessVerificationUploadUrl,
+  requestB2BListingImageUploadUrl,
   useCreateB2BListing,
   useGetMyB2BBusinessProfile,
   type B2BListing,
@@ -24,6 +25,7 @@ import {
   type B2BBusinessProfileInput,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { B2BShareButtons } from "../components/b2b-share-buttons";
 
 type DocumentContentType = "application/pdf" | "image/jpeg" | "image/png";
 
@@ -409,9 +411,23 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
     telegram: "",
     tiktok: "",
   });
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageError, setImageError] = useState("");
   const [publishedListing, setPublishedListing] = useState<B2BListing | null>(
     null,
   );
+
+  useEffect(() => {
+    if (!image) {
+      setImagePreview(null);
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(image);
+    setImagePreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [image]);
 
   const createListing = useCreateB2BListing({
     mutation: {
@@ -424,8 +440,9 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
     },
   });
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setImageError("");
     const cleanedSocials = {
       instagram: socials.instagram.trim() || undefined,
       facebook: socials.facebook.trim() || undefined,
@@ -435,22 +452,49 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
     };
     const hasSocials = Object.values(cleanedSocials).some(Boolean);
 
-    createListing.mutate({
-      data: {
-        role,
-        title: title.trim(),
-        fullName: fullName.trim(),
-        organization: profile.publicName,
-        location: location.trim(),
-        contact: contact.trim(),
-        description: description.trim(),
-        employmentType: role === "employer" ? employmentType : undefined,
-        salary: role === "employer" ? salary.trim() || undefined : undefined,
-        experience: role === "employer" ? experience.trim() || undefined : undefined,
-        website: website.trim() || undefined,
-        socialLinks: hasSocials ? cleanedSocials : undefined,
-      },
-    });
+    try {
+      let imageObjectPath: string | undefined;
+      if (image) {
+        const upload = await requestB2BListingImageUploadUrl({
+          name: image.name,
+          size: image.size,
+          contentType: image.type as "image/jpeg" | "image/png",
+        });
+        const uploadResponse = await fetch(upload.uploadURL, {
+          method: "PUT",
+          headers: { "Content-Type": image.type },
+          body: image,
+        });
+        if (!uploadResponse.ok) {
+          throw new Error("İlan görseli yüklenemedi.");
+        }
+        imageObjectPath = upload.objectPath;
+      }
+
+      createListing.mutate({
+        data: {
+          role,
+          title: title.trim(),
+          fullName: fullName.trim(),
+          organization: profile.publicName,
+          location: location.trim(),
+          contact: contact.trim(),
+          description: description.trim(),
+          imageObjectPath,
+          employmentType: role === "employer" ? employmentType : undefined,
+          salary: role === "employer" ? salary.trim() || undefined : undefined,
+          experience: role === "employer" ? experience.trim() || undefined : undefined,
+          website: website.trim() || undefined,
+          socialLinks: hasSocials ? cleanedSocials : undefined,
+        },
+      });
+    } catch (error) {
+      setImageError(
+        error instanceof Error
+          ? error.message
+          : "İlan görseli yüklenemedi. Lütfen tekrar deneyin.",
+      );
+    }
   }
 
   if (publishedListing) {
@@ -487,12 +531,18 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
               setPublishedListing(null);
               setTitle("");
               setDescription("");
+               setImage(null);
+               setImageError("");
             }}
             className="border border-border/70 px-6 py-3 text-sm font-semibold uppercase tracking-wider hover:border-primary hover:text-primary"
           >
             Yeni ilan yayınla
           </button>
         </div>
+        <B2BShareButtons
+          title={publishedListing.title}
+          url={`${window.location.origin}/b2b-agi/ilan/${publishedListing.id}`}
+        />
       </div>
     );
   }
@@ -614,6 +664,39 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
 
         <label className="mt-6 block text-sm">
           <span className="mb-2 block text-foreground/70">
+            İlan görseli <span className="text-foreground/45">(isteğe bağlı)</span>
+          </span>
+          <span className="flex cursor-pointer items-center gap-3 border border-dashed border-border/80 bg-background px-4 py-4 transition-colors hover:border-primary">
+            <Upload className="h-5 w-5 shrink-0 text-primary" />
+            <span className="min-w-0 flex-1 truncate text-sm">
+              {image?.name ?? "JPG veya PNG — en fazla 5 MB"}
+            </span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png"
+              className="sr-only"
+              onChange={(event) => {
+                const file = event.target.files?.[0] ?? null;
+                if (file && file.size > 5 * 1024 * 1024) {
+                  setImage(null);
+                  setImageError("Görsel en fazla 5 MB olabilir.");
+                  return;
+                }
+                setImage(file);
+              }}
+            />
+          </span>
+          {imagePreview ? (
+            <img
+              src={imagePreview}
+              alt="İlan görseli önizleme"
+              className="mt-3 aspect-[16/7] w-full object-cover"
+            />
+          ) : null}
+        </label>
+
+        <label className="mt-6 block text-sm">
+          <span className="mb-2 block text-foreground/70">
             Açıklama <span className="text-primary">*</span>
           </span>
           <textarea
@@ -626,6 +709,12 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
             className="w-full resize-y border border-border/70 bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary"
           />
         </label>
+
+        {imageError ? (
+          <p className="mt-5 border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-700 dark:text-red-300">
+            {imageError}
+          </p>
+        ) : null}
 
         <div className="mt-7 border-t border-border/70 pt-7">
           <h4 className="mb-4 text-sm font-semibold">Medya kanalları</h4>

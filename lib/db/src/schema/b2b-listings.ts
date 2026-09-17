@@ -51,6 +51,7 @@ export const b2bListingsTable = pgTable(
     location: text("location").notNull(),
     contact: text("contact").notNull(),
     description: text("description").notNull(),
+    imageObjectPath: text("image_object_path"),
     employmentType: text("employment_type"),
     salary: text("salary"),
     experience: text("experience"),

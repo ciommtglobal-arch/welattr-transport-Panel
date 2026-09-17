@@ -445,6 +445,13 @@ function ListingCard({ listing }: { listing: B2BListing }) {
       href={`/b2b-agi/ilan/${listing.id}`}
       className="group flex flex-col border border-border/70 bg-card p-6 transition-all hover:border-primary"
     >
+      {listing.imageUrl ? (
+        <img
+          src={listing.imageUrl}
+          alt={`${listing.organization} — ${listing.title}`}
+          className="-mx-6 -mt-6 mb-6 aspect-[16/9] w-[calc(100%+3rem)] object-cover"
+        />
+      ) : null}
       <div className="flex items-start justify-between gap-4 mb-5">
         <span className="inline-flex items-center gap-1.5 border border-primary/20 bg-primary/5 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
           <RoleIcon size={12} />

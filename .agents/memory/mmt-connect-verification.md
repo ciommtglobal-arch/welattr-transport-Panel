@@ -39,6 +39,12 @@ MMT Connect employment uses two paths: signed-in people submit moderated “İş
 
 **How to apply:** Keep employment requests under the staff request queue; keep employer listings under verified-business publishing and the public listing filters. Preserve employment type, salary, and experience fields through API, moderation, and public detail views.
 
+Approved B2B listings may carry one optional cover image stored outside PostgreSQL; the public detail page is the canonical share target and should offer direct social/link sharing.
+
+**Why:** A single controlled visual improves listing trust without turning requests into a media-upload workflow, and sharing the canonical detail URL keeps public links stable.
+
+**How to apply:** Require an authenticated verified business before image upload, keep the image optional, show it on cards and detail pages, and include WhatsApp, Telegram, LinkedIn, native share, and copy-link actions.
+
 MMT Connect should become MMT Global's own branded trade network; Instagram, Facebook, TikTok, and Telegram are distribution channels rather than the core product.
 
 **Why:** The user wants to protect and grow the MMT brand through an owned network instead of depending permanently on external social platforms.

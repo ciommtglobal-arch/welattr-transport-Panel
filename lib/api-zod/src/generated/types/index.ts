@@ -15,6 +15,8 @@ export * from './b2BBusinessVerificationDocumentInput';
 export * from './b2BBusinessVerificationDocumentInputContentType';
 export * from './b2BEmploymentType';
 export * from './b2BListing';
+export * from './b2BListingImageUploadInput';
+export * from './b2BListingImageUploadInputContentType';
 export * from './b2BListingInput';
 export * from './b2BListingPage';
 export * from './b2BListingRole';
