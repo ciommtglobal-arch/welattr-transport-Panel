@@ -208,6 +208,7 @@ function ClerkApp() {
     location === '/staff/b2b-dogrulamalar' ||
     location === '/staff/b2b-sikayetler' ||
     location === '/staff/b2b-talepler' ||
+    location === '/b2b-agi' ||
     location.startsWith('/b2b-agi/ilan/') ||
     location === '/b2b-agi/katil' ||
     location === '/b2b-agi/talep' ||
