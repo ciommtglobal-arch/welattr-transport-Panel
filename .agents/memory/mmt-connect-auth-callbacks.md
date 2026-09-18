@@ -16,3 +16,5 @@ Keep the public B2B network route in the same Clerk provider boundary as the bus
 **Why:** Re-entering the profile page from the B2B network could freeze on mobile Safari when the provider was unmounted on the network route and initialized again on the profile route.
 
 **How to apply:** Treat the B2B network and business-profile routes as one navigation group when adjusting route-scoped Clerk mounting.
+
+The user confirmed that the profile screen opens after returning from the B2B network; a brief blank loading frame appears first, then the pending-verification screen renders correctly.
