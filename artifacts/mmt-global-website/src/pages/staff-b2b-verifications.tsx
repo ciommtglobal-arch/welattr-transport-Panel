@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { SignInButton, UserButton, useAuth } from "@clerk/react";
+import { UserButton, useAuth } from "@clerk/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
@@ -77,11 +77,12 @@ export default function StaffB2BVerifications() {
           <p className="mt-5 leading-relaxed text-foreground/60">
             Firma belgelerini incelemek için personel hesabınızla giriş yapın.
           </p>
-          <SignInButton mode="modal">
-            <button className="mt-8 bg-primary px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-white">
-              Personel girişi
-            </button>
-          </SignInButton>
+          <Link
+            href="/staff/giris"
+            className="mt-8 inline-flex bg-primary px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-white"
+          >
+            Personel girişi
+          </Link>
         </section>
       ) : (
         <VerificationInbox />

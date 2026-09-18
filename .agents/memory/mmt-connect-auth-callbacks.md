@@ -18,3 +18,9 @@ Keep the public B2B network route in the same Clerk provider boundary as the bus
 **How to apply:** Treat the B2B network and business-profile routes as one navigation group when adjusting route-scoped Clerk mounting.
 
 The user confirmed that the profile screen opens after returning from the B2B network; a brief blank loading frame appears first, then the pending-verification screen renders correctly.
+
+Staff authentication also uses a dedicated full-page route with a return to the verification queue instead of a mobile modal.
+
+**Why:** The mobile staff login modal did not reliably open, leaving the user on the personnel landing screen.
+
+**How to apply:** Keep staff login on its own Clerk route and return authenticated staff to the verification queue after sign-in.

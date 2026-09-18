@@ -117,6 +117,19 @@ function SignInPage() {
   );
 }
 
+function StaffSignInPage() {
+  return (
+    <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
+      <SignIn
+        routing="path"
+        path={`${basePath}/staff/giris`}
+        signUpUrl={`${basePath}/sign-up`}
+        fallbackRedirectUrl={`${basePath}/staff/b2b-dogrulamalar`}
+      />
+    </div>
+  );
+}
+
 function SignUpPage() {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
@@ -160,6 +173,7 @@ function Router() {
         <Route path="/staff/b2b-dogrulamalar" component={StaffB2BVerifications} />
         <Route path="/staff/b2b-sikayetler" component={StaffB2BReports} />
         <Route path="/staff/b2b-talepler" component={StaffB2BRequests} />
+        <Route path="/staff/giris/*?" component={StaffSignInPage} />
         <Route path="/sign-in/*?" component={SignInPage} />
         <Route path="/sign-up/*?" component={SignUpPage} />
         <Route component={NotFound} />
@@ -208,6 +222,7 @@ function ClerkApp() {
     location === '/staff/b2b-dogrulamalar' ||
     location === '/staff/b2b-sikayetler' ||
     location === '/staff/b2b-talepler' ||
+    location.startsWith('/staff/giris') ||
     location === '/b2b-agi' ||
     location.startsWith('/b2b-agi/ilan/') ||
     location === '/b2b-agi/katil' ||
