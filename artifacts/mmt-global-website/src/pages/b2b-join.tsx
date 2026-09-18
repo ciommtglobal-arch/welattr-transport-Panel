@@ -651,7 +651,8 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
           </span>
         </h2>
         <p className="mt-8 leading-relaxed text-foreground/65">
-          Ürün, alım talebi, lojistik, hizmet veya iş ilanınızı oluşturun.
+          Ürün ilanı, satın alma talebi, lojistik, hizmet veya iş ilanınızı
+          oluşturun.
           İlanınız MMT Global ekibinin kontrolünden sonra yayınlanır.
         </p>
         <div className="mt-8 border-l-2 border-primary pl-4 text-sm leading-relaxed text-foreground/70">
