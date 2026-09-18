@@ -10,3 +10,4 @@
 - [MMT Connect verification](mmt-connect-verification.md) — Use one-time business verification, then let verified firms publish their own free B2B listings.
 - [MMT Global language rollout](mmt-global-i18n.md) — Use TR/EN/AR/RU UI translations with Arabic RTL; translate user-generated content only as a separate feature.
 - [Authentic MMT Global launch](authentic-mmt-launch.md) — Use only real business contact/social identities; begin organic audience growth after accounts are complete.
+- [Clerk localization compatibility](clerk-localization-compatibility.md) — Match the localization package to the installed Clerk React shared types; runtime can work while TypeScript versions still conflict.

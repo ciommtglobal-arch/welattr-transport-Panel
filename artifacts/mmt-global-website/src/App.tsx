@@ -1,10 +1,16 @@
-import { type ReactNode } from 'react';
+import { type ComponentProps, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ClerkProvider, SignIn, SignUp } from '@clerk/react';
+import { arSA, enUS, ruRU, trTR } from '@clerk/localizations';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { ErrorBoundary } from '@/components/error-boundary';
-import { I18nProvider, LanguageSelector } from '@/lib/i18n';
+import {
+  I18nProvider,
+  LanguageSelector,
+  useI18n,
+  type Locale,
+} from '@/lib/i18n';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
@@ -45,6 +51,15 @@ const clerkPubKey = publishableKeyFromHost(
 );
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+type ClerkLocalization = NonNullable<
+  ComponentProps<typeof ClerkProvider>["localization"]
+>;
+const clerkLocalizations: Record<Locale, ClerkLocalization> = {
+  tr: trTR as unknown as ClerkLocalization,
+  en: enUS as unknown as ClerkLocalization,
+  ar: arSA as unknown as ClerkLocalization,
+  ru: ruRU as unknown as ClerkLocalization,
+};
 
 if (!clerkPubKey) {
   throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in .env file');
@@ -216,6 +231,7 @@ function App() {
 
 function ClerkApp() {
   const [location, setLocation] = useLocation();
+  const { locale } = useI18n();
   const clerkRoute =
     location === '/staff/applications' ||
     location === '/staff/ilanlar' ||
@@ -243,6 +259,7 @@ function ClerkApp() {
       <ClerkProvider
         publishableKey={clerkPubKey}
         proxyUrl={clerkProxyUrl}
+        localization={clerkLocalizations[locale]}
         appearance={clerkAppearance}
         signInUrl={`${basePath}/sign-in`}
         signUpUrl={`${basePath}/sign-up`}
