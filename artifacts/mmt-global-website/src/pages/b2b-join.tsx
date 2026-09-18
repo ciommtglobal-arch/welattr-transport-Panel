@@ -26,6 +26,16 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 
 type DocumentContentType = "application/pdf" | "image/jpeg" | "image/png";
+type BusinessProfileForm = {
+  legalName: string;
+  publicName: string;
+  country: string;
+  registrationNumber: string;
+  businessType: string;
+  field: string;
+  website: string;
+  contact: string;
+};
 
 const statusCopy: Record<
   B2BBusinessProfile["status"],
@@ -178,19 +188,44 @@ function VerificationForm({
   initialProfile?: B2BBusinessProfile;
 }) {
   const queryClient = useQueryClient();
-  const [form, setForm] = useState({
-    legalName: initialProfile?.legalName ?? "",
-    publicName: initialProfile?.publicName ?? "",
-    country: initialProfile?.country ?? "",
-    registrationNumber: initialProfile?.registrationNumber ?? "",
-    businessType: initialProfile?.businessType ?? "",
-    field: initialProfile?.field ?? "",
-    website: initialProfile?.website ?? "",
-    contact: initialProfile?.contact ?? "",
+  const draftStorageKey = "mmt-connect-business-profile-draft";
+  const [form, setForm] = useState<BusinessProfileForm>(() => {
+    const profileForm: BusinessProfileForm = {
+      legalName: initialProfile?.legalName ?? "",
+      publicName: initialProfile?.publicName ?? "",
+      country: initialProfile?.country ?? "",
+      registrationNumber: initialProfile?.registrationNumber ?? "",
+      businessType: initialProfile?.businessType ?? "",
+      field: initialProfile?.field ?? "",
+      website: initialProfile?.website ?? "",
+      contact: initialProfile?.contact ?? "",
+    };
+
+    if (initialProfile || typeof window === "undefined") {
+      return profileForm;
+    }
+
+    try {
+      const savedDraft = window.sessionStorage.getItem(draftStorageKey);
+      return savedDraft
+        ? { ...profileForm, ...(JSON.parse(savedDraft) as Partial<BusinessProfileForm>) }
+        : profileForm;
+    } catch {
+      return profileForm;
+    }
   });
   const [document, setDocument] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (initialProfile) return;
+    try {
+      window.sessionStorage.setItem(draftStorageKey, JSON.stringify(form));
+    } catch {
+      // If session storage is unavailable, the form still works normally.
+    }
+  }, [draftStorageKey, form, initialProfile]);
 
   function updateField(name: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [name]: value }));
@@ -238,6 +273,11 @@ function VerificationForm({
         },
       };
       await createMyB2BBusinessProfile(input);
+      try {
+        window.sessionStorage.removeItem(draftStorageKey);
+      } catch {
+        // The submitted profile is already stored on the server.
+      }
       await queryClient.invalidateQueries({
         queryKey: getGetMyB2BBusinessProfileQueryKey(),
       });
@@ -299,7 +339,9 @@ function VerificationForm({
           <div>
             <h3 className="font-semibold">İşletme doğrulama profili</h3>
             <p className="text-xs text-foreground/55">
-              Bilgileriniz yalnızca doğrulama ve iletişim için kullanılır.
+              Bilgileriniz yalnızca doğrulama ve iletişim için kullanılır. Bu
+              sekmede geri dönerseniz yazılı alanlarınız korunur; resmi belgeyi
+              yeniden seçmeniz gerekebilir.
             </p>
           </div>
         </div>
