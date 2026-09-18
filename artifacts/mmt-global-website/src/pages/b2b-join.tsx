@@ -493,13 +493,13 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
   const [title, setTitle] = useState("");
   const [fullName, setFullName] = useState("");
   const [location, setLocation] = useState("");
-  const [contact, setContact] = useState(profile.contact);
+  const contact = profile.contact;
   const [description, setDescription] = useState("");
   const [employmentType, setEmploymentType] =
     useState<B2BEmploymentType>("full_time");
   const [salary, setSalary] = useState("");
   const [experience, setExperience] = useState("");
-  const [website, setWebsite] = useState(profile.website ?? "");
+  const website = profile.website ?? "";
   const [socials, setSocials] = useState({
     instagram: "",
     facebook: "",
@@ -723,16 +723,19 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
           <Field
             label="İletişim"
             value={contact}
-            onChange={setContact}
             required
+            readOnly
           />
           <Field
             label="Web sitesi"
             value={website}
-            onChange={setWebsite}
             placeholder="https://"
+            readOnly
           />
         </div>
+        <p className="mt-3 text-xs text-foreground/45">
+          Web sitesi ve iletişim bilgisi doğrulanmış işletme profilinizden alınır.
+        </p>
         {role === "employer" ? (
           <div className="mt-6 grid gap-5 md:grid-cols-3">
             <label className="flex flex-col gap-2 text-sm font-semibold">
@@ -855,12 +858,14 @@ function Field({
   onChange,
   required = false,
   placeholder,
+  readOnly = false,
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
   required?: boolean;
   placeholder?: string;
+  readOnly?: boolean;
 }) {
   return (
     <label className="block text-sm">
@@ -870,10 +875,15 @@ function Field({
       <input
         type="text"
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={
+          onChange ? (event) => onChange(event.target.value) : undefined
+        }
         required={required}
+        readOnly={readOnly}
         placeholder={placeholder}
-        className="w-full border border-border/70 bg-background px-4 py-3 outline-none transition-colors focus:border-primary"
+        className={`w-full border border-border/70 bg-background px-4 py-3 outline-none transition-colors focus:border-primary ${
+          readOnly ? "cursor-default text-foreground/65" : ""
+        }`}
       />
     </label>
   );
