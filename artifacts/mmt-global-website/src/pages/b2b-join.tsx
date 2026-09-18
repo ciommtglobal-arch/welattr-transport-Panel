@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link } from "wouter";
-import { SignInButton, SignUpButton, useAuth } from "@clerk/react";
+import { useAuth } from "@clerk/react";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -167,16 +167,18 @@ function SignInPrompt() {
         </p>
       </div>
       <div className="flex flex-col justify-center gap-3 sm:flex-row md:flex-col">
-        <SignUpButton mode="modal">
-          <button className="bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-primary/90">
-            Hesap oluştur
-          </button>
-        </SignUpButton>
-        <SignInButton mode="modal">
-          <button className="border border-border/70 px-6 py-3 text-sm font-semibold uppercase tracking-wider transition-colors hover:border-primary hover:text-primary">
-            Giriş yap
-          </button>
-        </SignInButton>
+        <Link
+          href="/sign-up"
+          className="bg-primary px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-primary/90"
+        >
+          Hesap oluştur
+        </Link>
+        <Link
+          href="/sign-in"
+          className="border border-border/70 px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider transition-colors hover:border-primary hover:text-primary"
+        >
+          Giriş yap
+        </Link>
       </div>
     </div>
   );

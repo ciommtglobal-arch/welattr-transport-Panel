@@ -111,6 +111,7 @@ function SignInPage() {
         routing="path"
         path={`${basePath}/sign-in`}
         signUpUrl={`${basePath}/sign-up`}
+        fallbackRedirectUrl={`${basePath}/b2b-agi/katil`}
       />
     </div>
   );
@@ -123,6 +124,7 @@ function SignUpPage() {
         routing="path"
         path={`${basePath}/sign-up`}
         signInUrl={`${basePath}/sign-in`}
+        fallbackRedirectUrl={`${basePath}/b2b-agi/katil`}
       />
     </div>
   );
