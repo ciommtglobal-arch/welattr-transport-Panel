@@ -124,7 +124,7 @@ function SignUpPage() {
         routing="path"
         path={`${basePath}/sign-up`}
         signInUrl={`${basePath}/sign-in`}
-        fallbackRedirectUrl={`${basePath}/b2b-agi/katil`}
+        fallbackRedirectUrl={`${basePath}/b2b-agi/katil?welcome=1`}
       />
     </div>
   );

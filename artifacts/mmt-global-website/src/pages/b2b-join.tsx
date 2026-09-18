@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { useAuth } from "@clerk/react";
 import {
   ArrowLeft,
+  ArrowRight,
   CheckCircle2,
   CircleAlert,
   FileCheck2,
@@ -73,6 +74,11 @@ const employmentTypeLabels: Record<B2BEmploymentType, string> = {
 
 export default function B2BJoinPage() {
   const { isLoaded, isSignedIn } = useAuth();
+  const [showWelcome, setShowWelcome] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("welcome") === "1",
+  );
   const profileQuery = useGetMyB2BBusinessProfile({
     query: {
       queryKey: getGetMyB2BBusinessProfileQueryKey(),
@@ -109,6 +115,17 @@ export default function B2BJoinPage() {
       <section className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-16">
         {!isSignedIn ? (
           <SignInPrompt />
+        ) : showWelcome ? (
+          <WelcomeState
+            onContinue={() => {
+              setShowWelcome(false);
+              window.history.replaceState(
+                null,
+                "",
+                `${window.location.pathname}${window.location.hash}`,
+              );
+            }}
+          />
         ) : profileQuery.isLoading ? (
           <LoadingState />
         ) : profileQuery.data ? (
@@ -124,6 +141,43 @@ export default function B2BJoinPage() {
         )}
       </section>
     </main>
+  );
+}
+
+function WelcomeState({ onContinue }: { onContinue: () => void }) {
+  return (
+    <div className="mx-auto max-w-3xl border border-primary/30 bg-card p-8 md:p-14">
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+        <CheckCircle2 className="h-8 w-8 text-primary" />
+      </div>
+      <p className="mt-8 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+        MMT Global Connect / Üyelik
+      </p>
+      <h2 className="mt-4 text-4xl font-semibold leading-tight md:text-5xl">
+        Hoş geldiniz.
+        <span className="block font-serif font-normal italic text-primary">
+          Hesabınız başarıyla oluşturuldu.
+        </span>
+      </h2>
+      <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/65 md:text-lg">
+        MMT Global Connect hesabınız hazır. Şimdi işletme bilgilerinizi ve
+        resmi belgenizi ekleyerek uluslararası üretici, alıcı, işveren ve
+        lojistik ekosistemine katılabilirsiniz.
+      </p>
+      <div className="mt-8 grid gap-3 border-l-2 border-primary pl-4 text-sm text-foreground/70 md:grid-cols-3 md:border-l-0 md:border-t-2 md:pl-0 md:pt-4">
+        <span>Hesap oluşturuldu</span>
+        <span>Firma profili hazırlanacak</span>
+        <span>Tek seferlik doğrulama</span>
+      </div>
+      <button
+        type="button"
+        onClick={onContinue}
+        className="mt-10 inline-flex items-center gap-3 bg-primary px-6 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-primary/90"
+      >
+        Firma profilini tamamla
+        <ArrowRight size={17} />
+      </button>
+    </div>
   );
 }
 

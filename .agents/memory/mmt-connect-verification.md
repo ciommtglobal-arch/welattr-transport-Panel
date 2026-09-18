@@ -56,3 +56,9 @@ During the initial MMT Global launch, use a stricter editorial mode: even verifi
 **Why:** The first public impression will be built from MMT-controlled real visuals and approved content, so consistency and authenticity matter more than maximum submission speed.
 
 **How to apply:** Prepare real branded content as drafts, review it internally, publish selected items, and only later consider returning verified businesses to direct routine publishing after the launch process is proven.
+
+During the founder-led launch, the founder's verified Clerk account is the initial active MMT staff admin and may review the first business profiles.
+
+**Why:** The project currently has no separate operations team, so the first legitimate application must not remain pending indefinitely; approval still stays behind the staff-only queue rather than becoming public self-approval.
+
+**How to apply:** Keep the reviewer route protected by the active staff table. Add future reviewers as separate staff records, and do not let arbitrary signed-in users claim the first admin role.
