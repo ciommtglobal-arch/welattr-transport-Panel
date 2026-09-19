@@ -124,18 +124,18 @@ router.get("/b2b-listings/:id/image", async (req, res): Promise<void> => {
   const [listing] = await db
     .select({
       imageObjectPath: b2bListingsTable.imageObjectPath,
+      status: b2bListingsTable.status,
     })
     .from(b2bListingsTable)
-    .where(
-      and(
-        eq(b2bListingsTable.id, params.data.id),
-        eq(b2bListingsTable.status, "approved"),
-      ),
-    )
+    .where(eq(b2bListingsTable.id, params.data.id))
     .limit(1);
 
   if (!listing?.imageObjectPath) {
     res.status(404).json({ error: "İlan görseli bulunamadı." });
+    return;
+  }
+
+  if (listing.status !== "approved" && !(await requireStaff(req, res))) {
     return;
   }
 

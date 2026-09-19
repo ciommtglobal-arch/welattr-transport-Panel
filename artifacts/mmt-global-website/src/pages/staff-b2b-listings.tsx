@@ -296,6 +296,16 @@ function ReviewInbox() {
               </div>
 
               <div className="flex-1 overflow-y-auto py-6">
+                 {selectedApplication.imageUrl ? (
+                   <div className="mb-8 overflow-hidden border border-border/70 bg-background">
+                     <img
+                       src={selectedApplication.imageUrl}
+                       alt={`${selectedApplication.title} ilan görseli`}
+                       className="aspect-[16/7] w-full object-cover"
+                     />
+                   </div>
+                 ) : null}
+
                 <dl className="grid gap-x-5 gap-y-8 text-sm sm:grid-cols-2 mb-8">
                   <Info label="Firma / Oluşum" value={selectedApplication.organization} />
                   <Info label="Yetkili Kişi" value={selectedApplication.fullName} />
