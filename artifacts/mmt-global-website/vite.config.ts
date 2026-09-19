@@ -23,7 +23,12 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss({ optimize: false }),
-    runtimeErrorOverlay(),
+    runtimeErrorOverlay({
+      // Mobile browsers can emit resource errors without an Error object.
+      // Do not interrupt the form with an unhelpful "(unknown runtime error)"
+      // overlay; real runtime errors still pass through to the overlay.
+      filter: (error) => error.message !== "(unknown runtime error)",
+    }),
     ...(process.env.NODE_ENV !== 'production' &&
     process.env.REPL_ID !== undefined
       ? [
