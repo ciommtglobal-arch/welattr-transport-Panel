@@ -38,6 +38,34 @@ type BusinessProfileForm = {
   contact: string;
 };
 
+type ListingSocials = {
+  instagram: string;
+  facebook: string;
+  linkedin: string;
+  telegram: string;
+  tiktok: string;
+};
+
+type ListingDraft = {
+  role: B2BListingRole;
+  title: string;
+  fullName: string;
+  location: string;
+  description: string;
+  employmentType: B2BEmploymentType;
+  salary: string;
+  experience: string;
+  socials: ListingSocials;
+};
+
+const emptyListingSocials: ListingSocials = {
+  instagram: "",
+  facebook: "",
+  linkedin: "",
+  telegram: "",
+  tiktok: "",
+};
+
 const statusCopy: Record<
   B2BBusinessProfile["status"],
   { title: string; description: string }
@@ -489,23 +517,32 @@ function ProfileStatus({ profile }: { profile: B2BBusinessProfile }) {
 
 function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
   const queryClient = useQueryClient();
-  const [role, setRole] = useState<B2BListingRole>("producer");
-  const [title, setTitle] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [location, setLocation] = useState("");
+  const draftStorageKey = `mmt-connect-listing-draft:${profile.id}`;
+  const [savedDraft] = useState<Partial<ListingDraft>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const stored = window.sessionStorage.getItem(draftStorageKey);
+      return stored ? (JSON.parse(stored) as Partial<ListingDraft>) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [role, setRole] = useState<B2BListingRole>(
+    savedDraft.role ?? "producer",
+  );
+  const [title, setTitle] = useState(savedDraft.title ?? "");
+  const [fullName, setFullName] = useState(savedDraft.fullName ?? "");
+  const [location, setLocation] = useState(savedDraft.location ?? "");
   const contact = profile.contact;
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(savedDraft.description ?? "");
   const [employmentType, setEmploymentType] =
-    useState<B2BEmploymentType>("full_time");
-  const [salary, setSalary] = useState("");
-  const [experience, setExperience] = useState("");
+    useState<B2BEmploymentType>(savedDraft.employmentType ?? "full_time");
+  const [salary, setSalary] = useState(savedDraft.salary ?? "");
+  const [experience, setExperience] = useState(savedDraft.experience ?? "");
   const website = profile.website ?? "";
-  const [socials, setSocials] = useState({
-    instagram: "",
-    facebook: "",
-    linkedin: "",
-    telegram: "",
-    tiktok: "",
+  const [socials, setSocials] = useState<ListingSocials>({
+    ...emptyListingSocials,
+    ...savedDraft.socials,
   });
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -525,10 +562,47 @@ function VerifiedPublisher({ profile }: { profile: B2BBusinessProfile }) {
     return () => URL.revokeObjectURL(previewUrl);
   }, [image]);
 
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(
+        draftStorageKey,
+        JSON.stringify({
+          role,
+          title,
+          fullName,
+          location,
+          description,
+          employmentType,
+          salary,
+          experience,
+          socials,
+        } satisfies ListingDraft),
+      );
+    } catch {
+      // If session storage is unavailable, the form still works normally.
+    }
+  }, [
+    draftStorageKey,
+    role,
+    title,
+    fullName,
+    location,
+    description,
+    employmentType,
+    salary,
+    experience,
+    socials,
+  ]);
+
   const createListing = useCreateB2BListing({
     mutation: {
       onSuccess: async (listing) => {
         setSubmittedListing(listing);
+        try {
+          window.sessionStorage.removeItem(draftStorageKey);
+        } catch {
+          // The submitted listing is already stored on the server.
+        }
         await queryClient.invalidateQueries({
           queryKey: getGetB2BListingsQueryKey(),
         });
