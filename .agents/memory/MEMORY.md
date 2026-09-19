@@ -11,3 +11,4 @@
 - [MMT Global language rollout](mmt-global-i18n.md) — Use TR/EN/AR/RU UI translations with Arabic RTL; translate user-generated content only as a separate feature.
 - [Authentic MMT Global launch](authentic-mmt-launch.md) — Use only real business contact/social identities; begin organic audience growth after accounts are complete.
 - [Clerk localization compatibility](clerk-localization-compatibility.md) — Match the localization package to the installed Clerk React shared types; runtime can work while TypeScript versions still conflict.
+- [Browser translation guard](browser-translation-guard.md) — MMT Global owns TR/EN/AR/RU translation; prevent mobile browser auto-translation from mixing languages.
