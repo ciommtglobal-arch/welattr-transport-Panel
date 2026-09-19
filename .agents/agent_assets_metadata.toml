@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "hmLyv40G9pDvXxJU0b24w"
+uri = "file://attached_assets/processed/mmt-global-connect-cover.png"
+type = "image"
+title = "MMT Global Connect ilan kapağı"
+description = "İlk ekosistem ilanı için temizlenmiş yatay kapak görseli."
+logical_id = "844253c1-f11c-4adb-bd52-929c72470a06"
+content_hash = "sha256:5509a024ba7fc01141a3e7c49483db1361e2d308b791c4be42ea3d1dde54fdff"
+size = 219692
+mtime_ms = 1789778176349
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/844253c1-f11c-4adb-bd52-929c72470a06/9bdb20c5-8586-48eb-b60b-d7270db40fc1"
+storage_version_token = "1789778192697110"
+content_type = "image/png"
