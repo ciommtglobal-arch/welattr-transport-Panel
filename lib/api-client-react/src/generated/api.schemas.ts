@@ -333,6 +333,159 @@ export interface ObjectDownloadUrlResponse {
   expiresAt: string;
 }
 
+export type MediaItemStatus = typeof MediaItemStatus[keyof typeof MediaItemStatus];
+
+
+export const MediaItemStatus = {
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived',
+} as const;
+
+export interface MediaItem {
+  id: number;
+  title: string;
+  summary: string;
+  category: string;
+  /** @nullable */
+  sourceUrl: string | null;
+  hasFile: boolean;
+  /** @nullable */
+  fileName: string | null;
+  /** @nullable */
+  contentType: string | null;
+  /** @nullable */
+  size: number | null;
+  status: MediaItemStatus;
+  createdAt: string;
+  updatedAt: string;
+  /** @nullable */
+  publishedAt: string | null;
+}
+
+export interface MediaItemInput {
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  title: string;
+  /**
+     * @minLength 1
+     * @maxLength 2000
+     */
+  summary: string;
+  /**
+     * @minLength 1
+     * @maxLength 80
+     */
+  category: string;
+  /** @nullable */
+  sourceUrl?: string | null;
+  /**
+     * @nullable
+     * @pattern ^/objects/uploads/[a-zA-Z0-9-]+$
+     */
+  objectPath?: string | null;
+  /**
+     * @maxLength 255
+     * @nullable
+     */
+  fileName?: string | null;
+  /**
+     * @maxLength 120
+     * @nullable
+     */
+  contentType?: string | null;
+  /**
+     * @minimum 1
+     * @maximum 52428800
+     * @nullable
+     */
+  size?: number | null;
+  status?: MediaItemStatus;
+}
+
+export interface MediaItemUpdate {
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  title?: string;
+  /**
+     * @minLength 1
+     * @maxLength 2000
+     */
+  summary?: string;
+  /**
+     * @minLength 1
+     * @maxLength 80
+     */
+  category?: string;
+  /** @nullable */
+  sourceUrl?: string | null;
+  /**
+     * @nullable
+     * @pattern ^/objects/uploads/[a-zA-Z0-9-]+$
+     */
+  objectPath?: string | null;
+  /**
+     * @maxLength 255
+     * @nullable
+     */
+  fileName?: string | null;
+  /**
+     * @maxLength 120
+     * @nullable
+     */
+  contentType?: string | null;
+  /**
+     * @minimum 1
+     * @maximum 52428800
+     * @nullable
+     */
+  size?: number | null;
+  status?: MediaItemStatus;
+}
+
+export interface MediaItemPage {
+  items: MediaItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
+export type MediaUploadUrlRequestContentType = typeof MediaUploadUrlRequestContentType[keyof typeof MediaUploadUrlRequestContentType];
+
+
+export const MediaUploadUrlRequestContentType = {
+  'application/pdf': 'application/pdf',
+  'image/jpeg': 'image/jpeg',
+  'image/png': 'image/png',
+  'image/webp': 'image/webp',
+  'video/mp4': 'video/mp4',
+  'audio/mpeg': 'audio/mpeg',
+} as const;
+
+export interface MediaUploadUrlRequest {
+  /**
+     * @minLength 1
+     * @maxLength 255
+     */
+  name: string;
+  /**
+     * @minimum 1
+     * @maximum 52428800
+     */
+  size: number;
+  contentType: MediaUploadUrlRequestContentType;
+}
+
+export interface MediaUploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+  metadata: MediaUploadUrlRequest;
+}
+
 export interface LimitApplicationPage {
   items: LimitApplication[];
   page: number;
@@ -772,6 +925,23 @@ export interface B2BBusinessProfilePage {
   pageSize: number;
   total: number;
 }
+
+export type GetMediaItemsParams = {
+status?: MediaItemStatus;
+/**
+ * @maxLength 120
+ */
+query?: string;
+/**
+ * @minimum 1
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+pageSize?: number;
+};
 
 export type GetLimitApplicationsParams = {
 status?: LimitApplicationStatus;

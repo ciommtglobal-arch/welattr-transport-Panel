@@ -27,6 +27,7 @@ import B2BListingDetail from '@/pages/b2b-listing-detail';
 import B2BJoinPage from '@/pages/b2b-join';
 import B2BRequestPage from '@/pages/b2b-request';
 import StaffB2BRequests from '@/pages/staff-b2b-requests';
+import StaffMediaCenter from '@/pages/staff-media-center';
 import {
   AboutPage,
   CareersPage,
@@ -193,6 +194,7 @@ function Router() {
         <Route path="/kariyer" component={CareersPage} />
         <Route path="/staff/applications" component={StaffApplications} />
         <Route path="/staff/ilanlar" component={StaffB2BListings} />
+        <Route path="/staff/medya-merkezi" component={StaffMediaCenter} />
         <Route path="/staff/b2b-dogrulamalar" component={StaffB2BVerifications} />
         <Route path="/staff/b2b-sikayetler" component={StaffB2BReports} />
         <Route path="/staff/b2b-talepler" component={StaffB2BRequests} />
@@ -243,6 +245,7 @@ function ClerkApp() {
   const clerkRoute =
     location === '/staff/applications' ||
     location === '/staff/ilanlar' ||
+    location === '/staff/medya-merkezi' ||
     location === '/staff/b2b-dogrulamalar' ||
     location === '/staff/b2b-sikayetler' ||
     location === '/staff/b2b-talepler' ||

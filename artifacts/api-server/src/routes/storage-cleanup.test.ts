@@ -16,6 +16,15 @@ const mockTables = vi.hoisted(() => ({
   limitApplicationDocumentsTable: {
     objectPath: "object_path",
   },
+  b2bBusinessProfilesTable: {
+    verificationDocumentObjectPath: "verification_document_object_path",
+  },
+  b2bListingsTable: {
+    imageObjectPath: "image_object_path",
+  },
+  mediaItemsTable: {
+    objectPath: "media_object_path",
+  },
 }));
 
 vi.mock("@clerk/express", () => ({
@@ -30,6 +39,10 @@ vi.mock("@workspace/db", () => ({
           const rows =
             table === mockTables.limitApplicationDocumentsTable
               ? state.references.map((objectPath) => ({ objectPath }))
+              : table === mockTables.b2bBusinessProfilesTable ||
+                  table === mockTables.b2bListingsTable ||
+                  table === mockTables.mediaItemsTable
+                ? []
               : [
                   {
                     id: 1,
@@ -53,6 +66,9 @@ vi.mock("@workspace/db", () => ({
   },
   staffUsersTable: mockTables.staffUsersTable,
   limitApplicationDocumentsTable: mockTables.limitApplicationDocumentsTable,
+  b2bBusinessProfilesTable: mockTables.b2bBusinessProfilesTable,
+  b2bListingsTable: mockTables.b2bListingsTable,
+  mediaItemsTable: mockTables.mediaItemsTable,
 }));
 
 import { ObjectStorageService } from "../lib/objectStorage";

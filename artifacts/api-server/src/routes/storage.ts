@@ -11,6 +11,7 @@ import {
   b2bListingsTable,
   db,
   limitApplicationDocumentsTable,
+  mediaItemsTable,
 } from "@workspace/db";
 import { eq, inArray } from "drizzle-orm";
 import {
@@ -65,10 +66,16 @@ async function getReferencedObjectPaths(objectPaths: string[]) {
     .from(b2bListingsTable)
     .where(inArray(b2bListingsTable.imageObjectPath, objectPaths));
 
+  const mediaItems = await db
+    .select({ objectPath: mediaItemsTable.objectPath })
+    .from(mediaItemsTable)
+    .where(inArray(mediaItemsTable.objectPath, objectPaths));
+
   return new Set([
     ...documents.map((document) => document.objectPath),
     ...businessProfiles.map((profile) => profile.objectPath),
     ...listings.map((listing) => listing.objectPath).filter(Boolean),
+    ...mediaItems.map((item) => item.objectPath).filter(Boolean),
   ]);
 }
 

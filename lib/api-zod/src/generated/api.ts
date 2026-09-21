@@ -177,6 +177,196 @@ export const CleanupOrphanUploadsResponse = zod.object({
 
 
 /**
+ * @summary Personel medya merkezi kayıtlarını listeler
+ */
+export const getMediaItemsQueryQueryMax = 120;
+
+export const getMediaItemsQueryPageDefault = 1;
+
+export const getMediaItemsQueryPageSizeDefault = 25;
+export const getMediaItemsQueryPageSizeMax = 50;
+
+
+
+export const GetMediaItemsQueryParams = zod.object({
+  "status": zod.enum(['draft', 'published', 'archived']).optional(),
+  "query": zod.coerce.string().max(getMediaItemsQueryQueryMax).optional(),
+  "page": zod.coerce.number().int().min(1).default(getMediaItemsQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getMediaItemsQueryPageSizeMax).default(getMediaItemsQueryPageSizeDefault)
+})
+
+export const GetMediaItemsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "sourceUrl": zod.url().nullable(),
+  "hasFile": zod.boolean(),
+  "fileName": zod.string().nullable(),
+  "contentType": zod.string().nullable(),
+  "size": zod.int().nullable(),
+  "status": zod.enum(['draft', 'published', 'archived']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullable()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "total": zod.int()
+})
+
+
+/**
+ * @summary Personel medya merkezi kaydı oluşturur
+ */
+export const createMediaItemBodyTitleMax = 180;
+
+export const createMediaItemBodySummaryMax = 2000;
+
+export const createMediaItemBodyCategoryMax = 80;
+
+export const createMediaItemBodyObjectPathRegExp = new RegExp('^/objects/uploads/[a-zA-Z0-9-]+$');
+export const createMediaItemBodyFileNameMax = 255;
+
+export const createMediaItemBodyContentTypeMax = 120;
+
+export const createMediaItemBodySizeMax = 52428800;
+
+
+
+export const CreateMediaItemBody = zod.object({
+  "title": zod.string().min(1).max(createMediaItemBodyTitleMax),
+  "summary": zod.string().min(1).max(createMediaItemBodySummaryMax),
+  "category": zod.string().min(1).max(createMediaItemBodyCategoryMax),
+  "sourceUrl": zod.url().nullish(),
+  "objectPath": zod.string().regex(createMediaItemBodyObjectPathRegExp).nullish(),
+  "fileName": zod.string().max(createMediaItemBodyFileNameMax).nullish(),
+  "contentType": zod.string().max(createMediaItemBodyContentTypeMax).nullish(),
+  "size": zod.int().min(1).max(createMediaItemBodySizeMax).nullish(),
+  "status": zod.enum(['draft', 'published', 'archived']).optional()
+})
+
+export const CreateMediaItemResponse = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "sourceUrl": zod.url().nullable(),
+  "hasFile": zod.boolean(),
+  "fileName": zod.string().nullable(),
+  "contentType": zod.string().nullable(),
+  "size": zod.int().nullable(),
+  "status": zod.enum(['draft', 'published', 'archived']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Personel medya merkezi kaydını günceller
+ */
+
+
+
+export const UpdateMediaItemParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const updateMediaItemBodyTitleMax = 180;
+
+export const updateMediaItemBodySummaryMax = 2000;
+
+export const updateMediaItemBodyCategoryMax = 80;
+
+export const updateMediaItemBodyObjectPathRegExp = new RegExp('^/objects/uploads/[a-zA-Z0-9-]+$');
+export const updateMediaItemBodyFileNameMax = 255;
+
+export const updateMediaItemBodyContentTypeMax = 120;
+
+export const updateMediaItemBodySizeMax = 52428800;
+
+
+
+export const UpdateMediaItemBody = zod.object({
+  "title": zod.string().min(1).max(updateMediaItemBodyTitleMax).optional(),
+  "summary": zod.string().min(1).max(updateMediaItemBodySummaryMax).optional(),
+  "category": zod.string().min(1).max(updateMediaItemBodyCategoryMax).optional(),
+  "sourceUrl": zod.url().nullish(),
+  "objectPath": zod.string().regex(updateMediaItemBodyObjectPathRegExp).nullish(),
+  "fileName": zod.string().max(updateMediaItemBodyFileNameMax).nullish(),
+  "contentType": zod.string().max(updateMediaItemBodyContentTypeMax).nullish(),
+  "size": zod.int().min(1).max(updateMediaItemBodySizeMax).nullish(),
+  "status": zod.enum(['draft', 'published', 'archived']).optional()
+})
+
+export const UpdateMediaItemResponse = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "sourceUrl": zod.url().nullable(),
+  "hasFile": zod.boolean(),
+  "fileName": zod.string().nullable(),
+  "contentType": zod.string().nullable(),
+  "size": zod.int().nullable(),
+  "status": zod.enum(['draft', 'published', 'archived']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Personel medya dosyası için kısa süreli indirme adresi oluşturur
+ */
+
+
+
+export const RequestMediaItemDownloadUrlParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const RequestMediaItemDownloadUrlResponse = zod.object({
+  "downloadURL": zod.url().describe('Kısa süreli imzalı GET adresi.'),
+  "expiresAt": zod.coerce.date().describe('İmzalı adresin geçerliliğinin sona erdiği zaman.')
+})
+
+
+/**
+ * @summary Personel medya dosyası için güvenli yükleme adresi oluşturur
+ */
+export const requestMediaUploadUrlBodyNameMax = 255;
+
+export const requestMediaUploadUrlBodySizeMax = 52428800;
+
+
+
+export const RequestMediaUploadUrlBody = zod.object({
+  "name": zod.string().min(1).max(requestMediaUploadUrlBodyNameMax),
+  "size": zod.int().min(1).max(requestMediaUploadUrlBodySizeMax),
+  "contentType": zod.enum(['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'audio/mpeg'])
+})
+
+export const requestMediaUploadUrlResponseMetadataNameMax = 255;
+
+export const requestMediaUploadUrlResponseMetadataSizeMax = 52428800;
+
+
+
+export const RequestMediaUploadUrlResponse = zod.object({
+  "uploadURL": zod.url(),
+  "objectPath": zod.string(),
+  "metadata": zod.object({
+  "name": zod.string().min(1).max(requestMediaUploadUrlResponseMetadataNameMax),
+  "size": zod.int().min(1).max(requestMediaUploadUrlResponseMetadataSizeMax),
+  "contentType": zod.enum(['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'audio/mpeg'])
+})
+})
+
+
+/**
  * Returns server health status
  * @summary Health check
  */

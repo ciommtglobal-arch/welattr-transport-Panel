@@ -20,6 +20,8 @@ tags:
     description: Moderated free B2B listing operations
   - name: b2b-businesses
     description: Verified business profile and B2B network operations
+  - name: media
+    description: MMT Global personel medya merkezi işlemleri
 paths:
   /payments/tami/hosted-session:
     post:
@@ -264,6 +266,216 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "500":
           description: Temizlik gerçekleştirilemedi.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /media/items:
+    get:
+      operationId: getMediaItems
+      tags: [media]
+      summary: Personel medya merkezi kayıtlarını listeler
+      parameters:
+        - in: query
+          name: status
+          schema:
+            $ref: "#/components/schemas/MediaItemStatus"
+        - in: query
+          name: query
+          schema:
+            type: string
+            maxLength: 120
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 25
+      responses:
+        "200":
+          description: Personel medya kayıtları
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItemPage"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    post:
+      operationId: createMediaItem
+      tags: [media]
+      summary: Personel medya merkezi kaydı oluşturur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaItemInput"
+      responses:
+        "201":
+          description: Medya kaydı oluşturuldu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+        "400":
+          description: Geçersiz medya bilgisi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /media/items/{id}:
+    patch:
+      operationId: updateMediaItem
+      tags: [media]
+      summary: Personel medya merkezi kaydını günceller
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaItemUpdate"
+      responses:
+        "200":
+          description: Medya kaydı güncellendi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+        "400":
+          description: Geçersiz medya güncellemesi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Medya kaydı bulunamadı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /media/items/{id}/download-url:
+    post:
+      operationId: requestMediaItemDownloadUrl
+      tags: [media]
+      summary: Personel medya dosyası için kısa süreli indirme adresi oluşturur
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Kısa süreli indirme adresi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjectDownloadUrlResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Medya dosyası bulunamadı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /media/uploads/request-url:
+    post:
+      operationId: requestMediaUploadUrl
+      tags: [media]
+      summary: Personel medya dosyası için güvenli yükleme adresi oluşturur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaUploadUrlRequest"
+      responses:
+        "200":
+          description: Güvenli yükleme adresi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaUploadUrlResponse"
+        "400":
+          description: Geçersiz medya dosyası
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: Yükleme adresi oluşturulamadı
           content:
             application/json:
               schema:
@@ -1467,6 +1679,172 @@ components:
           type: string
           format: date-time
           description: İmzalı adresin geçerliliğinin sona erdiği zaman.
+    MediaItemStatus:
+      type: string
+      enum: [draft, published, archived]
+    MediaItem:
+      type: object
+      required:
+        - id
+        - title
+        - summary
+        - category
+        - sourceUrl
+        - hasFile
+        - fileName
+        - contentType
+        - size
+        - status
+        - createdAt
+        - updatedAt
+        - publishedAt
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        summary:
+          type: string
+        category:
+          type: string
+        sourceUrl:
+          type: [string, "null"]
+          format: uri
+        hasFile:
+          type: boolean
+        fileName:
+          type: [string, "null"]
+        contentType:
+          type: [string, "null"]
+        size:
+          type: [integer, "null"]
+        status:
+          $ref: "#/components/schemas/MediaItemStatus"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        publishedAt:
+          type: [string, "null"]
+          format: date-time
+    MediaItemInput:
+      type: object
+      additionalProperties: false
+      required: [title, summary, category]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 180
+        summary:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        category:
+          type: string
+          minLength: 1
+          maxLength: 80
+        sourceUrl:
+          type: [string, "null"]
+          format: uri
+        objectPath:
+          type: [string, "null"]
+          pattern: "^/objects/uploads/[a-zA-Z0-9-]+$"
+        fileName:
+          type: [string, "null"]
+          maxLength: 255
+        contentType:
+          type: [string, "null"]
+          maxLength: 120
+        size:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 52428800
+        status:
+          $ref: "#/components/schemas/MediaItemStatus"
+    MediaItemUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 180
+        summary:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        category:
+          type: string
+          minLength: 1
+          maxLength: 80
+        sourceUrl:
+          type: [string, "null"]
+          format: uri
+        objectPath:
+          type: [string, "null"]
+          pattern: "^/objects/uploads/[a-zA-Z0-9-]+$"
+        fileName:
+          type: [string, "null"]
+          maxLength: 255
+        contentType:
+          type: [string, "null"]
+          maxLength: 120
+        size:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 52428800
+        status:
+          $ref: "#/components/schemas/MediaItemStatus"
+    MediaItemPage:
+      type: object
+      required: [items, page, pageSize, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MediaItem"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    MediaUploadUrlRequest:
+      type: object
+      additionalProperties: false
+      required: [name, size, contentType]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        size:
+          type: integer
+          minimum: 1
+          maximum: 52428800
+        contentType:
+          type: string
+          enum:
+            - application/pdf
+            - image/jpeg
+            - image/png
+            - image/webp
+            - video/mp4
+            - audio/mpeg
+    MediaUploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath, metadata]
+      properties:
+        uploadURL:
+          type: string
+          format: uri
+        objectPath:
+          type: string
+        metadata:
+          $ref: "#/components/schemas/MediaUploadUrlRequest"
     LimitApplicationPage:
       type: object
       required:

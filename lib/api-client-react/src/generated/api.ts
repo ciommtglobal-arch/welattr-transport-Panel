@@ -46,11 +46,18 @@ import type {
   GetB2BRequestReviewQueueParams,
   GetB2BRequestsParams,
   GetLimitApplicationsParams,
+  GetMediaItemsParams,
   HealthStatus,
   LimitApplication,
   LimitApplicationInput,
   LimitApplicationPage,
   LimitApplicationStatusUpdate,
+  MediaItem,
+  MediaItemInput,
+  MediaItemPage,
+  MediaItemUpdate,
+  MediaUploadUrlRequest,
+  MediaUploadUrlResponse,
   MockPaymentResultInput,
   ObjectDownloadUrlRequest,
   ObjectDownloadUrlResponse,
@@ -573,6 +580,405 @@ export const useCleanupOrphanUploads = <TError = ErrorType<ErrorEnvelope>,
         TContext
       > => {
       return useMutation(getCleanupOrphanUploadsMutationOptions(options));
+    }
+
+export const getGetMediaItemsUrl = (params?: GetMediaItemsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/media/items?${stringifiedParams}` : `/api/media/items`
+}
+
+/**
+ * @summary Personel medya merkezi kayıtlarını listeler
+ */
+export const getMediaItems = async (params?: GetMediaItemsParams, options?: Parameters<typeof customFetch>[1]): Promise<MediaItemPage> => {
+
+  return customFetch<MediaItemPage>(getGetMediaItemsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMediaItemsQueryKey = (params?: GetMediaItemsParams,) => {
+    return [
+    `/api/media/items`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMediaItemsQueryOptions = <TData = Awaited<ReturnType<typeof getMediaItems>>, TError = ErrorType<ErrorEnvelope>>(params?: GetMediaItemsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMediaItems>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMediaItemsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMediaItems>>> = ({ signal }) => getMediaItems(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMediaItems>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMediaItemsQueryResult = NonNullable<Awaited<ReturnType<typeof getMediaItems>>>
+export type GetMediaItemsQueryError = ErrorType<ErrorEnvelope>
+
+
+/**
+ * @summary Personel medya merkezi kayıtlarını listeler
+ */
+
+export function useGetMediaItems<TData = Awaited<ReturnType<typeof getMediaItems>>, TError = ErrorType<ErrorEnvelope>>(
+ params?: GetMediaItemsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMediaItems>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMediaItemsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateMediaItemUrl = () => {
+
+
+
+
+  return `/api/media/items`
+}
+
+/**
+ * @summary Personel medya merkezi kaydı oluşturur
+ */
+export const createMediaItem = async (mediaItemInput: MediaItemInput, options?: Parameters<typeof customFetch>[1]): Promise<MediaItem> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<MediaItem>(getCreateMediaItemUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(mediaItemInput)
+  }
+);}
+
+
+
+
+
+export const getCreateMediaItemMutationKey = () => ['createMediaItem'] as const;
+
+export const getCreateMediaItemMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMediaItem>>, TError,CreateMediaItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createMediaItem>>, TError,CreateMediaItemMutationVariables, TContext> => {
+
+const mutationKey = getCreateMediaItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createMediaItem>>, CreateMediaItemMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createMediaItem(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateMediaItemMutationResult = NonNullable<Awaited<ReturnType<typeof createMediaItem>>>
+    export type CreateMediaItemMutationBody = BodyType<MediaItemInput>
+    export type CreateMediaItemMutationError = ErrorType<ErrorEnvelope>
+    export type CreateMediaItemMutationVariables = {data: BodyType<MediaItemInput>}
+
+    /**
+ * @summary Personel medya merkezi kaydı oluşturur
+ */
+export const useCreateMediaItem = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMediaItem>>, TError,CreateMediaItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createMediaItem>>,
+        TError,
+        CreateMediaItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateMediaItemMutationOptions(options));
+    }
+
+export const getUpdateMediaItemUrl = (id: number,) => {
+
+
+
+
+  return `/api/media/items/${id}`
+}
+
+/**
+ * @summary Personel medya merkezi kaydını günceller
+ */
+export const updateMediaItem = async (id: number,
+    mediaItemUpdate: MediaItemUpdate, options?: Parameters<typeof customFetch>[1]): Promise<MediaItem> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<MediaItem>(getUpdateMediaItemUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(mediaItemUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateMediaItemMutationKey = () => ['updateMediaItem'] as const;
+
+export const getUpdateMediaItemMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMediaItem>>, TError,UpdateMediaItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateMediaItem>>, TError,UpdateMediaItemMutationVariables, TContext> => {
+
+const mutationKey = getUpdateMediaItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateMediaItem>>, UpdateMediaItemMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateMediaItem(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateMediaItemMutationResult = NonNullable<Awaited<ReturnType<typeof updateMediaItem>>>
+    export type UpdateMediaItemMutationBody = BodyType<MediaItemUpdate>
+    export type UpdateMediaItemMutationError = ErrorType<ErrorEnvelope>
+    export type UpdateMediaItemMutationVariables = {id: number;data: BodyType<MediaItemUpdate>}
+
+    /**
+ * @summary Personel medya merkezi kaydını günceller
+ */
+export const useUpdateMediaItem = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMediaItem>>, TError,UpdateMediaItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateMediaItem>>,
+        TError,
+        UpdateMediaItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateMediaItemMutationOptions(options));
+    }
+
+export const getRequestMediaItemDownloadUrlUrl = (id: number,) => {
+
+
+
+
+  return `/api/media/items/${id}/download-url`
+}
+
+/**
+ * @summary Personel medya dosyası için kısa süreli indirme adresi oluşturur
+ */
+export const requestMediaItemDownloadUrl = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<ObjectDownloadUrlResponse> => {
+
+  return customFetch<ObjectDownloadUrlResponse>(getRequestMediaItemDownloadUrlUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRequestMediaItemDownloadUrlMutationKey = () => ['requestMediaItemDownloadUrl'] as const;
+
+export const getRequestMediaItemDownloadUrlMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestMediaItemDownloadUrl>>, TError,RequestMediaItemDownloadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestMediaItemDownloadUrl>>, TError,RequestMediaItemDownloadUrlMutationVariables, TContext> => {
+
+const mutationKey = getRequestMediaItemDownloadUrlMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestMediaItemDownloadUrl>>, RequestMediaItemDownloadUrlMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  requestMediaItemDownloadUrl(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestMediaItemDownloadUrlMutationResult = NonNullable<Awaited<ReturnType<typeof requestMediaItemDownloadUrl>>>
+
+    export type RequestMediaItemDownloadUrlMutationError = ErrorType<ErrorEnvelope>
+    export type RequestMediaItemDownloadUrlMutationVariables = {id: number}
+
+    /**
+ * @summary Personel medya dosyası için kısa süreli indirme adresi oluşturur
+ */
+export const useRequestMediaItemDownloadUrl = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestMediaItemDownloadUrl>>, TError,RequestMediaItemDownloadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestMediaItemDownloadUrl>>,
+        TError,
+        RequestMediaItemDownloadUrlMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestMediaItemDownloadUrlMutationOptions(options));
+    }
+
+export const getRequestMediaUploadUrlUrl = () => {
+
+
+
+
+  return `/api/media/uploads/request-url`
+}
+
+/**
+ * @summary Personel medya dosyası için güvenli yükleme adresi oluşturur
+ */
+export const requestMediaUploadUrl = async (mediaUploadUrlRequest: MediaUploadUrlRequest, options?: Parameters<typeof customFetch>[1]): Promise<MediaUploadUrlResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<MediaUploadUrlResponse>(getRequestMediaUploadUrlUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(mediaUploadUrlRequest)
+  }
+);}
+
+
+
+
+
+export const getRequestMediaUploadUrlMutationKey = () => ['requestMediaUploadUrl'] as const;
+
+export const getRequestMediaUploadUrlMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestMediaUploadUrl>>, TError,RequestMediaUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestMediaUploadUrl>>, TError,RequestMediaUploadUrlMutationVariables, TContext> => {
+
+const mutationKey = getRequestMediaUploadUrlMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestMediaUploadUrl>>, RequestMediaUploadUrlMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestMediaUploadUrl(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestMediaUploadUrlMutationResult = NonNullable<Awaited<ReturnType<typeof requestMediaUploadUrl>>>
+    export type RequestMediaUploadUrlMutationBody = BodyType<MediaUploadUrlRequest>
+    export type RequestMediaUploadUrlMutationError = ErrorType<ErrorEnvelope>
+    export type RequestMediaUploadUrlMutationVariables = {data: BodyType<MediaUploadUrlRequest>}
+
+    /**
+ * @summary Personel medya dosyası için güvenli yükleme adresi oluşturur
+ */
+export const useRequestMediaUploadUrl = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestMediaUploadUrl>>, TError,RequestMediaUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestMediaUploadUrl>>,
+        TError,
+        RequestMediaUploadUrlMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestMediaUploadUrlMutationOptions(options));
     }
 
 export const getHealthCheckUrl = () => {

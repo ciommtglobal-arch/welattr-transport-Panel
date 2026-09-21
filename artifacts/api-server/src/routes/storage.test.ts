@@ -16,6 +16,12 @@ const mockTables = vi.hoisted(() => ({
   limitApplicationDocumentsTable: {
     objectPath: "object_path",
   },
+  b2bBusinessProfilesTable: {
+    verificationDocumentObjectPath: "verification_document_object_path",
+  },
+  mediaItemsTable: {
+    objectPath: "media_object_path",
+  },
 }));
 
 vi.mock("@clerk/express", () => ({
@@ -32,6 +38,10 @@ vi.mock("@workspace/db", () => ({
               ? authState.documentSaved
                 ? [{ objectPath }]
                 : []
+              : table === mockTables.b2bBusinessProfilesTable
+                ? []
+                : table === mockTables.mediaItemsTable
+                  ? []
               : authState.active === 1
                 ? [
                     {
@@ -49,6 +59,8 @@ vi.mock("@workspace/db", () => ({
   },
   staffUsersTable: mockTables.staffUsersTable,
   limitApplicationDocumentsTable: mockTables.limitApplicationDocumentsTable,
+  b2bBusinessProfilesTable: mockTables.b2bBusinessProfilesTable,
+  mediaItemsTable: mockTables.mediaItemsTable,
 }));
 
 import {
