@@ -335,6 +335,33 @@ export const RequestMediaItemDownloadUrlResponse = zod.object({
 
 
 /**
+ * @summary Yayınlanmış medya kaydını Telegram kanalına gönderir
+ */
+
+
+
+export const PublishMediaItemParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const PublishMediaItemResponse = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "sourceUrl": zod.url().nullable(),
+  "hasFile": zod.boolean(),
+  "fileName": zod.string().nullable(),
+  "contentType": zod.string().nullable(),
+  "size": zod.int().nullable(),
+  "status": zod.enum(['draft', 'published', 'archived']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullable()
+})
+
+
+/**
  * @summary Personel medya dosyası için güvenli yükleme adresi oluşturur
  */
 export const requestMediaUploadUrlBodyNameMax = 255;

@@ -16,6 +16,10 @@ import {
   ObjectNotFoundError,
   ObjectStorageService,
 } from "../lib/objectStorage";
+import {
+  dispatchMediaToDestinations,
+  queuePublishedMediaDelivery,
+} from "../lib/mediaPublisher";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -141,6 +145,9 @@ router.post("/media/items", async (req, res): Promise<void> => {
     .returning();
 
   res.status(201).json(serializeMediaItem(item));
+  if (item.status === "published") {
+    await queuePublishedMediaDelivery(item.id);
+  }
 });
 
 router.patch("/media/items/:id", async (req, res): Promise<void> => {
@@ -190,6 +197,57 @@ router.patch("/media/items/:id", async (req, res): Promise<void> => {
     })
     .where(eq(mediaItemsTable.id, id))
     .returning();
+
+  res.json(serializeMediaItem(item));
+  if (existing.status !== "published" && item.status === "published") {
+    await queuePublishedMediaDelivery(item.id);
+  }
+});
+
+router.post("/media/items/:id/publish", async (req, res): Promise<void> => {
+  if (!(await requireStaff(req, res))) return;
+
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) {
+    res.status(400).json({ error: "Medya numarası geçersiz." });
+    return;
+  }
+
+  const [item] = await db
+    .select()
+    .from(mediaItemsTable)
+    .where(eq(mediaItemsTable.id, id))
+    .limit(1);
+  if (!item) {
+    res.status(404).json({ error: "Medya kaydı bulunamadı." });
+    return;
+  }
+
+  if (item.status !== "published") {
+    const [published] = await db
+      .update(mediaItemsTable)
+      .set({
+        status: "published",
+        publishedAt: item.publishedAt ?? new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(mediaItemsTable.id, id))
+      .returning();
+    if (published) {
+      await queuePublishedMediaDelivery(id);
+      res.json(serializeMediaItem(published));
+      return;
+    }
+  }
+
+  try {
+    await dispatchMediaToDestinations(id);
+  } catch {
+    res.status(502).json({
+      error: "Medya Telegram kanalına gönderilemedi; teslimat kaydı tekrar denenebilir.",
+    });
+    return;
+  }
 
   res.json(serializeMediaItem(item));
 });

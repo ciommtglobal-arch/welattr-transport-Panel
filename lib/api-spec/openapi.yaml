@@ -438,6 +438,55 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+  /media/items/{id}/publish:
+    post:
+      operationId: publishMediaItem
+      tags: [media]
+      summary: Yayınlanmış medya kaydını Telegram kanalına gönderir
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Medya yayınlandı veya daha önce yayınlanmış kaydın gönderimi tekrarlandı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+        "400":
+          description: Geçersiz medya numarası
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Medya kaydı bulunamadı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "502":
+          description: Telegram gönderimi başarısız
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
   /media/uploads/request-url:
     post:
       operationId: requestMediaUploadUrl
@@ -1845,6 +1894,49 @@ components:
           type: string
         metadata:
           $ref: "#/components/schemas/MediaUploadUrlRequest"
+    MediaDeliveryTarget:
+      type: string
+      enum: [telegram, instagram, tiktok, webhook]
+    MediaDeliveryStatus:
+      type: string
+      enum: [pending, sending, sent, failed]
+    MediaDelivery:
+      type: object
+      required:
+        - id
+        - mediaItemId
+        - target
+        - status
+        - attempts
+        - externalId
+        - lastError
+        - createdAt
+        - updatedAt
+        - sentAt
+      properties:
+        id:
+          type: integer
+        mediaItemId:
+          type: integer
+        target:
+          $ref: "#/components/schemas/MediaDeliveryTarget"
+        status:
+          $ref: "#/components/schemas/MediaDeliveryStatus"
+        attempts:
+          type: integer
+        externalId:
+          type: [string, "null"]
+        lastError:
+          type: [string, "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        sentAt:
+          type: [string, "null"]
+          format: date-time
     LimitApplicationPage:
       type: object
       required:

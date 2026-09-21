@@ -901,6 +901,80 @@ export const useRequestMediaItemDownloadUrl = <TError = ErrorType<ErrorEnvelope>
       return useMutation(getRequestMediaItemDownloadUrlMutationOptions(options));
     }
 
+export const getPublishMediaItemUrl = (id: number,) => {
+
+
+
+
+  return `/api/media/items/${id}/publish`
+}
+
+/**
+ * @summary Yayınlanmış medya kaydını Telegram kanalına gönderir
+ */
+export const publishMediaItem = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<MediaItem> => {
+
+  return customFetch<MediaItem>(getPublishMediaItemUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPublishMediaItemMutationKey = () => ['publishMediaItem'] as const;
+
+export const getPublishMediaItemMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishMediaItem>>, TError,PublishMediaItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publishMediaItem>>, TError,PublishMediaItemMutationVariables, TContext> => {
+
+const mutationKey = getPublishMediaItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publishMediaItem>>, PublishMediaItemMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  publishMediaItem(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublishMediaItemMutationResult = NonNullable<Awaited<ReturnType<typeof publishMediaItem>>>
+
+    export type PublishMediaItemMutationError = ErrorType<ErrorEnvelope>
+    export type PublishMediaItemMutationVariables = {id: number}
+
+    /**
+ * @summary Yayınlanmış medya kaydını Telegram kanalına gönderir
+ */
+export const usePublishMediaItem = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishMediaItem>>, TError,PublishMediaItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publishMediaItem>>,
+        TError,
+        PublishMediaItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPublishMediaItemMutationOptions(options));
+    }
+
 export const getRequestMediaUploadUrlUrl = () => {
 
 

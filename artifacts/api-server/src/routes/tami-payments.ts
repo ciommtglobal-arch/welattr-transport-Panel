@@ -16,7 +16,9 @@ function getPaymentMode(): PaymentMode {
 }
 
 function getTamiEnvironment() {
-  return process.env.TAMI_ENVIRONMENT === "sandbox" ? "sandbox" : "production";
+  return process.env.TAMI_ENVIRONMENT?.trim().toLowerCase() === "production"
+    ? "production"
+    : "sandbox";
 }
 
 function getTamiBaseUrl() {

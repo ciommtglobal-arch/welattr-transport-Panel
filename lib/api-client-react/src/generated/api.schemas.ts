@@ -486,6 +486,42 @@ export interface MediaUploadUrlResponse {
   metadata: MediaUploadUrlRequest;
 }
 
+export type MediaDeliveryTarget = typeof MediaDeliveryTarget[keyof typeof MediaDeliveryTarget];
+
+
+export const MediaDeliveryTarget = {
+  telegram: 'telegram',
+  instagram: 'instagram',
+  tiktok: 'tiktok',
+  webhook: 'webhook',
+} as const;
+
+export type MediaDeliveryStatus = typeof MediaDeliveryStatus[keyof typeof MediaDeliveryStatus];
+
+
+export const MediaDeliveryStatus = {
+  pending: 'pending',
+  sending: 'sending',
+  sent: 'sent',
+  failed: 'failed',
+} as const;
+
+export interface MediaDelivery {
+  id: number;
+  mediaItemId: number;
+  target: MediaDeliveryTarget;
+  status: MediaDeliveryStatus;
+  attempts: number;
+  /** @nullable */
+  externalId: string | null;
+  /** @nullable */
+  lastError: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** @nullable */
+  sentAt: string | null;
+}
+
 export interface LimitApplicationPage {
   items: LimitApplication[];
   page: number;

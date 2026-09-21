@@ -21,6 +21,7 @@ import StaffB2BListings from '@/pages/staff-b2b-listings';
 import StaffB2BVerifications from '@/pages/staff-b2b-verifications';
 import StaffB2BReports from '@/pages/staff-b2b-reports';
 import DemoWallet from '@/pages/demo-wallet';
+import ConstructionStorePage from '@/pages/construction-store';
 import PaymentPage, { MockPaymentPage, PaymentResultPage } from '@/pages/payment';
 import FreeB2BNetworkPage from '@/pages/free-b2b-network';
 import B2BListingDetail from '@/pages/b2b-listing-detail';
@@ -173,6 +174,7 @@ function Router() {
         <Route path="/limit/ticari" component={CommercialLimit} />
         <Route path="/limit/konut" component={HousingLimit} />
         <Route path="/limit/tasit" component={VehicleLimit} />
+        <Route path="/insaat-magaza" component={ConstructionStorePage} />
         <Route path="/cuzdan-demo" component={DemoWallet} />
         <Route path="/b2b-agi" component={FreeB2BNetworkPage} />
         <Route path="/b2b-agi/katil" component={B2BJoinPage} />
