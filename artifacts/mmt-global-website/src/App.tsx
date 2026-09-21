@@ -28,8 +28,12 @@ import B2BJoinPage from '@/pages/b2b-join';
 import B2BRequestPage from '@/pages/b2b-request';
 import StaffB2BRequests from '@/pages/staff-b2b-requests';
 import {
+  AboutPage,
   CareersPage,
   CookiePage,
+  ContactPage,
+  DeliveryPage,
+  DistanceSalesPage,
   InvestmentsPage,
   KvkkPage,
   PrivacyPage,
@@ -176,8 +180,12 @@ function Router() {
         <Route path="/odeme" component={PaymentPage} />
         <Route path="/odeme/test" component={MockPaymentPage} />
         <Route path="/odeme/sonuc" component={PaymentResultPage} />
+        <Route path="/hakkimizda" component={AboutPage} />
+        <Route path="/iletisim" component={ContactPage} />
         <Route path="/hizmet-kosullari" component={ServiceTermsPage} />
         <Route path="/iade" component={RefundPage} />
+        <Route path="/teslimat" component={DeliveryPage} />
+        <Route path="/mesafeli-satis" component={DistanceSalesPage} />
         <Route path="/gizlilik" component={PrivacyPage} />
         <Route path="/cerez" component={CookiePage} />
         <Route path="/kvkk" component={KvkkPage} />

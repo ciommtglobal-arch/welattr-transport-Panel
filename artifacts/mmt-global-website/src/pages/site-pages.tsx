@@ -101,6 +101,204 @@ function ContactCta({ label = "İletişime geçin" }: { label?: string }) {
   );
 }
 
+export function AboutPage() {
+  return (
+    <PageShell
+      eyebrow="Hakkımızda"
+      title="Ticari bağlantılar"
+      highlight="güvenle büyür."
+      description="MMT Global; üreticileri, alıcıları, lojistik ekiplerini ve hizmet verenleri güvenilir bağlantılar etrafında buluşturan bir iş ekosistemidir."
+      meta={{
+        title: "Hakkımızda | MMT Global",
+        description: "MMT Global'in çalışma yaklaşımı, ücretsiz B2B ağı ve ticari hizmetleri.",
+      }}
+    >
+      <ContentSection title="MMT Global ne yapar?">
+        <p>
+          MMT Global; lojistik, inşaat ve bölgesel gelişim, sağlık turizmi,
+          kurumsal hizmetler ve endüstriyel ticaret alanlarında üretici, alıcı ve
+          hizmet taraflarının birbirini bulmasına yardımcı olur.
+        </p>
+      </ContentSection>
+      <ContentSection title="Ücretsiz ağ ve ticari işlemler">
+        <p>
+          Üretici tanıtımı, alıcı talepleri ve temel B2B bağlantı hizmetleri
+          ücretsizdir. Ücretli bir ürün veya hizmet sunuluyorsa kapsamı, fiyatı,
+          teslim koşulları ve iade şartları ödeme öncesinde ayrıca açıklanır.
+        </p>
+      </ContentSection>
+      <ContentSection title="Ödeme kapsamı">
+        <p>
+          MMT Global ödeme sayfası yalnızca kendi ticari faaliyetleri veya
+          açıkça yetkilendirilmiş ücretli hizmetler içindir. Ücretsiz B2B ağı
+          adına üyelerden veya üçüncü kişilerden emanet para, yatırım ya da
+          başkası adına tahsilat yapılmaz.
+        </p>
+      </ContentSection>
+      <ContentSection title="Resmî bilgiler">
+        <p>
+          Satıcı ve fatura bilgileri, ilgili teklif, sipariş özeti, sözleşme ve
+          fatura üzerinde işlem öncesinde gösterilir. Bilgi veya belge talebiniz
+          için{" "}
+          <a className="font-semibold text-primary hover:underline" href="mailto:info@mmtglobal.com">
+            info@mmtglobal.com
+          </a>{" "}
+          adresine yazabilirsiniz.
+        </p>
+      </ContentSection>
+    </PageShell>
+  );
+}
+
+export function ContactPage() {
+  return (
+    <PageShell
+      eyebrow="İletişim"
+      title="Doğru kişiye"
+      highlight="ulaşın."
+      description="B2B bağlantı, ticari hizmet, ödeme veya iş ortaklığı taleplerinizi yazılı olarak iletin."
+      meta={{
+        title: "İletişim | MMT Global",
+        description: "MMT Global iletişim ve ticari destek kanalı.",
+      }}
+    >
+      <ContentSection title="Genel iletişim">
+        <p>
+          Ürün, hizmet, B2B bağlantı veya kurumsal iş ortaklığı talepleriniz için
+          e-posta gönderin. Talebinizin konusunu, şirketinizi ve size nasıl
+          ulaşabileceğimizi belirtin.
+        </p>
+        <a
+          className="mt-5 inline-flex items-center gap-2 bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-primary/90"
+          href="mailto:info@mmtglobal.com"
+        >
+          <Mail size={16} />
+          info@mmtglobal.com
+        </a>
+      </ContentSection>
+      <ContentSection title="Ödeme desteği">
+        <p>
+          Ödeme öncesi tutar, para birimi, sipariş veya fatura sorularınızı
+          ödeme yapmadan önce iletin. Kart numarası, CVV, mobil bankacılık
+          şifresi, cüzdan seed phrase'i veya özel anahtar göndermeyin.
+        </p>
+      </ContentSection>
+      <ContentSection title="Yanıt süreci">
+        <p>
+          Talepler, konu ve gerekli doğrulamalar incelendikten sonra yanıtlanır.
+          Resmî ödeme talimatı yalnızca doğrulanmış ticari işlem veya sipariş
+          kapsamında paylaşılır.
+        </p>
+      </ContentSection>
+    </PageShell>
+  );
+}
+
+export function DeliveryPage() {
+  return (
+    <PageShell
+      eyebrow="Teslimat"
+      title="Süreç ve"
+      highlight="teslim koşulları."
+      description="Ürün ve hizmet teslimi, siparişin niteliğine ve taraflar arasında onaylanan teklife göre yürütülür."
+      meta={{
+        title: "Teslimat Koşulları | MMT Global",
+        description: "MMT Global ürün ve hizmet teslim süreçleri, süreleri ve koşulları.",
+      }}
+    >
+      <ContentSection title="Teslimat kapsamı">
+        <p>
+          Teslimat süresi, yöntemi, varsa kargo bedeli ve teslim noktası sipariş
+          özeti veya yazılı teklifte gösterilir. Sipariş onayı verilmeden önce
+          bu bilgiler müşteriye sunulur.
+        </p>
+      </ContentSection>
+      <ContentSection title="Fiziksel ürünler">
+        <p>
+          Fiziksel ürünlerde teslimat, ürünün niteliğine ve tarafların
+          kararlaştırdığı taşıma yöntemine göre yapılır. Alıcının doğru adres,
+          iletişim ve teslim bilgilerini sağlaması gerekir. Kargo veya taşıma
+          kaynaklı gecikmelerde müşteriye bilgi verilir.
+        </p>
+      </ContentSection>
+      <ContentSection title="Hizmet ve dijital teslim">
+        <p>
+          Hizmetler; kapsamına göre e-posta, çevrim içi toplantı, rapor, erişim
+          veya belirlenen başka bir kanal üzerinden teslim edilir. Başlangıç ve
+          tamamlanma tarihi teklif veya sözleşmede belirtilir.
+        </p>
+      </ContentSection>
+      <ContentSection title="Teslim alınamayan siparişler">
+        <p>
+          Adres veya iletişim bilgilerinin hatalı olması, teslimin kabul
+          edilmemesi ya da alıcıdan kaynaklanan başka bir nedenle teslim
+          yapılamaması hâlinde yeniden gönderim ve ek maliyetler taraflarla
+          görüşülerek belirlenir.
+        </p>
+      </ContentSection>
+    </PageShell>
+  );
+}
+
+export function DistanceSalesPage() {
+  return (
+    <PageShell
+      eyebrow="Mesafeli satış"
+      title="Açık sipariş,"
+      highlight="açık koşullar."
+      description="Mesafeli satış ve hizmet sözleşmesi, ödeme öncesinde müşteriye sunulan ürün, fiyat, teslim ve iade bilgileriyle birlikte değerlendirilir."
+      meta={{
+        title: "Mesafeli Satış Sözleşmesi | MMT Global",
+        description: "MMT Global mesafeli satış, sipariş, ödeme, teslimat ve iade esasları.",
+      }}
+    >
+      <ContentSection title="Sözleşmenin kapsamı">
+        <p>
+          Bu metin, MMT Global tarafından doğrudan sunulan ürün ve hizmetlerin
+          uzaktan sipariş edilmesi hâlinde uygulanacak temel esasları açıklar.
+          Ücretsiz B2B tanıtım ve bağlantı hizmetleri ücretli satış sözleşmesi
+          oluşturmaz.
+        </p>
+      </ContentSection>
+      <ContentSection title="Sipariş ve onay">
+        <p>
+          Müşteri; ürün veya hizmeti, toplam tutarı, para birimini, teslim
+          koşullarını ve iade şartlarını kontrol ederek sipariş verir. Sipariş,
+          ödeme sağlayıcının onayı ve MMT Global'in sipariş teyidiyle işleme
+          alınır.
+        </p>
+      </ContentSection>
+      <ContentSection title="Fiyat ve ödeme">
+        <p>
+          Ödeme öncesinde ürün veya hizmet bedeli, uygulanabilir vergiler,
+          teslimat bedeli ve toplam tutar gösterilir. Kart bilgileri MMT Global
+          sisteminde tutulmaz; ödeme yetkili ödeme sağlayıcının güvenli
+          ekranında tamamlanır.
+        </p>
+      </ContentSection>
+      <ContentSection title="İptal ve cayma">
+        <p>
+          İptal, iade ve uygulanabilir cayma hakları; ürünün veya hizmetin
+          niteliği, teslimin başlayıp başlamadığı ve taraflar arasındaki
+          sözleşme dikkate alınarak değerlendirilir. Talep için işlem numarası,
+          ödeme tarihi ve müşteri iletişim bilgileriyle{" "}
+          <a className="font-semibold text-primary hover:underline" href="mailto:info@mmtglobal.com">
+            info@mmtglobal.com
+          </a>{" "}
+          adresine yazın.
+        </p>
+      </ContentSection>
+      <ContentSection title="Uyuşmazlık ve iletişim">
+        <p>
+          Sorular önce yazılı iletişim kanalı üzerinden incelenir. Tüketici
+          işlemlerinde yürürlükteki zorunlu tüketici mevzuatı ve yetkili
+          mercilerin görev alanı saklıdır.
+        </p>
+      </ContentSection>
+    </PageShell>
+  );
+}
+
 export function PrivacyPage() {
   return (
     <PageShell
