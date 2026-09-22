@@ -547,6 +547,47 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+  /public/logistics/media:
+    get:
+      operationId: getPublicLogisticsMedia
+      tags: [public-logistics]
+      summary: Yayınlanmış lojistik medya içeriklerini listeler
+      responses:
+        "200":
+          description: Public-safe lojistik medya kayıtları
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PublicLogisticsMedia"
+  /public/logistics/media/{id}/file:
+    get:
+      operationId: getPublicLogisticsMediaFile
+      tags: [public-logistics]
+      summary: Yayınlanmış lojistik medya dosyasını açar
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "302":
+          description: Kısa süreli imzalı medya URL'sine yönlendirme
+        "400":
+          description: Geçersiz medya numarası
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Yayınlanmış lojistik medya dosyası bulunamadı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
   /healthz:
     get:
       operationId: healthCheck
@@ -2036,6 +2077,35 @@ components:
                 type: string
               handle:
                 type: string
+    PublicLogisticsMedia:
+      type: object
+      required:
+        - id
+        - title
+        - summary
+        - category
+        - sourceUrl
+        - fileUrl
+        - contentType
+        - publishedAt
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        summary:
+          type: string
+        category:
+          type: string
+        sourceUrl:
+          type: [string, "null"]
+        fileUrl:
+          type: [string, "null"]
+        contentType:
+          type: [string, "null"]
+        publishedAt:
+          type: string
+          format: date-time
     LimitApplicationPage:
       type: object
       required:

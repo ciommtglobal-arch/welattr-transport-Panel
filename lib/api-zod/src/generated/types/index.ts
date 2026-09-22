@@ -83,6 +83,7 @@ export * from './orphanUploadCleanupResponse';
 export * from './orphanUploadCleanupResponseFailedObjectsItem';
 export * from './paymentCurrency';
 export * from './paymentMode';
+export * from './publicLogisticsMedia';
 export * from './tamiHostedPaymentInput';
 export * from './tamiHostedPaymentSession';
 export * from './tamiPaymentStatus';

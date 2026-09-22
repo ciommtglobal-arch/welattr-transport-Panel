@@ -64,6 +64,7 @@ import type {
   ObjectDownloadUrlResponse,
   OrphanUploadCleanupRequest,
   OrphanUploadCleanupResponse,
+  PublicLogisticsMedia,
   TamiHostedPaymentInput,
   TamiHostedPaymentSession,
   TamiPaymentStatus,
@@ -1121,6 +1122,160 @@ export function useGetConstructionCatalog<TData = Awaited<ReturnType<typeof getC
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetConstructionCatalogQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetPublicLogisticsMediaUrl = () => {
+
+
+
+
+  return `/api/public/logistics/media`
+}
+
+/**
+ * @summary Yayınlanmış lojistik medya içeriklerini listeler
+ */
+export const getPublicLogisticsMedia = async ( options?: Parameters<typeof customFetch>[1]): Promise<PublicLogisticsMedia[]> => {
+
+  return customFetch<PublicLogisticsMedia[]>(getGetPublicLogisticsMediaUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicLogisticsMediaQueryKey = () => {
+    return [
+    `/api/public/logistics/media`
+    ] as const;
+    }
+
+
+export const getGetPublicLogisticsMediaQueryOptions = <TData = Awaited<ReturnType<typeof getPublicLogisticsMedia>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicLogisticsMedia>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicLogisticsMediaQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicLogisticsMedia>>> = ({ signal }) => getPublicLogisticsMedia({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicLogisticsMedia>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicLogisticsMediaQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicLogisticsMedia>>>
+export type GetPublicLogisticsMediaQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Yayınlanmış lojistik medya içeriklerini listeler
+ */
+
+export function useGetPublicLogisticsMedia<TData = Awaited<ReturnType<typeof getPublicLogisticsMedia>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicLogisticsMedia>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicLogisticsMediaQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetPublicLogisticsMediaFileUrl = (id: number,) => {
+
+
+
+
+  return `/api/public/logistics/media/${id}/file`
+}
+
+/**
+ * @summary Yayınlanmış lojistik medya dosyasını açar
+ */
+export const getPublicLogisticsMediaFile = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<unknown> => {
+
+  return customFetch<unknown>(getGetPublicLogisticsMediaFileUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicLogisticsMediaFileQueryKey = (id: number,) => {
+    return [
+    `/api/public/logistics/media/${id}/file`
+    ] as const;
+    }
+
+
+export const getGetPublicLogisticsMediaFileQueryOptions = <TData = Awaited<ReturnType<typeof getPublicLogisticsMediaFile>>, TError = ErrorType<void | ErrorEnvelope>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicLogisticsMediaFile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicLogisticsMediaFileQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicLogisticsMediaFile>>> = ({ signal }) => getPublicLogisticsMediaFile(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicLogisticsMediaFile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicLogisticsMediaFileQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicLogisticsMediaFile>>>
+export type GetPublicLogisticsMediaFileQueryError = ErrorType<void | ErrorEnvelope>
+
+
+/**
+ * @summary Yayınlanmış lojistik medya dosyasını açar
+ */
+
+export function useGetPublicLogisticsMediaFile<TData = Awaited<ReturnType<typeof getPublicLogisticsMediaFile>>, TError = ErrorType<void | ErrorEnvelope>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicLogisticsMediaFile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicLogisticsMediaFileQueryOptions(id,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

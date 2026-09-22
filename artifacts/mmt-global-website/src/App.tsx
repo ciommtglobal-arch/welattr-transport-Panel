@@ -29,6 +29,7 @@ import B2BJoinPage from '@/pages/b2b-join';
 import B2BRequestPage from '@/pages/b2b-request';
 import StaffB2BRequests from '@/pages/staff-b2b-requests';
 import StaffMediaCenter from '@/pages/staff-media-center';
+import LogisticsHubPage from '@/pages/logistics-hub';
 import {
   AboutPage,
   CareersPage,
@@ -180,6 +181,7 @@ function Router() {
         <Route path="/b2b-agi/katil" component={B2BJoinPage} />
         <Route path="/b2b-agi/talep" component={B2BRequestPage} />
         <Route path="/b2b-agi/ilan/:id" component={B2BListingDetail} />
+        <Route path="/lojistik" component={LogisticsHubPage} />
         <Route path="/odeme" component={PaymentPage} />
         <Route path="/odeme/test" component={MockPaymentPage} />
         <Route path="/odeme/sonuc" component={PaymentResultPage} />

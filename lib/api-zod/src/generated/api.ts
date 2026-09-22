@@ -428,6 +428,35 @@ export const GetConstructionCatalogResponse = zod.object({
 
 
 /**
+ * @summary Yayınlanmış lojistik medya içeriklerini listeler
+ */
+export const GetPublicLogisticsMediaResponseItem = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "sourceUrl": zod.string().nullable(),
+  "fileUrl": zod.string().nullable(),
+  "contentType": zod.string().nullable(),
+  "publishedAt": zod.coerce.date()
+})
+export const GetPublicLogisticsMediaResponse = zod.array(GetPublicLogisticsMediaResponseItem)
+
+
+/**
+ * @summary Yayınlanmış lojistik medya dosyasını açar
+ */
+
+
+
+export const GetPublicLogisticsMediaFileParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const GetPublicLogisticsMediaFileResponse = zod.void()
+
+
+/**
  * Returns server health status
  * @summary Health check
  */

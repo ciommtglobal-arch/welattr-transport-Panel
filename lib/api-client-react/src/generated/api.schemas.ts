@@ -564,6 +564,20 @@ export interface ConstructionCatalog {
   collections: ConstructionCatalogCollectionsItem[];
 }
 
+export interface PublicLogisticsMedia {
+  id: number;
+  title: string;
+  summary: string;
+  category: string;
+  /** @nullable */
+  sourceUrl: string | null;
+  /** @nullable */
+  fileUrl: string | null;
+  /** @nullable */
+  contentType: string | null;
+  publishedAt: string;
+}
+
 export interface LimitApplicationPage {
   items: LimitApplication[];
   page: number;
