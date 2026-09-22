@@ -31,6 +31,8 @@ export const staffProfilesTable = pgTable(
     languages: text("languages").array().notNull(),
     educationSummary: text("education_summary").notNull(),
     businessSummary: text("business_summary").notNull(),
+    additionalResponsibility: text("additional_responsibility"),
+    approvalRequired: boolean("approval_required").notNull().default(true),
     supportRequested: boolean("support_requested").notNull().default(false),
     supportNote: text("support_note"),
     publicVisibility: boolean("public_visibility").notNull().default(false),

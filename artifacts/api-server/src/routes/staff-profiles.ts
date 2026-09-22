@@ -20,6 +20,8 @@ function serializeProfile(profile: StaffProfile) {
     languages: profile.languages,
     educationSummary: profile.educationSummary,
     businessSummary: profile.businessSummary,
+    additionalResponsibility: profile.additionalResponsibility,
+    approvalRequired: profile.approvalRequired,
     supportRequested: profile.supportRequested,
     supportNote: profile.supportNote,
     publicVisibility: profile.publicVisibility,

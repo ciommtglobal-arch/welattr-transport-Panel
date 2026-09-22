@@ -887,6 +887,8 @@ export const GetStaffProfilesResponseItem = zod.object({
   "languages": zod.array(zod.string()),
   "educationSummary": zod.string(),
   "businessSummary": zod.string(),
+  "additionalResponsibility": zod.string().nullish(),
+  "approvalRequired": zod.boolean().optional(),
   "supportRequested": zod.boolean(),
   "supportNote": zod.string().nullish(),
   "publicVisibility": zod.boolean(),

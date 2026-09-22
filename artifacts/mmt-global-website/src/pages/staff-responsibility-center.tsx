@@ -269,6 +269,17 @@ function StaffProfileCard({ profile }: { profile: StaffProfile }) {
               <p className="mt-1 text-sm leading-6">{profile.proposedRole}</p>
             </div>
           </div>
+          {profile.additionalResponsibility ? (
+            <div className="border-l-2 border-primary/60 pl-4 text-sm leading-6 text-foreground/65">
+              <span className="font-semibold text-foreground">Ek sorumluluk: </span>
+              {profile.additionalResponsibility}
+              {profile.approvalRequired ? (
+                <span className="mt-1 block text-xs font-semibold uppercase tracking-[0.12em] text-primary">
+                  İş sahibi onayı zorunlu
+                </span>
+              ) : null}
+            </div>
+          ) : null}
           {profile.supportRequested ? (
             <div className="border-l-2 border-primary/60 pl-4 text-sm leading-6 text-foreground/65">
               <span className="font-semibold text-foreground">Destek notu: </span>

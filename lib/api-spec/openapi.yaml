@@ -1872,6 +1872,10 @@ components:
           type: string
         businessSummary:
           type: string
+        additionalResponsibility:
+          type: [string, "null"]
+        approvalRequired:
+          type: boolean
         supportRequested:
           type: boolean
         supportNote:

@@ -18,6 +18,9 @@ export interface StaffProfile {
   languages: string[];
   educationSummary: string;
   businessSummary: string;
+  /** @nullable */
+  additionalResponsibility?: string | null;
+  approvalRequired?: boolean;
   supportRequested: boolean;
   /** @nullable */
   supportNote?: string | null;
