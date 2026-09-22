@@ -7,10 +7,19 @@ import {
   Banknote,
   BriefcaseBusiness,
   FileCheck2,
+  Globe2,
+  GraduationCap,
+  Languages,
   LayoutDashboard,
+  Mail,
   Megaphone,
+  ShieldAlert,
   Truck,
 } from "lucide-react";
+import {
+  useGetStaffProfiles,
+  type StaffProfile,
+} from "@workspace/api-client-react";
 
 type Responsibility = {
   id: string;
@@ -178,7 +187,112 @@ function ResponsibilityCard({ item }: { item: Responsibility }) {
   );
 }
 
+function StaffProfileCard({ profile }: { profile: StaffProfile }) {
+  return (
+    <article
+      className="border border-primary/30 bg-card p-6 md:p-8"
+      data-testid={`card-staff-profile-${profile.internalId}`}
+    >
+      <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
+        <div>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+              {profile.internalId}
+            </span>
+            <span className="border border-primary/30 bg-primary/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-primary">
+              Taslak kayıt
+            </span>
+          </div>
+          <h3 className="mt-4 text-3xl font-semibold tracking-tight">{profile.fullName}</h3>
+          <p className="mt-2 text-base font-semibold text-primary">{profile.proposedRole}</p>
+        </div>
+        <div className="flex items-center gap-2 text-xs font-semibold text-foreground/55">
+          <ShieldAlert size={16} className="text-primary" />
+          Resmî doğrulama bekliyor
+        </div>
+      </div>
+
+      <div className="mt-8 grid gap-5 border-t border-border/70 pt-6 md:grid-cols-2">
+        <div className="space-y-4">
+          <div className="flex gap-3">
+            <Languages className="mt-0.5 shrink-0 text-primary" size={18} />
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-foreground/40">
+                Dil bilgisi
+              </p>
+              <p className="mt-1 text-sm leading-6">{profile.languages.join(" · ")}</p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <GraduationCap className="mt-0.5 shrink-0 text-primary" size={18} />
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-foreground/40">
+                Eğitim
+              </p>
+              <p className="mt-1 text-sm leading-6">{profile.educationSummary}</p>
+            </div>
+          </div>
+          {profile.contactEmail ? (
+            <div className="flex gap-3">
+              <Mail className="mt-0.5 shrink-0 text-primary" size={18} />
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-foreground/40">
+                  İç iletişim
+                </p>
+                <a
+                  href={`mailto:${profile.contactEmail}`}
+                  className="mt-1 block break-all text-sm leading-6 transition-colors hover:text-primary"
+                >
+                  {profile.contactEmail}
+                </a>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex gap-3">
+            <Globe2 className="mt-0.5 shrink-0 text-primary" size={18} />
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-foreground/40">
+                Uluslararası iş
+              </p>
+              <p className="mt-1 text-sm leading-6">{profile.businessSummary}</p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Truck className="mt-0.5 shrink-0 text-primary" size={18} />
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-foreground/40">
+                Operasyon odağı
+              </p>
+              <p className="mt-1 text-sm leading-6">{profile.proposedRole}</p>
+            </div>
+          </div>
+          {profile.supportRequested ? (
+            <div className="border-l-2 border-primary/60 pl-4 text-sm leading-6 text-foreground/65">
+              <span className="font-semibold text-foreground">Destek notu: </span>
+              {profile.supportNote ?? "Destek ihtiyacı görüşmede netleştirilecek."}
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <p className="mt-6 border-t border-border/70 pt-5 text-xs leading-6 text-foreground/45">
+        {profile.verificationNote ??
+          "Bilgiler iç taslak olarak tutuluyor; resmî belgeler doğrulanmadan kamuya açık profilde kullanılmaz."}
+      </p>
+    </article>
+  );
+}
+
 function SignedInCenter() {
+  const {
+    data: profiles = [],
+    isLoading: profilesLoading,
+    isError: profilesError,
+  } = useGetStaffProfiles();
+
   return (
     <section className="mx-auto max-w-7xl px-5 py-12 md:px-10 md:py-16">
       <div className="flex flex-col justify-between gap-8 border-b border-border/70 pb-10 md:flex-row md:items-end">
@@ -199,6 +313,38 @@ function SignedInCenter() {
           Yetkili personel alanı
         </div>
       </div>
+      <section className="mt-10" aria-labelledby="staff-profiles-title">
+        <div className="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-end">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+              İç ekip / taslak kayıtlar
+            </p>
+            <h2 id="staff-profiles-title" className="mt-2 text-2xl font-semibold tracking-tight">
+              Ekip profilleri
+            </h2>
+          </div>
+          <p className="max-w-md text-xs leading-5 text-foreground/45">
+            Bu bilgiler yalnızca yetkili personel API’sinden gelir; kamuya açık birim sayfalarına aktarılmaz.
+          </p>
+        </div>
+        {profilesLoading ? (
+          <div className="h-64 animate-pulse border border-border bg-card" data-testid="status-staff-profiles-loading" />
+        ) : profilesError ? (
+          <div className="border border-destructive/30 bg-destructive/5 p-5 text-sm leading-6 text-foreground/65" data-testid="status-staff-profiles-error">
+            İç ekip profilleri şu anda alınamadı. Operasyon kartları kullanılmaya devam edebilir.
+          </div>
+        ) : profiles.length === 0 ? (
+          <div className="border border-border bg-card p-5 text-sm leading-6 text-foreground/55" data-testid="status-staff-profiles-empty">
+            Henüz taslak personel profili bulunmuyor.
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {profiles.map((profile) => (
+              <StaffProfileCard key={profile.internalId} profile={profile} />
+            ))}
+          </div>
+        )}
+      </section>
       <div className="mt-10 grid gap-5 md:grid-cols-2">
         {responsibilities.map((item) => <ResponsibilityCard key={item.id} item={item} />)}
       </div>
