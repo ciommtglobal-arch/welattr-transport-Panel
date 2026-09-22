@@ -875,6 +875,29 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
+ * @summary Personel iç profil taslaklarını listeler
+ */
+export const GetStaffProfilesResponseItem = zod.object({
+  "id": zod.int(),
+  "internalId": zod.string(),
+  "fullName": zod.string(),
+  "contactEmail": zod.email().nullish(),
+  "proposedRole": zod.string(),
+  "profileStatus": zod.enum(['draft', 'verified', 'archived']),
+  "languages": zod.array(zod.string()),
+  "educationSummary": zod.string(),
+  "businessSummary": zod.string(),
+  "supportRequested": zod.boolean(),
+  "supportNote": zod.string().nullish(),
+  "publicVisibility": zod.boolean(),
+  "verificationNote": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const GetStaffProfilesResponse = zod.array(GetStaffProfilesResponseItem)
+
+
+/**
  * @summary Submit a limit application
  */
 export const createLimitApplicationBodyFullNameMin = 2;

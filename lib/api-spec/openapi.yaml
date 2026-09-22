@@ -24,6 +24,8 @@ tags:
     description: MMT Global personel medya merkezi işlemleri
   - name: logistics-operations
     description: Lojistik talep, taşıyıcı ve operasyon yönetimi
+  - name: staff-profiles
+    description: Giriş yapmış personel için iç ekip profil taslakları
 paths:
   /payments/tami/hosted-session:
     post:
@@ -906,6 +908,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /staff/profiles:
+    get:
+      operationId: getStaffProfiles
+      tags: [staff-profiles]
+      summary: Personel iç profil taslaklarını listeler
+      responses:
+        "200":
+          description: İç personel profilleri
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StaffProfile"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /limit-applications:
     post:
       operationId: createLimitApplication
@@ -1804,6 +1832,60 @@ components:
           type: string
       required:
         - status
+    StaffProfileStatus:
+      type: string
+      enum: [draft, verified, archived]
+    StaffProfile:
+      type: object
+      required:
+        - id
+        - internalId
+        - fullName
+        - proposedRole
+        - profileStatus
+        - languages
+        - educationSummary
+        - businessSummary
+        - supportRequested
+        - publicVisibility
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+        internalId:
+          type: string
+        fullName:
+          type: string
+        contactEmail:
+          type: [string, "null"]
+          format: email
+        proposedRole:
+          type: string
+        profileStatus:
+          $ref: "#/components/schemas/StaffProfileStatus"
+        languages:
+          type: array
+          items:
+            type: string
+        educationSummary:
+          type: string
+        businessSummary:
+          type: string
+        supportRequested:
+          type: boolean
+        supportNote:
+          type: [string, "null"]
+        publicVisibility:
+          type: boolean
+        verificationNote:
+          type: [string, "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     LimitApplicationStatus:
       type: string
       enum: [new, reviewing, approved, rejected]

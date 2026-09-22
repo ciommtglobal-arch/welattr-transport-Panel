@@ -100,6 +100,36 @@ export interface HealthStatus {
   status: string;
 }
 
+export type StaffProfileStatus = typeof StaffProfileStatus[keyof typeof StaffProfileStatus];
+
+
+export const StaffProfileStatus = {
+  draft: 'draft',
+  verified: 'verified',
+  archived: 'archived',
+} as const;
+
+export interface StaffProfile {
+  id: number;
+  internalId: string;
+  fullName: string;
+  /** @nullable */
+  contactEmail?: string | null;
+  proposedRole: string;
+  profileStatus: StaffProfileStatus;
+  languages: string[];
+  educationSummary: string;
+  businessSummary: string;
+  supportRequested: boolean;
+  /** @nullable */
+  supportNote?: string | null;
+  publicVisibility: boolean;
+  /** @nullable */
+  verificationNote?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type LimitApplicationStatus = typeof LimitApplicationStatus[keyof typeof LimitApplicationStatus];
 
 

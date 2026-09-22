@@ -78,6 +78,7 @@ import type {
   OrphanUploadCleanupRequest,
   OrphanUploadCleanupResponse,
   PublicLogisticsMedia,
+  StaffProfile,
   TamiHostedPaymentInput,
   TamiHostedPaymentSession,
   TamiPaymentStatus,
@@ -2077,6 +2078,83 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getHealthCheckQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetStaffProfilesUrl = () => {
+
+
+
+
+  return `/api/staff/profiles`
+}
+
+/**
+ * @summary Personel iç profil taslaklarını listeler
+ */
+export const getStaffProfiles = async ( options?: Parameters<typeof customFetch>[1]): Promise<StaffProfile[]> => {
+
+  return customFetch<StaffProfile[]>(getGetStaffProfilesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStaffProfilesQueryKey = () => {
+    return [
+    `/api/staff/profiles`
+    ] as const;
+    }
+
+
+export const getGetStaffProfilesQueryOptions = <TData = Awaited<ReturnType<typeof getStaffProfiles>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffProfiles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStaffProfilesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStaffProfiles>>> = ({ signal }) => getStaffProfiles({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStaffProfiles>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStaffProfilesQueryResult = NonNullable<Awaited<ReturnType<typeof getStaffProfiles>>>
+export type GetStaffProfilesQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Personel iç profil taslaklarını listeler
+ */
+
+export function useGetStaffProfiles<TData = Awaited<ReturnType<typeof getStaffProfiles>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffProfiles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStaffProfilesQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

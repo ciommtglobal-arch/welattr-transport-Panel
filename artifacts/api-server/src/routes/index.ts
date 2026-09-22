@@ -11,6 +11,7 @@ import mediaRouter from "./media";
 import storefrontRouter from "./storefront";
 import publicLogisticsRouter from "./public-logistics";
 import logisticsOperationsRouter from "./logistics-operations";
+import staffProfilesRouter from "./staff-profiles";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(mediaRouter);
 router.use(storefrontRouter);
 router.use(publicLogisticsRouter);
 router.use(logisticsOperationsRouter);
+router.use(staffProfilesRouter);
 
 export default router;

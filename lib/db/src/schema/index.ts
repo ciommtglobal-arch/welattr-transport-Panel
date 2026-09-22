@@ -7,3 +7,4 @@ export * from "./b2b-requests";
 export * from "./media-items";
 export * from "./media-deliveries";
 export * from "./logistics-operations";
+export * from "./staff-profiles";

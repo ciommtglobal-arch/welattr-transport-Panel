@@ -103,6 +103,8 @@ export * from './orphanUploadCleanupResponseFailedObjectsItem';
 export * from './paymentCurrency';
 export * from './paymentMode';
 export * from './publicLogisticsMedia';
+export * from './staffProfile';
+export * from './staffProfileStatus';
 export * from './tamiHostedPaymentInput';
 export * from './tamiHostedPaymentSession';
 export * from './tamiPaymentStatus';
