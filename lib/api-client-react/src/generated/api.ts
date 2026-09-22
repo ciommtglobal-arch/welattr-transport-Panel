@@ -47,12 +47,25 @@ import type {
   GetB2BRequestReviewQueueParams,
   GetB2BRequestsParams,
   GetLimitApplicationsParams,
+  GetLogisticsOperationsParams,
   GetMediaItemsParams,
   HealthStatus,
   LimitApplication,
   LimitApplicationInput,
   LimitApplicationPage,
   LimitApplicationStatusUpdate,
+  LogisticsCarrierInput,
+  LogisticsCarrierRecord,
+  LogisticsCommunicationInput,
+  LogisticsCommunicationRecord,
+  LogisticsOfferInput,
+  LogisticsOfferRecord,
+  LogisticsOperationsResponse,
+  LogisticsRequestInput,
+  LogisticsRequestRecord,
+  LogisticsRequestStatusUpdate,
+  LogisticsShipmentRecord,
+  LogisticsStaffMember,
   MediaItem,
   MediaItemInput,
   MediaItemPage,
@@ -1287,6 +1300,716 @@ export function useGetPublicLogisticsMediaFile<TData = Awaited<ReturnType<typeof
 
 
 
+
+export const getCreateLogisticsRequestUrl = () => {
+
+
+
+
+  return `/api/logistics/requests`
+}
+
+/**
+ * @summary Yeni yük talebi oluşturur
+ */
+export const createLogisticsRequest = async (logisticsRequestInput: LogisticsRequestInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsRequestRecord> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsRequestRecord>(getCreateLogisticsRequestUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsRequestInput)
+  }
+);}
+
+
+
+
+
+export const getCreateLogisticsRequestMutationKey = () => ['createLogisticsRequest'] as const;
+
+export const getCreateLogisticsRequestMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLogisticsRequest>>, TError,CreateLogisticsRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createLogisticsRequest>>, TError,CreateLogisticsRequestMutationVariables, TContext> => {
+
+const mutationKey = getCreateLogisticsRequestMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createLogisticsRequest>>, CreateLogisticsRequestMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createLogisticsRequest(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateLogisticsRequestMutationResult = NonNullable<Awaited<ReturnType<typeof createLogisticsRequest>>>
+    export type CreateLogisticsRequestMutationBody = BodyType<LogisticsRequestInput>
+    export type CreateLogisticsRequestMutationError = ErrorType<ErrorResponse>
+    export type CreateLogisticsRequestMutationVariables = {data: BodyType<LogisticsRequestInput>}
+
+    /**
+ * @summary Yeni yük talebi oluşturur
+ */
+export const useCreateLogisticsRequest = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLogisticsRequest>>, TError,CreateLogisticsRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createLogisticsRequest>>,
+        TError,
+        CreateLogisticsRequestMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateLogisticsRequestMutationOptions(options));
+    }
+
+export const getCreateLogisticsCarrierUrl = () => {
+
+
+
+
+  return `/api/logistics/carriers`
+}
+
+/**
+ * @summary Taşıyıcı başvurusu oluşturur
+ */
+export const createLogisticsCarrier = async (logisticsCarrierInput: LogisticsCarrierInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsCarrierRecord> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsCarrierRecord>(getCreateLogisticsCarrierUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsCarrierInput)
+  }
+);}
+
+
+
+
+
+export const getCreateLogisticsCarrierMutationKey = () => ['createLogisticsCarrier'] as const;
+
+export const getCreateLogisticsCarrierMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLogisticsCarrier>>, TError,CreateLogisticsCarrierMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createLogisticsCarrier>>, TError,CreateLogisticsCarrierMutationVariables, TContext> => {
+
+const mutationKey = getCreateLogisticsCarrierMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createLogisticsCarrier>>, CreateLogisticsCarrierMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createLogisticsCarrier(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateLogisticsCarrierMutationResult = NonNullable<Awaited<ReturnType<typeof createLogisticsCarrier>>>
+    export type CreateLogisticsCarrierMutationBody = BodyType<LogisticsCarrierInput>
+    export type CreateLogisticsCarrierMutationError = ErrorType<ErrorResponse>
+    export type CreateLogisticsCarrierMutationVariables = {data: BodyType<LogisticsCarrierInput>}
+
+    /**
+ * @summary Taşıyıcı başvurusu oluşturur
+ */
+export const useCreateLogisticsCarrier = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLogisticsCarrier>>, TError,CreateLogisticsCarrierMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createLogisticsCarrier>>,
+        TError,
+        CreateLogisticsCarrierMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateLogisticsCarrierMutationOptions(options));
+    }
+
+export const getGetLogisticsStaffUrl = () => {
+
+
+
+
+  return `/api/logistics/staff`
+}
+
+/**
+ * @summary Aktif operasyon personelini listeler
+ */
+export const getLogisticsStaff = async ( options?: Parameters<typeof customFetch>[1]): Promise<LogisticsStaffMember[]> => {
+
+  return customFetch<LogisticsStaffMember[]>(getGetLogisticsStaffUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLogisticsStaffQueryKey = () => {
+    return [
+    `/api/logistics/staff`
+    ] as const;
+    }
+
+
+export const getGetLogisticsStaffQueryOptions = <TData = Awaited<ReturnType<typeof getLogisticsStaff>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsStaff>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLogisticsStaffQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLogisticsStaff>>> = ({ signal }) => getLogisticsStaff({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLogisticsStaff>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLogisticsStaffQueryResult = NonNullable<Awaited<ReturnType<typeof getLogisticsStaff>>>
+export type GetLogisticsStaffQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Aktif operasyon personelini listeler
+ */
+
+export function useGetLogisticsStaff<TData = Awaited<ReturnType<typeof getLogisticsStaff>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsStaff>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLogisticsStaffQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetLogisticsOperationsUrl = (params?: GetLogisticsOperationsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/logistics/operations?${stringifiedParams}` : `/api/logistics/operations`
+}
+
+/**
+ * @summary Lojistik operasyon paneli verilerini listeler
+ */
+export const getLogisticsOperations = async (params?: GetLogisticsOperationsParams, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsOperationsResponse> => {
+
+  return customFetch<LogisticsOperationsResponse>(getGetLogisticsOperationsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLogisticsOperationsQueryKey = (params?: GetLogisticsOperationsParams,) => {
+    return [
+    `/api/logistics/operations`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetLogisticsOperationsQueryOptions = <TData = Awaited<ReturnType<typeof getLogisticsOperations>>, TError = ErrorType<ErrorResponse>>(params?: GetLogisticsOperationsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsOperations>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLogisticsOperationsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLogisticsOperations>>> = ({ signal }) => getLogisticsOperations(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLogisticsOperations>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLogisticsOperationsQueryResult = NonNullable<Awaited<ReturnType<typeof getLogisticsOperations>>>
+export type GetLogisticsOperationsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Lojistik operasyon paneli verilerini listeler
+ */
+
+export function useGetLogisticsOperations<TData = Awaited<ReturnType<typeof getLogisticsOperations>>, TError = ErrorType<ErrorResponse>>(
+ params?: GetLogisticsOperationsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsOperations>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLogisticsOperationsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateLogisticsRequestStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/logistics/requests/${id}/status`
+}
+
+/**
+ * @summary Yük talebinin operasyon durumunu günceller
+ */
+export const updateLogisticsRequestStatus = async (id: number,
+    logisticsRequestStatusUpdate: LogisticsRequestStatusUpdate, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsShipmentRecord> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsShipmentRecord>(getUpdateLogisticsRequestStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsRequestStatusUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateLogisticsRequestStatusMutationKey = () => ['updateLogisticsRequestStatus'] as const;
+
+export const getUpdateLogisticsRequestStatusMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLogisticsRequestStatus>>, TError,UpdateLogisticsRequestStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateLogisticsRequestStatus>>, TError,UpdateLogisticsRequestStatusMutationVariables, TContext> => {
+
+const mutationKey = getUpdateLogisticsRequestStatusMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateLogisticsRequestStatus>>, UpdateLogisticsRequestStatusMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateLogisticsRequestStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateLogisticsRequestStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateLogisticsRequestStatus>>>
+    export type UpdateLogisticsRequestStatusMutationBody = BodyType<LogisticsRequestStatusUpdate>
+    export type UpdateLogisticsRequestStatusMutationError = ErrorType<ErrorResponse>
+    export type UpdateLogisticsRequestStatusMutationVariables = {id: number;data: BodyType<LogisticsRequestStatusUpdate>}
+
+    /**
+ * @summary Yük talebinin operasyon durumunu günceller
+ */
+export const useUpdateLogisticsRequestStatus = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLogisticsRequestStatus>>, TError,UpdateLogisticsRequestStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateLogisticsRequestStatus>>,
+        TError,
+        UpdateLogisticsRequestStatusMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateLogisticsRequestStatusMutationOptions(options));
+    }
+
+export const getCreateLogisticsOfferUrl = () => {
+
+
+
+
+  return `/api/logistics/offers`
+}
+
+/**
+ * @summary Yönetici onayına teklif gönderir
+ */
+export const createLogisticsOffer = async (logisticsOfferInput: LogisticsOfferInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsOfferRecord> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsOfferRecord>(getCreateLogisticsOfferUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsOfferInput)
+  }
+);}
+
+
+
+
+
+export const getCreateLogisticsOfferMutationKey = () => ['createLogisticsOffer'] as const;
+
+export const getCreateLogisticsOfferMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLogisticsOffer>>, TError,CreateLogisticsOfferMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createLogisticsOffer>>, TError,CreateLogisticsOfferMutationVariables, TContext> => {
+
+const mutationKey = getCreateLogisticsOfferMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createLogisticsOffer>>, CreateLogisticsOfferMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createLogisticsOffer(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateLogisticsOfferMutationResult = NonNullable<Awaited<ReturnType<typeof createLogisticsOffer>>>
+    export type CreateLogisticsOfferMutationBody = BodyType<LogisticsOfferInput>
+    export type CreateLogisticsOfferMutationError = ErrorType<ErrorResponse>
+    export type CreateLogisticsOfferMutationVariables = {data: BodyType<LogisticsOfferInput>}
+
+    /**
+ * @summary Yönetici onayına teklif gönderir
+ */
+export const useCreateLogisticsOffer = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLogisticsOffer>>, TError,CreateLogisticsOfferMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createLogisticsOffer>>,
+        TError,
+        CreateLogisticsOfferMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateLogisticsOfferMutationOptions(options));
+    }
+
+export const getApproveLogisticsOfferUrl = (id: number,) => {
+
+
+
+
+  return `/api/logistics/offers/${id}/approve`
+}
+
+/**
+ * @summary Teklifi yönetici olarak onaylar
+ */
+export const approveLogisticsOffer = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsOfferRecord> => {
+
+  return customFetch<LogisticsOfferRecord>(getApproveLogisticsOfferUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getApproveLogisticsOfferMutationKey = () => ['approveLogisticsOffer'] as const;
+
+export const getApproveLogisticsOfferMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveLogisticsOffer>>, TError,ApproveLogisticsOfferMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof approveLogisticsOffer>>, TError,ApproveLogisticsOfferMutationVariables, TContext> => {
+
+const mutationKey = getApproveLogisticsOfferMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveLogisticsOffer>>, ApproveLogisticsOfferMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  approveLogisticsOffer(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ApproveLogisticsOfferMutationResult = NonNullable<Awaited<ReturnType<typeof approveLogisticsOffer>>>
+
+    export type ApproveLogisticsOfferMutationError = ErrorType<ErrorResponse>
+    export type ApproveLogisticsOfferMutationVariables = {id: number}
+
+    /**
+ * @summary Teklifi yönetici olarak onaylar
+ */
+export const useApproveLogisticsOffer = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveLogisticsOffer>>, TError,ApproveLogisticsOfferMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof approveLogisticsOffer>>,
+        TError,
+        ApproveLogisticsOfferMutationVariables,
+        TContext
+      > => {
+      return useMutation(getApproveLogisticsOfferMutationOptions(options));
+    }
+
+export const getMarkLogisticsOfferSentUrl = (id: number,) => {
+
+
+
+
+  return `/api/logistics/offers/${id}/mark-sent`
+}
+
+/**
+ * @summary Onaylı teklifi müşteriye gönderildi olarak işaretler
+ */
+export const markLogisticsOfferSent = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsOfferRecord> => {
+
+  return customFetch<LogisticsOfferRecord>(getMarkLogisticsOfferSentUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getMarkLogisticsOfferSentMutationKey = () => ['markLogisticsOfferSent'] as const;
+
+export const getMarkLogisticsOfferSentMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markLogisticsOfferSent>>, TError,MarkLogisticsOfferSentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markLogisticsOfferSent>>, TError,MarkLogisticsOfferSentMutationVariables, TContext> => {
+
+const mutationKey = getMarkLogisticsOfferSentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markLogisticsOfferSent>>, MarkLogisticsOfferSentMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  markLogisticsOfferSent(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkLogisticsOfferSentMutationResult = NonNullable<Awaited<ReturnType<typeof markLogisticsOfferSent>>>
+
+    export type MarkLogisticsOfferSentMutationError = ErrorType<ErrorResponse>
+    export type MarkLogisticsOfferSentMutationVariables = {id: number}
+
+    /**
+ * @summary Onaylı teklifi müşteriye gönderildi olarak işaretler
+ */
+export const useMarkLogisticsOfferSent = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markLogisticsOfferSent>>, TError,MarkLogisticsOfferSentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markLogisticsOfferSent>>,
+        TError,
+        MarkLogisticsOfferSentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getMarkLogisticsOfferSentMutationOptions(options));
+    }
+
+export const getCreateLogisticsCommunicationUrl = () => {
+
+
+
+
+  return `/api/logistics/communications`
+}
+
+/**
+ * @summary İş kaydına manuel iletişim notu ekler
+ */
+export const createLogisticsCommunication = async (logisticsCommunicationInput: LogisticsCommunicationInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsCommunicationRecord> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsCommunicationRecord>(getCreateLogisticsCommunicationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsCommunicationInput)
+  }
+);}
+
+
+
+
+
+export const getCreateLogisticsCommunicationMutationKey = () => ['createLogisticsCommunication'] as const;
+
+export const getCreateLogisticsCommunicationMutationOptions = <TError = ErrorType<ErrorResponse | ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLogisticsCommunication>>, TError,CreateLogisticsCommunicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createLogisticsCommunication>>, TError,CreateLogisticsCommunicationMutationVariables, TContext> => {
+
+const mutationKey = getCreateLogisticsCommunicationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createLogisticsCommunication>>, CreateLogisticsCommunicationMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createLogisticsCommunication(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateLogisticsCommunicationMutationResult = NonNullable<Awaited<ReturnType<typeof createLogisticsCommunication>>>
+    export type CreateLogisticsCommunicationMutationBody = BodyType<LogisticsCommunicationInput>
+    export type CreateLogisticsCommunicationMutationError = ErrorType<ErrorResponse | ErrorEnvelope>
+    export type CreateLogisticsCommunicationMutationVariables = {data: BodyType<LogisticsCommunicationInput>}
+
+    /**
+ * @summary İş kaydına manuel iletişim notu ekler
+ */
+export const useCreateLogisticsCommunication = <TError = ErrorType<ErrorResponse | ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLogisticsCommunication>>, TError,CreateLogisticsCommunicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createLogisticsCommunication>>,
+        TError,
+        CreateLogisticsCommunicationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateLogisticsCommunicationMutationOptions(options));
+    }
 
 export const getHealthCheckUrl = () => {
 

@@ -457,6 +457,415 @@ export const GetPublicLogisticsMediaFileResponse = zod.void()
 
 
 /**
+ * @summary Yeni yük talebi oluşturur
+ */
+export const createLogisticsRequestBodyRequesterNameMin = 2;
+export const createLogisticsRequestBodyRequesterNameMax = 160;
+
+export const createLogisticsRequestBodyOrganizationMax = 200;
+
+export const createLogisticsRequestBodyPhoneMin = 5;
+export const createLogisticsRequestBodyPhoneMax = 40;
+
+export const createLogisticsRequestBodyOriginMin = 2;
+export const createLogisticsRequestBodyOriginMax = 160;
+
+export const createLogisticsRequestBodyDestinationMin = 2;
+export const createLogisticsRequestBodyDestinationMax = 160;
+
+export const createLogisticsRequestBodyCargoTypeMin = 2;
+export const createLogisticsRequestBodyCargoTypeMax = 160;
+
+export const createLogisticsRequestBodyWeightKgMin = 0;
+
+export const createLogisticsRequestBodyVolumeM3Min = 0;
+
+export const createLogisticsRequestBodyNotesMax = 2000;
+
+
+
+export const CreateLogisticsRequestBody = zod.object({
+  "requesterName": zod.string().min(createLogisticsRequestBodyRequesterNameMin).max(createLogisticsRequestBodyRequesterNameMax),
+  "organization": zod.string().max(createLogisticsRequestBodyOrganizationMax).optional(),
+  "email": zod.email(),
+  "phone": zod.string().min(createLogisticsRequestBodyPhoneMin).max(createLogisticsRequestBodyPhoneMax),
+  "origin": zod.string().min(createLogisticsRequestBodyOriginMin).max(createLogisticsRequestBodyOriginMax),
+  "destination": zod.string().min(createLogisticsRequestBodyDestinationMin).max(createLogisticsRequestBodyDestinationMax),
+  "cargoType": zod.string().min(createLogisticsRequestBodyCargoTypeMin).max(createLogisticsRequestBodyCargoTypeMax),
+  "weightKg": zod.number().min(createLogisticsRequestBodyWeightKgMin),
+  "volumeM3": zod.number().min(createLogisticsRequestBodyVolumeM3Min),
+  "transportMode": zod.enum(['road', 'sea', 'air']),
+  "loadingDate": zod.coerce.date(),
+  "notes": zod.string().max(createLogisticsRequestBodyNotesMax).optional(),
+  "isTest": zod.boolean().optional()
+})
+
+export const CreateLogisticsRequestResponse = zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "requesterName": zod.string(),
+  "organization": zod.string().nullish(),
+  "email": zod.string(),
+  "phone": zod.string(),
+  "origin": zod.string(),
+  "destination": zod.string(),
+  "cargoType": zod.string(),
+  "weightKg": zod.number(),
+  "volumeM3": zod.number(),
+  "transportMode": zod.enum(['road', 'sea', 'air']),
+  "loadingDate": zod.coerce.date(),
+  "notes": zod.string().nullish(),
+  "status": zod.enum(['new_request', 'planning', 'quote_approval', 'customer_approval', 'loading', 'in_transit', 'delivered']),
+  "isTest": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Taşıyıcı başvurusu oluşturur
+ */
+export const createLogisticsCarrierBodyCompanyNameMin = 2;
+export const createLogisticsCarrierBodyCompanyNameMax = 200;
+
+export const createLogisticsCarrierBodyContactNameMin = 2;
+export const createLogisticsCarrierBodyContactNameMax = 160;
+
+export const createLogisticsCarrierBodyPhoneMin = 5;
+export const createLogisticsCarrierBodyPhoneMax = 40;
+
+export const createLogisticsCarrierBodyServiceRoutesMin = 2;
+export const createLogisticsCarrierBodyServiceRoutesMax = 1000;
+
+export const createLogisticsCarrierBodyCapacityMax = 200;
+
+export const createLogisticsCarrierBodyAvailabilityMax = 500;
+
+export const createLogisticsCarrierBodyNotesMax = 2000;
+
+
+
+export const CreateLogisticsCarrierBody = zod.object({
+  "companyName": zod.string().min(createLogisticsCarrierBodyCompanyNameMin).max(createLogisticsCarrierBodyCompanyNameMax),
+  "contactName": zod.string().min(createLogisticsCarrierBodyContactNameMin).max(createLogisticsCarrierBodyContactNameMax),
+  "email": zod.email(),
+  "phone": zod.string().min(createLogisticsCarrierBodyPhoneMin).max(createLogisticsCarrierBodyPhoneMax),
+  "serviceRoutes": zod.string().min(createLogisticsCarrierBodyServiceRoutesMin).max(createLogisticsCarrierBodyServiceRoutesMax),
+  "transportMode": zod.enum(['road', 'sea', 'air']),
+  "capacity": zod.string().min(1).max(createLogisticsCarrierBodyCapacityMax),
+  "availability": zod.string().min(1).max(createLogisticsCarrierBodyAvailabilityMax),
+  "notes": zod.string().max(createLogisticsCarrierBodyNotesMax).optional(),
+  "isTest": zod.boolean().optional()
+})
+
+export const CreateLogisticsCarrierResponse = zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "companyName": zod.string(),
+  "contactName": zod.string(),
+  "email": zod.string(),
+  "phone": zod.string(),
+  "serviceRoutes": zod.string(),
+  "transportMode": zod.enum(['road', 'sea', 'air']),
+  "capacity": zod.string(),
+  "availability": zod.string(),
+  "notes": zod.string().nullish(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "isTest": zod.boolean(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Aktif operasyon personelini listeler
+ */
+export const GetLogisticsStaffResponseItem = zod.object({
+  "id": zod.int(),
+  "clerkUserId": zod.string(),
+  "email": zod.string(),
+  "role": zod.string()
+})
+export const GetLogisticsStaffResponse = zod.array(GetLogisticsStaffResponseItem)
+
+
+/**
+ * @summary Lojistik operasyon paneli verilerini listeler
+ */
+
+
+
+export const GetLogisticsOperationsQueryParams = zod.object({
+  "status": zod.enum(['new_request', 'planning', 'quote_approval', 'customer_approval', 'loading', 'in_transit', 'delivered']).optional(),
+  "requestId": zod.coerce.number().int().min(1).optional()
+})
+
+export const GetLogisticsOperationsResponse = zod.object({
+  "requests": zod.array(zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "requesterName": zod.string(),
+  "organization": zod.string().nullish(),
+  "email": zod.string(),
+  "phone": zod.string(),
+  "origin": zod.string(),
+  "destination": zod.string(),
+  "cargoType": zod.string(),
+  "weightKg": zod.number(),
+  "volumeM3": zod.number(),
+  "transportMode": zod.enum(['road', 'sea', 'air']),
+  "loadingDate": zod.coerce.date(),
+  "notes": zod.string().nullish(),
+  "status": zod.enum(['new_request', 'planning', 'quote_approval', 'customer_approval', 'loading', 'in_transit', 'delivered']),
+  "isTest": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "carriers": zod.array(zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "companyName": zod.string(),
+  "contactName": zod.string(),
+  "email": zod.string(),
+  "phone": zod.string(),
+  "serviceRoutes": zod.string(),
+  "transportMode": zod.enum(['road', 'sea', 'air']),
+  "capacity": zod.string(),
+  "availability": zod.string(),
+  "notes": zod.string().nullish(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "isTest": zod.boolean(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "shipments": zod.array(zod.object({
+  "id": zod.int(),
+  "requestId": zod.int(),
+  "referenceCode": zod.string(),
+  "status": zod.enum(['new_request', 'planning', 'quote_approval', 'customer_approval', 'loading', 'in_transit', 'delivered']),
+  "assignedStaffClerkUserId": zod.string().nullable(),
+  "plannedLoadingAt": zod.coerce.date().nullable(),
+  "actualLoadingAt": zod.coerce.date().nullable(),
+  "plannedDeliveryAt": zod.coerce.date().nullable(),
+  "actualDeliveryAt": zod.coerce.date().nullable(),
+  "internalNote": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "offers": zod.array(zod.object({
+  "id": zod.int(),
+  "requestId": zod.int(),
+  "carrierId": zod.int(),
+  "carrierCostAmount": zod.number(),
+  "customerPriceAmount": zod.number(),
+  "currency": zod.string(),
+  "includedServices": zod.string(),
+  "validUntil": zod.coerce.date(),
+  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired']),
+  "createdByClerkUserId": zod.string(),
+  "approvedByClerkUserId": zod.string().nullable(),
+  "approvedAt": zod.coerce.date().nullable(),
+  "sentAt": zod.coerce.date().nullable(),
+  "isTest": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "communications": zod.array(zod.object({
+  "id": zod.int(),
+  "requestId": zod.int(),
+  "channel": zod.enum(['phone', 'email', 'whatsapp', 'note']),
+  "direction": zod.enum(['inbound', 'outbound', 'internal']),
+  "message": zod.string(),
+  "createdByClerkUserId": zod.string(),
+  "isTest": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})),
+  "staff": zod.array(zod.object({
+  "id": zod.int(),
+  "clerkUserId": zod.string(),
+  "email": zod.string(),
+  "role": zod.string()
+}))
+})
+
+
+/**
+ * @summary Yük talebinin operasyon durumunu günceller
+ */
+
+
+
+export const UpdateLogisticsRequestStatusParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const updateLogisticsRequestStatusBodyInternalNoteMax = 4000;
+
+
+
+export const UpdateLogisticsRequestStatusBody = zod.object({
+  "status": zod.enum(['new_request', 'planning', 'quote_approval', 'customer_approval', 'loading', 'in_transit', 'delivered']),
+  "assignedStaffClerkUserId": zod.string().nullish(),
+  "plannedLoadingAt": zod.coerce.date().nullish(),
+  "plannedDeliveryAt": zod.coerce.date().nullish(),
+  "internalNote": zod.string().max(updateLogisticsRequestStatusBodyInternalNoteMax).nullish()
+})
+
+export const UpdateLogisticsRequestStatusResponse = zod.object({
+  "id": zod.int(),
+  "requestId": zod.int(),
+  "referenceCode": zod.string(),
+  "status": zod.enum(['new_request', 'planning', 'quote_approval', 'customer_approval', 'loading', 'in_transit', 'delivered']),
+  "assignedStaffClerkUserId": zod.string().nullable(),
+  "plannedLoadingAt": zod.coerce.date().nullable(),
+  "actualLoadingAt": zod.coerce.date().nullable(),
+  "plannedDeliveryAt": zod.coerce.date().nullable(),
+  "actualDeliveryAt": zod.coerce.date().nullable(),
+  "internalNote": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Yönetici onayına teklif gönderir
+ */
+
+
+export const createLogisticsOfferBodyCarrierCostAmountMin = 0;
+
+export const createLogisticsOfferBodyCustomerPriceAmountMin = 0;
+
+export const createLogisticsOfferBodyCurrencyMin = 3;
+export const createLogisticsOfferBodyCurrencyMax = 8;
+
+export const createLogisticsOfferBodyIncludedServicesMin = 2;
+export const createLogisticsOfferBodyIncludedServicesMax = 2000;
+
+
+
+export const CreateLogisticsOfferBody = zod.object({
+  "requestId": zod.int().min(1),
+  "carrierId": zod.int().min(1),
+  "carrierCostAmount": zod.number().min(createLogisticsOfferBodyCarrierCostAmountMin),
+  "customerPriceAmount": zod.number().min(createLogisticsOfferBodyCustomerPriceAmountMin),
+  "currency": zod.string().min(createLogisticsOfferBodyCurrencyMin).max(createLogisticsOfferBodyCurrencyMax),
+  "includedServices": zod.string().min(createLogisticsOfferBodyIncludedServicesMin).max(createLogisticsOfferBodyIncludedServicesMax),
+  "validUntil": zod.coerce.date(),
+  "isTest": zod.boolean().optional()
+})
+
+export const CreateLogisticsOfferResponse = zod.object({
+  "id": zod.int(),
+  "requestId": zod.int(),
+  "carrierId": zod.int(),
+  "carrierCostAmount": zod.number(),
+  "customerPriceAmount": zod.number(),
+  "currency": zod.string(),
+  "includedServices": zod.string(),
+  "validUntil": zod.coerce.date(),
+  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired']),
+  "createdByClerkUserId": zod.string(),
+  "approvedByClerkUserId": zod.string().nullable(),
+  "approvedAt": zod.coerce.date().nullable(),
+  "sentAt": zod.coerce.date().nullable(),
+  "isTest": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Teklifi yönetici olarak onaylar
+ */
+
+
+
+export const ApproveLogisticsOfferParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const ApproveLogisticsOfferResponse = zod.object({
+  "id": zod.int(),
+  "requestId": zod.int(),
+  "carrierId": zod.int(),
+  "carrierCostAmount": zod.number(),
+  "customerPriceAmount": zod.number(),
+  "currency": zod.string(),
+  "includedServices": zod.string(),
+  "validUntil": zod.coerce.date(),
+  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired']),
+  "createdByClerkUserId": zod.string(),
+  "approvedByClerkUserId": zod.string().nullable(),
+  "approvedAt": zod.coerce.date().nullable(),
+  "sentAt": zod.coerce.date().nullable(),
+  "isTest": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Onaylı teklifi müşteriye gönderildi olarak işaretler
+ */
+
+
+
+export const MarkLogisticsOfferSentParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const MarkLogisticsOfferSentResponse = zod.object({
+  "id": zod.int(),
+  "requestId": zod.int(),
+  "carrierId": zod.int(),
+  "carrierCostAmount": zod.number(),
+  "customerPriceAmount": zod.number(),
+  "currency": zod.string(),
+  "includedServices": zod.string(),
+  "validUntil": zod.coerce.date(),
+  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired']),
+  "createdByClerkUserId": zod.string(),
+  "approvedByClerkUserId": zod.string().nullable(),
+  "approvedAt": zod.coerce.date().nullable(),
+  "sentAt": zod.coerce.date().nullable(),
+  "isTest": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary İş kaydına manuel iletişim notu ekler
+ */
+
+export const createLogisticsCommunicationBodyMessageMax = 4000;
+
+
+
+export const CreateLogisticsCommunicationBody = zod.object({
+  "requestId": zod.int().min(1),
+  "channel": zod.enum(['phone', 'email', 'whatsapp', 'note']),
+  "direction": zod.enum(['inbound', 'outbound', 'internal']),
+  "message": zod.string().min(1).max(createLogisticsCommunicationBodyMessageMax),
+  "isTest": zod.boolean().optional()
+})
+
+export const CreateLogisticsCommunicationResponse = zod.object({
+  "id": zod.int(),
+  "requestId": zod.int(),
+  "channel": zod.enum(['phone', 'email', 'whatsapp', 'note']),
+  "direction": zod.enum(['inbound', 'outbound', 'internal']),
+  "message": zod.string(),
+  "createdByClerkUserId": zod.string(),
+  "isTest": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
  * Returns server health status
  * @summary Health check
  */

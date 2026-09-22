@@ -585,6 +585,311 @@ export interface LimitApplicationPage {
   total: number;
 }
 
+export type LogisticsTransportMode = typeof LogisticsTransportMode[keyof typeof LogisticsTransportMode];
+
+
+export const LogisticsTransportMode = {
+  road: 'road',
+  sea: 'sea',
+  air: 'air',
+} as const;
+
+export type LogisticsShipmentStatus = typeof LogisticsShipmentStatus[keyof typeof LogisticsShipmentStatus];
+
+
+export const LogisticsShipmentStatus = {
+  new_request: 'new_request',
+  planning: 'planning',
+  quote_approval: 'quote_approval',
+  customer_approval: 'customer_approval',
+  loading: 'loading',
+  in_transit: 'in_transit',
+  delivered: 'delivered',
+} as const;
+
+export type LogisticsCarrierStatus = typeof LogisticsCarrierStatus[keyof typeof LogisticsCarrierStatus];
+
+
+export const LogisticsCarrierStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type LogisticsOfferStatus = typeof LogisticsOfferStatus[keyof typeof LogisticsOfferStatus];
+
+
+export const LogisticsOfferStatus = {
+  pending_approval: 'pending_approval',
+  approved: 'approved',
+  sent: 'sent',
+  accepted: 'accepted',
+  rejected: 'rejected',
+  expired: 'expired',
+} as const;
+
+export type LogisticsCommunicationChannel = typeof LogisticsCommunicationChannel[keyof typeof LogisticsCommunicationChannel];
+
+
+export const LogisticsCommunicationChannel = {
+  phone: 'phone',
+  email: 'email',
+  whatsapp: 'whatsapp',
+  note: 'note',
+} as const;
+
+export type LogisticsCommunicationDirection = typeof LogisticsCommunicationDirection[keyof typeof LogisticsCommunicationDirection];
+
+
+export const LogisticsCommunicationDirection = {
+  inbound: 'inbound',
+  outbound: 'outbound',
+  internal: 'internal',
+} as const;
+
+export interface LogisticsRequestInput {
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  requesterName: string;
+  /** @maxLength 200 */
+  organization?: string;
+  email: string;
+  /**
+     * @minLength 5
+     * @maxLength 40
+     */
+  phone: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  origin: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  destination: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  cargoType: string;
+  /** @minimum 0 */
+  weightKg: number;
+  /** @minimum 0 */
+  volumeM3: number;
+  transportMode: LogisticsTransportMode;
+  loadingDate: string;
+  /** @maxLength 2000 */
+  notes?: string;
+  isTest?: boolean;
+}
+
+export interface LogisticsCarrierInput {
+  /**
+     * @minLength 2
+     * @maxLength 200
+     */
+  companyName: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  contactName: string;
+  email: string;
+  /**
+     * @minLength 5
+     * @maxLength 40
+     */
+  phone: string;
+  /**
+     * @minLength 2
+     * @maxLength 1000
+     */
+  serviceRoutes: string;
+  transportMode: LogisticsTransportMode;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  capacity: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  availability: string;
+  /** @maxLength 2000 */
+  notes?: string;
+  isTest?: boolean;
+}
+
+export interface LogisticsRequestRecord {
+  id: number;
+  referenceCode: string;
+  requesterName: string;
+  /** @nullable */
+  organization?: string | null;
+  email: string;
+  phone: string;
+  origin: string;
+  destination: string;
+  cargoType: string;
+  weightKg: number;
+  volumeM3: number;
+  transportMode: LogisticsTransportMode;
+  loadingDate: string;
+  /** @nullable */
+  notes?: string | null;
+  status: LogisticsShipmentStatus;
+  isTest: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LogisticsCarrierRecord {
+  id: number;
+  referenceCode: string;
+  companyName: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  serviceRoutes: string;
+  transportMode: LogisticsTransportMode;
+  capacity: string;
+  availability: string;
+  /** @nullable */
+  notes?: string | null;
+  status: LogisticsCarrierStatus;
+  isTest: boolean;
+  /** @nullable */
+  reviewedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LogisticsShipmentRecord {
+  id: number;
+  requestId: number;
+  referenceCode: string;
+  status: LogisticsShipmentStatus;
+  /** @nullable */
+  assignedStaffClerkUserId: string | null;
+  /** @nullable */
+  plannedLoadingAt: string | null;
+  /** @nullable */
+  actualLoadingAt: string | null;
+  /** @nullable */
+  plannedDeliveryAt: string | null;
+  /** @nullable */
+  actualDeliveryAt: string | null;
+  /** @nullable */
+  internalNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LogisticsRequestStatusUpdate {
+  status: LogisticsShipmentStatus;
+  /** @nullable */
+  assignedStaffClerkUserId?: string | null;
+  /** @nullable */
+  plannedLoadingAt?: string | null;
+  /** @nullable */
+  plannedDeliveryAt?: string | null;
+  /**
+     * @maxLength 4000
+     * @nullable
+     */
+  internalNote?: string | null;
+}
+
+export interface LogisticsOfferInput {
+  /** @minimum 1 */
+  requestId: number;
+  /** @minimum 1 */
+  carrierId: number;
+  /** @minimum 0 */
+  carrierCostAmount: number;
+  /** @minimum 0 */
+  customerPriceAmount: number;
+  /**
+     * @minLength 3
+     * @maxLength 8
+     */
+  currency: string;
+  /**
+     * @minLength 2
+     * @maxLength 2000
+     */
+  includedServices: string;
+  validUntil: string;
+  isTest?: boolean;
+}
+
+export interface LogisticsOfferRecord {
+  id: number;
+  requestId: number;
+  carrierId: number;
+  carrierCostAmount: number;
+  customerPriceAmount: number;
+  currency: string;
+  includedServices: string;
+  validUntil: string;
+  status: LogisticsOfferStatus;
+  createdByClerkUserId: string;
+  /** @nullable */
+  approvedByClerkUserId: string | null;
+  /** @nullable */
+  approvedAt: string | null;
+  /** @nullable */
+  sentAt: string | null;
+  isTest: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LogisticsCommunicationInput {
+  /** @minimum 1 */
+  requestId: number;
+  channel: LogisticsCommunicationChannel;
+  direction: LogisticsCommunicationDirection;
+  /**
+     * @minLength 1
+     * @maxLength 4000
+     */
+  message: string;
+  isTest?: boolean;
+}
+
+export interface LogisticsCommunicationRecord {
+  id: number;
+  requestId: number;
+  channel: LogisticsCommunicationChannel;
+  direction: LogisticsCommunicationDirection;
+  message: string;
+  createdByClerkUserId: string;
+  isTest: boolean;
+  createdAt: string;
+}
+
+export interface LogisticsStaffMember {
+  id: number;
+  clerkUserId: string;
+  email: string;
+  role: string;
+}
+
+export interface LogisticsOperationsResponse {
+  requests: LogisticsRequestRecord[];
+  carriers: LogisticsCarrierRecord[];
+  shipments: LogisticsShipmentRecord[];
+  offers: LogisticsOfferRecord[];
+  communications: LogisticsCommunicationRecord[];
+  staff: LogisticsStaffMember[];
+}
+
 export interface ErrorResponse {
   error: string;
 }
@@ -1033,6 +1338,14 @@ page?: number;
  * @maximum 50
  */
 pageSize?: number;
+};
+
+export type GetLogisticsOperationsParams = {
+status?: LogisticsShipmentStatus;
+/**
+ * @minimum 1
+ */
+requestId?: number;
 };
 
 export type GetLimitApplicationsParams = {

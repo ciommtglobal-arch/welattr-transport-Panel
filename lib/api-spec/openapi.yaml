@@ -22,6 +22,8 @@ tags:
     description: Verified business profile and B2B network operations
   - name: media
     description: MMT Global personel medya merkezi işlemleri
+  - name: logistics-operations
+    description: Lojistik talep, taşıyıcı ve operasyon yönetimi
 paths:
   /payments/tami/hosted-session:
     post:
@@ -582,6 +584,309 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+  /logistics/requests:
+    post:
+      operationId: createLogisticsRequest
+      tags: [logistics-operations]
+      summary: Yeni yük talebi oluşturur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogisticsRequestInput"
+      responses:
+        "201":
+          description: Yük talebi ve operasyon kaydı oluşturuldu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogisticsRequestRecord"
+        "400":
+          description: Geçersiz yük talebi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /logistics/carriers:
+    post:
+      operationId: createLogisticsCarrier
+      tags: [logistics-operations]
+      summary: Taşıyıcı başvurusu oluşturur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogisticsCarrierInput"
+      responses:
+        "201":
+          description: Taşıyıcı başvurusu oluşturuldu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogisticsCarrierRecord"
+        "400":
+          description: Geçersiz taşıyıcı başvurusu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /logistics/staff:
+    get:
+      operationId: getLogisticsStaff
+      tags: [logistics-operations]
+      summary: Aktif operasyon personelini listeler
+      responses:
+        "200":
+          description: Aktif personel listesi
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogisticsStaffMember"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /logistics/operations:
+    get:
+      operationId: getLogisticsOperations
+      tags: [logistics-operations]
+      summary: Lojistik operasyon paneli verilerini listeler
+      parameters:
+        - in: query
+          name: status
+          schema:
+            $ref: "#/components/schemas/LogisticsShipmentStatus"
+        - in: query
+          name: requestId
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Operasyon paneli verileri
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogisticsOperationsResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /logistics/requests/{id}/status:
+    patch:
+      operationId: updateLogisticsRequestStatus
+      tags: [logistics-operations]
+      summary: Yük talebinin operasyon durumunu günceller
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogisticsRequestStatusUpdate"
+      responses:
+        "200":
+          description: Güncellenmiş sevkiyat kaydı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogisticsShipmentRecord"
+        "400":
+          description: Geçersiz operasyon durumu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Talep bulunamadı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /logistics/offers:
+    post:
+      operationId: createLogisticsOffer
+      tags: [logistics-operations]
+      summary: Yönetici onayına teklif gönderir
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogisticsOfferInput"
+      responses:
+        "201":
+          description: Teklif oluşturuldu ve yönetici onayına alındı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogisticsOfferRecord"
+        "400":
+          description: Geçersiz teklif
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /logistics/offers/{id}/approve:
+    post:
+      operationId: approveLogisticsOffer
+      tags: [logistics-operations]
+      summary: Teklifi yönetici olarak onaylar
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Onaylanan teklif
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogisticsOfferRecord"
+        "400":
+          description: Teklif onaylanamaz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Admin staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /logistics/offers/{id}/mark-sent:
+    post:
+      operationId: markLogisticsOfferSent
+      tags: [logistics-operations]
+      summary: Onaylı teklifi müşteriye gönderildi olarak işaretler
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Gönderildi olarak işaretlenen teklif
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogisticsOfferRecord"
+        "400":
+          description: Teklif gönderilemez
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /logistics/communications:
+    post:
+      operationId: createLogisticsCommunication
+      tags: [logistics-operations]
+      summary: İş kaydına manuel iletişim notu ekler
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogisticsCommunicationInput"
+      responses:
+        "201":
+          description: İletişim geçmişine eklenen kayıt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogisticsCommunicationRecord"
+        "400":
+          description: Geçersiz iletişim kaydı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: Yayınlanmış lojistik medya dosyası bulunamadı
           content:
@@ -2124,6 +2429,403 @@ components:
           type: integer
         total:
           type: integer
+    LogisticsTransportMode:
+      type: string
+      enum: [road, sea, air]
+    LogisticsShipmentStatus:
+      type: string
+      enum:
+        [new_request, planning, quote_approval, customer_approval, loading, in_transit, delivered]
+    LogisticsCarrierStatus:
+      type: string
+      enum: [pending, approved, rejected]
+    LogisticsOfferStatus:
+      type: string
+      enum: [pending_approval, approved, sent, accepted, rejected, expired]
+    LogisticsCommunicationChannel:
+      type: string
+      enum: [phone, email, whatsapp, note]
+    LogisticsCommunicationDirection:
+      type: string
+      enum: [inbound, outbound, internal]
+    LogisticsRequestInput:
+      type: object
+      additionalProperties: false
+      required:
+        [requesterName, email, phone, origin, destination, cargoType, weightKg, volumeM3, transportMode, loadingDate]
+      properties:
+        requesterName:
+          type: string
+          minLength: 2
+          maxLength: 160
+        organization:
+          type: string
+          maxLength: 200
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          minLength: 5
+          maxLength: 40
+        origin:
+          type: string
+          minLength: 2
+          maxLength: 160
+        destination:
+          type: string
+          minLength: 2
+          maxLength: 160
+        cargoType:
+          type: string
+          minLength: 2
+          maxLength: 160
+        weightKg:
+          type: number
+          minimum: 0
+        volumeM3:
+          type: number
+          minimum: 0
+        transportMode:
+          $ref: "#/components/schemas/LogisticsTransportMode"
+        loadingDate:
+          type: string
+          format: date
+        notes:
+          type: string
+          maxLength: 2000
+        isTest:
+          type: boolean
+    LogisticsCarrierInput:
+      type: object
+      additionalProperties: false
+      required:
+        [companyName, contactName, email, phone, serviceRoutes, transportMode, capacity, availability]
+      properties:
+        companyName:
+          type: string
+          minLength: 2
+          maxLength: 200
+        contactName:
+          type: string
+          minLength: 2
+          maxLength: 160
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          minLength: 5
+          maxLength: 40
+        serviceRoutes:
+          type: string
+          minLength: 2
+          maxLength: 1000
+        transportMode:
+          $ref: "#/components/schemas/LogisticsTransportMode"
+        capacity:
+          type: string
+          minLength: 1
+          maxLength: 200
+        availability:
+          type: string
+          minLength: 1
+          maxLength: 500
+        notes:
+          type: string
+          maxLength: 2000
+        isTest:
+          type: boolean
+    LogisticsRequestRecord:
+      type: object
+      required:
+        [id, referenceCode, requesterName, email, phone, origin, destination, cargoType, weightKg, volumeM3, transportMode, loadingDate, status, isTest, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        referenceCode:
+          type: string
+        requesterName:
+          type: string
+        organization:
+          type: [string, "null"]
+        email:
+          type: string
+        phone:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        cargoType:
+          type: string
+        weightKg:
+          type: number
+        volumeM3:
+          type: number
+        transportMode:
+          $ref: "#/components/schemas/LogisticsTransportMode"
+        loadingDate:
+          type: string
+          format: date
+        notes:
+          type: [string, "null"]
+        status:
+          $ref: "#/components/schemas/LogisticsShipmentStatus"
+        isTest:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    LogisticsCarrierRecord:
+      type: object
+      required:
+        [id, referenceCode, companyName, contactName, email, phone, serviceRoutes, transportMode, capacity, availability, status, isTest, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        referenceCode:
+          type: string
+        companyName:
+          type: string
+        contactName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        serviceRoutes:
+          type: string
+        transportMode:
+          $ref: "#/components/schemas/LogisticsTransportMode"
+        capacity:
+          type: string
+        availability:
+          type: string
+        notes:
+          type: [string, "null"]
+        status:
+          $ref: "#/components/schemas/LogisticsCarrierStatus"
+        isTest:
+          type: boolean
+        reviewedAt:
+          type: [string, "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    LogisticsShipmentRecord:
+      type: object
+      required:
+        [id, requestId, referenceCode, status, plannedLoadingAt, actualLoadingAt, plannedDeliveryAt, actualDeliveryAt, assignedStaffClerkUserId, internalNote, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        requestId:
+          type: integer
+        referenceCode:
+          type: string
+        status:
+          $ref: "#/components/schemas/LogisticsShipmentStatus"
+        assignedStaffClerkUserId:
+          type: [string, "null"]
+        plannedLoadingAt:
+          type: [string, "null"]
+          format: date-time
+        actualLoadingAt:
+          type: [string, "null"]
+          format: date-time
+        plannedDeliveryAt:
+          type: [string, "null"]
+          format: date-time
+        actualDeliveryAt:
+          type: [string, "null"]
+          format: date-time
+        internalNote:
+          type: [string, "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    LogisticsRequestStatusUpdate:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          $ref: "#/components/schemas/LogisticsShipmentStatus"
+        assignedStaffClerkUserId:
+          type: [string, "null"]
+        plannedLoadingAt:
+          type: [string, "null"]
+          format: date-time
+        plannedDeliveryAt:
+          type: [string, "null"]
+          format: date-time
+        internalNote:
+          type: [string, "null"]
+          maxLength: 4000
+    LogisticsOfferInput:
+      type: object
+      additionalProperties: false
+      required:
+        [requestId, carrierId, carrierCostAmount, customerPriceAmount, currency, includedServices, validUntil]
+      properties:
+        requestId:
+          type: integer
+          minimum: 1
+        carrierId:
+          type: integer
+          minimum: 1
+        carrierCostAmount:
+          type: number
+          minimum: 0
+        customerPriceAmount:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 8
+        includedServices:
+          type: string
+          minLength: 2
+          maxLength: 2000
+        validUntil:
+          type: string
+          format: date-time
+        isTest:
+          type: boolean
+    LogisticsOfferRecord:
+      type: object
+      required:
+        [id, requestId, carrierId, carrierCostAmount, customerPriceAmount, currency, includedServices, validUntil, status, createdByClerkUserId, approvedByClerkUserId, approvedAt, sentAt, isTest, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        requestId:
+          type: integer
+        carrierId:
+          type: integer
+        carrierCostAmount:
+          type: number
+        customerPriceAmount:
+          type: number
+        currency:
+          type: string
+        includedServices:
+          type: string
+        validUntil:
+          type: string
+          format: date-time
+        status:
+          $ref: "#/components/schemas/LogisticsOfferStatus"
+        createdByClerkUserId:
+          type: string
+        approvedByClerkUserId:
+          type: [string, "null"]
+        approvedAt:
+          type: [string, "null"]
+          format: date-time
+        sentAt:
+          type: [string, "null"]
+          format: date-time
+        isTest:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    LogisticsCommunicationInput:
+      type: object
+      additionalProperties: false
+      required: [requestId, channel, direction, message]
+      properties:
+        requestId:
+          type: integer
+          minimum: 1
+        channel:
+          $ref: "#/components/schemas/LogisticsCommunicationChannel"
+        direction:
+          $ref: "#/components/schemas/LogisticsCommunicationDirection"
+        message:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        isTest:
+          type: boolean
+    LogisticsCommunicationRecord:
+      type: object
+      required:
+        [id, requestId, channel, direction, message, createdByClerkUserId, isTest, createdAt]
+      properties:
+        id:
+          type: integer
+        requestId:
+          type: integer
+        channel:
+          $ref: "#/components/schemas/LogisticsCommunicationChannel"
+        direction:
+          $ref: "#/components/schemas/LogisticsCommunicationDirection"
+        message:
+          type: string
+        createdByClerkUserId:
+          type: string
+        isTest:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+    LogisticsStaffMember:
+      type: object
+      required: [id, clerkUserId, email, role]
+      properties:
+        id:
+          type: integer
+        clerkUserId:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+    LogisticsOperationsResponse:
+      type: object
+      required: [requests, carriers, shipments, offers, communications, staff]
+      properties:
+        requests:
+          type: array
+          items:
+            $ref: "#/components/schemas/LogisticsRequestRecord"
+        carriers:
+          type: array
+          items:
+            $ref: "#/components/schemas/LogisticsCarrierRecord"
+        shipments:
+          type: array
+          items:
+            $ref: "#/components/schemas/LogisticsShipmentRecord"
+        offers:
+          type: array
+          items:
+            $ref: "#/components/schemas/LogisticsOfferRecord"
+        communications:
+          type: array
+          items:
+            $ref: "#/components/schemas/LogisticsCommunicationRecord"
+        staff:
+          type: array
+          items:
+            $ref: "#/components/schemas/LogisticsStaffMember"
     ErrorResponse:
       type: object
       required:

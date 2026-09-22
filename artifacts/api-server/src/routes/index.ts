@@ -10,6 +10,7 @@ import b2bRequestsRouter from "./b2b-requests";
 import mediaRouter from "./media";
 import storefrontRouter from "./storefront";
 import publicLogisticsRouter from "./public-logistics";
+import logisticsOperationsRouter from "./logistics-operations";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(b2bRequestsRouter);
 router.use(mediaRouter);
 router.use(storefrontRouter);
 router.use(publicLogisticsRouter);
+router.use(logisticsOperationsRouter);
 
 export default router;
