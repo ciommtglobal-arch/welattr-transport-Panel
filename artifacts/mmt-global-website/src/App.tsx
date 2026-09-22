@@ -148,7 +148,7 @@ function StaffSignInPage() {
         routing="path"
         path={`${basePath}/staff/giris`}
         signUpUrl={`${basePath}/sign-up`}
-        fallbackRedirectUrl={`${basePath}/staff/b2b-dogrulamalar`}
+        fallbackRedirectUrl={`${basePath}/staff/sorumluluk-merkezi`}
       />
     </div>
   );
