@@ -1,0 +1,231 @@
+import { useEffect } from "react";
+import { UserButton, useAuth } from "@clerk/react";
+import { Link } from "wouter";
+import {
+  ArrowRight,
+  BadgeCheck,
+  Banknote,
+  BriefcaseBusiness,
+  FileCheck2,
+  LayoutDashboard,
+  Megaphone,
+  Truck,
+} from "lucide-react";
+
+type Responsibility = {
+  id: string;
+  team: string;
+  title: string;
+  description: string;
+  icon: typeof Banknote;
+  links: { href: string; label: string; id: string }[];
+};
+
+const responsibilities: Responsibility[] = [
+  {
+    id: "finance",
+    team: "Finans ekibi",
+    title: "Finance & POS / ödeme takibi",
+    description:
+      "Ödeme taleplerini, POS akışlarını ve finans başvurularını doğru işlem adımına taşıyın.",
+    icon: Banknote,
+    links: [
+      { href: "/odeme", label: "Ödeme ekranını aç", id: "payment" },
+      { href: "/staff/applications", label: "Finans başvuruları", id: "applications" },
+    ],
+  },
+  {
+    id: "media",
+    team: "Medya & reklam ekibi",
+    title: "Media & brand / içerik yayınlama",
+    description:
+      "Marka, duyuru ve içerik akışını tek merkezden hazırlayın; yayın sorumluluğunu net tutun.",
+    icon: Megaphone,
+    links: [
+      { href: "/staff/medya-merkezi", label: "Medya merkezine git", id: "media-center" },
+      { href: "/staff/ilanlar", label: "İlanları görüntüle", id: "listings" },
+    ],
+  },
+  {
+    id: "logistics",
+    team: "Lojistik operasyon",
+    title: "Logistics / saha ve bağlantı",
+    description:
+      "Rota, kapasite ve lojistik ihtiyaçlarını görünür kılarak doğru hizmet bağlantısını kurun.",
+    icon: Truck,
+    links: [{ href: "/lojistik", label: "Lojistik merkezini aç", id: "logistics" }],
+  },
+  {
+    id: "b2b",
+    team: "B2B doğrulama",
+    title: "B2B / doğrulama ve talepler",
+    description:
+      "İşletme doğrulamalarını, yeni talepleri ve ağdaki bildirimleri güvenilir bir sırayla yönetin.",
+    icon: BadgeCheck,
+    links: [
+      { href: "/staff/b2b-dogrulamalar", label: "Doğrulamaları incele", id: "verifications" },
+      { href: "/staff/b2b-talepler", label: "B2B taleplerini aç", id: "requests" },
+      { href: "/staff/b2b-sikayetler", label: "Şikâyetleri görüntüle", id: "reports" },
+    ],
+  },
+];
+
+function useStaffMeta() {
+  useEffect(() => {
+    document.title = "Sorumluluk Merkezi | MMT Global";
+    let descriptionTag = document.querySelector('meta[name="description"]');
+    if (!descriptionTag) {
+      descriptionTag = document.createElement("meta");
+      descriptionTag.setAttribute("name", "description");
+      document.head.appendChild(descriptionTag);
+    }
+    descriptionTag.setAttribute("content", "MMT Global personel sorumluluk ve operasyon merkezi.");
+  }, []);
+}
+
+function BrandMark() {
+  return (
+    <Link href="/" data-testid="link-staff-home" className="group flex items-center gap-3">
+      <span className="flex h-9 w-9 items-center justify-center rounded-br-2xl rounded-tl-2xl bg-primary text-lg font-bold text-primary-foreground transition-transform group-hover:scale-95">
+        M
+      </span>
+      <span className="text-sm font-bold tracking-[0.18em]">
+        MMT <span className="font-normal text-foreground/55">GLOBAL</span>
+      </span>
+    </Link>
+  );
+}
+
+function StaffHeader({ signedIn }: { signedIn: boolean }) {
+  return (
+    <header className="border-b border-border/70 bg-background/90 backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-5 py-5 md:px-10">
+        <BrandMark />
+        <div className="flex items-center gap-4">
+          <Link href="/birimler" data-testid="link-staff-departments" className="hidden text-[11px] font-bold uppercase tracking-[0.13em] text-foreground/55 transition-colors hover:text-primary sm:inline">
+            Birimler
+          </Link>
+          {signedIn ? <UserButton /> : null}
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function LoadingState() {
+  return (
+    <section className="mx-auto max-w-7xl px-5 py-14 md:px-10 md:py-20" aria-live="polite" data-testid="status-staff-loading">
+      <div className="h-3 w-32 animate-pulse bg-muted" />
+      <div className="mt-6 h-14 max-w-xl animate-pulse bg-muted" />
+      <div className="mt-12 grid gap-5 md:grid-cols-2">
+        <div className="h-56 animate-pulse border border-border bg-card" />
+        <div className="h-56 animate-pulse border border-border bg-card" />
+        <div className="h-56 animate-pulse border border-border bg-card" />
+        <div className="h-56 animate-pulse border border-border bg-card" />
+      </div>
+    </section>
+  );
+}
+
+function SignedOutState() {
+  return (
+    <section className="mx-auto flex min-h-[72dvh] max-w-xl flex-col items-center justify-center px-5 text-center md:px-10">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary">
+        <BriefcaseBusiness size={28} strokeWidth={1.5} />
+      </div>
+      <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.22em] text-primary">MMT Global / Staff</p>
+      <h1 className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl">Sorumluluk merkezine giriş</h1>
+      <p className="mt-5 max-w-md text-base leading-7 text-foreground/60">
+        Finans, medya, lojistik ve B2B operasyonlarını görmek için personel hesabınızla giriş yapın.
+      </p>
+      <Link href="/staff/giris" data-testid="link-staff-sign-in" className="mt-8 inline-flex items-center gap-3 bg-primary px-7 py-4 text-xs font-bold uppercase tracking-[0.16em] text-primary-foreground transition-colors hover:bg-primary/85">
+        Personel girişi
+        <ArrowRight size={16} />
+      </Link>
+    </section>
+  );
+}
+
+function ResponsibilityCard({ item }: { item: Responsibility }) {
+  const Icon = item.icon;
+  return (
+    <article className="group flex flex-col justify-between border border-border bg-card p-6 transition-transform duration-300 hover:-translate-y-1 hover:border-primary/50 md:p-8" data-testid={`card-staff-responsibility-${item.id}`}>
+      <div>
+        <div className="flex items-start justify-between gap-5">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary">
+            <Icon size={22} strokeWidth={1.7} />
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/35">0{responsibilities.indexOf(item) + 1}</span>
+        </div>
+        <p className="mt-9 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">{item.team}</p>
+        <h2 className="mt-3 text-2xl font-semibold leading-tight tracking-tight">{item.title}</h2>
+        <p className="mt-4 text-sm leading-7 text-foreground/58">{item.description}</p>
+      </div>
+      <div className="mt-8 space-y-2 border-t border-border/70 pt-5">
+        {item.links.map((link) => (
+          <Link
+            key={link.id}
+            href={link.href}
+            data-testid={`link-staff-${link.id}`}
+            className="flex items-center justify-between gap-4 py-2 text-sm font-semibold transition-colors hover:text-primary"
+          >
+            {link.label}
+            <ArrowRight className="text-primary transition-transform group-hover:translate-x-1" size={16} />
+          </Link>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function SignedInCenter() {
+  return (
+    <section className="mx-auto max-w-7xl px-5 py-12 md:px-10 md:py-16">
+      <div className="flex flex-col justify-between gap-8 border-b border-border/70 pb-10 md:flex-row md:items-end">
+        <div>
+          <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-primary">
+            <LayoutDashboard size={15} />
+            MMT Global / Operasyon
+          </p>
+          <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-[0.98] tracking-tight md:text-6xl">
+            Sorumluluk merkezi
+          </h1>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-foreground/60">
+            Her iş alanının sahibi ve bir sonraki operasyon adımı burada. İsimler değil, sorumluluklar görünür.
+          </p>
+        </div>
+        <div className="flex items-center gap-3 border border-primary/25 bg-primary/10 px-4 py-3 text-xs font-semibold text-primary" data-testid="status-staff-access">
+          <FileCheck2 size={17} />
+          Yetkili personel alanı
+        </div>
+      </div>
+      <div className="mt-10 grid gap-5 md:grid-cols-2">
+        {responsibilities.map((item) => <ResponsibilityCard key={item.id} item={item} />)}
+      </div>
+      <div className="mt-10 flex flex-col gap-5 border border-border bg-secondary p-6 text-secondary-foreground md:flex-row md:items-center md:justify-between md:p-8">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Çalışma ilkesi</p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-secondary-foreground/65">
+            Her talep doğru ekibe, her yayın doğru bağlama, her bağlantı açık bir sonraki adıma ulaşır.
+          </p>
+        </div>
+        <Link href="/birimler" data-testid="link-staff-public-departments" className="inline-flex shrink-0 items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-secondary-foreground transition-colors hover:text-primary">
+          Genel birimleri gör
+          <ArrowRight size={16} />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+export default function StaffResponsibilityCenter() {
+  useStaffMeta();
+  const { isLoaded, isSignedIn } = useAuth();
+
+  return (
+    <main className="min-h-[100dvh] bg-background text-foreground">
+      <StaffHeader signedIn={Boolean(isSignedIn)} />
+      {!isLoaded ? <LoadingState /> : !isSignedIn ? <SignedOutState /> : <SignedInCenter />}
+    </main>
+  );
+}
