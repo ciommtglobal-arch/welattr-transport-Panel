@@ -13,3 +13,4 @@
 - [Clerk localization compatibility](clerk-localization-compatibility.md) — Match the localization package to the installed Clerk React shared types; runtime can work while TypeScript versions still conflict.
 - [Browser translation guard](browser-translation-guard.md) — MMT Global owns TR/EN/AR/RU translation; prevent mobile browser auto-translation from mixing languages.
 - [Mobile Vite runtime overlay](mobile-vite-runtime-overlay.md) — Ignore message-less development overlay events from mobile browsers while preserving meaningful runtime errors.
+- [Shopify catalog connection](shopify-catalog-connection.md) — Read connected Shopify catalog server-side; never seed products or collections without merchant-supplied real data.

@@ -394,6 +394,40 @@ export const RequestMediaUploadUrlResponse = zod.object({
 
 
 /**
+ * @summary Shopify inşaat ürünleri kataloğunu okur
+ */
+export const GetConstructionCatalogResponse = zod.object({
+  "connected": zod.boolean(),
+  "shopName": zod.string(),
+  "fetchedAt": zod.coerce.date(),
+  "products": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "handle": zod.string(),
+  "description": zod.string(),
+  "category": zod.string(),
+  "vendor": zod.string(),
+  "imageUrl": zod.string().nullable(),
+  "imageAlt": zod.string().nullable(),
+  "price": zod.string().nullable(),
+  "currency": zod.string().nullable(),
+  "inventory": zod.int().nullable(),
+  "variants": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "price": zod.string(),
+  "inventoryQuantity": zod.int().nullable()
+}))
+})),
+  "collections": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "handle": zod.string()
+}))
+})
+
+
+/**
  * Returns server health status
  * @summary Health check
  */

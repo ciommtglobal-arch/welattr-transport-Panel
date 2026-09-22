@@ -529,6 +529,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+  /storefront/construction/catalog:
+    get:
+      operationId: getConstructionCatalog
+      tags: [storefront]
+      summary: Shopify inşaat ürünleri kataloğunu okur
+      responses:
+        "200":
+          description: Bağlı Shopify kataloğu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConstructionCatalog"
+        "503":
+          description: Shopify kataloğu okunamadı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
   /healthz:
     get:
       operationId: healthCheck
@@ -1937,6 +1955,87 @@ components:
         sentAt:
           type: [string, "null"]
           format: date-time
+    ConstructionCatalogProductVariant:
+      type: object
+      required: [id, title, price, inventoryQuantity]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        price:
+          type: string
+        inventoryQuantity:
+          type: [integer, "null"]
+    ConstructionCatalogProduct:
+      type: object
+      required:
+        - id
+        - title
+        - handle
+        - description
+        - category
+        - vendor
+        - imageUrl
+        - imageAlt
+        - price
+        - currency
+        - inventory
+        - variants
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        handle:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        vendor:
+          type: string
+        imageUrl:
+          type: [string, "null"]
+        imageAlt:
+          type: [string, "null"]
+        price:
+          type: [string, "null"]
+        currency:
+          type: [string, "null"]
+        inventory:
+          type: [integer, "null"]
+        variants:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConstructionCatalogProductVariant"
+    ConstructionCatalog:
+      type: object
+      required: [connected, shopName, fetchedAt, products, collections]
+      properties:
+        connected:
+          type: boolean
+        shopName:
+          type: string
+        fetchedAt:
+          type: string
+          format: date-time
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConstructionCatalogProduct"
+        collections:
+          type: array
+          items:
+            type: object
+            required: [id, title, handle]
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              handle:
+                type: string
     LimitApplicationPage:
       type: object
       required:

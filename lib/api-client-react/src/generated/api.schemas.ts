@@ -522,6 +522,48 @@ export interface MediaDelivery {
   sentAt: string | null;
 }
 
+export interface ConstructionCatalogProductVariant {
+  id: string;
+  title: string;
+  price: string;
+  /** @nullable */
+  inventoryQuantity: number | null;
+}
+
+export interface ConstructionCatalogProduct {
+  id: string;
+  title: string;
+  handle: string;
+  description: string;
+  category: string;
+  vendor: string;
+  /** @nullable */
+  imageUrl: string | null;
+  /** @nullable */
+  imageAlt: string | null;
+  /** @nullable */
+  price: string | null;
+  /** @nullable */
+  currency: string | null;
+  /** @nullable */
+  inventory: number | null;
+  variants: ConstructionCatalogProductVariant[];
+}
+
+export type ConstructionCatalogCollectionsItem = {
+  id: string;
+  title: string;
+  handle: string;
+};
+
+export interface ConstructionCatalog {
+  connected: boolean;
+  shopName: string;
+  fetchedAt: string;
+  products: ConstructionCatalogProduct[];
+  collections: ConstructionCatalogCollectionsItem[];
+}
+
 export interface LimitApplicationPage {
   items: LimitApplication[];
   page: number;

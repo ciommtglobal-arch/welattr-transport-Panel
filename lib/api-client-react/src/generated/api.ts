@@ -37,6 +37,7 @@ import type {
   B2BRequestInput,
   B2BRequestPage,
   B2BRequestStatusUpdate,
+  ConstructionCatalog,
   ErrorEnvelope,
   ErrorResponse,
   GetB2BBusinessProfileReviewQueueParams,
@@ -1054,6 +1055,83 @@ export const useRequestMediaUploadUrl = <TError = ErrorType<ErrorEnvelope>,
       > => {
       return useMutation(getRequestMediaUploadUrlMutationOptions(options));
     }
+
+export const getGetConstructionCatalogUrl = () => {
+
+
+
+
+  return `/api/storefront/construction/catalog`
+}
+
+/**
+ * @summary Shopify inşaat ürünleri kataloğunu okur
+ */
+export const getConstructionCatalog = async ( options?: Parameters<typeof customFetch>[1]): Promise<ConstructionCatalog> => {
+
+  return customFetch<ConstructionCatalog>(getGetConstructionCatalogUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetConstructionCatalogQueryKey = () => {
+    return [
+    `/api/storefront/construction/catalog`
+    ] as const;
+    }
+
+
+export const getGetConstructionCatalogQueryOptions = <TData = Awaited<ReturnType<typeof getConstructionCatalog>>, TError = ErrorType<ErrorEnvelope>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConstructionCatalog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetConstructionCatalogQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getConstructionCatalog>>> = ({ signal }) => getConstructionCatalog({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getConstructionCatalog>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetConstructionCatalogQueryResult = NonNullable<Awaited<ReturnType<typeof getConstructionCatalog>>>
+export type GetConstructionCatalogQueryError = ErrorType<ErrorEnvelope>
+
+
+/**
+ * @summary Shopify inşaat ürünleri kataloğunu okur
+ */
+
+export function useGetConstructionCatalog<TData = Awaited<ReturnType<typeof getConstructionCatalog>>, TError = ErrorType<ErrorEnvelope>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConstructionCatalog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetConstructionCatalogQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getHealthCheckUrl = () => {
 
