@@ -27,6 +27,7 @@ const OFFICIAL_SOCIAL_CHANNELS = [
 const homeCopy: Record<Locale, {
   navApproach: string;
   navEcosystem: string;
+  navDepartments: string;
   navFleet: string;
   navContact: string;
   navB2B: string;
@@ -90,28 +91,28 @@ const homeCopy: Record<Locale, {
   floatingAction: string;
 }> = {
   tr: {
-    navApproach: "BAKIŞ AÇIMIZ", navEcosystem: "EKOSİSTEM", navFleet: "KURUMSAL FİLO", navContact: "İLETİŞİM", navB2B: "ÜCRETSİZ B2B AĞI", portal: "PORTALA GİRİŞ", wallet: "DEMO CÜZDAN", payment: "TİCARİ ÖDEME",
+    navApproach: "BAKIŞ AÇIMIZ", navEcosystem: "EKOSİSTEM", navDepartments: "BİRİMLER", navFleet: "KURUMSAL FİLO", navContact: "İLETİŞİM", navB2B: "ÜCRETSİZ B2B AĞI", portal: "PORTALA GİRİŞ", wallet: "DEMO CÜZDAN", payment: "TİCARİ ÖDEME",
     categories: "Başvuru kategorileri", categoryCommercial: "Ticari", categoryHousing: "Konut", categoryVehicle: "Taşıt", categoryIndividual: "Bireysel", allApplications: "TÜM BAŞVURULAR",
     heroKicker: "MMT GLOBAL / ÜCRETSİZ B2B İŞ AĞI", produce: "Üret.", promote: "Tanıt.", sell: "Sat.", heroDescriptionStrong: "Üreticiyi, alıcıyı ve hizmet taraflarını buluşturuyoruz.", heroDescription: "Üretici tanıtımı, alıcı talepleri ve temel B2B bağlantı hizmetlerimiz ücretsizdir. Güvenle büyüyen bir iş ekosistemi kuruyoruz.", joinNetwork: "ÜCRETSİZ AĞA KATILIN", discover: "KEŞFETMEK İÇİN KAYDIR",
     approach: "BAKIŞ AÇIMIZ", approachTitle: "Birlikte Büyüyoruz", approachDescription: "MMT Global olarak üreticilerin, alıcıların, lojistik ekiplerinin ve hizmet verenlerin birbirini bulabildiği ücretsiz bir B2B ağı kuruyoruz. Önce güvenilir bağlantılar ve sosyal fayda; sonra birlikte büyüyen sürdürülebilir bir marka.", discoverStory: "HİKAYEMİZİ KEŞFET", roadmap: "YOL HARİTAMIZ", roadmapTitle: "Üret. Tanıt. Sat.", roadmapDescription: "Takipçilerimiz ve üyelerimiz için adım adım ilerliyoruz. Temel tanıtım ve bağlantı hizmetlerine erişim ücretsiz kalır.", roadmapProduceDescription: "Üreticilerin ve hizmet verenlerin kendilerini, ürünlerini ve yetkinliklerini görünür kılmasına yardımcı oluruz.", roadmapPromoteDescription: "Üretici tanıtımlarını ve alıcı taleplerini güvenilir bilgilerle paylaşır, doğru kişilerin birbirini bulmasını kolaylaştırırız.", roadmapSellDescription: "Alıcı, üretici ve lojistik taraflarını buluşturarak şeffaf ve gerçekçi ticari bağlantıların kurulmasına zemin hazırlarız.",
      ecosystem: "EKOSİSTEM", contactTitle: "Küresel Büyümeye", contactTitleEmphasis: "Hazır Mısınız?", contactDescription: "Üreticiler, alıcılar ve hizmet verenler için ücretsiz B2B bağlantı ağı kuruyoruz. Birlikte büyüyelim.", whatsapp: "WHATSAPP'TAN YAZIN", pageShare: "BU SAYFAYI PAYLAŞIN", officialChannels: "RESMİ KANALLAR", officialChannelsDescription: "Doğrulanabilen resmî Instagram ve TikTok profillerimiz aşağıda yer alır.", officialChannelsPending: "Facebook, LinkedIn ve Telegram kanalları için doğrudan bağlantılar bekleniyor.", quickLinks: "HIZLI BAĞLANTILAR", about: "Hakkımızda", contactPage: "İletişim", investments: "Yatırımlarımız", career: "Kariyer", legalAndPayment: "YASAL VE ÖDEME", serviceTerms: "Hizmet koşulları", refund: "İade ve iptal", delivery: "Teslimat koşulları", distanceSales: "Mesafeli satış", ecosystemTitle: "EKOSİSTEM", logistics: "Lojistik", healthTourism: "Sağlık Turizmi", construction: "İnşaat & Gelişim", financeMedia: "Finans & Medya", footerDescription: "Üreticileri, alıcıları, lojistik ve hizmet taraflarını ücretsiz B2B bağlantı ağıyla buluştururuz.", contact: "İLETİŞİM", contactPending: "Resmi iletişim hattı hazırlanıyor.", privacy: "Gizlilik Politikası", cookies: "Çerez Politikası", kvkk: "KVKK", floatingAction: "Hızlı işlemler",
   },
   en: {
-    navApproach: "OUR APPROACH", navEcosystem: "ECOSYSTEM", navFleet: "CORPORATE FLEET", navContact: "CONTACT", navB2B: "FREE B2B NETWORK", portal: "OPEN PORTAL", wallet: "DEMO WALLET", payment: "BUSINESS PAYMENT",
+    navApproach: "OUR APPROACH", navEcosystem: "ECOSYSTEM", navDepartments: "DEPARTMENTS", navFleet: "CORPORATE FLEET", navContact: "CONTACT", navB2B: "FREE B2B NETWORK", portal: "OPEN PORTAL", wallet: "DEMO WALLET", payment: "BUSINESS PAYMENT",
     categories: "Application categories", categoryCommercial: "Commercial", categoryHousing: "Housing", categoryVehicle: "Vehicle", categoryIndividual: "Individual", allApplications: "ALL APPLICATIONS",
     heroKicker: "MMT GLOBAL / FREE B2B NETWORK", produce: "Produce.", promote: "Promote.", sell: "Sell.", heroDescriptionStrong: "We connect producers, buyers and service providers.", heroDescription: "Producer promotion, buyer requests and core B2B connection services are free. We are building a business ecosystem that grows on trust.", joinNetwork: "JOIN THE FREE NETWORK", discover: "SCROLL TO EXPLORE",
     approach: "OUR APPROACH", approachTitle: "Growing Together", approachDescription: "MMT Global is building a free B2B network where producers, buyers, logistics teams and service providers can find one another. Reliable connections and social value first; a sustainable brand that grows together next.", discoverStory: "DISCOVER OUR STORY", roadmap: "OUR ROADMAP", roadmapTitle: "Produce. Promote. Sell.", roadmapDescription: "We move forward step by step for our followers and members. Core promotion and connection services remain free.", roadmapProduceDescription: "We help producers and service providers make themselves, their products and their capabilities visible.", roadmapPromoteDescription: "We share producer introductions and buyer requests with reliable information, making it easier for the right people to find one another.", roadmapSellDescription: "We bring buyers, producers and logistics partners together to create transparent and realistic commercial connections.",
      ecosystem: "ECOSYSTEM", contactTitle: "Ready for", contactTitleEmphasis: "Global Growth?", contactDescription: "We are building a free B2B connection network for producers, buyers and service providers. Let’s grow together.", whatsapp: "MESSAGE ON WHATSAPP", pageShare: "SHARE THIS PAGE", officialChannels: "OFFICIAL CHANNELS", officialChannelsDescription: "Our verifiable official Instagram and TikTok profiles are listed below.", officialChannelsPending: "Direct links for the Facebook, LinkedIn and Telegram channels are still pending.", quickLinks: "QUICK LINKS", about: "About us", contactPage: "Contact", investments: "Investments", career: "Careers", legalAndPayment: "LEGAL & PAYMENT", serviceTerms: "Service terms", refund: "Refunds and cancellations", delivery: "Delivery terms", distanceSales: "Distance sales", ecosystemTitle: "ECOSYSTEM", logistics: "Logistics", healthTourism: "Health tourism", construction: "Construction & development", financeMedia: "Finance & media", footerDescription: "We connect producers, buyers, logistics and service providers through a free B2B network.", contact: "CONTACT", contactPending: "The official business contact line is being prepared.", privacy: "Privacy policy", cookies: "Cookie policy", kvkk: "KVKK", floatingAction: "Quick actions",
   },
   ar: {
-    navApproach: "نهجنا", navEcosystem: "المنظومة", navFleet: "الأسطول المؤسسي", navContact: "اتصل بنا", navB2B: "شبكة B2B المجانية", portal: "دخول البوابة", wallet: "محفظة تجريبية", payment: "الدفع التجاري",
+    navApproach: "نهجنا", navEcosystem: "المنظومة", navDepartments: "الأقسام", navFleet: "الأسطول المؤسسي", navContact: "اتصل بنا", navB2B: "شبكة B2B المجانية", portal: "دخول البوابة", wallet: "محفظة تجريبية", payment: "الدفع التجاري",
     categories: "فئات الطلب", categoryCommercial: "تجاري", categoryHousing: "سكني", categoryVehicle: "مركبات", categoryIndividual: "فردي", allApplications: "كل الطلبات",
     heroKicker: "MMT GLOBAL / شبكة B2B مجانية", produce: "أنتج.", promote: "روّج.", sell: "بع.", heroDescriptionStrong: "نربط المنتجين بالمشترين ومقدمي الخدمات.", heroDescription: "الترويج للمنتجين وطلبات المشترين وخدمات الربط الأساسية مجانية. نبني منظومة أعمال تنمو بالثقة.", joinNetwork: "انضم إلى الشبكة المجانية", discover: "مرر للاستكشاف",
     approach: "نهجنا", approachTitle: "ننمو معاً", approachDescription: "تبني MMT Global شبكة B2B مجانية تتيح للمنتجين والمشترين وفرق الخدمات اللوجستية ومقدمي الخدمات العثور على بعضهم. نبدأ بالروابط الموثوقة والقيمة الاجتماعية، ثم نبني علامة مستدامة تنمو معاً.", discoverStory: "اكتشف قصتنا", roadmap: "خريطة الطريق", roadmapTitle: "أنتج. روّج. بع.", roadmapDescription: "نتقدم خطوة بخطوة من أجل متابعينا وأعضائنا. تبقى خدمات التعريف والربط الأساسية مجانية.", roadmapProduceDescription: "نساعد المنتجين ومقدمي الخدمات على إبراز أنفسهم ومنتجاتهم وخبراتهم.", roadmapPromoteDescription: "نشارك تعريفات المنتجين وطلبات المشترين بمعلومات موثوقة، ونقرّب الأشخاص المناسبين من بعضهم.", roadmapSellDescription: "نربط المشترين والمنتجين وشركاء الخدمات اللوجستية لبناء روابط تجارية شفافة وواقعية.",
      ecosystem: "المنظومة", contactTitle: "هل أنتم مستعدون", contactTitleEmphasis: "للنمو العالمي؟", contactDescription: "نبني شبكة B2B مجانية لربط المنتجين والمشترين ومقدمي الخدمات. لِنَنْمُ معاً.", whatsapp: "اكتبوا عبر واتساب", pageShare: "شاركوا هذه الصفحة", officialChannels: "القنوات الرسمية", officialChannelsDescription: "تجدون أدناه حساباتنا الرسمية القابلة للتحقق على Instagram وTikTok.", officialChannelsPending: "لا تزال الروابط المباشرة لقنوات فيسبوك ولينكدإن ومجموعة تيليغرام قيد الإعداد.", quickLinks: "روابط سريعة", about: "من نحن", contactPage: "اتصل بنا", investments: "استثماراتنا", career: "الوظائف", legalAndPayment: "قانوني والدفع", serviceTerms: "شروط الخدمة", refund: "الإلغاء والاسترداد", delivery: "شروط التسليم", distanceSales: "البيع عن بُعد", ecosystemTitle: "المنظومة", logistics: "الخدمات اللوجستية", healthTourism: "السياحة الصحية", construction: "الإنشاء والتطوير", financeMedia: "المال والإعلام", footerDescription: "نربط المنتجين والمشترين والخدمات اللوجستية ومقدمي الخدمات عبر شبكة B2B مجانية.", contact: "اتصل بنا", contactPending: "يجري إعداد خط الاتصال التجاري الرسمي.", privacy: "سياسة الخصوصية", cookies: "سياسة ملفات الارتباط", kvkk: "KVKK", floatingAction: "إجراءات سريعة",
   },
   ru: {
-    navApproach: "НАШ ПОДХОД", navEcosystem: "ЭКОСИСТЕМА", navFleet: "КОРПОРАТИВНЫЙ АВТОПАРК", navContact: "КОНТАКТЫ", navB2B: "БЕСПЛАТНАЯ B2B-СЕТЬ", portal: "ВОЙТИ В ПОРТАЛ", wallet: "ДЕМО-КОШЕЛЁК", payment: "КОММЕРЧЕСКАЯ ОПЛАТА",
+    navApproach: "НАШ ПОДХОД", navEcosystem: "ЭКОСИСТЕМА", navDepartments: "ПОДРАЗДЕЛЕНИЯ", navFleet: "КОРПОРАТИВНЫЙ АВТОПАРК", navContact: "КОНТАКТЫ", navB2B: "БЕСПЛАТНАЯ B2B-СЕТЬ", portal: "ВОЙТИ В ПОРТАЛ", wallet: "ДЕМО-КОШЕЛЁК", payment: "КОММЕРЧЕСКАЯ ОПЛАТА",
     categories: "Категории заявок", categoryCommercial: "Коммерция", categoryHousing: "Жильё", categoryVehicle: "Транспорт", categoryIndividual: "Для частных лиц", allApplications: "ВСЕ ЗАЯВКИ",
     heroKicker: "MMT GLOBAL / БЕСПЛАТНАЯ B2B-СЕТЬ", produce: "Производи.", promote: "Продвигай.", sell: "Продавай.", heroDescriptionStrong: "Мы соединяем производителей, покупателей и поставщиков услуг.", heroDescription: "Продвижение производителей, запросы покупателей и базовые B2B-связи бесплатны. Мы строим деловую экосистему, которая растёт на доверии.", joinNetwork: "ПРИСОЕДИНИТЬСЯ К СЕТИ", discover: "ЛИСТАЙТЕ ДЛЯ ОБЗОРА",
     approach: "НАШ ПОДХОД", approachTitle: "Растём вместе", approachDescription: "MMT Global создаёт бесплатную B2B-сеть, где производители, покупатели, логистические команды и поставщики услуг находят друг друга. Сначала надёжные связи и социальная польза, затем устойчивый бренд, который растёт вместе.", discoverStory: "УЗНАТЬ НАШУ ИСТОРИЮ", roadmap: "НАША ДОРОЖНАЯ КАРТА", roadmapTitle: "Производи. Продвигай. Продавай.", roadmapDescription: "Мы двигаемся шаг за шагом для наших подписчиков и участников. Базовые услуги продвижения и связи остаются бесплатными.", roadmapProduceDescription: "Мы помогаем производителям и поставщикам услуг сделать заметными себя, свои продукты и компетенции.", roadmapPromoteDescription: "Мы делимся презентациями производителей и запросами покупателей на основе надёжной информации, помогая нужным людям найти друг друга.", roadmapSellDescription: "Мы соединяем покупателей, производителей и логистических партнёров для прозрачных и реалистичных деловых связей.",
@@ -173,6 +174,9 @@ export default function Home() {
             <button onClick={() => scrollToSection("ecosystem")} className="hover:text-primary transition-colors">
               {copy.navEcosystem}
             </button>
+            <Link href="/birimler" className="hover:text-primary transition-colors">
+              {copy.navDepartments}
+            </Link>
             <button onClick={() => scrollToSection("corporate-fleet")} className="hover:text-primary transition-colors">
               {copy.navFleet}
             </button>
@@ -235,6 +239,9 @@ export default function Home() {
         <button onClick={() => scrollToSection("ecosystem")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
           {copy.navEcosystem}
         </button>
+        <Link href="/birimler" className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
+          {copy.navDepartments}
+        </Link>
         <button onClick={() => scrollToSection("corporate-fleet")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
           {copy.navFleet}
         </button>
@@ -435,6 +442,7 @@ export default function Home() {
               icon={<Truck className="w-8 h-8" />}
                title={copy.logistics}
                desc={copy.heroDescription}
+               href="/birimler/lojistik"
             />
             <EcosystemCard 
               icon={<Stethoscope className="w-8 h-8" />}
@@ -450,6 +458,7 @@ export default function Home() {
               icon={<Tv className="w-8 h-8" />}
                title={copy.financeMedia}
                desc={copy.officialChannelsDescription}
+               href="/birimler"
             />
             <EcosystemCard 
               icon={<Briefcase className="w-8 h-8" />}
@@ -601,6 +610,7 @@ export default function Home() {
               <ul className="space-y-4 text-sm text-foreground/60">
                   <li><Link href="/hakkimizda" className="hover:text-primary transition-colors">{copy.about}</Link></li>
                   <li><Link href="/iletisim" className="hover:text-primary transition-colors">{copy.contactPage}</Link></li>
+                  <li><Link href="/birimler" className="hover:text-primary transition-colors">{copy.navDepartments}</Link></li>
                  <li><button onClick={() => scrollToSection("approach")} className="hover:text-primary transition-colors">{copy.navApproach}</button></li>
                  <li><button onClick={() => scrollToSection("ecosystem")} className="hover:text-primary transition-colors">{copy.navEcosystem}</button></li>
                  <li><Link href="/yatirimlar" className="hover:text-primary transition-colors">{copy.investments}</Link></li>
@@ -612,19 +622,11 @@ export default function Home() {
             <div>
                <h4 className="font-semibold text-sm mb-6 uppercase tracking-wider">{copy.ecosystemTitle}</h4>
               <ul className="space-y-4 text-sm text-foreground/60">
-                 <li><span className="hover:text-primary transition-colors cursor-pointer">{copy.logistics}</span></li>
+                  <li><Link href="/birimler/lojistik" className="hover:text-primary transition-colors">{copy.logistics}</Link></li>
                  <li><span className="hover:text-primary transition-colors cursor-pointer">{copy.healthTourism}</span></li>
                  <li><span className="hover:text-primary transition-colors cursor-pointer">{copy.construction}</span></li>
                 <li>
-                  <Link
-                    href="/limit"
-                    onClick={() =>
-                      trackEvent("application_center_opened", {
-                        location: "footer",
-                      })
-                    }
-                    className="hover:text-primary transition-colors"
-                  >
+                   <Link href="/birimler" className="hover:text-primary transition-colors">
                      {copy.financeMedia}
                   </Link>
                 </li>

@@ -30,6 +30,8 @@ import B2BRequestPage from '@/pages/b2b-request';
 import StaffB2BRequests from '@/pages/staff-b2b-requests';
 import StaffMediaCenter from '@/pages/staff-media-center';
 import LogisticsHubPage from '@/pages/logistics-hub';
+import DepartmentsOverviewPage, { DepartmentPage } from '@/pages/departments';
+import StaffResponsibilityCenter from '@/pages/staff-responsibility-center';
 import {
   AboutPage,
   CareersPage,
@@ -182,6 +184,8 @@ function Router() {
         <Route path="/b2b-agi/talep" component={B2BRequestPage} />
         <Route path="/b2b-agi/ilan/:id" component={B2BListingDetail} />
         <Route path="/lojistik" component={LogisticsHubPage} />
+        <Route path="/birimler" component={DepartmentsOverviewPage} />
+        <Route path="/birimler/:slug" component={DepartmentPage} />
         <Route path="/odeme" component={PaymentPage} />
         <Route path="/odeme/test" component={MockPaymentPage} />
         <Route path="/odeme/sonuc" component={PaymentResultPage} />
@@ -202,6 +206,7 @@ function Router() {
         <Route path="/staff/b2b-dogrulamalar" component={StaffB2BVerifications} />
         <Route path="/staff/b2b-sikayetler" component={StaffB2BReports} />
         <Route path="/staff/b2b-talepler" component={StaffB2BRequests} />
+        <Route path="/staff/sorumluluk-merkezi" component={StaffResponsibilityCenter} />
         <Route path="/staff/giris/*?" component={StaffSignInPage} />
         <Route path="/sign-in/*?" component={SignInPage} />
         <Route path="/sign-up/*?" component={SignUpPage} />
@@ -253,6 +258,7 @@ function ClerkApp() {
     location === '/staff/b2b-dogrulamalar' ||
     location === '/staff/b2b-sikayetler' ||
     location === '/staff/b2b-talepler' ||
+    location === '/staff/sorumluluk-merkezi' ||
     location.startsWith('/staff/giris') ||
     location === '/b2b-agi' ||
     location.startsWith('/b2b-agi/ilan/') ||
