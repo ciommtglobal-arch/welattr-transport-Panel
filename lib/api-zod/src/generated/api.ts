@@ -914,6 +914,167 @@ export const GetOperationsDeskResponse = zod.object({
 
 
 /**
+ * @summary Personel puan ve ödül özetlerini listeler
+ */
+export const GetStaffRewardsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "staffUserId": zod.int(),
+  "staffEmail": zod.email(),
+  "pointsBalance": zod.int(),
+  "cashBalance": zod.number(),
+  "holidayBalance": zod.number(),
+  "internationalTravelBalance": zod.number(),
+  "plans": zod.array(zod.object({
+  "id": zod.int(),
+  "staffUserId": zod.int(),
+  "staffEmail": zod.email(),
+  "name": zod.string(),
+  "monthlyPoints": zod.int(),
+  "monthlyCashAmount": zod.number(),
+  "currency": zod.string(),
+  "holidayPackageBudget": zod.number(),
+  "internationalTravelBudget": zod.number(),
+  "customBenefits": zod.array(zod.string()),
+  "status": zod.enum(['draft', 'active', 'paused']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "transactions": zod.array(zod.object({
+  "id": zod.int(),
+  "staffUserId": zod.int(),
+  "staffEmail": zod.email(),
+  "planId": zod.int().nullish(),
+  "kind": zod.enum(['points', 'cash', 'holiday_package', 'international_trip']),
+  "pointsDelta": zod.int(),
+  "cashAmount": zod.number(),
+  "currency": zod.string(),
+  "title": zod.string(),
+  "reason": zod.string(),
+  "status": zod.enum(['approved', 'pending_approval', 'rejected']),
+  "createdAt": zod.coerce.date()
+}))
+}))
+})
+
+
+/**
+ * @summary Bir personele özel puan ve ödül paketi tanımlar
+ */
+export const createStaffRewardPlanBodyNameMin = 2;
+export const createStaffRewardPlanBodyNameMax = 160;
+
+export const createStaffRewardPlanBodyMonthlyPointsMin = 0;
+export const createStaffRewardPlanBodyMonthlyPointsMax = 1000000;
+
+export const createStaffRewardPlanBodyMonthlyCashAmountMin = 0;
+
+export const createStaffRewardPlanBodyHolidayPackageBudgetMin = 0;
+
+export const createStaffRewardPlanBodyInternationalTravelBudgetMin = 0;
+
+export const createStaffRewardPlanBodyCustomBenefitsItemMax = 200;
+
+export const createStaffRewardPlanBodyCustomBenefitsMax = 20;
+
+
+
+export const CreateStaffRewardPlanBody = zod.object({
+  "staffEmail": zod.email(),
+  "name": zod.string().min(createStaffRewardPlanBodyNameMin).max(createStaffRewardPlanBodyNameMax),
+  "monthlyPoints": zod.int().min(createStaffRewardPlanBodyMonthlyPointsMin).max(createStaffRewardPlanBodyMonthlyPointsMax).optional(),
+  "monthlyCashAmount": zod.number().min(createStaffRewardPlanBodyMonthlyCashAmountMin).optional(),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']).optional(),
+  "holidayPackageBudget": zod.number().min(createStaffRewardPlanBodyHolidayPackageBudgetMin).optional(),
+  "internationalTravelBudget": zod.number().min(createStaffRewardPlanBodyInternationalTravelBudgetMin).optional(),
+  "customBenefits": zod.array(zod.string().max(createStaffRewardPlanBodyCustomBenefitsItemMax)).max(createStaffRewardPlanBodyCustomBenefitsMax).optional()
+})
+
+export const CreateStaffRewardPlanResponse = zod.object({
+  "id": zod.int(),
+  "staffUserId": zod.int(),
+  "staffEmail": zod.email(),
+  "name": zod.string(),
+  "monthlyPoints": zod.int(),
+  "monthlyCashAmount": zod.number(),
+  "currency": zod.string(),
+  "holidayPackageBudget": zod.number(),
+  "internationalTravelBudget": zod.number(),
+  "customBenefits": zod.array(zod.string()),
+  "status": zod.enum(['draft', 'active', 'paused']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Personel puanı veya ödül kazanımı oluşturur
+ */
+export const createStaffRewardTransactionBodyPointsDeltaMin = -1000000;
+export const createStaffRewardTransactionBodyPointsDeltaMax = 1000000;
+
+export const createStaffRewardTransactionBodyCashAmountMin = 0;
+
+export const createStaffRewardTransactionBodyTitleMin = 2;
+export const createStaffRewardTransactionBodyTitleMax = 160;
+
+export const createStaffRewardTransactionBodyReasonMax = 2000;
+
+
+
+export const CreateStaffRewardTransactionBody = zod.object({
+  "staffEmail": zod.email(),
+  "kind": zod.enum(['points', 'cash', 'holiday_package', 'international_trip']),
+  "pointsDelta": zod.int().min(createStaffRewardTransactionBodyPointsDeltaMin).max(createStaffRewardTransactionBodyPointsDeltaMax).optional(),
+  "cashAmount": zod.number().min(createStaffRewardTransactionBodyCashAmountMin).optional(),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']).optional(),
+  "title": zod.string().min(createStaffRewardTransactionBodyTitleMin).max(createStaffRewardTransactionBodyTitleMax),
+  "reason": zod.string().max(createStaffRewardTransactionBodyReasonMax).optional()
+})
+
+export const CreateStaffRewardTransactionResponse = zod.object({
+  "id": zod.int(),
+  "staffUserId": zod.int(),
+  "staffEmail": zod.email(),
+  "planId": zod.int().nullish(),
+  "kind": zod.enum(['points', 'cash', 'holiday_package', 'international_trip']),
+  "pointsDelta": zod.int(),
+  "cashAmount": zod.number(),
+  "currency": zod.string(),
+  "title": zod.string(),
+  "reason": zod.string(),
+  "status": zod.enum(['approved', 'pending_approval', 'rejected']),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Nakit veya seyahat ödülü kararını verir
+ */
+export const DecideStaffRewardTransactionParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DecideStaffRewardTransactionBody = zod.object({
+  "decision": zod.enum(['approve', 'reject'])
+})
+
+export const DecideStaffRewardTransactionResponse = zod.object({
+  "id": zod.int(),
+  "staffUserId": zod.int(),
+  "staffEmail": zod.email(),
+  "planId": zod.int().nullish(),
+  "kind": zod.enum(['points', 'cash', 'holiday_package', 'international_trip']),
+  "pointsDelta": zod.int(),
+  "cashAmount": zod.number(),
+  "currency": zod.string(),
+  "title": zod.string(),
+  "reason": zod.string(),
+  "status": zod.enum(['approved', 'pending_approval', 'rejected']),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
  * @summary Submit a limit application
  */
 export const createLimitApplicationBodyFullNameMin = 2;
@@ -2181,6 +2342,9 @@ export const CreateB2BReportResponse = zod.object({
   "internalNote": zod.string().nullish(),
   "reviewerClerkUserId": zod.string().nullish(),
   "reviewedAt": zod.coerce.date().nullish(),
+  "rating": zod.int().nullish(),
+  "ratingComment": zod.string().nullish(),
+  "ratedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2217,6 +2381,9 @@ export const GetB2BReportReviewQueueResponse = zod.object({
   "internalNote": zod.string().nullish(),
   "reviewerClerkUserId": zod.string().nullish(),
   "reviewedAt": zod.coerce.date().nullish(),
+  "rating": zod.int().nullish(),
+  "ratingComment": zod.string().nullish(),
+  "ratedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })),
@@ -2256,8 +2423,238 @@ export const UpdateB2BReportStatusResponse = zod.object({
   "internalNote": zod.string().nullish(),
   "reviewerClerkUserId": zod.string().nullish(),
   "reviewedAt": zod.coerce.date().nullish(),
+  "rating": zod.int().nullish(),
+  "ratingComment": zod.string().nullish(),
+  "ratedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Rate a submitted suggestion or complaint
+ */
+export const RateB2BReportParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const rateB2BReportBodyRatingMax = 5;
+
+export const rateB2BReportBodyCommentMax = 1000;
+
+
+
+export const RateB2BReportBody = zod.object({
+  "rating": zod.int().min(1).max(rateB2BReportBodyRatingMax),
+  "comment": zod.string().max(rateB2BReportBodyCommentMax).optional()
+})
+
+export const RateB2BReportResponse = zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "listingId": zod.int().nullish(),
+  "businessProfileId": zod.int().nullish(),
+  "listingReferenceCode": zod.string(),
+  "listingTitle": zod.string(),
+  "organization": zod.string(),
+  "category": zod.enum(['misleading_information', 'fraud_or_scam', 'inappropriate_content', 'spam', 'contact_issue', 'other']),
+  "details": zod.string(),
+  "status": zod.enum(['pending', 'reviewing', 'resolved', 'dismissed']),
+  "internalNote": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "rating": zod.int().nullish(),
+  "ratingComment": zod.string().nullish(),
+  "ratedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List company approval items
+ */
+export const GetB2BWorkflowApprovalsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int().nullish(),
+  "entityType": zod.enum(['company_task', 'company_request', 'business_profile', 'limit_application', 'b2b_listing', 'b2b_request', 'b2b_report', 'media_item', 'media_delivery', 'logistics_offer']),
+  "entityId": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "submittedByClerkUserId": zod.string().nullish(),
+  "ownerClerkUserId": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "riskCategory": zod.enum(['none', 'financial', 'legal', 'external', 'delete', 'permission']),
+  "riskReason": zod.string().nullish(),
+  "status": zod.enum(['pending_reviewer', 'pending_owner', 'auto_approved', 'approved', 'rejected', 'expired']),
+  "reviewerDecisionAt": zod.coerce.date().nullish(),
+  "ownerDecisionAt": zod.coerce.date().nullish(),
+  "decisionDueAt": zod.coerce.date().nullish(),
+  "autoDecisionAt": zod.coerce.date().nullish(),
+  "decisionNote": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "total": zod.int()
+})
+
+
+/**
+ * @summary Create a company approval item
+ */
+export const createB2BWorkflowApprovalBodyTitleMin = 2;
+export const createB2BWorkflowApprovalBodyTitleMax = 200;
+
+export const createB2BWorkflowApprovalBodySummaryMax = 4000;
+
+export const createB2BWorkflowApprovalBodyRiskReasonMax = 1000;
+
+
+
+export const CreateB2BWorkflowApprovalBody = zod.object({
+  "entityType": zod.enum(['company_task', 'company_request', 'business_profile', 'limit_application', 'b2b_listing', 'b2b_request', 'b2b_report', 'media_item', 'media_delivery', 'logistics_offer']),
+  "entityId": zod.int(),
+  "title": zod.string().min(createB2BWorkflowApprovalBodyTitleMin).max(createB2BWorkflowApprovalBodyTitleMax),
+  "summary": zod.string().max(createB2BWorkflowApprovalBodySummaryMax).optional(),
+  "riskCategory": zod.enum(['none', 'financial', 'legal', 'external', 'delete', 'permission']).optional(),
+  "riskReason": zod.string().max(createB2BWorkflowApprovalBodyRiskReasonMax).optional()
+})
+
+export const CreateB2BWorkflowApprovalResponse = zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int().nullish(),
+  "entityType": zod.enum(['company_task', 'company_request', 'business_profile', 'limit_application', 'b2b_listing', 'b2b_request', 'b2b_report', 'media_item', 'media_delivery', 'logistics_offer']),
+  "entityId": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "submittedByClerkUserId": zod.string().nullish(),
+  "ownerClerkUserId": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "riskCategory": zod.enum(['none', 'financial', 'legal', 'external', 'delete', 'permission']),
+  "riskReason": zod.string().nullish(),
+  "status": zod.enum(['pending_reviewer', 'pending_owner', 'auto_approved', 'approved', 'rejected', 'expired']),
+  "reviewerDecisionAt": zod.coerce.date().nullish(),
+  "ownerDecisionAt": zod.coerce.date().nullish(),
+  "decisionDueAt": zod.coerce.date().nullish(),
+  "autoDecisionAt": zod.coerce.date().nullish(),
+  "decisionNote": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Review a company approval item
+ */
+export const ReviewB2BWorkflowApprovalParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const reviewB2BWorkflowApprovalBodyNoteMax = 4000;
+
+
+
+export const ReviewB2BWorkflowApprovalBody = zod.object({
+  "decision": zod.enum(['approve', 'reject']),
+  "note": zod.string().max(reviewB2BWorkflowApprovalBodyNoteMax).optional()
+})
+
+export const ReviewB2BWorkflowApprovalResponse = zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int().nullish(),
+  "entityType": zod.enum(['company_task', 'company_request', 'business_profile', 'limit_application', 'b2b_listing', 'b2b_request', 'b2b_report', 'media_item', 'media_delivery', 'logistics_offer']),
+  "entityId": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "submittedByClerkUserId": zod.string().nullish(),
+  "ownerClerkUserId": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "riskCategory": zod.enum(['none', 'financial', 'legal', 'external', 'delete', 'permission']),
+  "riskReason": zod.string().nullish(),
+  "status": zod.enum(['pending_reviewer', 'pending_owner', 'auto_approved', 'approved', 'rejected', 'expired']),
+  "reviewerDecisionAt": zod.coerce.date().nullish(),
+  "ownerDecisionAt": zod.coerce.date().nullish(),
+  "decisionDueAt": zod.coerce.date().nullish(),
+  "autoDecisionAt": zod.coerce.date().nullish(),
+  "decisionNote": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Approve or reject a risky company approval item
+ */
+export const DecideB2BWorkflowApprovalParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const decideB2BWorkflowApprovalBodyNoteMax = 4000;
+
+
+
+export const DecideB2BWorkflowApprovalBody = zod.object({
+  "decision": zod.enum(['approve', 'reject']),
+  "note": zod.string().max(decideB2BWorkflowApprovalBodyNoteMax).optional()
+})
+
+export const DecideB2BWorkflowApprovalResponse = zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int().nullish(),
+  "entityType": zod.enum(['company_task', 'company_request', 'business_profile', 'limit_application', 'b2b_listing', 'b2b_request', 'b2b_report', 'media_item', 'media_delivery', 'logistics_offer']),
+  "entityId": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "submittedByClerkUserId": zod.string().nullish(),
+  "ownerClerkUserId": zod.string().nullish(),
+  "reviewerClerkUserId": zod.string().nullish(),
+  "riskCategory": zod.enum(['none', 'financial', 'legal', 'external', 'delete', 'permission']),
+  "riskReason": zod.string().nullish(),
+  "status": zod.enum(['pending_reviewer', 'pending_owner', 'auto_approved', 'approved', 'rejected', 'expired']),
+  "reviewerDecisionAt": zod.coerce.date().nullish(),
+  "ownerDecisionAt": zod.coerce.date().nullish(),
+  "decisionDueAt": zod.coerce.date().nullish(),
+  "autoDecisionAt": zod.coerce.date().nullish(),
+  "decisionNote": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List in-app workflow notifications
+ */
+export const GetWorkflowNotificationsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "type": zod.enum(['approval', 'risk', 'deadline', 'rating']),
+  "title": zod.string(),
+  "body": zod.string(),
+  "approvalId": zod.int().nullish(),
+  "readAt": zod.coerce.date().nullable(),
+  "createdAt": zod.coerce.date()
+})),
+  "total": zod.int(),
+  "unreadCount": zod.int()
+})
+
+
+/**
+ * @summary Mark a workflow notification as read
+ */
+export const MarkWorkflowNotificationReadParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const MarkWorkflowNotificationReadResponse = zod.object({
+  "id": zod.int(),
+  "type": zod.enum(['approval', 'risk', 'deadline', 'rating']),
+  "title": zod.string(),
+  "body": zod.string(),
+  "approvalId": zod.int().nullish(),
+  "readAt": zod.coerce.date().nullable(),
+  "createdAt": zod.coerce.date()
 })
 
 

@@ -27,6 +27,12 @@ export interface B2BReport {
   reviewerClerkUserId?: string | null;
   /** @nullable */
   reviewedAt?: Date | null;
+  /** @nullable */
+  rating?: number | null;
+  /** @nullable */
+  ratingComment?: string | null;
+  /** @nullable */
+  ratedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

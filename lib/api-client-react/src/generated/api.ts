@@ -45,6 +45,7 @@ import type {
   B2BReport,
   B2BReportInput,
   B2BReportPage,
+  B2BReportRatingInput,
   B2BReportStatusUpdate,
   B2BRequest,
   B2BRequestInput,
@@ -93,11 +94,24 @@ import type {
   OrphanUploadCleanupResponse,
   PublicLogisticsMedia,
   StaffProfile,
+  StaffRewardPlan,
+  StaffRewardPlanInput,
+  StaffRewardTransaction,
+  StaffRewardTransactionDecision,
+  StaffRewardTransactionInput,
+  StaffRewardsResponse,
   TamiHostedPaymentInput,
   TamiHostedPaymentSession,
   TamiPaymentStatus,
   UploadUrlRequest,
-  UploadUrlResponse
+  UploadUrlResponse,
+  WorkflowApproval,
+  WorkflowApprovalInput,
+  WorkflowApprovalPage,
+  WorkflowNotification,
+  WorkflowNotificationPage,
+  WorkflowOwnerDecision,
+  WorkflowReviewerDecision
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -2257,6 +2271,324 @@ export function useGetOperationsDesk<TData = Awaited<ReturnType<typeof getOperat
 
 
 
+
+export const getGetStaffRewardsUrl = () => {
+
+
+
+
+  return `/api/staff/rewards`
+}
+
+/**
+ * @summary Personel puan ve ödül özetlerini listeler
+ */
+export const getStaffRewards = async ( options?: Parameters<typeof customFetch>[1]): Promise<StaffRewardsResponse> => {
+
+  return customFetch<StaffRewardsResponse>(getGetStaffRewardsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStaffRewardsQueryKey = () => {
+    return [
+    `/api/staff/rewards`
+    ] as const;
+    }
+
+
+export const getGetStaffRewardsQueryOptions = <TData = Awaited<ReturnType<typeof getStaffRewards>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffRewards>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStaffRewardsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStaffRewards>>> = ({ signal }) => getStaffRewards({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStaffRewards>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStaffRewardsQueryResult = NonNullable<Awaited<ReturnType<typeof getStaffRewards>>>
+export type GetStaffRewardsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Personel puan ve ödül özetlerini listeler
+ */
+
+export function useGetStaffRewards<TData = Awaited<ReturnType<typeof getStaffRewards>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffRewards>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStaffRewardsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateStaffRewardPlanUrl = () => {
+
+
+
+
+  return `/api/staff/rewards/plans`
+}
+
+/**
+ * @summary Bir personele özel puan ve ödül paketi tanımlar
+ */
+export const createStaffRewardPlan = async (staffRewardPlanInput: StaffRewardPlanInput, options?: Parameters<typeof customFetch>[1]): Promise<StaffRewardPlan> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<StaffRewardPlan>(getCreateStaffRewardPlanUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(staffRewardPlanInput)
+  }
+);}
+
+
+
+
+
+export const getCreateStaffRewardPlanMutationKey = () => ['createStaffRewardPlan'] as const;
+
+export const getCreateStaffRewardPlanMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStaffRewardPlan>>, TError,CreateStaffRewardPlanMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createStaffRewardPlan>>, TError,CreateStaffRewardPlanMutationVariables, TContext> => {
+
+const mutationKey = getCreateStaffRewardPlanMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createStaffRewardPlan>>, CreateStaffRewardPlanMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createStaffRewardPlan(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateStaffRewardPlanMutationResult = NonNullable<Awaited<ReturnType<typeof createStaffRewardPlan>>>
+    export type CreateStaffRewardPlanMutationBody = BodyType<StaffRewardPlanInput>
+    export type CreateStaffRewardPlanMutationError = ErrorType<ErrorResponse>
+    export type CreateStaffRewardPlanMutationVariables = {data: BodyType<StaffRewardPlanInput>}
+
+    /**
+ * @summary Bir personele özel puan ve ödül paketi tanımlar
+ */
+export const useCreateStaffRewardPlan = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStaffRewardPlan>>, TError,CreateStaffRewardPlanMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createStaffRewardPlan>>,
+        TError,
+        CreateStaffRewardPlanMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateStaffRewardPlanMutationOptions(options));
+    }
+
+export const getCreateStaffRewardTransactionUrl = () => {
+
+
+
+
+  return `/api/staff/rewards/transactions`
+}
+
+/**
+ * @summary Personel puanı veya ödül kazanımı oluşturur
+ */
+export const createStaffRewardTransaction = async (staffRewardTransactionInput: StaffRewardTransactionInput, options?: Parameters<typeof customFetch>[1]): Promise<StaffRewardTransaction> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<StaffRewardTransaction>(getCreateStaffRewardTransactionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(staffRewardTransactionInput)
+  }
+);}
+
+
+
+
+
+export const getCreateStaffRewardTransactionMutationKey = () => ['createStaffRewardTransaction'] as const;
+
+export const getCreateStaffRewardTransactionMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStaffRewardTransaction>>, TError,CreateStaffRewardTransactionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createStaffRewardTransaction>>, TError,CreateStaffRewardTransactionMutationVariables, TContext> => {
+
+const mutationKey = getCreateStaffRewardTransactionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createStaffRewardTransaction>>, CreateStaffRewardTransactionMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createStaffRewardTransaction(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateStaffRewardTransactionMutationResult = NonNullable<Awaited<ReturnType<typeof createStaffRewardTransaction>>>
+    export type CreateStaffRewardTransactionMutationBody = BodyType<StaffRewardTransactionInput>
+    export type CreateStaffRewardTransactionMutationError = ErrorType<ErrorResponse>
+    export type CreateStaffRewardTransactionMutationVariables = {data: BodyType<StaffRewardTransactionInput>}
+
+    /**
+ * @summary Personel puanı veya ödül kazanımı oluşturur
+ */
+export const useCreateStaffRewardTransaction = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStaffRewardTransaction>>, TError,CreateStaffRewardTransactionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createStaffRewardTransaction>>,
+        TError,
+        CreateStaffRewardTransactionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateStaffRewardTransactionMutationOptions(options));
+    }
+
+export const getDecideStaffRewardTransactionUrl = (id: number,) => {
+
+
+
+
+  return `/api/staff/rewards/transactions/${id}/decision`
+}
+
+/**
+ * @summary Nakit veya seyahat ödülü kararını verir
+ */
+export const decideStaffRewardTransaction = async (id: number,
+    staffRewardTransactionDecision: StaffRewardTransactionDecision, options?: Parameters<typeof customFetch>[1]): Promise<StaffRewardTransaction> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<StaffRewardTransaction>(getDecideStaffRewardTransactionUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(staffRewardTransactionDecision)
+  }
+);}
+
+
+
+
+
+export const getDecideStaffRewardTransactionMutationKey = () => ['decideStaffRewardTransaction'] as const;
+
+export const getDecideStaffRewardTransactionMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideStaffRewardTransaction>>, TError,DecideStaffRewardTransactionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof decideStaffRewardTransaction>>, TError,DecideStaffRewardTransactionMutationVariables, TContext> => {
+
+const mutationKey = getDecideStaffRewardTransactionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof decideStaffRewardTransaction>>, DecideStaffRewardTransactionMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  decideStaffRewardTransaction(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DecideStaffRewardTransactionMutationResult = NonNullable<Awaited<ReturnType<typeof decideStaffRewardTransaction>>>
+    export type DecideStaffRewardTransactionMutationBody = BodyType<StaffRewardTransactionDecision>
+    export type DecideStaffRewardTransactionMutationError = ErrorType<ErrorResponse>
+    export type DecideStaffRewardTransactionMutationVariables = {id: number;data: BodyType<StaffRewardTransactionDecision>}
+
+    /**
+ * @summary Nakit veya seyahat ödülü kararını verir
+ */
+export const useDecideStaffRewardTransaction = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideStaffRewardTransaction>>, TError,DecideStaffRewardTransactionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof decideStaffRewardTransaction>>,
+        TError,
+        DecideStaffRewardTransactionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDecideStaffRewardTransactionMutationOptions(options));
+    }
 
 export const getCreateLimitApplicationUrl = () => {
 
@@ -4677,5 +5009,556 @@ export const useUpdateB2BReportStatus = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getUpdateB2BReportStatusMutationOptions(options));
+    }
+
+export const getRateB2BReportUrl = (id: number,) => {
+
+
+
+
+  return `/api/b2b-reports/${id}/rating`
+}
+
+/**
+ * @summary Rate a submitted suggestion or complaint
+ */
+export const rateB2BReport = async (id: number,
+    b2BReportRatingInput: B2BReportRatingInput, options?: Parameters<typeof customFetch>[1]): Promise<B2BReport> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BReport>(getRateB2BReportUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BReportRatingInput)
+  }
+);}
+
+
+
+
+
+export const getRateB2BReportMutationKey = () => ['rateB2BReport'] as const;
+
+export const getRateB2BReportMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rateB2BReport>>, TError,RateB2BReportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof rateB2BReport>>, TError,RateB2BReportMutationVariables, TContext> => {
+
+const mutationKey = getRateB2BReportMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rateB2BReport>>, RateB2BReportMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  rateB2BReport(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RateB2BReportMutationResult = NonNullable<Awaited<ReturnType<typeof rateB2BReport>>>
+    export type RateB2BReportMutationBody = BodyType<B2BReportRatingInput>
+    export type RateB2BReportMutationError = ErrorType<ErrorResponse>
+    export type RateB2BReportMutationVariables = {id: number;data: BodyType<B2BReportRatingInput>}
+
+    /**
+ * @summary Rate a submitted suggestion or complaint
+ */
+export const useRateB2BReport = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rateB2BReport>>, TError,RateB2BReportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof rateB2BReport>>,
+        TError,
+        RateB2BReportMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRateB2BReportMutationOptions(options));
+    }
+
+export const getGetB2BWorkflowApprovalsUrl = () => {
+
+
+
+
+  return `/api/b2b/business-profile/approvals`
+}
+
+/**
+ * @summary List company approval items
+ */
+export const getB2BWorkflowApprovals = async ( options?: Parameters<typeof customFetch>[1]): Promise<WorkflowApprovalPage> => {
+
+  return customFetch<WorkflowApprovalPage>(getGetB2BWorkflowApprovalsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetB2BWorkflowApprovalsQueryKey = () => {
+    return [
+    `/api/b2b/business-profile/approvals`
+    ] as const;
+    }
+
+
+export const getGetB2BWorkflowApprovalsQueryOptions = <TData = Awaited<ReturnType<typeof getB2BWorkflowApprovals>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BWorkflowApprovals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetB2BWorkflowApprovalsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getB2BWorkflowApprovals>>> = ({ signal }) => getB2BWorkflowApprovals({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getB2BWorkflowApprovals>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetB2BWorkflowApprovalsQueryResult = NonNullable<Awaited<ReturnType<typeof getB2BWorkflowApprovals>>>
+export type GetB2BWorkflowApprovalsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List company approval items
+ */
+
+export function useGetB2BWorkflowApprovals<TData = Awaited<ReturnType<typeof getB2BWorkflowApprovals>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BWorkflowApprovals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetB2BWorkflowApprovalsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateB2BWorkflowApprovalUrl = () => {
+
+
+
+
+  return `/api/b2b/business-profile/approvals`
+}
+
+/**
+ * @summary Create a company approval item
+ */
+export const createB2BWorkflowApproval = async (workflowApprovalInput: WorkflowApprovalInput, options?: Parameters<typeof customFetch>[1]): Promise<WorkflowApproval> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<WorkflowApproval>(getCreateB2BWorkflowApprovalUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(workflowApprovalInput)
+  }
+);}
+
+
+
+
+
+export const getCreateB2BWorkflowApprovalMutationKey = () => ['createB2BWorkflowApproval'] as const;
+
+export const getCreateB2BWorkflowApprovalMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createB2BWorkflowApproval>>, TError,CreateB2BWorkflowApprovalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createB2BWorkflowApproval>>, TError,CreateB2BWorkflowApprovalMutationVariables, TContext> => {
+
+const mutationKey = getCreateB2BWorkflowApprovalMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createB2BWorkflowApproval>>, CreateB2BWorkflowApprovalMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createB2BWorkflowApproval(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateB2BWorkflowApprovalMutationResult = NonNullable<Awaited<ReturnType<typeof createB2BWorkflowApproval>>>
+    export type CreateB2BWorkflowApprovalMutationBody = BodyType<WorkflowApprovalInput>
+    export type CreateB2BWorkflowApprovalMutationError = ErrorType<ErrorResponse>
+    export type CreateB2BWorkflowApprovalMutationVariables = {data: BodyType<WorkflowApprovalInput>}
+
+    /**
+ * @summary Create a company approval item
+ */
+export const useCreateB2BWorkflowApproval = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createB2BWorkflowApproval>>, TError,CreateB2BWorkflowApprovalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createB2BWorkflowApproval>>,
+        TError,
+        CreateB2BWorkflowApprovalMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateB2BWorkflowApprovalMutationOptions(options));
+    }
+
+export const getReviewB2BWorkflowApprovalUrl = (id: number,) => {
+
+
+
+
+  return `/api/b2b/business-profile/approvals/${id}/review`
+}
+
+/**
+ * @summary Review a company approval item
+ */
+export const reviewB2BWorkflowApproval = async (id: number,
+    workflowReviewerDecision: WorkflowReviewerDecision, options?: Parameters<typeof customFetch>[1]): Promise<WorkflowApproval> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<WorkflowApproval>(getReviewB2BWorkflowApprovalUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(workflowReviewerDecision)
+  }
+);}
+
+
+
+
+
+export const getReviewB2BWorkflowApprovalMutationKey = () => ['reviewB2BWorkflowApproval'] as const;
+
+export const getReviewB2BWorkflowApprovalMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewB2BWorkflowApproval>>, TError,ReviewB2BWorkflowApprovalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reviewB2BWorkflowApproval>>, TError,ReviewB2BWorkflowApprovalMutationVariables, TContext> => {
+
+const mutationKey = getReviewB2BWorkflowApprovalMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reviewB2BWorkflowApproval>>, ReviewB2BWorkflowApprovalMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  reviewB2BWorkflowApproval(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReviewB2BWorkflowApprovalMutationResult = NonNullable<Awaited<ReturnType<typeof reviewB2BWorkflowApproval>>>
+    export type ReviewB2BWorkflowApprovalMutationBody = BodyType<WorkflowReviewerDecision>
+    export type ReviewB2BWorkflowApprovalMutationError = ErrorType<ErrorResponse>
+    export type ReviewB2BWorkflowApprovalMutationVariables = {id: number;data: BodyType<WorkflowReviewerDecision>}
+
+    /**
+ * @summary Review a company approval item
+ */
+export const useReviewB2BWorkflowApproval = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewB2BWorkflowApproval>>, TError,ReviewB2BWorkflowApprovalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reviewB2BWorkflowApproval>>,
+        TError,
+        ReviewB2BWorkflowApprovalMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReviewB2BWorkflowApprovalMutationOptions(options));
+    }
+
+export const getDecideB2BWorkflowApprovalUrl = (id: number,) => {
+
+
+
+
+  return `/api/b2b/business-profile/approvals/${id}/owner-decision`
+}
+
+/**
+ * @summary Approve or reject a risky company approval item
+ */
+export const decideB2BWorkflowApproval = async (id: number,
+    workflowOwnerDecision: WorkflowOwnerDecision, options?: Parameters<typeof customFetch>[1]): Promise<WorkflowApproval> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<WorkflowApproval>(getDecideB2BWorkflowApprovalUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(workflowOwnerDecision)
+  }
+);}
+
+
+
+
+
+export const getDecideB2BWorkflowApprovalMutationKey = () => ['decideB2BWorkflowApproval'] as const;
+
+export const getDecideB2BWorkflowApprovalMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideB2BWorkflowApproval>>, TError,DecideB2BWorkflowApprovalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof decideB2BWorkflowApproval>>, TError,DecideB2BWorkflowApprovalMutationVariables, TContext> => {
+
+const mutationKey = getDecideB2BWorkflowApprovalMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof decideB2BWorkflowApproval>>, DecideB2BWorkflowApprovalMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  decideB2BWorkflowApproval(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DecideB2BWorkflowApprovalMutationResult = NonNullable<Awaited<ReturnType<typeof decideB2BWorkflowApproval>>>
+    export type DecideB2BWorkflowApprovalMutationBody = BodyType<WorkflowOwnerDecision>
+    export type DecideB2BWorkflowApprovalMutationError = ErrorType<ErrorResponse>
+    export type DecideB2BWorkflowApprovalMutationVariables = {id: number;data: BodyType<WorkflowOwnerDecision>}
+
+    /**
+ * @summary Approve or reject a risky company approval item
+ */
+export const useDecideB2BWorkflowApproval = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideB2BWorkflowApproval>>, TError,DecideB2BWorkflowApprovalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof decideB2BWorkflowApproval>>,
+        TError,
+        DecideB2BWorkflowApprovalMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDecideB2BWorkflowApprovalMutationOptions(options));
+    }
+
+export const getGetWorkflowNotificationsUrl = () => {
+
+
+
+
+  return `/api/workflow/notifications`
+}
+
+/**
+ * @summary List in-app workflow notifications
+ */
+export const getWorkflowNotifications = async ( options?: Parameters<typeof customFetch>[1]): Promise<WorkflowNotificationPage> => {
+
+  return customFetch<WorkflowNotificationPage>(getGetWorkflowNotificationsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetWorkflowNotificationsQueryKey = () => {
+    return [
+    `/api/workflow/notifications`
+    ] as const;
+    }
+
+
+export const getGetWorkflowNotificationsQueryOptions = <TData = Awaited<ReturnType<typeof getWorkflowNotifications>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWorkflowNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetWorkflowNotificationsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWorkflowNotifications>>> = ({ signal }) => getWorkflowNotifications({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getWorkflowNotifications>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetWorkflowNotificationsQueryResult = NonNullable<Awaited<ReturnType<typeof getWorkflowNotifications>>>
+export type GetWorkflowNotificationsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List in-app workflow notifications
+ */
+
+export function useGetWorkflowNotifications<TData = Awaited<ReturnType<typeof getWorkflowNotifications>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWorkflowNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetWorkflowNotificationsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getMarkWorkflowNotificationReadUrl = (id: number,) => {
+
+
+
+
+  return `/api/workflow/notifications/${id}/read`
+}
+
+/**
+ * @summary Mark a workflow notification as read
+ */
+export const markWorkflowNotificationRead = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<WorkflowNotification> => {
+
+  return customFetch<WorkflowNotification>(getMarkWorkflowNotificationReadUrl(id),
+  {
+    ...options,
+    method: 'PATCH'
+
+
+  }
+);}
+
+
+
+
+
+export const getMarkWorkflowNotificationReadMutationKey = () => ['markWorkflowNotificationRead'] as const;
+
+export const getMarkWorkflowNotificationReadMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markWorkflowNotificationRead>>, TError,MarkWorkflowNotificationReadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markWorkflowNotificationRead>>, TError,MarkWorkflowNotificationReadMutationVariables, TContext> => {
+
+const mutationKey = getMarkWorkflowNotificationReadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markWorkflowNotificationRead>>, MarkWorkflowNotificationReadMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  markWorkflowNotificationRead(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkWorkflowNotificationReadMutationResult = NonNullable<Awaited<ReturnType<typeof markWorkflowNotificationRead>>>
+
+    export type MarkWorkflowNotificationReadMutationError = ErrorType<ErrorResponse>
+    export type MarkWorkflowNotificationReadMutationVariables = {id: number}
+
+    /**
+ * @summary Mark a workflow notification as read
+ */
+export const useMarkWorkflowNotificationRead = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markWorkflowNotificationRead>>, TError,MarkWorkflowNotificationReadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markWorkflowNotificationRead>>,
+        TError,
+        MarkWorkflowNotificationReadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getMarkWorkflowNotificationReadMutationOptions(options));
     }
 

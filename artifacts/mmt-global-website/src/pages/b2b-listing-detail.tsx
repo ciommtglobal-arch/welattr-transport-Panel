@@ -13,11 +13,13 @@ import {
   Loader2,
   ExternalLink,
   ChevronRight,
-  Info
-  , ShieldAlert
+  Info,
+  ShieldAlert,
+  Star,
 } from "lucide-react";
 import {
   useCreateB2BReport,
+  useRateB2BReport,
   useGetB2BListing,
   getGetB2BListingQueryKey,
   type B2BReportCategory,
@@ -303,13 +305,23 @@ function ReportBox({ listingId }: { listingId: number }) {
     useState<B2BReportCategory>("misleading_information");
   const [details, setDetails] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submittedReportId, setSubmittedReportId] = useState<number | null>(null);
+  const [rating, setRating] = useState<number | null>(null);
+  const [ratingComment, setRatingComment] = useState("");
+  const [rated, setRated] = useState(false);
   const report = useCreateB2BReport({
     mutation: {
-      onSuccess: () => {
+      onSuccess: (created) => {
         setSubmitted(true);
+        setSubmittedReportId(created.id);
         setIsOpen(false);
         setDetails("");
       },
+    },
+  });
+  const rate = useRateB2BReport({
+    mutation: {
+      onSuccess: () => setRated(true),
     },
   });
 
@@ -338,9 +350,73 @@ function ReportBox({ listingId }: { listingId: number }) {
         {t("listing_report")}
       </p>
       {submitted ? (
-        <p className="mt-3 text-xs leading-relaxed text-primary">
-          {t("report_submitted")}
-        </p>
+        <div className="mt-3 space-y-4">
+          <p className="text-xs leading-relaxed text-primary">
+            {t("report_submitted")}
+          </p>
+          {rated ? (
+            <p className="text-xs leading-relaxed text-primary">
+              Değerlendirmeniz kaydedildi. Teşekkür ederiz.
+            </p>
+          ) : (
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (!submittedReportId || !rating) return;
+                rate.mutate({
+                  id: submittedReportId,
+                  data: {
+                    rating,
+                    comment: ratingComment.trim() || undefined,
+                  },
+                });
+              }}
+              className="border border-border/70 bg-card p-4"
+            >
+              <p className="flex items-center gap-2 text-xs font-semibold">
+                <Star size={14} className="text-primary" />
+                Şikâyet merkezini değerlendirin
+              </p>
+              <div className="mt-3 flex gap-1" aria-label="1 ile 5 arasında puan">
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setRating(value)}
+                    className={`rounded-full border px-3 py-2 text-xs ${
+                      rating === value
+                        ? "border-primary bg-primary text-white"
+                        : "border-border text-foreground/60"
+                    }`}
+                    aria-label={`${value} puan`}
+                  >
+                    {value}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={ratingComment}
+                onChange={(event) => setRatingComment(event.target.value)}
+                maxLength={1000}
+                rows={2}
+                placeholder="İsterseniz kısa bir yorum bırakın."
+                className="mt-3 w-full resize-y border border-border bg-background p-3 text-xs outline-none focus:border-primary"
+              />
+              {rate.isError ? (
+                <p className="mt-2 text-xs text-red-600">
+                  Puan kaydedilemedi. Lütfen tekrar deneyin.
+                </p>
+              ) : null}
+              <button
+                type="submit"
+                disabled={!rating || rate.isPending}
+                className="mt-3 bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white disabled:opacity-60"
+              >
+                {rate.isPending ? "Kaydediliyor..." : "Puanı kaydet"}
+              </button>
+            </form>
+          )}
+        </div>
       ) : !isOpen ? (
         <button
           type="button"

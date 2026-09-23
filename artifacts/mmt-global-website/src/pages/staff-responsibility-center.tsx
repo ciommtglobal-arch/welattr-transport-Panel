@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { UserButton, useAuth } from "@clerk/react";
 import { Link } from "wouter";
 import {
@@ -7,20 +7,32 @@ import {
   Banknote,
   BriefcaseBusiness,
   FileCheck2,
+  Gift,
   Globe2,
   GraduationCap,
   Languages,
   LayoutDashboard,
   Mail,
   Megaphone,
+  Plane,
+  Trophy,
   ShieldAlert,
   Truck,
   Users,
 } from "lucide-react";
 import {
   useGetStaffProfiles,
+  getGetStaffRewardsQueryKey,
+  useCreateStaffRewardPlan,
+  useCreateStaffRewardTransaction,
+  useDecideStaffRewardTransaction,
+  useGetOperationsDesk,
+  useGetStaffRewards,
   type StaffProfile,
+  type StaffRewardSummary,
+  type StaffRewardTransactionKind,
 } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Responsibility = {
   id: string;
@@ -416,11 +428,15 @@ function SharedFinanceDesk({ profiles }: { profiles: StaffProfile[] }) {
 }
 
 function SignedInCenter() {
+  const queryClient = useQueryClient();
   const {
     data: profiles = [],
     isLoading: profilesLoading,
     isError: profilesError,
   } = useGetStaffProfiles();
+  const rewardsQuery = useGetStaffRewards();
+  const operationsDeskQuery = useGetOperationsDesk();
+  const isRewardsAdmin = operationsDeskQuery.data?.role === "admin";
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-12 md:px-10 md:py-16">
@@ -492,6 +508,11 @@ function SignedInCenter() {
         )}
       </section>
       {profiles.length > 0 ? <SharedFinanceDesk profiles={profiles} /> : null}
+      <StaffRewardsSection
+        items={rewardsQuery.data?.items ?? []}
+        isLoading={rewardsQuery.isLoading}
+        isAdmin={isRewardsAdmin}
+      />
       <div className="mt-10 grid gap-5 md:grid-cols-2">
         {responsibilities.map((item) => <ResponsibilityCard key={item.id} item={item} />)}
       </div>
@@ -509,6 +530,188 @@ function SignedInCenter() {
       </div>
     </section>
   );
+}
+
+function StaffRewardsSection({
+  items,
+  isLoading,
+  isAdmin,
+}: {
+  items: StaffRewardSummary[];
+  isLoading: boolean;
+  isAdmin: boolean;
+}) {
+  const queryClient = useQueryClient();
+  const [plan, setPlan] = useState({
+    staffEmail: "",
+    name: "",
+    monthlyPoints: "100",
+    monthlyCashAmount: "0",
+    holidayPackageBudget: "0",
+    internationalTravelBudget: "0",
+    customBenefits: "",
+  });
+  const [transaction, setTransaction] = useState({
+    staffEmail: "",
+    kind: "points" as StaffRewardTransactionKind,
+    pointsDelta: "50",
+    cashAmount: "0",
+    title: "",
+    reason: "",
+  });
+  const refresh = () =>
+    void queryClient.invalidateQueries({ queryKey: getGetStaffRewardsQueryKey() });
+  const createPlan = useCreateStaffRewardPlan({
+    mutation: { onSuccess: refresh },
+  });
+  const createTransaction = useCreateStaffRewardTransaction({
+    mutation: { onSuccess: refresh },
+  });
+  const decide = useDecideStaffRewardTransaction({
+    mutation: { onSuccess: refresh },
+  });
+
+  function submitPlan(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    createPlan.mutate({
+      data: {
+        staffEmail: plan.staffEmail.trim(),
+        name: plan.name.trim(),
+        monthlyPoints: Number(plan.monthlyPoints) || 0,
+        monthlyCashAmount: Number(plan.monthlyCashAmount) || 0,
+        holidayPackageBudget: Number(plan.holidayPackageBudget) || 0,
+        internationalTravelBudget: Number(plan.internationalTravelBudget) || 0,
+        customBenefits: plan.customBenefits
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
+      },
+    });
+  }
+
+  function submitTransaction(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    createTransaction.mutate({
+      data: {
+        staffEmail: transaction.staffEmail.trim(),
+        kind: transaction.kind,
+        pointsDelta: Number(transaction.pointsDelta) || 0,
+        cashAmount: Number(transaction.cashAmount) || 0,
+        title: transaction.title.trim(),
+        reason: transaction.reason.trim() || undefined,
+      },
+    });
+  }
+
+  return (
+    <section className="mt-10 border border-primary/30 bg-card p-6 md:p-8">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+            <Gift size={15} />
+            Personel değer ve ödül merkezi
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight">Kişiye özel kazanç paketleri</h2>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-foreground/60">
+            Puan, prim, tatil paketi, izin ve yurt dışı seyahat bütçeleri her
+            personel için ayrı tanımlanabilir. Nakit ve seyahat işlemleri ödeme
+            yapılmış sayılmaz; yönetici kararını bekler.
+          </p>
+        </div>
+        <Trophy className="text-primary" size={28} />
+      </div>
+
+      {isLoading ? (
+        <div className="mt-8 h-40 animate-pulse border border-border bg-background" />
+      ) : (
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
+          {items.map((item) => (
+            <article key={item.staffUserId} className="border border-border/70 p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">{item.staffEmail}</p>
+                  <h3 className="mt-2 text-xl font-semibold">{item.pointsBalance.toLocaleString("tr-TR")} puan</h3>
+                </div>
+                <span className="text-xs text-foreground/50">{item.plans.length} paket</span>
+              </div>
+              <div className="mt-5 grid grid-cols-3 gap-3 text-xs">
+                <Metric label="Nakit" value={`${item.cashBalance.toLocaleString("tr-TR")} ₺`} />
+                <Metric label="Tatil" value={`${item.holidayBalance.toLocaleString("tr-TR")} ₺`} />
+                <Metric label="Yurt dışı" value={`${item.internationalTravelBalance.toLocaleString("tr-TR")} ₺`} />
+              </div>
+              <div className="mt-5 space-y-2 border-t border-border/70 pt-4">
+                {item.plans.slice(0, 2).map((rewardPlan) => (
+                  <p key={rewardPlan.id} className="text-xs text-foreground/60">
+                    <span className="font-semibold text-foreground">{rewardPlan.name}</span>
+                    {" · "}
+                    {rewardPlan.monthlyPoints.toLocaleString("tr-TR")} puan/ay
+                  </p>
+                ))}
+                {item.transactions.filter((entry) => entry.status === "pending_approval").map((entry) => (
+                  <div key={entry.id} className="flex items-center justify-between gap-3 border border-primary/20 bg-primary/5 p-3 text-xs">
+                    <span>{entry.title} · yönetici kararı bekliyor</span>
+                    {isAdmin ? (
+                      <span className="flex gap-2">
+                        <button type="button" onClick={() => decide.mutate({ id: entry.id, data: { decision: "approve" } })} className="font-bold text-primary">Onayla</button>
+                        <button type="button" onClick={() => decide.mutate({ id: entry.id, data: { decision: "reject" } })} className="font-bold text-destructive">Reddet</button>
+                      </span>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {isAdmin ? (
+        <div className="mt-8 grid gap-6 border-t border-border/70 pt-8 lg:grid-cols-2">
+          <form onSubmit={submitPlan} className="space-y-3">
+            <h3 className="text-xl font-semibold">Özel paket tanımla</h3>
+            <RewardInput label="Personel e-postası" value={plan.staffEmail} onChange={(value) => setPlan((current) => ({ ...current, staffEmail: value }))} type="email" required />
+            <RewardInput label="Paket adı" value={plan.name} onChange={(value) => setPlan((current) => ({ ...current, name: value }))} required />
+            <div className="grid grid-cols-2 gap-3">
+              <RewardInput label="Aylık puan" value={plan.monthlyPoints} onChange={(value) => setPlan((current) => ({ ...current, monthlyPoints: value }))} type="number" />
+              <RewardInput label="Aylık nakit karşılığı" value={plan.monthlyCashAmount} onChange={(value) => setPlan((current) => ({ ...current, monthlyCashAmount: value }))} type="number" />
+              <RewardInput label="Tatil bütçesi" value={plan.holidayPackageBudget} onChange={(value) => setPlan((current) => ({ ...current, holidayPackageBudget: value }))} type="number" />
+              <RewardInput label="Yurt dışı bütçesi" value={plan.internationalTravelBudget} onChange={(value) => setPlan((current) => ({ ...current, internationalTravelBudget: value }))} type="number" />
+            </div>
+            <RewardInput label="Özel jestler (virgülle ayırın)" value={plan.customBenefits} onChange={(value) => setPlan((current) => ({ ...current, customBenefits: value }))} />
+            <button disabled={createPlan.isPending} className="bg-primary px-4 py-3 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-60">
+              Paketi kaydet
+            </button>
+          </form>
+          <form onSubmit={submitTransaction} className="space-y-3">
+            <h3 className="text-xl font-semibold">Puan veya ödül ekle</h3>
+            <RewardInput label="Personel e-postası" value={transaction.staffEmail} onChange={(value) => setTransaction((current) => ({ ...current, staffEmail: value }))} type="email" required />
+            <RewardInput label="Kazanım başlığı" value={transaction.title} onChange={(value) => setTransaction((current) => ({ ...current, title: value }))} required />
+            <select value={transaction.kind} onChange={(event) => setTransaction((current) => ({ ...current, kind: event.target.value as StaffRewardTransactionKind }))} className="w-full border border-border bg-background px-3 py-3 text-sm">
+              <option value="points">Puan</option>
+              <option value="cash">Nakit kazanç</option>
+              <option value="holiday_package">Tatil paketi</option>
+              <option value="international_trip">Yurt dışı gezisi</option>
+            </select>
+            <div className="grid grid-cols-2 gap-3">
+              <RewardInput label="Puan miktarı" value={transaction.pointsDelta} onChange={(value) => setTransaction((current) => ({ ...current, pointsDelta: value }))} type="number" />
+              <RewardInput label="Bütçe tutarı" value={transaction.cashAmount} onChange={(value) => setTransaction((current) => ({ ...current, cashAmount: value }))} type="number" />
+            </div>
+            <RewardInput label="Gerekçe" value={transaction.reason} onChange={(value) => setTransaction((current) => ({ ...current, reason: value }))} />
+            <button disabled={createTransaction.isPending} className="bg-primary px-4 py-3 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-60">
+              Kazanımı kaydet
+            </button>
+          </form>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return <div className="border border-border/60 p-3"><p className="text-[10px] uppercase tracking-wider text-foreground/40">{label}</p><p className="mt-1 font-semibold">{value}</p></div>;
+}
+
+function RewardInput({ label, value, onChange, type = "text", required = false }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean }) {
+  return <label className="block text-sm"><span className="mb-1 block text-foreground/65">{label}</span><input required={required} type={type} value={value} onChange={(event) => onChange(event.target.value)} className="w-full border border-border bg-background px-3 py-3 outline-none focus:border-primary" /></label>;
 }
 
 export default function StaffResponsibilityCenter() {

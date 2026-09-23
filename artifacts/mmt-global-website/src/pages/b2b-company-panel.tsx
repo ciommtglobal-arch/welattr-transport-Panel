@@ -3,9 +3,12 @@ import { useAuth } from "@clerk/react";
 import { Link } from "wouter";
 import {
   ArrowLeft,
+  AlertTriangle,
+  Bell,
   CheckCircle2,
   Clipboard,
   Copy,
+  Clock3,
   Inbox,
   LayoutDashboard,
   Loader2,
@@ -31,6 +34,13 @@ import {
   useGetMyB2BCompanyRequests,
   useGetMyB2BCompanyTasks,
   useGetMyB2BBusinessProfile,
+  getGetB2BWorkflowApprovalsQueryKey,
+  getGetWorkflowNotificationsQueryKey,
+  useDecideB2BWorkflowApproval,
+  useGetB2BWorkflowApprovals,
+  useGetWorkflowNotifications,
+  useMarkWorkflowNotificationRead,
+  useReviewB2BWorkflowApproval,
   type B2BBusinessProfile,
   type B2BCompanyMember,
   type B2BCompanyMemberRole,
@@ -38,6 +48,9 @@ import {
   type B2BCompanyRequestPriority,
   type B2BCompanyRequestStatus,
   type B2BCompanyTaskStatus,
+  type WorkflowApproval,
+  type WorkflowApprovalStatus,
+  type WorkflowNotification,
 } from "@workspace/api-client-react";
 
 const taskStatuses: Array<[B2BCompanyTaskStatus, string]> = [
@@ -95,6 +108,8 @@ function CompanyPanelContent({
   const membersQuery = useGetMyB2BCompanyMembers();
   const requestsQuery = useGetMyB2BCompanyRequests();
   const tasksQuery = useGetMyB2BCompanyTasks();
+  const approvalsQuery = useGetB2BWorkflowApprovals();
+  const notificationsQuery = useGetWorkflowNotifications();
   const [inviteToken, setInviteToken] = useState(() =>
     typeof window === "undefined"
       ? ""
@@ -112,6 +127,9 @@ function CompanyPanelContent({
     currentRole === "manager";
   const canManage = canManageCompany;
   const canManageTasks = canManageCompany;
+  const canReviewApprovals = canManageCompany;
+  const canDecideApprovals =
+    currentRole === "owner" || currentRole === "admin";
   const [inviteResult, setInviteResult] = useState("");
   const [error, setError] = useState("");
   const [isAccepting, setIsAccepting] = useState(false);
@@ -253,6 +271,23 @@ function CompanyPanelContent({
           />
         </div>
 
+        <WorkflowSection
+          approvals={approvalsQuery.data?.items ?? []}
+          notifications={notificationsQuery.data?.items ?? []}
+          unreadCount={notificationsQuery.data?.unreadCount ?? 0}
+          canReview={canReviewApprovals}
+          canDecide={canDecideApprovals}
+          onError={setError}
+          onRefresh={() => {
+            void queryClient.invalidateQueries({
+              queryKey: getGetB2BWorkflowApprovalsQueryKey(),
+            });
+            void queryClient.invalidateQueries({
+              queryKey: getGetWorkflowNotificationsQueryKey(),
+            });
+          }}
+        />
+
         <RequestsSection
           requests={requests}
           canSubmit={Boolean(currentMember)}
@@ -279,6 +314,256 @@ function CompanyPanelContent({
         />
       </section>
     </main>
+  );
+}
+
+function WorkflowSection({
+  approvals,
+  notifications,
+  unreadCount,
+  canReview,
+  canDecide,
+  onError,
+  onRefresh,
+}: {
+  approvals: WorkflowApproval[];
+  notifications: WorkflowNotification[];
+  unreadCount: number;
+  canReview: boolean;
+  canDecide: boolean;
+  onError: (value: string) => void;
+  onRefresh: () => void;
+}) {
+  const review = useReviewB2BWorkflowApproval({
+    mutation: {
+      onSuccess: onRefresh,
+      onError: () => onError("Onay incelemesi kaydedilemedi."),
+    },
+  });
+  const decide = useDecideB2BWorkflowApproval({
+    mutation: {
+      onSuccess: onRefresh,
+      onError: () => onError("Sahip kararı kaydedilemedi."),
+    },
+  });
+  const markRead = useMarkWorkflowNotificationRead({
+    mutation: {
+      onSuccess: onRefresh,
+      onError: () => onError("Bildirim okunmuş olarak işaretlenemedi."),
+    },
+  });
+
+  function reviewApproval(approval: WorkflowApproval, decision: "approve" | "reject") {
+    review.mutate({
+      id: approval.id,
+      data: { decision },
+    });
+  }
+
+  function decideApproval(approval: WorkflowApproval, decision: "approve" | "reject") {
+    decide.mutate({
+      id: approval.id,
+      data: { decision },
+    });
+  }
+
+  return (
+    <section className="border border-primary/25 bg-card p-6 md:p-8">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+        <div>
+          <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+            <ShieldCheck size={15} />
+            Ortak onay merkezi
+          </p>
+          <h2 className="mt-3 text-2xl font-semibold">Kontrollü işlem akışı</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground/60">
+            Düşük riskli işler incelemeden sonra kısa sürede sistem tarafından
+            sonuçlandırılır. Finans, hukuk, dışa gönderim, silme ve yetki
+            değişikliği içeren işler manuel sahip kararını bekler.
+          </p>
+        </div>
+        <span className="inline-flex items-center gap-2 border border-border/70 px-3 py-2 font-mono text-xs">
+          <Bell size={14} />
+          {unreadCount} yeni bildirim
+        </span>
+      </div>
+
+      {notifications.length > 0 ? (
+        <div className="mt-6 grid gap-3 md:grid-cols-2">
+          {notifications.slice(0, 4).map((notification) => (
+            <article
+              key={notification.id}
+              className={`border p-4 ${
+                notification.readAt
+                  ? "border-border/60 bg-background/30"
+                  : "border-primary/35 bg-primary/5"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold">{notification.title}</p>
+                  <p className="mt-1 text-xs leading-5 text-foreground/60">
+                    {notification.body}
+                  </p>
+                </div>
+                {!notification.readAt ? (
+                  <button
+                    type="button"
+                    onClick={() => markRead.mutate({ id: notification.id })}
+                    className="whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.12em] text-primary"
+                  >
+                    Okundu
+                  </button>
+                ) : null}
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : null}
+
+      {approvals.length === 0 ? (
+        <p className="mt-6 border border-dashed border-border/70 p-4 text-sm text-foreground/55">
+          Bekleyen veya sonuçlanmış ortak onay kaydı bulunmuyor.
+        </p>
+      ) : (
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          {approvals.map((approval) => (
+            <ApprovalCard
+              key={approval.id}
+              approval={approval}
+              canReview={canReview}
+              canDecide={canDecide}
+              isBusy={review.isPending || decide.isPending}
+              onReview={reviewApproval}
+              onDecide={decideApproval}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ApprovalCard({
+  approval,
+  canReview,
+  canDecide,
+  isBusy,
+  onReview,
+  onDecide,
+}: {
+  approval: WorkflowApproval;
+  canReview: boolean;
+  canDecide: boolean;
+  isBusy: boolean;
+  onReview: (approval: WorkflowApproval, decision: "approve" | "reject") => void;
+  onDecide: (approval: WorkflowApproval, decision: "approve" | "reject") => void;
+}) {
+  const riskLabels: Record<WorkflowApproval["riskCategory"], string> = {
+    none: "Düşük risk",
+    financial: "Finansal risk",
+    legal: "Hukuki risk",
+    external: "Dışa gönderim / yayın",
+    delete: "Silme / geri döndürülemez değişiklik",
+    permission: "Yetki değişikliği",
+  };
+  const statusLabels: Record<WorkflowApprovalStatus, string> = {
+    pending_reviewer: "İnceleme bekliyor",
+    pending_owner: "Sahip kararı bekliyor",
+    auto_approved: "Sistem sürecinde",
+    approved: "Onaylandı",
+    rejected: "Reddedildi",
+    expired: "Süresi geçti",
+  };
+  const canReviewThis = canReview && approval.status === "pending_reviewer";
+  const canDecideThis = canDecide && approval.status === "pending_owner";
+
+  return (
+    <article className="border border-border/70 p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.13em] text-primary">
+              {approval.entityType.replaceAll("_", " ")}
+            </span>
+            <span
+              className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] ${
+                approval.riskCategory === "none"
+                  ? "text-emerald-600"
+                  : "text-destructive"
+              }`}
+            >
+              {approval.riskCategory === "none" ? (
+                <CheckCircle2 size={12} />
+              ) : (
+                <AlertTriangle size={12} />
+              )}
+              {riskLabels[approval.riskCategory]}
+            </span>
+          </div>
+          <h3 className="mt-2 text-lg font-semibold">{approval.title}</h3>
+        </div>
+        <span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.1em] text-foreground/50">
+          {statusLabels[approval.status]}
+        </span>
+      </div>
+      {approval.summary ? (
+        <p className="mt-3 text-sm leading-6 text-foreground/65">
+          {approval.summary}
+        </p>
+      ) : null}
+      {approval.riskReason ? (
+        <p className="mt-3 border-l-2 border-destructive/40 bg-destructive/5 px-3 py-2 text-xs leading-5 text-foreground/65">
+          {approval.riskReason}
+        </p>
+      ) : null}
+      <p className="mt-4 flex items-center gap-2 border-t border-border/70 pt-4 text-xs text-foreground/45">
+        <Clock3 size={13} />
+        {approval.decisionDueAt
+          ? `Karar zamanı: ${new Date(approval.decisionDueAt).toLocaleString("tr-TR")}`
+          : "Karar zamanı belirtilmedi"}
+      </p>
+      {canReviewThis ? (
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            disabled={isBusy}
+            onClick={() => onReview(approval, "approve")}
+            className="flex-1 bg-primary px-3 py-3 text-[10px] font-bold uppercase tracking-[0.1em] text-primary-foreground disabled:opacity-60"
+          >
+            İncelemeyi onayla
+          </button>
+          <button
+            type="button"
+            disabled={isBusy}
+            onClick={() => onReview(approval, "reject")}
+            className="border border-destructive/40 px-3 py-3 text-[10px] font-bold uppercase tracking-[0.1em] text-destructive disabled:opacity-60"
+          >
+            Reddet
+          </button>
+        </div>
+      ) : null}
+      {canDecideThis ? (
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            disabled={isBusy}
+            onClick={() => onDecide(approval, "approve")}
+            className="flex-1 bg-primary px-3 py-3 text-[10px] font-bold uppercase tracking-[0.1em] text-primary-foreground disabled:opacity-60"
+          >
+            Sahip olarak onayla
+          </button>
+          <button
+            type="button"
+            disabled={isBusy}
+            onClick={() => onDecide(approval, "reject")}
+            className="border border-destructive/40 px-3 py-3 text-[10px] font-bold uppercase tracking-[0.1em] text-destructive disabled:opacity-60"
+          >
+            Reddet
+          </button>
+        </div>
+      ) : null}
+    </article>
   );
 }
 

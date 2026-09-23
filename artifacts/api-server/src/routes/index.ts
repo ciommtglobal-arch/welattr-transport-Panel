@@ -13,6 +13,8 @@ import publicLogisticsRouter from "./public-logistics";
 import logisticsOperationsRouter from "./logistics-operations";
 import staffProfilesRouter from "./staff-profiles";
 import b2bCompanyManagementRouter from "./b2b-company-management";
+import workflowRouter from "./workflow";
+import staffRewardsRouter from "./staff-rewards";
 
 const router: IRouter = Router();
 
@@ -30,5 +32,7 @@ router.use(publicLogisticsRouter);
 router.use(logisticsOperationsRouter);
 router.use(staffProfilesRouter);
 router.use(b2bCompanyManagementRouter);
+  router.use(workflowRouter);
+  router.use(staffRewardsRouter);
 
 export default router;

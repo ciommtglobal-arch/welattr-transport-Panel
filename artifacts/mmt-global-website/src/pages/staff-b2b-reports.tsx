@@ -201,6 +201,14 @@ function ReportInbox() {
               <dl className="mt-8 grid gap-5 sm:grid-cols-2 text-sm">
                 <Info label="Bildirim türü" value={categoryLabels[selected.category]} />
                 <Info label="Bildirim tarihi" value={formatDate(selected.createdAt)} />
+                <Info
+                  label="Kullanıcı puanı"
+                  value={
+                    selected.rating
+                      ? `${selected.rating}/5${selected.ratingComment ? ` · ${selected.ratingComment}` : ""}`
+                      : "Henüz puanlanmadı"
+                  }
+                />
               </dl>
               <div className="mt-8 flex-1">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-foreground/40">

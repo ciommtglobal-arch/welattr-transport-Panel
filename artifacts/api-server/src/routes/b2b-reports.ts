@@ -3,6 +3,8 @@ import {
   CreateB2BReportBody,
   CreateB2BReportParams,
   GetB2BReportReviewQueueQueryParams,
+  RateB2BReportBody,
+  RateB2BReportParams,
   UpdateB2BReportStatusBody,
   UpdateB2BReportStatusParams,
 } from "@workspace/api-zod";
@@ -41,6 +43,9 @@ function serializeReport(report: B2BReport, includeInternalNote = false) {
       ? report.reviewerClerkUserId
       : null,
     reviewedAt: report.reviewedAt?.toISOString() ?? null,
+    rating: report.rating,
+    ratingComment: report.ratingComment,
+    ratedAt: report.ratedAt?.toISOString() ?? null,
     createdAt: report.createdAt.toISOString(),
     updatedAt: report.updatedAt.toISOString(),
   };
@@ -136,6 +141,46 @@ router.get("/b2b-reports/review", async (req, res): Promise<void> => {
     total: countRows[0]?.count ?? 0,
   });
 });
+
+router.post(
+  "/b2b-reports/:id/rating",
+  async (req, res): Promise<void> => {
+    const userId = requireUser(req, res);
+    if (!userId) return;
+    const params = RateB2BReportParams.safeParse(req.params);
+    const body = RateB2BReportBody.safeParse(req.body);
+    if (!params.success || !body.success) {
+      res.status(400).json({ error: "Puan bilgileri geçersiz." });
+      return;
+    }
+
+    const [existing] = await db
+      .select()
+      .from(b2bReportsTable)
+      .where(
+        and(
+          eq(b2bReportsTable.id, params.data.id),
+          eq(b2bReportsTable.reporterClerkUserId, userId),
+        ),
+      )
+      .limit(1);
+    if (!existing) {
+      res.status(404).json({ error: "Şikâyet kaydı bulunamadı." });
+      return;
+    }
+
+    const [updated] = await db
+      .update(b2bReportsTable)
+      .set({
+        rating: body.data.rating,
+        ratingComment: body.data.comment?.trim() || null,
+        ratedAt: new Date(),
+      })
+      .where(eq(b2bReportsTable.id, existing.id))
+      .returning();
+    res.json(serializeReport(updated));
+  },
+);
 
 router.patch(
   "/b2b-reports/:id/status",

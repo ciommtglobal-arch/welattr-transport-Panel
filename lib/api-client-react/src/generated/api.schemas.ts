@@ -143,6 +143,157 @@ export interface OperationsDesk {
   boundaries: string[];
 }
 
+export type StaffRewardPlanStatus = typeof StaffRewardPlanStatus[keyof typeof StaffRewardPlanStatus];
+
+
+export const StaffRewardPlanStatus = {
+  draft: 'draft',
+  active: 'active',
+  paused: 'paused',
+} as const;
+
+export type StaffRewardTransactionKind = typeof StaffRewardTransactionKind[keyof typeof StaffRewardTransactionKind];
+
+
+export const StaffRewardTransactionKind = {
+  points: 'points',
+  cash: 'cash',
+  holiday_package: 'holiday_package',
+  international_trip: 'international_trip',
+} as const;
+
+export type StaffRewardTransactionStatus = typeof StaffRewardTransactionStatus[keyof typeof StaffRewardTransactionStatus];
+
+
+export const StaffRewardTransactionStatus = {
+  approved: 'approved',
+  pending_approval: 'pending_approval',
+  rejected: 'rejected',
+} as const;
+
+export type StaffRewardPlanInputCurrency = typeof StaffRewardPlanInputCurrency[keyof typeof StaffRewardPlanInputCurrency];
+
+
+export const StaffRewardPlanInputCurrency = {
+  TRY: 'TRY',
+  USD: 'USD',
+  EUR: 'EUR',
+} as const;
+
+export interface StaffRewardPlanInput {
+  staffEmail: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  name: string;
+  /**
+     * @minimum 0
+     * @maximum 1000000
+     */
+  monthlyPoints?: number;
+  /** @minimum 0 */
+  monthlyCashAmount?: number;
+  currency?: StaffRewardPlanInputCurrency;
+  /** @minimum 0 */
+  holidayPackageBudget?: number;
+  /** @minimum 0 */
+  internationalTravelBudget?: number;
+  /**
+     * @maxItems 20
+     * @items.maxLength 200
+     */
+  customBenefits?: string[];
+}
+
+export interface StaffRewardPlan {
+  id: number;
+  staffUserId: number;
+  staffEmail: string;
+  name: string;
+  monthlyPoints: number;
+  monthlyCashAmount: number;
+  currency: string;
+  holidayPackageBudget: number;
+  internationalTravelBudget: number;
+  customBenefits: string[];
+  status: StaffRewardPlanStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type StaffRewardTransactionInputCurrency = typeof StaffRewardTransactionInputCurrency[keyof typeof StaffRewardTransactionInputCurrency];
+
+
+export const StaffRewardTransactionInputCurrency = {
+  TRY: 'TRY',
+  USD: 'USD',
+  EUR: 'EUR',
+} as const;
+
+export interface StaffRewardTransactionInput {
+  staffEmail: string;
+  kind: StaffRewardTransactionKind;
+  /**
+     * @minimum -1000000
+     * @maximum 1000000
+     */
+  pointsDelta?: number;
+  /** @minimum 0 */
+  cashAmount?: number;
+  currency?: StaffRewardTransactionInputCurrency;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  title: string;
+  /** @maxLength 2000 */
+  reason?: string;
+}
+
+export interface StaffRewardTransaction {
+  id: number;
+  staffUserId: number;
+  staffEmail: string;
+  /** @nullable */
+  planId?: number | null;
+  kind: StaffRewardTransactionKind;
+  pointsDelta: number;
+  cashAmount: number;
+  currency: string;
+  title: string;
+  reason: string;
+  status: StaffRewardTransactionStatus;
+  createdAt: string;
+}
+
+export type StaffRewardTransactionDecisionDecision = typeof StaffRewardTransactionDecisionDecision[keyof typeof StaffRewardTransactionDecisionDecision];
+
+
+export const StaffRewardTransactionDecisionDecision = {
+  approve: 'approve',
+  reject: 'reject',
+} as const;
+
+export interface StaffRewardTransactionDecision {
+  decision: StaffRewardTransactionDecisionDecision;
+}
+
+export interface StaffRewardSummary {
+  staffUserId: number;
+  staffEmail: string;
+  pointsBalance: number;
+  cashBalance: number;
+  holidayBalance: number;
+  internationalTravelBalance: number;
+  plans: StaffRewardPlan[];
+  transactions: StaffRewardTransaction[];
+}
+
+export interface StaffRewardsResponse {
+  items: StaffRewardSummary[];
+}
+
 export type LimitApplicationStatus = typeof LimitApplicationStatus[keyof typeof LimitApplicationStatus];
 
 
@@ -1233,6 +1384,12 @@ export interface B2BReport {
   reviewerClerkUserId?: string | null;
   /** @nullable */
   reviewedAt?: string | null;
+  /** @nullable */
+  rating?: number | null;
+  /** @nullable */
+  ratingComment?: string | null;
+  /** @nullable */
+  ratedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -1241,6 +1398,16 @@ export interface B2BReportStatusUpdate {
   status: B2BReportStatus;
   /** @maxLength 4000 */
   internalNote?: string;
+}
+
+export interface B2BReportRatingInput {
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  rating: number;
+  /** @maxLength 1000 */
+  comment?: string;
 }
 
 export interface B2BReportPage {
@@ -1617,6 +1784,154 @@ export interface B2BCompanyRequest {
 export interface B2BCompanyRequestPage {
   items: B2BCompanyRequest[];
   total: number;
+}
+
+export type WorkflowEntityType = typeof WorkflowEntityType[keyof typeof WorkflowEntityType];
+
+
+export const WorkflowEntityType = {
+  company_task: 'company_task',
+  company_request: 'company_request',
+  business_profile: 'business_profile',
+  limit_application: 'limit_application',
+  b2b_listing: 'b2b_listing',
+  b2b_request: 'b2b_request',
+  b2b_report: 'b2b_report',
+  media_item: 'media_item',
+  media_delivery: 'media_delivery',
+  logistics_offer: 'logistics_offer',
+} as const;
+
+export type WorkflowRiskCategory = typeof WorkflowRiskCategory[keyof typeof WorkflowRiskCategory];
+
+
+export const WorkflowRiskCategory = {
+  none: 'none',
+  financial: 'financial',
+  legal: 'legal',
+  external: 'external',
+  delete: 'delete',
+  permission: 'permission',
+} as const;
+
+export type WorkflowApprovalStatus = typeof WorkflowApprovalStatus[keyof typeof WorkflowApprovalStatus];
+
+
+export const WorkflowApprovalStatus = {
+  pending_reviewer: 'pending_reviewer',
+  pending_owner: 'pending_owner',
+  auto_approved: 'auto_approved',
+  approved: 'approved',
+  rejected: 'rejected',
+  expired: 'expired',
+} as const;
+
+export type WorkflowNotificationType = typeof WorkflowNotificationType[keyof typeof WorkflowNotificationType];
+
+
+export const WorkflowNotificationType = {
+  approval: 'approval',
+  risk: 'risk',
+  deadline: 'deadline',
+  rating: 'rating',
+} as const;
+
+export interface WorkflowApprovalInput {
+  entityType: WorkflowEntityType;
+  entityId: number;
+  /**
+     * @minLength 2
+     * @maxLength 200
+     */
+  title: string;
+  /** @maxLength 4000 */
+  summary?: string;
+  riskCategory?: WorkflowRiskCategory;
+  /** @maxLength 1000 */
+  riskReason?: string;
+}
+
+export interface WorkflowApproval {
+  id: number;
+  /** @nullable */
+  businessProfileId?: number | null;
+  entityType: WorkflowEntityType;
+  entityId: number;
+  title: string;
+  summary: string;
+  /** @nullable */
+  submittedByClerkUserId?: string | null;
+  /** @nullable */
+  ownerClerkUserId?: string | null;
+  /** @nullable */
+  reviewerClerkUserId?: string | null;
+  riskCategory: WorkflowRiskCategory;
+  /** @nullable */
+  riskReason?: string | null;
+  status: WorkflowApprovalStatus;
+  /** @nullable */
+  reviewerDecisionAt?: string | null;
+  /** @nullable */
+  ownerDecisionAt?: string | null;
+  /** @nullable */
+  decisionDueAt?: string | null;
+  /** @nullable */
+  autoDecisionAt?: string | null;
+  /** @nullable */
+  decisionNote?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type WorkflowReviewerDecisionDecision = typeof WorkflowReviewerDecisionDecision[keyof typeof WorkflowReviewerDecisionDecision];
+
+
+export const WorkflowReviewerDecisionDecision = {
+  approve: 'approve',
+  reject: 'reject',
+} as const;
+
+export interface WorkflowReviewerDecision {
+  decision: WorkflowReviewerDecisionDecision;
+  /** @maxLength 4000 */
+  note?: string;
+}
+
+export type WorkflowOwnerDecisionDecision = typeof WorkflowOwnerDecisionDecision[keyof typeof WorkflowOwnerDecisionDecision];
+
+
+export const WorkflowOwnerDecisionDecision = {
+  approve: 'approve',
+  reject: 'reject',
+} as const;
+
+export interface WorkflowOwnerDecision {
+  decision: WorkflowOwnerDecisionDecision;
+  /** @maxLength 4000 */
+  note?: string;
+}
+
+export interface WorkflowNotification {
+  id: number;
+  type: WorkflowNotificationType;
+  title: string;
+  body: string;
+  /** @nullable */
+  approvalId?: number | null;
+  /** @nullable */
+  readAt: string | null;
+  createdAt: string;
+}
+
+export interface WorkflowApprovalPage {
+  items: WorkflowApproval[];
+  total: number;
+}
+
+export interface WorkflowNotificationPage {
+  items: WorkflowNotification[];
+  total: number;
+  unreadCount: number;
 }
 
 export type GetMediaItemsParams = {

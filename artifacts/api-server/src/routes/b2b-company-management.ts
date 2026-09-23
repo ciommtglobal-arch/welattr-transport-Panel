@@ -27,6 +27,7 @@ import {
 } from "@workspace/db";
 import { requireMyCompany } from "../lib/companyAuth";
 import { requireUser } from "../lib/staffAuth";
+import { createWorkflowApproval, isWorkflowEntityApproved } from "./workflow";
 
 const router: IRouter = Router();
 const inviteLifetimeMs = 7 * 24 * 60 * 60 * 1000;
@@ -343,6 +344,16 @@ router.post(
       })
       .returning();
 
+    await createWorkflowApproval({
+      businessProfileId: authorization.profile.id,
+      entityType: "company_request",
+      entityId: request.id,
+      title: request.title,
+      summary: request.description,
+      submittedByClerkUserId: authorization.userId,
+      ownerClerkUserId: authorization.profile.ownerClerkUserId,
+    });
+
     req.log.info(
       {
         businessProfileId: authorization.profile.id,
@@ -388,6 +399,18 @@ router.patch(
       .limit(1);
     if (!request) {
       res.status(404).json({ error: "Talep bulunamadı." });
+      return;
+    }
+    if (
+      !(await isWorkflowEntityApproved({
+        businessProfileId: authorization.profile.id,
+        entityType: "company_request",
+        entityId: request.id,
+      }))
+    ) {
+      res.status(409).json({
+        error: "Bu talep onay kararı verilmeden güncellenemez.",
+      });
       return;
     }
 
@@ -501,6 +524,16 @@ router.post(
       })
       .returning();
 
+    await createWorkflowApproval({
+      businessProfileId: authorization.profile.id,
+      entityType: "company_task",
+      entityId: task.id,
+      title: task.title,
+      summary: `${task.area}: ${task.description}`,
+      submittedByClerkUserId: authorization.userId,
+      ownerClerkUserId: authorization.profile.ownerClerkUserId,
+    });
+
     res.status(201).json(serializeTask(task));
   },
 );
@@ -534,6 +567,18 @@ router.patch(
 
     if (!task) {
       res.status(404).json({ error: "Görev bulunamadı." });
+      return;
+    }
+    if (
+      !(await isWorkflowEntityApproved({
+        businessProfileId: authorization.profile.id,
+        entityType: "company_task",
+        entityId: task.id,
+      }))
+    ) {
+      res.status(409).json({
+        error: "Bu görev onay kararı verilmeden güncellenemez.",
+      });
       return;
     }
 

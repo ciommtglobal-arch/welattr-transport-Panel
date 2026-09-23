@@ -958,6 +958,150 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /staff/rewards:
+    get:
+      operationId: getStaffRewards
+      tags: [staff-rewards]
+      summary: Personel puan ve ödül özetlerini listeler
+      responses:
+        "200":
+          description: Personel ödül özeti
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffRewardsResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /staff/rewards/plans:
+    post:
+      operationId: createStaffRewardPlan
+      tags: [staff-rewards]
+      summary: Bir personele özel puan ve ödül paketi tanımlar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StaffRewardPlanInput"
+      responses:
+        "201":
+          description: Created reward plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffRewardPlan"
+        "400":
+          description: Invalid reward plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Admin staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /staff/rewards/transactions:
+    post:
+      operationId: createStaffRewardTransaction
+      tags: [staff-rewards]
+      summary: Personel puanı veya ödül kazanımı oluşturur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StaffRewardTransactionInput"
+      responses:
+        "201":
+          description: Created reward transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffRewardTransaction"
+        "400":
+          description: Invalid reward transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Admin staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /staff/rewards/transactions/{id}/decision:
+    patch:
+      operationId: decideStaffRewardTransaction
+      tags: [staff-rewards]
+      summary: Nakit veya seyahat ödülü kararını verir
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StaffRewardTransactionDecision"
+      responses:
+        "200":
+          description: Updated reward transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffRewardTransaction"
+        "400":
+          description: Invalid reward decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Admin staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Reward transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /limit-applications:
     post:
       operationId: createLimitApplication
@@ -2077,6 +2221,257 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /b2b-reports/{id}/rating:
+    post:
+      operationId: rateB2BReport
+      tags: [b2b-reports]
+      summary: Rate a submitted suggestion or complaint
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BReportRatingInput"
+      responses:
+        "200":
+          description: Rated B2B report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BReport"
+        "400":
+          description: Invalid report rating
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Only the original reporter may rate this item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Report not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profile/approvals:
+    get:
+      operationId: getB2BWorkflowApprovals
+      tags: [workflow]
+      summary: List company approval items
+      responses:
+        "200":
+          description: Approval queue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowApprovalPage"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Company access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createB2BWorkflowApproval
+      tags: [workflow]
+      summary: Create a company approval item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowApprovalInput"
+      responses:
+        "201":
+          description: Created approval item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowApproval"
+        "400":
+          description: Invalid approval item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Company access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profile/approvals/{id}/review:
+    patch:
+      operationId: reviewB2BWorkflowApproval
+      tags: [workflow]
+      summary: Review a company approval item
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowReviewerDecision"
+      responses:
+        "200":
+          description: Updated approval item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowApproval"
+        "400":
+          description: Invalid approval review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Reviewer access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Approval item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profile/approvals/{id}/owner-decision:
+    patch:
+      operationId: decideB2BWorkflowApproval
+      tags: [workflow]
+      summary: Approve or reject a risky company approval item
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowOwnerDecision"
+      responses:
+        "200":
+          description: Updated approval item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowApproval"
+        "400":
+          description: Invalid owner decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Owner access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Approval item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /workflow/notifications:
+    get:
+      operationId: getWorkflowNotifications
+      tags: [workflow]
+      summary: List in-app workflow notifications
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowNotificationPage"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /workflow/notifications/{id}/read:
+    patch:
+      operationId: markWorkflowNotificationRead
+      tags: [workflow]
+      summary: Mark a workflow notification as read
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated notification
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowNotification"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Notification not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     TamiHostedPaymentInput:
@@ -2259,6 +2654,182 @@ components:
           type: array
           items:
             type: string
+    StaffRewardPlanStatus:
+      type: string
+      enum: [draft, active, paused]
+    StaffRewardTransactionKind:
+      type: string
+      enum: [points, cash, holiday_package, international_trip]
+    StaffRewardTransactionStatus:
+      type: string
+      enum: [approved, pending_approval, rejected]
+    StaffRewardPlanInput:
+      type: object
+      additionalProperties: false
+      required: [staffEmail, name]
+      properties:
+        staffEmail:
+          type: string
+          format: email
+        name:
+          type: string
+          minLength: 2
+          maxLength: 160
+        monthlyPoints:
+          type: integer
+          minimum: 0
+          maximum: 1000000
+        monthlyCashAmount:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          enum: [TRY, USD, EUR]
+        holidayPackageBudget:
+          type: number
+          minimum: 0
+        internationalTravelBudget:
+          type: number
+          minimum: 0
+        customBenefits:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            maxLength: 200
+    StaffRewardPlan:
+      type: object
+      required: [id, staffUserId, staffEmail, name, monthlyPoints, monthlyCashAmount, currency, holidayPackageBudget, internationalTravelBudget, customBenefits, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        staffUserId:
+          type: integer
+        staffEmail:
+          type: string
+          format: email
+        name:
+          type: string
+        monthlyPoints:
+          type: integer
+        monthlyCashAmount:
+          type: number
+        currency:
+          type: string
+        holidayPackageBudget:
+          type: number
+        internationalTravelBudget:
+          type: number
+        customBenefits:
+          type: array
+          items:
+            type: string
+        status:
+          $ref: "#/components/schemas/StaffRewardPlanStatus"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    StaffRewardTransactionInput:
+      type: object
+      additionalProperties: false
+      required: [staffEmail, kind, title]
+      properties:
+        staffEmail:
+          type: string
+          format: email
+        kind:
+          $ref: "#/components/schemas/StaffRewardTransactionKind"
+        pointsDelta:
+          type: integer
+          minimum: -1000000
+          maximum: 1000000
+        cashAmount:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          enum: [TRY, USD, EUR]
+        title:
+          type: string
+          minLength: 2
+          maxLength: 160
+        reason:
+          type: string
+          maxLength: 2000
+    StaffRewardTransaction:
+      type: object
+      required: [id, staffUserId, staffEmail, kind, pointsDelta, cashAmount, currency, title, reason, status, createdAt]
+      properties:
+        id:
+          type: integer
+        staffUserId:
+          type: integer
+        staffEmail:
+          type: string
+          format: email
+        planId:
+          type: [integer, "null"]
+        kind:
+          $ref: "#/components/schemas/StaffRewardTransactionKind"
+        pointsDelta:
+          type: integer
+        cashAmount:
+          type: number
+        currency:
+          type: string
+        title:
+          type: string
+        reason:
+          type: string
+        status:
+          $ref: "#/components/schemas/StaffRewardTransactionStatus"
+        createdAt:
+          type: string
+          format: date-time
+    StaffRewardTransactionDecision:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [approve, reject]
+    StaffRewardSummary:
+      type: object
+      required: [staffUserId, staffEmail, pointsBalance, cashBalance, holidayBalance, internationalTravelBalance, plans, transactions]
+      properties:
+        staffUserId:
+          type: integer
+        staffEmail:
+          type: string
+          format: email
+        pointsBalance:
+          type: integer
+        cashBalance:
+          type: number
+        holidayBalance:
+          type: number
+        internationalTravelBalance:
+          type: number
+        plans:
+          type: array
+          items:
+            $ref: "#/components/schemas/StaffRewardPlan"
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/StaffRewardTransaction"
+    StaffRewardsResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/StaffRewardSummary"
     LimitApplicationStatus:
       type: string
       enum: [new, reviewing, approved, rejected]
@@ -3676,6 +4247,13 @@ components:
         reviewedAt:
           type: [string, "null"]
           format: date-time
+        rating:
+          type: [integer, "null"]
+        ratingComment:
+          type: [string, "null"]
+        ratedAt:
+          type: [string, "null"]
+          format: date-time
         createdAt:
           type: string
           format: date-time
@@ -3692,6 +4270,18 @@ components:
         internalNote:
           type: string
           maxLength: 4000
+    B2BReportRatingInput:
+      type: object
+      additionalProperties: false
+      required: [rating]
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          maxLength: 1000
     B2BReportPage:
       type: object
       required: [items, page, pageSize, total]
@@ -4204,4 +4794,149 @@ components:
           items:
             $ref: "#/components/schemas/B2BCompanyRequest"
         total:
+          type: integer
+    WorkflowEntityType:
+      type: string
+      enum: [company_task, company_request, business_profile, limit_application, b2b_listing, b2b_request, b2b_report, media_item, media_delivery, logistics_offer]
+    WorkflowRiskCategory:
+      type: string
+      enum: [none, financial, legal, external, delete, permission]
+    WorkflowApprovalStatus:
+      type: string
+      enum: [pending_reviewer, pending_owner, auto_approved, approved, rejected, expired]
+    WorkflowNotificationType:
+      type: string
+      enum: [approval, risk, deadline, rating]
+    WorkflowApprovalInput:
+      type: object
+      additionalProperties: false
+      required: [entityType, entityId, title]
+      properties:
+        entityType:
+          $ref: "#/components/schemas/WorkflowEntityType"
+        entityId:
+          type: integer
+        title:
+          type: string
+          minLength: 2
+          maxLength: 200
+        summary:
+          type: string
+          maxLength: 4000
+        riskCategory:
+          $ref: "#/components/schemas/WorkflowRiskCategory"
+        riskReason:
+          type: string
+          maxLength: 1000
+    WorkflowApproval:
+      type: object
+      required: [id, entityType, entityId, title, summary, riskCategory, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        businessProfileId:
+          type: [integer, "null"]
+        entityType:
+          $ref: "#/components/schemas/WorkflowEntityType"
+        entityId:
+          type: integer
+        title:
+          type: string
+        summary:
+          type: string
+        submittedByClerkUserId:
+          type: [string, "null"]
+        ownerClerkUserId:
+          type: [string, "null"]
+        reviewerClerkUserId:
+          type: [string, "null"]
+        riskCategory:
+          $ref: "#/components/schemas/WorkflowRiskCategory"
+        riskReason:
+          type: [string, "null"]
+        status:
+          $ref: "#/components/schemas/WorkflowApprovalStatus"
+        reviewerDecisionAt:
+          type: [string, "null"]
+          format: date-time
+        ownerDecisionAt:
+          type: [string, "null"]
+          format: date-time
+        decisionDueAt:
+          type: [string, "null"]
+          format: date-time
+        autoDecisionAt:
+          type: [string, "null"]
+          format: date-time
+        decisionNote:
+          type: [string, "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    WorkflowReviewerDecision:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [approve, reject]
+        note:
+          type: string
+          maxLength: 4000
+    WorkflowOwnerDecision:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [approve, reject]
+        note:
+          type: string
+          maxLength: 4000
+    WorkflowNotification:
+      type: object
+      required: [id, type, title, body, readAt, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          $ref: "#/components/schemas/WorkflowNotificationType"
+        title:
+          type: string
+        body:
+          type: string
+        approvalId:
+          type: [integer, "null"]
+        readAt:
+          type: [string, "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+    WorkflowApprovalPage:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowApproval"
+        total:
+          type: integer
+    WorkflowNotificationPage:
+      type: object
+      required: [items, total, unreadCount]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowNotification"
+        total:
+          type: integer
+        unreadCount:
           type: integer

@@ -51,6 +51,9 @@ export const b2bReportsTable = pgTable(
     internalNote: text("internal_note"),
     reviewerClerkUserId: text("reviewer_clerk_user_id"),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    rating: integer("rating"),
+    ratingComment: text("rating_comment"),
+    ratedAt: timestamp("rated_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -79,6 +82,9 @@ export const insertB2BReportSchema = createInsertSchema(b2bReportsTable).omit({
   internalNote: true,
   reviewerClerkUserId: true,
   reviewedAt: true,
+  rating: true,
+  ratingComment: true,
+  ratedAt: true,
   createdAt: true,
   updatedAt: true,
 });
