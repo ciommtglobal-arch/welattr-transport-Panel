@@ -179,10 +179,21 @@ function CompanyPanelContent({
         }),
       ]);
     } catch (acceptError) {
-      setError(
+      const message =
         acceptError instanceof Error
           ? acceptError.message
-          : "Davet kabul edilemedi.",
+          : "Davet kabul edilemedi.";
+      if (
+        message.includes("Davet bulunamadı") ||
+        message.includes("daha önce kullanıldı")
+      ) {
+        window.sessionStorage.removeItem("mmt-connect-invite");
+        window.history.replaceState(null, "", window.location.pathname);
+        window.location.reload();
+        return;
+      }
+      setError(
+        message,
       );
     } finally {
       setIsAccepting(false);
