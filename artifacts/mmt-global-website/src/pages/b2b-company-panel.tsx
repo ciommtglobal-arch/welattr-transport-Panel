@@ -76,16 +76,24 @@ const defaultAreas = [
 
 export default function B2BCompanyPanel() {
   const { isLoaded, isSignedIn, userId } = useAuth();
+  const [inviteToken] = useState(() =>
+    typeof window === "undefined"
+      ? ""
+      : new URLSearchParams(window.location.search).get("invite") ??
+        window.sessionStorage.getItem("mmt-connect-invite") ??
+        "",
+  );
   const profileQuery = useGetMyB2BBusinessProfile({
     query: {
       queryKey: getGetMyB2BBusinessProfileQueryKey(),
       retry: false,
-      enabled: isLoaded && Boolean(isSignedIn),
+      enabled: isLoaded && Boolean(isSignedIn) && !inviteToken,
     },
   });
 
   if (!isLoaded) return <PanelLoading />;
   if (!isSignedIn) return <PanelSignedOut />;
+  if (inviteToken) return <InvitationAcceptance token={inviteToken} />;
   if (profileQuery.isLoading) return <PanelLoading />;
   if (profileQuery.isError || !profileQuery.data) return <NoCompanyState />;
 
@@ -312,6 +320,61 @@ function CompanyPanelContent({
             })
           }
         />
+      </section>
+    </main>
+  );
+}
+
+function InvitationAcceptance({ token }: { token: string }) {
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [error, setError] = useState('');
+
+  async function handleAccept() {
+    setError('');
+    setIsAccepting(true);
+    try {
+      await acceptB2BCompanyInvitation({ token });
+      window.sessionStorage.removeItem('mmt-connect-invite');
+      window.history.replaceState(null, '', window.location.pathname);
+      window.location.reload();
+    } catch (acceptError) {
+      setError(
+        acceptError instanceof Error
+          ? acceptError.message
+          : 'Davet kabul edilemedi.',
+      );
+    } finally {
+      setIsAccepting(false);
+    }
+  }
+
+  return (
+    <main className="flex min-h-[100dvh] items-center justify-center bg-background px-5">
+      <section className="max-w-xl border border-primary/30 bg-card p-8 text-center md:p-12">
+        <ShieldCheck className="mx-auto text-primary" size={36} />
+        <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+          MMT Connect / Firma Daveti
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold">Firma ekibine katılın.</h1>
+        <p className="mt-4 text-sm leading-7 text-foreground/60">
+          Giriş yaptığınız hesap, MMT Global firma ekibine personel olarak
+          bağlanacak. Daveti kabul ettiğinizde size tanımlanan operasyon ve
+          görev alanları açılacak.
+        </p>
+        {error ? (
+          <p className="mt-5 border border-destructive/30 bg-destructive/5 p-4 text-sm text-foreground/70">
+            {error}
+          </p>
+        ) : null}
+        <button
+          type="button"
+          onClick={handleAccept}
+          disabled={isAccepting}
+          className="mt-7 inline-flex items-center justify-center gap-2 bg-primary px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] text-primary-foreground disabled:opacity-60"
+        >
+          {isAccepting ? <Loader2 size={15} className="animate-spin" /> : null}
+          Daveti kabul et
+        </button>
       </section>
     </main>
   );
@@ -1241,6 +1304,11 @@ function PanelSignedOut() {
         </p>
         <Link
           href={`/sign-in${inviteQuery}`}
+          onClick={() => {
+            if (inviteToken) {
+              window.sessionStorage.setItem("mmt-connect-invite", inviteToken);
+            }
+          }}
           className="mt-7 inline-flex items-center gap-2 bg-primary px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] text-primary-foreground"
         >
           Giriş yap
@@ -1248,6 +1316,9 @@ function PanelSignedOut() {
         {inviteToken ? (
           <Link
             href={`/sign-up${inviteQuery}`}
+            onClick={() => {
+              window.sessionStorage.setItem("mmt-connect-invite", inviteToken);
+            }}
             className="mt-4 inline-flex items-center gap-2 border border-primary/40 px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] text-primary"
           >
             İlk kez hesap oluştur

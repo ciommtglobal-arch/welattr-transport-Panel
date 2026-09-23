@@ -132,7 +132,18 @@ function stripBase(path: string) {
 
 function getInviteToken() {
   if (typeof window === 'undefined') return '';
-  return new URLSearchParams(window.location.search).get('invite') ?? '';
+  return (
+    new URLSearchParams(window.location.search).get('invite') ??
+    window.sessionStorage.getItem('mmt-connect-invite') ??
+    ''
+  );
+}
+
+function rememberInviteToken() {
+  const inviteToken = getInviteToken();
+  if (inviteToken && typeof window !== 'undefined') {
+    window.sessionStorage.setItem('mmt-connect-invite', inviteToken);
+  }
 }
 
 function getInviteAwarePanelRedirect(fallback: string) {
@@ -150,6 +161,8 @@ function getInviteAwareAuthUrl(path: string) {
 }
 
 function SignInPage() {
+  rememberInviteToken();
+
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
       <SignIn
@@ -189,6 +202,8 @@ function StaffSignUpPage() {
 }
 
 function SignUpPage() {
+  rememberInviteToken();
+
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
       <SignUp
