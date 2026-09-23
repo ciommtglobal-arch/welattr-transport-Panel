@@ -42,3 +42,31 @@ mtime_ms = 1790171114187
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/1f2aaca9-d368-4e46-9aef-8daf38d0ee74/3c33cc8a-8dfb-40e1-b3d6-d14cf24dd635"
 storage_version_token = "1790171126824967"
 content_type = "image/svg+xml"
+
+[[outputs]]
+id = "CnnnhVAj8dRR0D7geAINb"
+uri = "file://attached_assets/generated_images/mmt-media-whatsapp-icon.png"
+type = "image"
+title = "MMT Media WhatsApp PNG"
+description = "WhatsApp grup simgesi olarak yüklemeye hazır MMT Media görseli."
+logical_id = "369e346f-23c1-4d85-b9e1-c9cfabbfc3d0"
+content_hash = "sha256:9c37f07f4aace4848de22d3da43c7a084623fc0f0a8b0865c06d238ce228b0ff"
+size = 170869
+mtime_ms = 1790171267904
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/369e346f-23c1-4d85-b9e1-c9cfabbfc3d0/bef1e566-aba7-4ab2-be6f-44b014316294"
+storage_version_token = "1790171277373834"
+content_type = "image/png"
+
+[[outputs]]
+id = "ztgcH8emDY1EE4vLWMxKd"
+uri = "file://attached_assets/generated_images/mmt-connect-whatsapp-icon.png"
+type = "image"
+title = "MMT Connect WhatsApp PNG"
+description = "WhatsApp grup simgesi olarak yüklemeye hazır MMT Connect görseli."
+logical_id = "6120a74d-4a77-4db0-9af1-d652344a8e1a"
+content_hash = "sha256:dacecf0d9204ebb5ac19b542c2d2de259acdd70f11f8c40e29e5ca7983619c70"
+size = 263937
+mtime_ms = 1790171268168
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/6120a74d-4a77-4db0-9af1-d652344a8e1a/76f7b641-5b21-4f6c-a861-ec62e4bfe387"
+storage_version_token = "1790171278683338"
+content_type = "image/png"
