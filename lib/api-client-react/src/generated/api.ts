@@ -75,6 +75,7 @@ import type {
   MockPaymentResultInput,
   ObjectDownloadUrlRequest,
   ObjectDownloadUrlResponse,
+  OperationsDesk,
   OrphanUploadCleanupRequest,
   OrphanUploadCleanupResponse,
   PublicLogisticsMedia,
@@ -2155,6 +2156,83 @@ export function useGetStaffProfiles<TData = Awaited<ReturnType<typeof getStaffPr
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetStaffProfilesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetOperationsDeskUrl = () => {
+
+
+
+
+  return `/api/staff/operations-desk`
+}
+
+/**
+ * @summary Operasyon koordinasyon masası yetkisini ve kapsamını döndürür
+ */
+export const getOperationsDesk = async ( options?: Parameters<typeof customFetch>[1]): Promise<OperationsDesk> => {
+
+  return customFetch<OperationsDesk>(getGetOperationsDeskUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetOperationsDeskQueryKey = () => {
+    return [
+    `/api/staff/operations-desk`
+    ] as const;
+    }
+
+
+export const getGetOperationsDeskQueryOptions = <TData = Awaited<ReturnType<typeof getOperationsDesk>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOperationsDesk>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetOperationsDeskQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getOperationsDesk>>> = ({ signal }) => getOperationsDesk({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getOperationsDesk>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetOperationsDeskQueryResult = NonNullable<Awaited<ReturnType<typeof getOperationsDesk>>>
+export type GetOperationsDeskQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Operasyon koordinasyon masası yetkisini ve kapsamını döndürür
+ */
+
+export function useGetOperationsDesk<TData = Awaited<ReturnType<typeof getOperationsDesk>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOperationsDesk>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetOperationsDeskQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

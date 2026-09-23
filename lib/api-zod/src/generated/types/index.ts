@@ -97,6 +97,7 @@ export * from './mockPaymentResultInput';
 export * from './mockPaymentResultInputStatus';
 export * from './objectDownloadUrlRequest';
 export * from './objectDownloadUrlResponse';
+export * from './operationsDesk';
 export * from './orphanUploadCleanupRequest';
 export * from './orphanUploadCleanupResponse';
 export * from './orphanUploadCleanupResponseFailedObjectsItem';

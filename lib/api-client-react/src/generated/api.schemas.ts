@@ -133,6 +133,16 @@ export interface StaffProfile {
   updatedAt: string;
 }
 
+export interface OperationsDesk {
+  deskCode: string;
+  deskTitle: string;
+  assignedTo: string;
+  role: string;
+  accountEmail: string;
+  responsibilities: string[];
+  boundaries: string[];
+}
+
 export type LimitApplicationStatus = typeof LimitApplicationStatus[keyof typeof LimitApplicationStatus];
 
 

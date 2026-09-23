@@ -900,6 +900,20 @@ export const GetStaffProfilesResponse = zod.array(GetStaffProfilesResponseItem)
 
 
 /**
+ * @summary Operasyon koordinasyon masası yetkisini ve kapsamını döndürür
+ */
+export const GetOperationsDeskResponse = zod.object({
+  "deskCode": zod.string(),
+  "deskTitle": zod.string(),
+  "assignedTo": zod.string(),
+  "role": zod.string(),
+  "accountEmail": zod.email(),
+  "responsibilities": zod.array(zod.string()),
+  "boundaries": zod.array(zod.string())
+})
+
+
+/**
  * @summary Submit a limit application
  */
 export const createLimitApplicationBodyFullNameMin = 2;
