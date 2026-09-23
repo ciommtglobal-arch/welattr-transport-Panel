@@ -148,7 +148,20 @@ function StaffSignInPage() {
       <SignIn
         routing="path"
         path={`${basePath}/staff/giris`}
-        signUpUrl={`${basePath}/sign-up`}
+        signUpUrl={`${basePath}/staff/kayit`}
+        fallbackRedirectUrl={`${basePath}/staff/sorumluluk-merkezi`}
+      />
+    </div>
+  );
+}
+
+function StaffSignUpPage() {
+  return (
+    <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
+      <SignUp
+        routing="path"
+        path={`${basePath}/staff/kayit`}
+        signInUrl={`${basePath}/staff/giris`}
         fallbackRedirectUrl={`${basePath}/staff/sorumluluk-merkezi`}
       />
     </div>
@@ -210,6 +223,7 @@ function Router() {
         <Route path="/staff/sorumluluk-merkezi" component={StaffResponsibilityCenter} />
         <Route path="/staff/operasyon-masasi" component={StaffOperationsDesk} />
         <Route path="/staff/giris/*?" component={StaffSignInPage} />
+        <Route path="/staff/kayit/*?" component={StaffSignUpPage} />
         <Route path="/sign-in/*?" component={SignInPage} />
         <Route path="/sign-up/*?" component={SignUpPage} />
         <Route component={NotFound} />

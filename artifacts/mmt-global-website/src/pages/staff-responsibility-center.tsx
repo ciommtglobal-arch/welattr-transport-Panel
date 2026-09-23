@@ -442,6 +442,23 @@ function SignedInCenter() {
           Yetkili personel alanı
         </div>
       </div>
+      <section
+        className="mt-8 border border-primary/30 bg-primary/10 p-6 md:p-8"
+        aria-labelledby="staff-welcome-title"
+        data-testid="banner-staff-welcome"
+      >
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+          MMT Global / personel erişimi
+        </p>
+        <h2 id="staff-welcome-title" className="mt-3 text-3xl font-semibold tracking-tight">
+          Hoş geldiniz.
+        </h2>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-foreground/65">
+          Sorumluluk alanınız, açık operasyon adımları ve ekip bağlantıları bu
+          merkezden takip edilir. Kesin finansal işlem ve ticari kararlar
+          yalnızca proje sahibi onayıyla ilerler.
+        </p>
+      </section>
       <section className="mt-10" aria-labelledby="staff-profiles-title">
         <div className="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-end">
           <div>
