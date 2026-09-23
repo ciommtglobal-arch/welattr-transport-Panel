@@ -15,6 +15,7 @@ import {
   Megaphone,
   ShieldAlert,
   Truck,
+  Users,
 } from "lucide-react";
 import {
   useGetStaffProfiles,
@@ -304,6 +305,116 @@ function StaffProfileCard({ profile }: { profile: StaffProfile }) {
   );
 }
 
+function SharedFinanceDesk({ profiles }: { profiles: StaffProfile[] }) {
+  const participants = profiles.filter(
+    (profile) =>
+      profile.internalId === "MMT-FIN-001" ||
+      profile.internalId === "MMT-FIN-002",
+  );
+
+  if (participants.length === 0) return null;
+
+  return (
+    <section
+      className="mt-10 border border-primary/30 bg-primary/5 p-6 md:p-8"
+      aria-labelledby="shared-finance-desk-title"
+      data-testid="card-shared-finance-desk"
+    >
+      <div className="flex flex-col justify-between gap-5 border-b border-primary/20 pb-6 md:flex-row md:items-end">
+        <div>
+          <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+            <Users size={15} />
+            Ortak çalışma alanı
+          </p>
+          <h2
+            id="shared-finance-desk-title"
+            className="mt-3 text-3xl font-semibold tracking-tight"
+          >
+            Finans ve müşteri değerlendirme masası
+          </h2>
+          <p className="mt-4 max-w-3xl text-sm leading-7 text-foreground/65">
+            Selen Hanım ve Fırat Bey, müşteri taleplerini aynı dosya akışında
+            takip eder; görevler ayrı, nihai onay sınırı ortaktır.
+          </p>
+        </div>
+        <Link
+          href="/staff/applications"
+          data-testid="link-shared-finance-applications"
+          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-primary hover:text-primary/70"
+        >
+          Finans başvuruları
+          <ArrowRight size={15} />
+        </Link>
+      </div>
+
+      <div className="mt-7 grid gap-4 lg:grid-cols-2">
+        {participants.map((profile) => {
+          const isSelen = profile.internalId === "MMT-FIN-001";
+          const responsibilities = isSelen
+            ? [
+                "Finans, risk ve limit ön değerlendirmesi",
+                "Müşteriyle resmi şartların kontrolü",
+                "Dosyanın yönetici onayına hazırlanması",
+              ]
+            : [
+                "Müşteriyle masa başı iletişim",
+                "Belge toplama ve eksik bilgi takibi",
+                "Şube ve saha rehberliği ile dosya tamlık kontrolü",
+              ];
+
+          return (
+            <article
+              key={profile.internalId}
+              className="border border-border bg-card p-5 md:p-6"
+              data-testid={`card-shared-finance-${profile.internalId}`}
+            >
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+                {isSelen ? "Finans değerlendirme odağı" : "Müşteri ve dosya odağı"}
+              </p>
+              <h3 className="mt-3 text-2xl font-semibold tracking-tight">
+                {profile.fullName}
+              </h3>
+              <p className="mt-1 text-sm font-semibold text-foreground/60">
+                {profile.proposedRole}
+              </p>
+              <ul className="mt-5 space-y-3 text-sm leading-6 text-foreground/70">
+                {responsibilities.map((responsibility) => (
+                  <li key={responsibility} className="flex gap-3">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                    {responsibility}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          );
+        })}
+      </div>
+
+      <div className="mt-6 grid gap-3 border-t border-primary/20 pt-6 text-sm md:grid-cols-3">
+        <div>
+          <p className="font-bold text-foreground">Dosya akışı</p>
+          <p className="mt-1 leading-6 text-foreground/60">
+            Eksik bilgi, belge, risk ve sonraki adım tek kayıtta tutulur.
+          </p>
+        </div>
+        <div>
+          <p className="font-bold text-foreground">Müşteri iletişimi</p>
+          <p className="mt-1 leading-6 text-foreground/60">
+            Şartlar açıklanır; kesin finansman veya onay vaadi verilmez.
+          </p>
+        </div>
+        <div>
+          <p className="font-bold text-foreground">Onay sınırı</p>
+          <p className="mt-1 leading-6 text-foreground/60">
+            Para transferi, sözleşme ve kesin işlem yalnızca sizin onayınızla
+            ilerler.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function SignedInCenter() {
   const {
     data: profiles = [],
@@ -363,6 +474,7 @@ function SignedInCenter() {
           </div>
         )}
       </section>
+      {profiles.length > 0 ? <SharedFinanceDesk profiles={profiles} /> : null}
       <div className="mt-10 grid gap-5 md:grid-cols-2">
         {responsibilities.map((item) => <ResponsibilityCard key={item.id} item={item} />)}
       </div>
