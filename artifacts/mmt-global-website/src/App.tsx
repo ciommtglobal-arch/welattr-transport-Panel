@@ -32,6 +32,7 @@ import StaffMediaCenter from '@/pages/staff-media-center';
 import LogisticsHubPage from '@/pages/logistics-hub';
 import DepartmentsOverviewPage, { DepartmentPage } from '@/pages/departments';
 import StaffResponsibilityCenter from '@/pages/staff-responsibility-center';
+import StaffOperationsDesk from '@/pages/staff-operations-desk';
 import {
   AboutPage,
   CareersPage,
@@ -207,6 +208,7 @@ function Router() {
         <Route path="/staff/b2b-sikayetler" component={StaffB2BReports} />
         <Route path="/staff/b2b-talepler" component={StaffB2BRequests} />
         <Route path="/staff/sorumluluk-merkezi" component={StaffResponsibilityCenter} />
+        <Route path="/staff/operasyon-masasi" component={StaffOperationsDesk} />
         <Route path="/staff/giris/*?" component={StaffSignInPage} />
         <Route path="/sign-in/*?" component={SignInPage} />
         <Route path="/sign-up/*?" component={SignUpPage} />
@@ -259,6 +261,7 @@ function ClerkApp() {
     location === '/staff/b2b-sikayetler' ||
     location === '/staff/b2b-talepler' ||
     location === '/staff/sorumluluk-merkezi' ||
+     location === '/staff/operasyon-masasi' ||
     location.startsWith('/staff/giris') ||
     location === '/b2b-agi' ||
     location.startsWith('/b2b-agi/ilan/') ||
