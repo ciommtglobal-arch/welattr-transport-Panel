@@ -1,0 +1,35 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="92" y1="78" x2="930" y2="946" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#071A3A"/>
+      <stop offset="1" stop-color="#0A4F83"/>
+    </linearGradient>
+    <linearGradient id="line" x1="214" y1="210" x2="816" y2="804" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#27D8F3"/>
+      <stop offset="1" stop-color="#6C9BFF"/>
+    </linearGradient>
+    <filter id="shadow" x="108" y="112" width="808" height="808" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#020A1B" flood-opacity="0.42"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" rx="220" fill="#050F24"/>
+  <rect x="48" y="48" width="928" height="928" rx="190" fill="url(#bg)"/>
+  <circle cx="208" cy="210" r="160" fill="#27D8F3" fill-opacity="0.08"/>
+  <circle cx="828" cy="820" r="220" fill="#F06B3C" fill-opacity="0.08"/>
+  <g filter="url(#shadow)">
+    <circle cx="512" cy="416" r="247" fill="#07142E" stroke="#27D8F3" stroke-opacity="0.42" stroke-width="6"/>
+    <path d="M281 429L394 310L558 361L692 259L768 406L658 555L489 590L349 527L281 429Z" stroke="url(#line)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M394 310L489 590M558 361L658 555M281 429L768 406M349 527L692 259" stroke="#F4FBFF" stroke-opacity="0.22" stroke-width="7"/>
+    <circle cx="281" cy="429" r="34" fill="#F06B3C"/>
+    <circle cx="394" cy="310" r="34" fill="#27D8F3"/>
+    <circle cx="558" cy="361" r="34" fill="#6C9BFF"/>
+    <circle cx="692" cy="259" r="34" fill="#27D8F3"/>
+    <circle cx="768" cy="406" r="34" fill="#F06B3C"/>
+    <circle cx="658" cy="555" r="34" fill="#6C9BFF"/>
+    <circle cx="489" cy="590" r="34" fill="#27D8F3"/>
+    <circle cx="349" cy="527" r="34" fill="#6C9BFF"/>
+  </g>
+  <text x="512" y="814" text-anchor="middle" fill="#F6FCFF" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="700" letter-spacing="8">MMT</text>
+  <text x="512" y="884" text-anchor="middle" fill="#27D8F3" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="700" letter-spacing="9">CONNECT</text>
+  <rect x="374" y="918" width="276" height="8" rx="4" fill="#F06B3C"/>
+</svg>

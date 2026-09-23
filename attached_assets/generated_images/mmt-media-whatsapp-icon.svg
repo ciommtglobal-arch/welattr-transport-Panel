@@ -1,0 +1,30 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="92" y1="78" x2="930" y2="946" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#071A3A"/>
+      <stop offset="1" stop-color="#0A4F83"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="198" y1="191" x2="828" y2="831" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#27D8F3"/>
+      <stop offset="1" stop-color="#0D83D8"/>
+    </linearGradient>
+    <filter id="shadow" x="110" y="116" width="804" height="804" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#020A1B" flood-opacity="0.42"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" rx="220" fill="#050F24"/>
+  <rect x="48" y="48" width="928" height="928" rx="190" fill="url(#bg)"/>
+  <circle cx="782" cy="195" r="170" fill="#27D8F3" fill-opacity="0.08"/>
+  <circle cx="226" cy="836" r="230" fill="#F06B3C" fill-opacity="0.08"/>
+  <g filter="url(#shadow)">
+    <rect x="178" y="165" width="668" height="500" rx="46" fill="#07142E" stroke="#2AD9F2" stroke-opacity="0.42" stroke-width="6"/>
+    <path d="M224 590L385 438L493 525L646 345L800 590" stroke="url(#accent)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="382" cy="330" r="42" fill="#F06B3C"/>
+    <path d="M223 590H801" stroke="#F4FBFF" stroke-opacity="0.3" stroke-width="7"/>
+    <path d="M276 694H748" stroke="#F4FBFF" stroke-opacity="0.16" stroke-width="7" stroke-linecap="round"/>
+    <path d="M344 742H680" stroke="#F4FBFF" stroke-opacity="0.1" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <text x="512" y="814" text-anchor="middle" fill="#F6FCFF" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="700" letter-spacing="8">MMT</text>
+  <text x="512" y="884" text-anchor="middle" fill="#27D8F3" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="700" letter-spacing="12">MEDIA</text>
+  <rect x="374" y="918" width="276" height="8" rx="4" fill="#F06B3C"/>
+</svg>
