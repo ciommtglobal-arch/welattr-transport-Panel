@@ -146,7 +146,8 @@ router.post(
     const parsed = InviteB2BCompanyMemberBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({
-        error: parsed.error.issues[0]?.message ?? "Personel bilgileri geçersiz.",
+        error:
+          parsed.error.issues[0]?.message ?? "Uzman ekip bilgileri geçersiz.",
       });
       return;
     }
@@ -158,7 +159,7 @@ router.post(
     ) {
       res.status(403).json({
         error:
-          "Alan yöneticisi yalnızca personel veya alan yöneticisi davet edebilir.",
+          "Alan lideri yalnızca uzman ekip üyesi veya alan lideri davet edebilir.",
       });
       return;
     }
@@ -179,7 +180,7 @@ router.post(
 
     if (existing) {
       res.status(409).json({
-        error: "Bu e-posta ile firma personeli zaten kayıtlı.",
+        error: "Bu e-posta ile uzman ekip üyesi zaten kayıtlı.",
       });
       return;
     }
@@ -262,7 +263,7 @@ router.post(
       .limit(1);
 
     if (alreadyMember) {
-      res.status(409).json({ error: "Bu hesap zaten firma personeli." });
+      res.status(409).json({ error: "Bu hesap zaten uzman ekip üyesi." });
       return;
     }
 
@@ -323,7 +324,7 @@ router.get(
       items: visibleRequests.map((request) =>
         serializeRequest(
           request,
-          memberNames.get(request.requesterMemberId) ?? "Firma personeli",
+          memberNames.get(request.requesterMemberId) ?? "Uzman ekip üyesi",
         ),
       ),
       total: visibleRequests.length,
@@ -448,7 +449,7 @@ router.patch(
       .limit(1);
 
     res.json(
-      serializeRequest(updated, requester?.fullName ?? "Firma personeli"),
+      serializeRequest(updated, requester?.fullName ?? "Uzman ekip üyesi"),
     );
   },
 );
@@ -515,7 +516,7 @@ router.post(
       );
       if (!assignee) {
         res.status(400).json({
-          error: "Sorumlu personel bu firmaya bağlı aktif bir kullanıcı değil.",
+          error: "Sorumlu ekip üyesi bu firmaya bağlı aktif bir kullanıcı değil.",
         });
         return;
       }
@@ -607,7 +608,8 @@ router.patch(
         Object.keys(input).some((key) => key !== "status")
       ) {
         res.status(403).json({
-          error: "Personel yalnızca kendisine atanmış görevin durumunu değiştirebilir.",
+          error:
+            "Uzman ekip üyesi yalnızca kendisine atanmış görevin durumunu değiştirebilir.",
         });
         return;
       }
@@ -620,7 +622,7 @@ router.patch(
       );
       if (input.assigneeMemberId !== null && !assignee) {
         res.status(400).json({
-          error: "Sorumlu personel bu firmaya bağlı aktif bir kullanıcı değil.",
+          error: "Sorumlu ekip üyesi bu firmaya bağlı aktif bir kullanıcı değil.",
         });
         return;
       }

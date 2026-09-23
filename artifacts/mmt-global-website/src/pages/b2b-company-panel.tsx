@@ -76,9 +76,9 @@ const defaultAreas = [
 
 const roleLabels: Record<B2BCompanyMemberRole, string> = {
   owner: "Firma sahibi",
-  admin: "Firma yöneticisi",
-  manager: "Alan yöneticisi",
-  member: "Personel",
+  admin: "Sistem ve ekip yöneticisi",
+  manager: "Alan lideri",
+  member: "Uzman ekip üyesi",
 };
 
 const areaLabels: Record<string, string> = {
@@ -292,8 +292,9 @@ function CompanyPanelContent({
             <div className="mt-7 border-t border-border/70 pt-5 text-xs leading-6 text-foreground/55">
               <p className="font-semibold text-foreground">Güvenlik sınırı</p>
               <p className="mt-1">
-                Firma yöneticisi yalnızca bu firmaya bağlı personel ve görevleri
-                yönetebilir. Personel bilgileri public ilanlarda gösterilmez.
+                Sistem ve ekip yöneticisi yalnızca bu firmaya bağlı uzman ekip
+                üyelerini ve görevleri yönetebilir. Ekip bilgileri public ilanlarda
+                gösterilmez.
               </p>
             </div>
           </section>
@@ -391,7 +392,7 @@ function InvitationAcceptance({ token }: { token: string }) {
         </p>
         <h1 className="mt-3 text-3xl font-semibold">Firma ekibine katılın.</h1>
         <p className="mt-4 text-sm leading-7 text-foreground/60">
-          Giriş yaptığınız hesap, MMT Global firma ekibine personel olarak
+          Giriş yaptığınız hesap, MMT Global uzman ekibine ekip üyesi olarak
           bağlanacak. Daveti kabul ettiğinizde size tanımlanan operasyon ve
           görev alanları açılacak.
         </p>
@@ -725,7 +726,7 @@ function MembersSection({
       onError(
         inviteError instanceof Error
           ? inviteError.message
-          : "Personel daveti gönderilemedi.",
+          : "Uzman ekip daveti gönderilemedi.",
       );
     } finally {
       setIsSubmitting(false);
@@ -738,7 +739,7 @@ function MembersSection({
         <div>
           <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
             <Users size={15} />
-            Firma personeli
+            Uzman ekip
           </p>
           <h2 className="mt-3 text-2xl font-semibold">Ekip ve davetler</h2>
         </div>
@@ -750,7 +751,7 @@ function MembersSection({
       <div className="mt-6 space-y-3">
         {members.length === 0 ? (
           <p className="border border-dashed border-border/70 p-4 text-sm text-foreground/55">
-            Henüz firma personeli eklenmedi.
+            Henüz uzman ekip üyesi eklenmedi.
           </p>
         ) : (
           members.map((member) => (
@@ -785,7 +786,7 @@ function MembersSection({
         <form onSubmit={handleSubmit} className="mt-7 border-t border-border/70 pt-6">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <Plus size={16} className="text-primary" />
-            Yeni personel davet et
+            Uzman ekip üyesi davet et
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <PanelField label="Ad soyad *" value={form.fullName} onChange={(value) => setForm((current) => ({ ...current, fullName: value }))} required />
@@ -801,10 +802,10 @@ function MembersSection({
               onChange={(event) => setForm((current) => ({ ...current, role: event.target.value as B2BCompanyMemberRole }))}
               className="border border-border/70 bg-background px-4 py-3 text-sm outline-none focus:border-primary"
             >
-              <option value="member">Personel</option>
-              <option value="manager">Alan yöneticisi</option>
+              <option value="member">Uzman ekip üyesi</option>
+              <option value="manager">Alan lideri</option>
                {canGrantAdmin ? (
-                 <option value="admin">Firma yöneticisi</option>
+                 <option value="admin">Sistem ve ekip yöneticisi</option>
                ) : null}
             </select>
             <button
@@ -834,7 +835,7 @@ function MembersSection({
             </button>
           </div>
           <p className="mt-2 text-xs leading-5 text-foreground/55">
-            Personel bağlantıyı açıp kendi Clerk hesabıyla giriş yaptıktan sonra
+            Ekip üyesi bağlantıyı açıp kendi Clerk hesabıyla giriş yaptıktan sonra
             daveti kabul etmelidir. Kabul edilene kadar aktif sayılmaz.
           </p>
         </div>
@@ -887,7 +888,7 @@ function RequestsSection({
       onError(
         requestError instanceof Error
           ? requestError.message
-          : "Personel talebi gönderilemedi.",
+          : "Ekip talebi gönderilemedi.",
       );
     } finally {
       setIsSubmitting(false);
@@ -920,10 +921,10 @@ function RequestsSection({
             Firma içi talepler
           </p>
           <h2 className="mt-3 text-2xl font-semibold">
-            Personel talepleri size ulaşsın
+            Ekip talepleri size ulaşsın
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground/60">
-            Personel iş, satın alma, operasyon veya müşteri ilişkileriyle ilgili
+            Uzman ekip iş, satın alma, operasyon veya müşteri ilişkileriyle ilgili
             ihtiyacını buradan iletir. Siz ve yetkili yöneticiler talepleri
             görür, durumunu günceller.
           </p>
@@ -1005,7 +1006,7 @@ function RequestsSection({
                 <span>
                   {request.status === "pending"
                     ? "Yanıt bekliyor"
-                    : "Firma yöneticisi tarafından takip ediliyor"}
+                    : "Sistem ve ekip yöneticisi tarafından takip ediliyor"}
                 </span>
               </p>
             </article>
@@ -1192,7 +1193,7 @@ function TasksSection({
             <PanelField label="İlgili alan *" value={form.area} onChange={(value) => setForm((current) => ({ ...current, area: value }))} required list="mmt-task-areas" />
             <PanelField label="Son tarih" type="date" value={form.dueDate} onChange={(value) => setForm((current) => ({ ...current, dueDate: value }))} />
             <label className="block text-sm">
-              <span className="mb-2 block text-foreground/70">Sorumlu personel</span>
+              <span className="mb-2 block text-foreground/70">Sorumlu ekip üyesi</span>
               <select
                 value={form.assigneeMemberId}
                 onChange={(event) => setForm((current) => ({ ...current, assigneeMemberId: event.target.value }))}
@@ -1340,7 +1341,7 @@ function PanelSignedOut() {
         </p>
         <h1 className="mt-3 text-3xl font-semibold">Firmanızla devam edin.</h1>
         <p className="mt-4 text-sm leading-7 text-foreground/60">
-          Firma personeli, davet kabulü ve görev yönetimi için giriş yapın.
+          Uzman ekip üyeleri, davet kabulü ve görev yönetimi için giriş yapın.
         </p>
         <Link
           href={`/sign-in${inviteQuery}`}
