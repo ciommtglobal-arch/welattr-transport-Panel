@@ -35,3 +35,20 @@ export async function requireStaff(req: Request, res: Response) {
 
   return { staff, userId };
 }
+
+export async function requireOperationsStaff(req: Request, res: Response) {
+  const authorization = await requireStaff(req, res);
+  if (!authorization) return null;
+
+  if (
+    authorization.staff.role !== "operations" &&
+    authorization.staff.role !== "admin"
+  ) {
+    res.status(403).json({
+      error: "Bu masa için operasyon veya yönetici yetkisi gerekiyor.",
+    });
+    return null;
+  }
+
+  return authorization;
+}

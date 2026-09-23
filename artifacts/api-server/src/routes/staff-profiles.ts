@@ -5,7 +5,7 @@ import {
   type StaffProfile,
 } from "@workspace/db";
 import { asc } from "drizzle-orm";
-import { requireStaff } from "../lib/staffAuth";
+import { requireOperationsStaff, requireStaff } from "../lib/staffAuth";
 
 const router: IRouter = Router();
 
@@ -40,6 +40,30 @@ router.get("/staff/profiles", async (req, res): Promise<void> => {
     .orderBy(asc(staffProfilesTable.createdAt));
 
   res.json(profiles.map(serializeProfile));
+});
+
+router.get("/staff/operations-desk", async (req, res): Promise<void> => {
+  const authorization = await requireOperationsStaff(req, res);
+  if (!authorization) return;
+
+  res.json({
+    deskCode: "MMT-OPS-DESK-001",
+    deskTitle: "Genel Operasyon ve Koordinasyon Masası",
+    assignedTo: "Abdurrahman Bey",
+    role: authorization.staff.role,
+    accountEmail: authorization.staff.email,
+    responsibilities: [
+      "Lojistik ve saha operasyonlarını günlük olarak takip etmek",
+      "Ekiplerden durum, risk ve sonraki adım bilgilerini toplamak",
+      "Açık iş dosyalarını ilgili sorumlulara yönlendirmek",
+      "Kritik konuları proje sahibine zamanında bildirmek",
+    ],
+    boundaries: [
+      "Finansal onay ve para transferi yetkisi yoktur",
+      "Şirket adına sözleşme veya kesin ticari taahhüt veremez",
+      "Teklif onayı yalnızca yönetici onayıyla tamamlanır",
+    ],
+  });
 });
 
 export default router;

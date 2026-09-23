@@ -934,6 +934,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /staff/operations-desk:
+    get:
+      operationId: getOperationsDesk
+      tags: [staff-profiles]
+      summary: Operasyon koordinasyon masası yetkisini ve kapsamını döndürür
+      responses:
+        "200":
+          description: Operasyon masası erişimi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OperationsDesk"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Operations or admin staff access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /limit-applications:
     post:
       operationId: createLimitApplication
@@ -1890,6 +1914,36 @@ components:
         updatedAt:
           type: string
           format: date-time
+    OperationsDesk:
+      type: object
+      required:
+        - deskCode
+        - deskTitle
+        - assignedTo
+        - role
+        - accountEmail
+        - responsibilities
+        - boundaries
+      properties:
+        deskCode:
+          type: string
+        deskTitle:
+          type: string
+        assignedTo:
+          type: string
+        role:
+          type: string
+        accountEmail:
+          type: string
+          format: email
+        responsibilities:
+          type: array
+          items:
+            type: string
+        boundaries:
+          type: array
+          items:
+            type: string
     LimitApplicationStatus:
       type: string
       enum: [new, reviewing, approved, rejected]
