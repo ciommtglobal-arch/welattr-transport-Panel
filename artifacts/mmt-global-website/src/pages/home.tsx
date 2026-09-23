@@ -31,6 +31,9 @@ const homeCopy: Record<Locale, {
   navFleet: string;
   navContact: string;
   navB2B: string;
+  home: string;
+  registerCompany: string;
+  companyPanel: string;
   portal: string;
   wallet: string;
   payment: string;
@@ -91,30 +94,30 @@ const homeCopy: Record<Locale, {
   floatingAction: string;
 }> = {
   tr: {
-    navApproach: "BAKIŞ AÇIMIZ", navEcosystem: "EKOSİSTEM", navDepartments: "BİRİMLER", navFleet: "KURUMSAL FİLO", navContact: "İLETİŞİM", navB2B: "ÜCRETSİZ B2B AĞI", portal: "PORTALA GİRİŞ", wallet: "DEMO CÜZDAN", payment: "TİCARİ ÖDEME",
+    navApproach: "BAKIŞ AÇIMIZ", navEcosystem: "EKOSİSTEM", navDepartments: "BİRİMLER", navFleet: "KURUMSAL FİLO", navContact: "İLETİŞİM", navB2B: "ÜCRETSİZ B2B AĞI", home: "ANA SAYFA", registerCompany: "FİRMA KAYDI", companyPanel: "FİRMA PANELİM", portal: "PORTALA GİRİŞ", wallet: "DEMO CÜZDAN", payment: "TİCARİ ÖDEME",
     categories: "Başvuru kategorileri", categoryCommercial: "Ticari", categoryHousing: "Konut", categoryVehicle: "Taşıt", categoryIndividual: "Bireysel", allApplications: "TÜM BAŞVURULAR",
-    heroKicker: "MMT GLOBAL / ÜCRETSİZ B2B İŞ AĞI", produce: "Üret.", promote: "Tanıt.", sell: "Sat.", heroDescriptionStrong: "Üreticiyi, alıcıyı ve hizmet taraflarını buluşturuyoruz.", heroDescription: "Üretici tanıtımı, alıcı talepleri ve temel B2B bağlantı hizmetlerimiz ücretsizdir. Güvenle büyüyen bir iş ekosistemi kuruyoruz.", joinNetwork: "ÜCRETSİZ AĞA KATILIN", discover: "KEŞFETMEK İÇİN KAYDIR",
+    heroKicker: "MMT GLOBAL / ÜCRETSİZ B2B İŞ AĞI", produce: "Üret.", promote: "Tanıt.", sell: "Sat.", heroDescriptionStrong: "Firmanı tanıt, iş bağlantıları kur, ekibini tek yerden yönet.", heroDescription: "Üretici tanıtımı, alıcı talepleri ve temel B2B bağlantı hizmetleri ücretsizdir.", joinNetwork: "İŞ AĞINI KEŞFET", discover: "AĞI KEŞFETMEK İÇİN KAYDIR",
     approach: "BAKIŞ AÇIMIZ", approachTitle: "Birlikte Büyüyoruz", approachDescription: "MMT Global olarak üreticilerin, alıcıların, lojistik ekiplerinin ve hizmet verenlerin birbirini bulabildiği ücretsiz bir B2B ağı kuruyoruz. Önce güvenilir bağlantılar ve sosyal fayda; sonra birlikte büyüyen sürdürülebilir bir marka.", discoverStory: "HİKAYEMİZİ KEŞFET", roadmap: "YOL HARİTAMIZ", roadmapTitle: "Üret. Tanıt. Sat.", roadmapDescription: "Takipçilerimiz ve üyelerimiz için adım adım ilerliyoruz. Temel tanıtım ve bağlantı hizmetlerine erişim ücretsiz kalır.", roadmapProduceDescription: "Üreticilerin ve hizmet verenlerin kendilerini, ürünlerini ve yetkinliklerini görünür kılmasına yardımcı oluruz.", roadmapPromoteDescription: "Üretici tanıtımlarını ve alıcı taleplerini güvenilir bilgilerle paylaşır, doğru kişilerin birbirini bulmasını kolaylaştırırız.", roadmapSellDescription: "Alıcı, üretici ve lojistik taraflarını buluşturarak şeffaf ve gerçekçi ticari bağlantıların kurulmasına zemin hazırlarız.",
      ecosystem: "EKOSİSTEM", contactTitle: "Küresel Büyümeye", contactTitleEmphasis: "Hazır Mısınız?", contactDescription: "Üreticiler, alıcılar ve hizmet verenler için ücretsiz B2B bağlantı ağı kuruyoruz. Birlikte büyüyelim.", whatsapp: "WHATSAPP'TAN YAZIN", pageShare: "BU SAYFAYI PAYLAŞIN", officialChannels: "RESMİ KANALLAR", officialChannelsDescription: "Doğrulanabilen resmî Instagram ve TikTok profillerimiz aşağıda yer alır.", officialChannelsPending: "Facebook, LinkedIn ve Telegram kanalları için doğrudan bağlantılar bekleniyor.", quickLinks: "HIZLI BAĞLANTILAR", about: "Hakkımızda", contactPage: "İletişim", investments: "Yatırımlarımız", career: "Kariyer", legalAndPayment: "YASAL VE ÖDEME", serviceTerms: "Hizmet koşulları", refund: "İade ve iptal", delivery: "Teslimat koşulları", distanceSales: "Mesafeli satış", ecosystemTitle: "EKOSİSTEM", logistics: "Lojistik", healthTourism: "Sağlık Turizmi", construction: "İnşaat & Gelişim", financeMedia: "Finans & Medya", footerDescription: "Üreticileri, alıcıları, lojistik ve hizmet taraflarını ücretsiz B2B bağlantı ağıyla buluştururuz.", contact: "İLETİŞİM", contactPending: "Resmi iletişim hattı hazırlanıyor.", privacy: "Gizlilik Politikası", cookies: "Çerez Politikası", kvkk: "KVKK", floatingAction: "Hızlı işlemler",
   },
   en: {
-    navApproach: "OUR APPROACH", navEcosystem: "ECOSYSTEM", navDepartments: "DEPARTMENTS", navFleet: "CORPORATE FLEET", navContact: "CONTACT", navB2B: "FREE B2B NETWORK", portal: "OPEN PORTAL", wallet: "DEMO WALLET", payment: "BUSINESS PAYMENT",
+    navApproach: "OUR APPROACH", navEcosystem: "ECOSYSTEM", navDepartments: "DEPARTMENTS", navFleet: "CORPORATE FLEET", navContact: "CONTACT", navB2B: "FREE B2B NETWORK", home: "HOME", registerCompany: "COMPANY REGISTRATION", companyPanel: "MY COMPANY PANEL", portal: "OPEN PORTAL", wallet: "DEMO WALLET", payment: "BUSINESS PAYMENT",
     categories: "Application categories", categoryCommercial: "Commercial", categoryHousing: "Housing", categoryVehicle: "Vehicle", categoryIndividual: "Individual", allApplications: "ALL APPLICATIONS",
-    heroKicker: "MMT GLOBAL / FREE B2B NETWORK", produce: "Produce.", promote: "Promote.", sell: "Sell.", heroDescriptionStrong: "We connect producers, buyers and service providers.", heroDescription: "Producer promotion, buyer requests and core B2B connection services are free. We are building a business ecosystem that grows on trust.", joinNetwork: "JOIN THE FREE NETWORK", discover: "SCROLL TO EXPLORE",
+    heroKicker: "MMT GLOBAL / FREE B2B NETWORK", produce: "Produce.", promote: "Promote.", sell: "Sell.", heroDescriptionStrong: "Introduce your company, build connections and manage your team in one place.", heroDescription: "Producer promotion, buyer requests and core B2B connection services are free.", joinNetwork: "EXPLORE THE NETWORK", discover: "SCROLL TO EXPLORE",
     approach: "OUR APPROACH", approachTitle: "Growing Together", approachDescription: "MMT Global is building a free B2B network where producers, buyers, logistics teams and service providers can find one another. Reliable connections and social value first; a sustainable brand that grows together next.", discoverStory: "DISCOVER OUR STORY", roadmap: "OUR ROADMAP", roadmapTitle: "Produce. Promote. Sell.", roadmapDescription: "We move forward step by step for our followers and members. Core promotion and connection services remain free.", roadmapProduceDescription: "We help producers and service providers make themselves, their products and their capabilities visible.", roadmapPromoteDescription: "We share producer introductions and buyer requests with reliable information, making it easier for the right people to find one another.", roadmapSellDescription: "We bring buyers, producers and logistics partners together to create transparent and realistic commercial connections.",
      ecosystem: "ECOSYSTEM", contactTitle: "Ready for", contactTitleEmphasis: "Global Growth?", contactDescription: "We are building a free B2B connection network for producers, buyers and service providers. Let’s grow together.", whatsapp: "MESSAGE ON WHATSAPP", pageShare: "SHARE THIS PAGE", officialChannels: "OFFICIAL CHANNELS", officialChannelsDescription: "Our verifiable official Instagram and TikTok profiles are listed below.", officialChannelsPending: "Direct links for the Facebook, LinkedIn and Telegram channels are still pending.", quickLinks: "QUICK LINKS", about: "About us", contactPage: "Contact", investments: "Investments", career: "Careers", legalAndPayment: "LEGAL & PAYMENT", serviceTerms: "Service terms", refund: "Refunds and cancellations", delivery: "Delivery terms", distanceSales: "Distance sales", ecosystemTitle: "ECOSYSTEM", logistics: "Logistics", healthTourism: "Health tourism", construction: "Construction & development", financeMedia: "Finance & media", footerDescription: "We connect producers, buyers, logistics and service providers through a free B2B network.", contact: "CONTACT", contactPending: "The official business contact line is being prepared.", privacy: "Privacy policy", cookies: "Cookie policy", kvkk: "KVKK", floatingAction: "Quick actions",
   },
   ar: {
-    navApproach: "نهجنا", navEcosystem: "المنظومة", navDepartments: "الأقسام", navFleet: "الأسطول المؤسسي", navContact: "اتصل بنا", navB2B: "شبكة B2B المجانية", portal: "دخول البوابة", wallet: "محفظة تجريبية", payment: "الدفع التجاري",
+    navApproach: "نهجنا", navEcosystem: "المنظومة", navDepartments: "الأقسام", navFleet: "الأسطول المؤسسي", navContact: "اتصل بنا", navB2B: "شبكة B2B المجانية", home: "الرئيسية", registerCompany: "تسجيل الشركة", companyPanel: "لوحة شركتي", portal: "دخول البوابة", wallet: "محفظة تجريبية", payment: "الدفع التجاري",
     categories: "فئات الطلب", categoryCommercial: "تجاري", categoryHousing: "سكني", categoryVehicle: "مركبات", categoryIndividual: "فردي", allApplications: "كل الطلبات",
-    heroKicker: "MMT GLOBAL / شبكة B2B مجانية", produce: "أنتج.", promote: "روّج.", sell: "بع.", heroDescriptionStrong: "نربط المنتجين بالمشترين ومقدمي الخدمات.", heroDescription: "الترويج للمنتجين وطلبات المشترين وخدمات الربط الأساسية مجانية. نبني منظومة أعمال تنمو بالثقة.", joinNetwork: "انضم إلى الشبكة المجانية", discover: "مرر للاستكشاف",
+    heroKicker: "MMT GLOBAL / شبكة B2B مجانية", produce: "أنتج.", promote: "روّج.", sell: "بع.", heroDescriptionStrong: "عرّف بشركتك، وابنِ علاقات العمل، وأدر فريقك من مكان واحد.", heroDescription: "الترويج للمنتجين وطلبات المشترين وخدمات الربط الأساسية مجانية.", joinNetwork: "اكتشف شبكة الأعمال", discover: "مرر للاستكشاف",
     approach: "نهجنا", approachTitle: "ننمو معاً", approachDescription: "تبني MMT Global شبكة B2B مجانية تتيح للمنتجين والمشترين وفرق الخدمات اللوجستية ومقدمي الخدمات العثور على بعضهم. نبدأ بالروابط الموثوقة والقيمة الاجتماعية، ثم نبني علامة مستدامة تنمو معاً.", discoverStory: "اكتشف قصتنا", roadmap: "خريطة الطريق", roadmapTitle: "أنتج. روّج. بع.", roadmapDescription: "نتقدم خطوة بخطوة من أجل متابعينا وأعضائنا. تبقى خدمات التعريف والربط الأساسية مجانية.", roadmapProduceDescription: "نساعد المنتجين ومقدمي الخدمات على إبراز أنفسهم ومنتجاتهم وخبراتهم.", roadmapPromoteDescription: "نشارك تعريفات المنتجين وطلبات المشترين بمعلومات موثوقة، ونقرّب الأشخاص المناسبين من بعضهم.", roadmapSellDescription: "نربط المشترين والمنتجين وشركاء الخدمات اللوجستية لبناء روابط تجارية شفافة وواقعية.",
      ecosystem: "المنظومة", contactTitle: "هل أنتم مستعدون", contactTitleEmphasis: "للنمو العالمي؟", contactDescription: "نبني شبكة B2B مجانية لربط المنتجين والمشترين ومقدمي الخدمات. لِنَنْمُ معاً.", whatsapp: "اكتبوا عبر واتساب", pageShare: "شاركوا هذه الصفحة", officialChannels: "القنوات الرسمية", officialChannelsDescription: "تجدون أدناه حساباتنا الرسمية القابلة للتحقق على Instagram وTikTok.", officialChannelsPending: "لا تزال الروابط المباشرة لقنوات فيسبوك ولينكدإن ومجموعة تيليغرام قيد الإعداد.", quickLinks: "روابط سريعة", about: "من نحن", contactPage: "اتصل بنا", investments: "استثماراتنا", career: "الوظائف", legalAndPayment: "قانوني والدفع", serviceTerms: "شروط الخدمة", refund: "الإلغاء والاسترداد", delivery: "شروط التسليم", distanceSales: "البيع عن بُعد", ecosystemTitle: "المنظومة", logistics: "الخدمات اللوجستية", healthTourism: "السياحة الصحية", construction: "الإنشاء والتطوير", financeMedia: "المال والإعلام", footerDescription: "نربط المنتجين والمشترين والخدمات اللوجستية ومقدمي الخدمات عبر شبكة B2B مجانية.", contact: "اتصل بنا", contactPending: "يجري إعداد خط الاتصال التجاري الرسمي.", privacy: "سياسة الخصوصية", cookies: "سياسة ملفات الارتباط", kvkk: "KVKK", floatingAction: "إجراءات سريعة",
   },
   ru: {
-    navApproach: "НАШ ПОДХОД", navEcosystem: "ЭКОСИСТЕМА", navDepartments: "ПОДРАЗДЕЛЕНИЯ", navFleet: "КОРПОРАТИВНЫЙ АВТОПАРК", navContact: "КОНТАКТЫ", navB2B: "БЕСПЛАТНАЯ B2B-СЕТЬ", portal: "ВОЙТИ В ПОРТАЛ", wallet: "ДЕМО-КОШЕЛЁК", payment: "КОММЕРЧЕСКАЯ ОПЛАТА",
+    navApproach: "НАШ ПОДХОД", navEcosystem: "ЭКОСИСТЕМА", navDepartments: "ПОДРАЗДЕЛЕНИЯ", navFleet: "КОРПОРАТИВНЫЙ АВТОПАРК", navContact: "КОНТАКТЫ", navB2B: "БЕСПЛАТНАЯ B2B-СЕТЬ", home: "ГЛАВНАЯ", registerCompany: "РЕГИСТРАЦИЯ КОМПАНИИ", companyPanel: "ПАНЕЛЬ КОМПАНИИ", portal: "ВОЙТИ В ПОРТАЛ", wallet: "ДЕМО-КОШЕЛЁК", payment: "КОММЕРЧЕСКАЯ ОПЛАТА",
     categories: "Категории заявок", categoryCommercial: "Коммерция", categoryHousing: "Жильё", categoryVehicle: "Транспорт", categoryIndividual: "Для частных лиц", allApplications: "ВСЕ ЗАЯВКИ",
-    heroKicker: "MMT GLOBAL / БЕСПЛАТНАЯ B2B-СЕТЬ", produce: "Производи.", promote: "Продвигай.", sell: "Продавай.", heroDescriptionStrong: "Мы соединяем производителей, покупателей и поставщиков услуг.", heroDescription: "Продвижение производителей, запросы покупателей и базовые B2B-связи бесплатны. Мы строим деловую экосистему, которая растёт на доверии.", joinNetwork: "ПРИСОЕДИНИТЬСЯ К СЕТИ", discover: "ЛИСТАЙТЕ ДЛЯ ОБЗОРА",
+    heroKicker: "MMT GLOBAL / БЕСПЛАТНАЯ B2B-СЕТЬ", produce: "Производи.", promote: "Продвигай.", sell: "Продавай.", heroDescriptionStrong: "Представляйте компанию, создавайте связи и управляйте командой в одном месте.", heroDescription: "Продвижение производителей, запросы покупателей и базовые B2B-связи бесплатны.", joinNetwork: "ИЗУЧИТЬ СЕТЬ", discover: "ЛИСТАЙТЕ ДЛЯ ОБЗОРА",
     approach: "НАШ ПОДХОД", approachTitle: "Растём вместе", approachDescription: "MMT Global создаёт бесплатную B2B-сеть, где производители, покупатели, логистические команды и поставщики услуг находят друг друга. Сначала надёжные связи и социальная польза, затем устойчивый бренд, который растёт вместе.", discoverStory: "УЗНАТЬ НАШУ ИСТОРИЮ", roadmap: "НАША ДОРОЖНАЯ КАРТА", roadmapTitle: "Производи. Продвигай. Продавай.", roadmapDescription: "Мы двигаемся шаг за шагом для наших подписчиков и участников. Базовые услуги продвижения и связи остаются бесплатными.", roadmapProduceDescription: "Мы помогаем производителям и поставщикам услуг сделать заметными себя, свои продукты и компетенции.", roadmapPromoteDescription: "Мы делимся презентациями производителей и запросами покупателей на основе надёжной информации, помогая нужным людям найти друг друга.", roadmapSellDescription: "Мы соединяем покупателей, производителей и логистических партнёров для прозрачных и реалистичных деловых связей.",
      ecosystem: "ЭКОСИСТЕМА", contactTitle: "Готовы к", contactTitleEmphasis: "глобальному росту?", contactDescription: "Мы создаём бесплатную B2B-сеть для производителей, покупателей и поставщиков услуг. Давайте расти вместе.", whatsapp: "НАПИСАТЬ В WHATSAPP", pageShare: "ПОДЕЛИТЬСЯ СТРАНИЦЕЙ", officialChannels: "ОФИЦИАЛЬНЫЕ КАНАЛЫ", officialChannelsDescription: "Ниже указаны наши проверяемые официальные профили в Instagram и TikTok.", officialChannelsPending: "Прямые ссылки на каналы Facebook, LinkedIn и операционную группу Telegram ещё готовятся.", quickLinks: "БЫСТРЫЕ ССЫЛКИ", about: "О нас", contactPage: "Контакты", investments: "Наши инвестиции", career: "Карьера", legalAndPayment: "ПРАВО И ОПЛАТА", serviceTerms: "Условия услуг", refund: "Возврат и отмена", delivery: "Условия доставки", distanceSales: "Дистанционная продажа", ecosystemTitle: "ЭКОСИСТЕМА", logistics: "Логистика", healthTourism: "Медицинский туризм", construction: "Строительство и развитие", financeMedia: "Финансы и медиа", footerDescription: "Мы соединяем производителей, покупателей, логистические и сервисные компании через бесплатную B2B-сеть.", contact: "КОНТАКТЫ", contactPending: "Официальная бизнес-линия готовится.", privacy: "Политика конфиденциальности", cookies: "Политика cookie", kvkk: "KVKK", floatingAction: "Быстрые действия",
   },
@@ -229,10 +232,33 @@ export default function Home() {
       <div
         id="mobile-navigation"
         className={cn(
-          "fixed inset-0 bg-background/95 backdrop-blur-xl z-40 flex flex-col items-center justify-center gap-8 transition-all duration-300 ease-in-out md:hidden",
+          "fixed inset-0 overflow-y-auto bg-background/95 backdrop-blur-xl z-40 flex flex-col items-center justify-start gap-7 px-6 py-24 transition-all duration-300 ease-in-out md:hidden",
           mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
       >
+        <div className="grid w-full max-w-sm grid-cols-3 gap-2 border-b border-border/70 pb-6">
+          <Link
+            href="/"
+            onClick={() => setMobileMenuOpen(false)}
+            className="border border-primary/50 bg-primary/10 px-2 py-3 text-center text-[10px] font-bold uppercase tracking-[0.1em] text-primary"
+          >
+            {copy.home}
+          </Link>
+          <Link
+            href="/b2b-agi"
+            onClick={() => setMobileMenuOpen(false)}
+            className="border border-border px-2 py-3 text-center text-[10px] font-bold uppercase tracking-[0.1em] text-foreground/75"
+          >
+            {copy.navB2B}
+          </Link>
+          <Link
+            href="/b2b-agi/panel"
+            onClick={() => setMobileMenuOpen(false)}
+            className="border border-border px-2 py-3 text-center text-[10px] font-bold uppercase tracking-[0.1em] text-foreground/75"
+          >
+            {copy.companyPanel}
+          </Link>
+        </div>
         <button onClick={() => scrollToSection("approach")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
           {copy.navApproach}
         </button>
@@ -294,7 +320,7 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative min-h-[100dvh] w-full flex flex-col justify-center pt-24 pb-12 overflow-hidden">
+      <section className="relative min-h-[calc(100dvh-1rem)] w-full flex flex-col justify-center overflow-hidden pb-10 pt-24 md:min-h-[100dvh] md:pb-12">
         {/* Background Image & Overlay */}
         <div className="absolute inset-0 z-0">
           <div 
@@ -305,10 +331,10 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 w-full flex flex-col gap-12 md:gap-16">
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 md:gap-16 md:px-12">
           
           {/* Top Label */}
-          <div className="flex items-center gap-4 opacity-0 animate-slide-up-fade delay-150">
+          <div className="flex items-center gap-4 md:opacity-0 md:animate-slide-up-fade delay-150">
             <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
             <p className="text-xs md:text-sm tracking-[0.2em] font-medium text-foreground/80 uppercase">
               {copy.heroKicker}
@@ -316,32 +342,41 @@ export default function Home() {
           </div>
 
           {/* Headline */}
-          <h1 className="flex flex-col gap-1 md:gap-2 text-[5.5rem] md:text-[8rem] lg:text-[10rem] leading-[0.85] tracking-tight">
-            <span className="font-semibold opacity-0 animate-slide-up-fade delay-300">
+          <h1 className="flex flex-col gap-1 text-[4.25rem] leading-[0.85] tracking-tight sm:text-[5.5rem] md:gap-2 md:text-[8rem] lg:text-[10rem]">
+            <span className="font-semibold md:opacity-0 md:animate-slide-up-fade delay-300">
               {copy.produce}
             </span>
-            <span className="font-serif italic text-primary font-normal opacity-0 animate-slide-up-fade delay-500">
+            <span className="font-serif italic text-primary font-normal md:opacity-0 md:animate-slide-up-fade delay-500">
               {copy.promote}
             </span>
-            <span className="font-semibold opacity-0 animate-slide-up-fade delay-700">
+            <span className="font-semibold md:opacity-0 md:animate-slide-up-fade delay-700">
               {copy.sell}
             </span>
           </h1>
 
           {/* Subtext and CTA row */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-12 mt-8 md:mt-16">
-            <div className="max-w-xl opacity-0 animate-slide-up-fade delay-1000">
-              <p className="text-lg md:text-xl leading-relaxed text-foreground/80 font-light">
+          <div className="mt-4 flex flex-col justify-between gap-6 md:mt-16 md:flex-row md:items-end md:gap-12">
+            <div className="max-w-xl md:opacity-0 md:animate-slide-up-fade delay-1000">
+              <p className="text-base leading-relaxed text-foreground/80 md:text-xl">
                 <strong className="font-semibold text-foreground">{copy.heroDescriptionStrong}</strong><br/>
                  {copy.heroDescription}
               </p>
-              <Link
-                href="/b2b-agi"
-                className="mt-8 inline-flex w-fit items-center gap-2 border border-primary px-5 py-3 text-xs font-semibold uppercase tracking-wider text-primary transition-colors hover:bg-primary hover:text-white"
-              >
-                {copy.joinNetwork}
-                <ArrowRight size={15} />
-              </Link>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row md:mt-8">
+                <Link
+                  href="/b2b-agi/katil"
+                  className="inline-flex w-fit items-center justify-center gap-2 bg-primary px-5 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  {copy.registerCompany}
+                  <ArrowRight size={15} />
+                </Link>
+                <Link
+                  href="/b2b-agi"
+                  className="inline-flex w-fit items-center justify-center gap-2 border border-primary px-5 py-3 text-xs font-semibold uppercase tracking-wider text-primary transition-colors hover:bg-primary hover:text-white"
+                >
+                  {copy.joinNetwork}
+                  <ArrowRight size={15} />
+                </Link>
+              </div>
             </div>
             
             <button 
@@ -354,7 +389,7 @@ export default function Home() {
           </div>
 
           {/* Scroll Cue */}
-          <div className="absolute bottom-8 left-6 md:left-12 flex items-center gap-6 opacity-0 animate-slide-up-fade delay-1000">
+          <div className="absolute bottom-8 left-6 hidden items-center gap-6 opacity-0 animate-slide-up-fade delay-1000 md:left-12 md:flex">
             <span className="text-[10px] md:text-xs tracking-[0.3em] text-foreground/60 font-medium">{copy.discover}</span>
             <div className="w-16 md:w-24 h-[1px] bg-foreground/20 relative overflow-hidden">
               <div className="absolute inset-0 bg-primary w-full origin-left animate-[scale-x_2s_ease-in-out_infinite]" />

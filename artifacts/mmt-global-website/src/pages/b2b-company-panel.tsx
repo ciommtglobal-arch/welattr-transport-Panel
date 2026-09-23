@@ -106,8 +106,12 @@ function CompanyPanelContent({
   const currentMember = members.find((member) => member.clerkUserId === userId);
   const currentRole: B2BCompanyMemberRole =
     currentMember?.role ?? "member";
-  const canManage = currentRole === "owner" || currentRole === "admin";
-  const canManageTasks = canManage || currentRole === "manager";
+  const canManageCompany =
+    currentRole === "owner" ||
+    currentRole === "admin" ||
+    currentRole === "manager";
+  const canManage = canManageCompany;
+  const canManageTasks = canManageCompany;
   const [inviteResult, setInviteResult] = useState("");
   const [error, setError] = useState("");
   const [isAccepting, setIsAccepting] = useState(false);

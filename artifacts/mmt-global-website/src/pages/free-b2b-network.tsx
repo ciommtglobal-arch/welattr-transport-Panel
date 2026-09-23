@@ -78,13 +78,22 @@ export default function FreeB2BNetworkPage() {
               MMT <span className="font-light opacity-80">GLOBAL</span>
             </span>
           </Link>
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/65 transition-colors hover:text-primary"
-          >
-            <ArrowLeft size={15} />
-            {t("home")}
-          </Link>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/65 transition-colors hover:text-primary"
+            >
+              <ArrowLeft size={15} />
+              {t("home")}
+            </Link>
+            <Link
+              href="/b2b-agi/panel"
+              className="hidden items-center gap-2 border border-primary/40 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-primary transition-colors hover:bg-primary/10 sm:flex sm:px-4 sm:text-xs"
+            >
+              <LayoutDashboard size={14} />
+              <span className="hidden sm:inline">Panelim</span>
+            </Link>
+          </div>
         </div>
       </header>
 
