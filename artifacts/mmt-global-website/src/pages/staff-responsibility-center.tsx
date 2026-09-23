@@ -62,7 +62,14 @@ const responsibilities: Responsibility[] = [
     description:
       "Rota, kapasite ve lojistik ihtiyaçlarını görünür kılarak doğru hizmet bağlantısını kurun.",
     icon: Truck,
-    links: [{ href: "/lojistik", label: "Lojistik merkezini aç", id: "logistics" }],
+    links: [
+      { href: "/lojistik", label: "Lojistik merkezini aç", id: "logistics" },
+      {
+        href: "/staff/operasyon-masasi",
+        label: "Abdurrahman Bey’in operasyon masası",
+        id: "operations-desk",
+      },
+    ],
   },
   {
     id: "b2b",
