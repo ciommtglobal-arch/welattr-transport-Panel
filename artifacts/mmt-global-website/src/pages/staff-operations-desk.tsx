@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import { BriefcaseBusiness, CircleAlert, ClipboardList, Loader2, ShieldCheck, Truck, UserButton, Users } from "lucide-react";
-import { SignInButton, useAuth } from "@clerk/react";
+import { BriefcaseBusiness, CircleAlert, ClipboardList, Loader2, ShieldCheck, Truck, Users } from "lucide-react";
+import { SignInButton, UserButton, useAuth } from "@clerk/react";
 import { Link } from "wouter";
 import {
   useGetLogisticsOperations,
+  getGetLogisticsOperationsQueryKey,
   useGetOperationsDesk,
   type LogisticsShipmentStatus,
 } from "@workspace/api-client-react";
@@ -117,7 +118,10 @@ function Metric({
 function OperationsDeskView() {
   const desk = useGetOperationsDesk();
   const operations = useGetLogisticsOperations(undefined, {
-    query: { enabled: Boolean(desk.data) },
+    query: {
+      queryKey: getGetLogisticsOperationsQueryKey(),
+      enabled: Boolean(desk.data),
+    },
   });
 
   if (desk.isLoading || operations.isLoading) {
