@@ -20,7 +20,7 @@ import {
   ObjectNotFoundError,
   ObjectStorageService,
 } from "../lib/objectStorage";
-import { requireStaff } from "../lib/staffAuth";
+import { requireFinanceStaff } from "../lib/staffAuth";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -158,7 +158,7 @@ router.post("/limit-applications", async (req, res) => {
 });
 
 router.get("/limit-applications", async (req, res) => {
-  const authorization = await requireStaff(req, res);
+  const authorization = await requireFinanceStaff(req, res);
   if (!authorization) return;
 
   const parsed = GetLimitApplicationsQueryParams.safeParse(req.query);
@@ -213,7 +213,7 @@ router.get("/limit-applications", async (req, res) => {
 });
 
 router.patch("/limit-applications/:id/status", async (req, res) => {
-  const authorization = await requireStaff(req, res);
+  const authorization = await requireFinanceStaff(req, res);
   if (!authorization) return;
 
   const params = UpdateLimitApplicationStatusParams.safeParse(req.params);

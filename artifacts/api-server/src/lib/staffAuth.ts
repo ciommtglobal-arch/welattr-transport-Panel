@@ -52,3 +52,20 @@ export async function requireOperationsStaff(req: Request, res: Response) {
 
   return authorization;
 }
+
+export async function requireFinanceStaff(req: Request, res: Response) {
+  const authorization = await requireStaff(req, res);
+  if (!authorization) return null;
+
+  if (
+    authorization.staff.role !== "finance" &&
+    authorization.staff.role !== "admin"
+  ) {
+    res.status(403).json({
+      error: "Bu finans ekranı için finans veya yönetici yetkisi gerekiyor.",
+    });
+    return null;
+  }
+
+  return authorization;
+}

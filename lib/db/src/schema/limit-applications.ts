@@ -42,6 +42,7 @@ export const limitApplicationDocumentTypeEnum = pgEnum(
 export const staffRoleEnum = pgEnum("staff_role", [
   "admin",
   "operations",
+  "finance",
   "reviewer",
 ]);
 
