@@ -1166,6 +1166,214 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profile/members:
+    get:
+      operationId: getMyB2BCompanyMembers
+      tags: [b2b-company]
+      summary: List the signed-in user's company personnel
+      responses:
+        "200":
+          description: Company personnel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompanyMemberPage"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Company access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: inviteB2BCompanyMember
+      tags: [b2b-company]
+      summary: Invite a personnel member to the signed-in user's company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BCompanyMemberInput"
+      responses:
+        "201":
+          description: Personnel invitation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompanyMemberInvitation"
+        "400":
+          description: Invalid personnel data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Company manager access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Personnel member already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profile/members/invitations/accept:
+    post:
+      operationId: acceptB2BCompanyInvitation
+      tags: [b2b-company]
+      summary: Accept a company personnel invitation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BCompanyInvitationAcceptInput"
+      responses:
+        "200":
+          description: Invitation accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompanyMember"
+        "400":
+          description: Invalid or expired invitation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Invitation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profile/tasks:
+    get:
+      operationId: getMyB2BCompanyTasks
+      tags: [b2b-company]
+      summary: List tasks visible to the signed-in company member
+      responses:
+        "200":
+          description: Company tasks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompanyTaskPage"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Company access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createB2BCompanyTask
+      tags: [b2b-company]
+      summary: Create a task in the signed-in user's company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BCompanyTaskInput"
+      responses:
+        "201":
+          description: Company task created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompanyTask"
+        "400":
+          description: Invalid task data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Company manager access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profile/tasks/{id}:
+    patch:
+      operationId: updateB2BCompanyTask
+      tags: [b2b-company]
+      summary: Update a company task
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BCompanyTaskUpdate"
+      responses:
+        "200":
+          description: Updated company task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompanyTask"
+        "400":
+          description: Invalid task update
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Company access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /b2b/business-profiles/review:
     get:
       operationId: getB2BBusinessProfileReviewQueue
@@ -3391,6 +3599,9 @@ components:
           type: integer
         total:
           type: integer
+    B2BBusinessRole:
+      type: string
+      enum: [producer, buyer, logistics, employer]
     B2BBusinessProfileStatus:
       type: string
       enum: [pending, verified, rejected, suspended]
@@ -3420,9 +3631,13 @@ components:
         - legalName
         - publicName
         - country
+        - contactName
+        - phone
+        - email
         - registrationNumber
         - businessType
         - field
+        - roles
         - contact
         - verificationDocument
       properties:
@@ -3438,6 +3653,21 @@ components:
           type: string
           minLength: 2
           maxLength: 80
+        city:
+          type: string
+          minLength: 2
+          maxLength: 120
+        contactName:
+          type: string
+          minLength: 2
+          maxLength: 160
+        phone:
+          type: string
+          minLength: 5
+          maxLength: 40
+        email:
+          type: string
+          format: email
         registrationNumber:
           type: string
           minLength: 2
@@ -3450,6 +3680,12 @@ components:
           type: string
           minLength: 2
           maxLength: 140
+        roles:
+          type: array
+          minItems: 1
+          maxItems: 4
+          items:
+            $ref: "#/components/schemas/B2BBusinessRole"
         website:
           type: string
           format: uri
@@ -3466,9 +3702,13 @@ components:
         - legalName
         - publicName
         - country
+        - contactName
+        - phone
+        - email
         - registrationNumber
         - businessType
         - field
+        - roles
         - contact
         - verificationDocumentObjectPath
         - verificationDocumentFileName
@@ -3486,12 +3726,25 @@ components:
           type: string
         country:
           type: string
+        city:
+          type: [string, "null"]
+        contactName:
+          type: [string, "null"]
+        phone:
+          type: [string, "null"]
+        email:
+          type: [string, "null"]
+          format: email
         registrationNumber:
           type: string
         businessType:
           type: string
         field:
           type: string
+        roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/B2BBusinessRole"
         website:
           type: [string, "null"]
           format: uri
@@ -3545,5 +3798,218 @@ components:
           type: integer
         pageSize:
           type: integer
+        total:
+          type: integer
+    B2BCompanyMemberRole:
+      type: string
+      enum: [owner, admin, manager, member]
+    B2BCompanyMemberStatus:
+      type: string
+      enum: [invited, active, revoked]
+    B2BCompanyTaskStatus:
+      type: string
+      enum: [pending, in_progress, completed]
+    B2BCompanyMemberInput:
+      type: object
+      additionalProperties: false
+      required: [fullName, email, areas]
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 160
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          maxLength: 40
+        department:
+          type: string
+          maxLength: 120
+        jobTitle:
+          type: string
+          maxLength: 160
+        areas:
+          type: array
+          minItems: 1
+          maxItems: 5
+          items:
+            type: string
+            minLength: 2
+            maxLength: 80
+        role:
+          $ref: "#/components/schemas/B2BCompanyMemberRole"
+    B2BCompanyMember:
+      type: object
+      required:
+        - id
+        - businessProfileId
+        - fullName
+        - email
+        - areas
+        - role
+        - status
+        - invitedAt
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+        businessProfileId:
+          type: integer
+        clerkUserId:
+          type: [string, "null"]
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: [string, "null"]
+        department:
+          type: [string, "null"]
+        jobTitle:
+          type: [string, "null"]
+        areas:
+          type: array
+          items:
+            type: string
+        role:
+          $ref: "#/components/schemas/B2BCompanyMemberRole"
+        status:
+          $ref: "#/components/schemas/B2BCompanyMemberStatus"
+        invitedAt:
+          type: string
+          format: date-time
+        acceptedAt:
+          type: [string, "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    B2BCompanyMemberInvitation:
+      type: object
+      required: [member, inviteUrl]
+      properties:
+        member:
+          $ref: "#/components/schemas/B2BCompanyMember"
+        inviteUrl:
+          type: string
+    B2BCompanyMemberPage:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/B2BCompanyMember"
+        total:
+          type: integer
+    B2BCompanyInvitationAcceptInput:
+      type: object
+      additionalProperties: false
+      required: [token]
+      properties:
+        token:
+          type: string
+          minLength: 20
+          maxLength: 200
+    B2BCompanyTaskInput:
+      type: object
+      additionalProperties: false
+      required: [title, area]
+      properties:
+        title:
+          type: string
+          minLength: 2
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 4000
+        area:
+          type: string
+          minLength: 2
+          maxLength: 80
+        dueDate:
+          type: [string, "null"]
+          format: date
+        assigneeMemberId:
+          type: [integer, "null"]
+        status:
+          $ref: "#/components/schemas/B2BCompanyTaskStatus"
+    B2BCompanyTaskUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+          minLength: 2
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 4000
+        area:
+          type: string
+          minLength: 2
+          maxLength: 80
+        dueDate:
+          type: [string, "null"]
+          format: date
+        assigneeMemberId:
+          type: [integer, "null"]
+        status:
+          $ref: "#/components/schemas/B2BCompanyTaskStatus"
+    B2BCompanyTask:
+      type: object
+      required:
+        - id
+        - businessProfileId
+        - title
+        - description
+        - area
+        - dueDate
+        - status
+        - assigneeMemberId
+        - createdByClerkUserId
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+        businessProfileId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        area:
+          type: string
+        dueDate:
+          type: [string, "null"]
+          format: date
+        status:
+          $ref: "#/components/schemas/B2BCompanyTaskStatus"
+        assigneeMemberId:
+          type: [integer, "null"]
+        createdByClerkUserId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    B2BCompanyTaskPage:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/B2BCompanyTask"
         total:
           type: integer

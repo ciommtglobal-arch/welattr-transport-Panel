@@ -1250,6 +1250,16 @@ export interface B2BReportPage {
   total: number;
 }
 
+export type B2BBusinessRole = typeof B2BBusinessRole[keyof typeof B2BBusinessRole];
+
+
+export const B2BBusinessRole = {
+  producer: 'producer',
+  buyer: 'buyer',
+  logistics: 'logistics',
+  employer: 'employer',
+} as const;
+
 export type B2BBusinessProfileStatus = typeof B2BBusinessProfileStatus[keyof typeof B2BBusinessProfileStatus];
 
 
@@ -1303,6 +1313,22 @@ export interface B2BBusinessProfileInput {
   country: string;
   /**
      * @minLength 2
+     * @maxLength 120
+     */
+  city?: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  contactName: string;
+  /**
+     * @minLength 5
+     * @maxLength 40
+     */
+  phone: string;
+  email: string;
+  /**
+     * @minLength 2
      * @maxLength 80
      */
   registrationNumber: string;
@@ -1316,6 +1342,11 @@ export interface B2BBusinessProfileInput {
      * @maxLength 140
      */
   field: string;
+  /**
+     * @minItems 1
+     * @maxItems 4
+     */
+  roles: B2BBusinessRole[];
   website?: string;
   /**
      * @minLength 5
@@ -1330,9 +1361,18 @@ export interface B2BBusinessProfile {
   legalName: string;
   publicName: string;
   country: string;
+  /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  contactName: string | null;
+  /** @nullable */
+  phone: string | null;
+  /** @nullable */
+  email: string | null;
   registrationNumber: string;
   businessType: string;
   field: string;
+  roles: B2BBusinessRole[];
   /** @nullable */
   website?: string | null;
   contact: string;
@@ -1363,6 +1403,159 @@ export interface B2BBusinessProfilePage {
   items: B2BBusinessProfile[];
   page: number;
   pageSize: number;
+  total: number;
+}
+
+export type B2BCompanyMemberRole = typeof B2BCompanyMemberRole[keyof typeof B2BCompanyMemberRole];
+
+
+export const B2BCompanyMemberRole = {
+  owner: 'owner',
+  admin: 'admin',
+  manager: 'manager',
+  member: 'member',
+} as const;
+
+export type B2BCompanyMemberStatus = typeof B2BCompanyMemberStatus[keyof typeof B2BCompanyMemberStatus];
+
+
+export const B2BCompanyMemberStatus = {
+  invited: 'invited',
+  active: 'active',
+  revoked: 'revoked',
+} as const;
+
+export type B2BCompanyTaskStatus = typeof B2BCompanyTaskStatus[keyof typeof B2BCompanyTaskStatus];
+
+
+export const B2BCompanyTaskStatus = {
+  pending: 'pending',
+  in_progress: 'in_progress',
+  completed: 'completed',
+} as const;
+
+export interface B2BCompanyMemberInput {
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  fullName: string;
+  email: string;
+  /** @maxLength 40 */
+  phone?: string;
+  /** @maxLength 120 */
+  department?: string;
+  /** @maxLength 160 */
+  jobTitle?: string;
+  /**
+     * @minItems 1
+     * @maxItems 5
+     * @items.minLength 2
+     * @items.maxLength 80
+     */
+  areas: string[];
+  role?: B2BCompanyMemberRole;
+}
+
+export interface B2BCompanyMember {
+  id: number;
+  businessProfileId: number;
+  /** @nullable */
+  clerkUserId?: string | null;
+  fullName: string;
+  email: string;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  department?: string | null;
+  /** @nullable */
+  jobTitle?: string | null;
+  areas: string[];
+  role: B2BCompanyMemberRole;
+  status: B2BCompanyMemberStatus;
+  invitedAt: string;
+  /** @nullable */
+  acceptedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface B2BCompanyMemberInvitation {
+  member: B2BCompanyMember;
+  inviteUrl: string;
+}
+
+export interface B2BCompanyMemberPage {
+  items: B2BCompanyMember[];
+  total: number;
+}
+
+export interface B2BCompanyInvitationAcceptInput {
+  /**
+     * @minLength 20
+     * @maxLength 200
+     */
+  token: string;
+}
+
+export interface B2BCompanyTaskInput {
+  /**
+     * @minLength 2
+     * @maxLength 200
+     */
+  title: string;
+  /** @maxLength 4000 */
+  description?: string;
+  /**
+     * @minLength 2
+     * @maxLength 80
+     */
+  area: string;
+  /** @nullable */
+  dueDate?: string | null;
+  /** @nullable */
+  assigneeMemberId?: number | null;
+  status?: B2BCompanyTaskStatus;
+}
+
+export interface B2BCompanyTaskUpdate {
+  /**
+     * @minLength 2
+     * @maxLength 200
+     */
+  title?: string;
+  /** @maxLength 4000 */
+  description?: string;
+  /**
+     * @minLength 2
+     * @maxLength 80
+     */
+  area?: string;
+  /** @nullable */
+  dueDate?: string | null;
+  /** @nullable */
+  assigneeMemberId?: number | null;
+  status?: B2BCompanyTaskStatus;
+}
+
+export interface B2BCompanyTask {
+  id: number;
+  businessProfileId: number;
+  title: string;
+  description: string;
+  area: string;
+  /** @nullable */
+  dueDate: string | null;
+  status: B2BCompanyTaskStatus;
+  /** @nullable */
+  assigneeMemberId: number | null;
+  createdByClerkUserId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface B2BCompanyTaskPage {
+  items: B2BCompanyTask[];
   total: number;
 }
 

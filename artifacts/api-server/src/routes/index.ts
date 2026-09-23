@@ -12,6 +12,7 @@ import storefrontRouter from "./storefront";
 import publicLogisticsRouter from "./public-logistics";
 import logisticsOperationsRouter from "./logistics-operations";
 import staffProfilesRouter from "./staff-profiles";
+import b2bCompanyManagementRouter from "./b2b-company-management";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(storefrontRouter);
 router.use(publicLogisticsRouter);
 router.use(logisticsOperationsRouter);
 router.use(staffProfilesRouter);
+router.use(b2bCompanyManagementRouter);
 
 export default router;

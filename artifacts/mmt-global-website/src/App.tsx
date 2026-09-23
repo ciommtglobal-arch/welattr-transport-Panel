@@ -27,6 +27,7 @@ import FreeB2BNetworkPage from '@/pages/free-b2b-network';
 import B2BListingDetail from '@/pages/b2b-listing-detail';
 import B2BJoinPage from '@/pages/b2b-join';
 import B2BRequestPage from '@/pages/b2b-request';
+import B2BCompanyPanel from '@/pages/b2b-company-panel';
 import StaffB2BRequests from '@/pages/staff-b2b-requests';
 import StaffMediaCenter from '@/pages/staff-media-center';
 import LogisticsHubPage from '@/pages/logistics-hub';
@@ -195,6 +196,7 @@ function Router() {
         <Route path="/cuzdan-demo" component={DemoWallet} />
         <Route path="/b2b-agi" component={FreeB2BNetworkPage} />
         <Route path="/b2b-agi/katil" component={B2BJoinPage} />
+        <Route path="/b2b-agi/panel" component={B2BCompanyPanel} />
         <Route path="/b2b-agi/talep" component={B2BRequestPage} />
         <Route path="/b2b-agi/ilan/:id" component={B2BListingDetail} />
         <Route path="/lojistik" component={LogisticsHubPage} />
@@ -281,6 +283,7 @@ function ClerkApp() {
     location === '/b2b-agi' ||
     location.startsWith('/b2b-agi/ilan/') ||
     location === '/b2b-agi/katil' ||
+     location === '/b2b-agi/panel' ||
     location === '/b2b-agi/talep' ||
     location.startsWith('/sign-in') ||
     location.startsWith('/sign-up');

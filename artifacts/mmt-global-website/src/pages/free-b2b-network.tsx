@@ -13,6 +13,8 @@ import {
   Loader2,
   Info,
   MessageSquareText,
+  LogIn,
+  LayoutDashboard,
 } from "lucide-react";
 import {
   useGetB2BRequests,
@@ -92,10 +94,39 @@ export default function FreeB2BNetworkPage() {
         </section>
 
         <section className="mx-auto max-w-7xl px-6 py-10 md:px-12 md:py-16 w-full flex-1">
-          <div className="flex items-center gap-8 border-b border-border/70 mb-10 overflow-x-auto">
+          <div className="mb-8 grid gap-3 border-b border-border/70 pb-8 sm:grid-cols-3">
             <button
+              type="button"
+              onClick={() => setActiveTab("submit")}
+              className="flex min-h-14 items-center justify-center gap-3 bg-primary px-5 py-4 text-center text-xs font-bold uppercase tracking-[0.13em] text-primary-foreground transition-colors hover:bg-primary/85"
+              data-testid="button-business-registration"
+            >
+              <Building2 size={17} />
+              Firma Kaydı
+            </button>
+            <Link
+              href="/sign-in"
+              className="flex min-h-14 items-center justify-center gap-3 border border-border/70 bg-card px-5 py-4 text-center text-xs font-bold uppercase tracking-[0.13em] transition-colors hover:border-primary hover:text-primary"
+              data-testid="link-business-sign-in"
+            >
+              <LogIn size={17} />
+              Giriş Yap
+            </Link>
+            <Link
+              href="/b2b-agi/panel"
+              className="flex min-h-14 items-center justify-center gap-3 border border-primary/40 bg-primary/5 px-5 py-4 text-center text-xs font-bold uppercase tracking-[0.13em] text-primary transition-colors hover:bg-primary/10"
+              data-testid="link-company-panel"
+            >
+              <LayoutDashboard size={17} />
+              Firma Panelim
+            </Link>
+          </div>
+
+          <div className="grid gap-3 border-b border-border/70 mb-10 sm:grid-cols-3">
+            <button
+              type="button"
               onClick={() => setActiveTab("explore")}
-              className={`whitespace-nowrap pb-3 text-sm font-semibold tracking-[0.15em] uppercase transition-colors border-b-2 ${
+              className={`min-h-12 px-3 py-3 text-xs font-semibold tracking-[0.15em] uppercase transition-colors border-b-2 ${
                 activeTab === "explore"
                   ? "border-primary text-primary"
                   : "border-transparent text-foreground/50 hover:text-foreground"
@@ -104,8 +135,9 @@ export default function FreeB2BNetworkPage() {
               {t("tab_explore")}
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab("requests")}
-              className={`whitespace-nowrap pb-3 text-sm font-semibold tracking-[0.15em] uppercase transition-colors border-b-2 ${
+              className={`min-h-12 px-3 py-3 text-xs font-semibold tracking-[0.15em] uppercase transition-colors border-b-2 ${
                 activeTab === "requests"
                   ? "border-primary text-primary"
                   : "border-transparent text-foreground/50 hover:text-foreground"
@@ -114,8 +146,9 @@ export default function FreeB2BNetworkPage() {
               {t("tab_requests")}
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab("submit")}
-              className={`whitespace-nowrap pb-3 text-sm font-semibold tracking-[0.15em] uppercase transition-colors border-b-2 ${
+              className={`min-h-12 px-3 py-3 text-xs font-semibold tracking-[0.15em] uppercase transition-colors border-b-2 ${
                 activeTab === "submit"
                   ? "border-primary text-primary"
                   : "border-transparent text-foreground/50 hover:text-foreground"

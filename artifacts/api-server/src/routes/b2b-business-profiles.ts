@@ -9,12 +9,14 @@ import {
 } from "@workspace/api-zod";
 import {
   b2bBusinessProfilesTable,
+  b2bCompanyMembersTable,
   db,
   type B2BBusinessProfile,
 } from "@workspace/db";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage";
 import { requireStaff, requireUser } from "../lib/staffAuth";
+import { requireMyCompany } from "../lib/companyAuth";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -25,9 +27,14 @@ function serializeBusinessProfile(profile: B2BBusinessProfile) {
     legalName: profile.legalName,
     publicName: profile.publicName,
     country: profile.country,
+    city: profile.city,
+    contactName: profile.contactName,
+    phone: profile.phone,
+    email: profile.email,
     registrationNumber: profile.registrationNumber,
     businessType: profile.businessType,
     field: profile.field,
+    roles: profile.roles,
     website: profile.website,
     contact: profile.contact,
     verificationDocumentObjectPath: profile.verificationDocumentObjectPath,
@@ -45,21 +52,10 @@ function serializeBusinessProfile(profile: B2BBusinessProfile) {
 }
 
 router.get("/b2b/business-profile/me", async (req, res): Promise<void> => {
-  const userId = requireUser(req, res);
-  if (!userId) return;
+  const authorization = await requireMyCompany(req, res);
+  if (!authorization) return;
 
-  const [profile] = await db
-    .select()
-    .from(b2bBusinessProfilesTable)
-    .where(eq(b2bBusinessProfilesTable.ownerClerkUserId, userId))
-    .limit(1);
-
-  if (!profile) {
-    res.status(404).json({ error: "İşletme profili bulunamadı." });
-    return;
-  }
-
-  res.json(serializeBusinessProfile(profile));
+  res.json(serializeBusinessProfile(authorization.profile));
 });
 
 router.post("/b2b/business-profile/verification-upload-url", async (req, res) => {
@@ -130,11 +126,16 @@ router.post("/b2b/business-profile/me", async (req, res): Promise<void> => {
           legalName: input.legalName.trim(),
           publicName: input.publicName.trim(),
           country: input.country.trim(),
+           city: input.city?.trim() || null,
+           contactName: input.contactName.trim(),
+           phone: input.phone.trim(),
+           email: input.email.trim().toLowerCase(),
           registrationNumber: input.registrationNumber.trim(),
           businessType: input.businessType.trim(),
           field: input.field.trim(),
+           roles: input.roles,
           website: input.website?.trim() || null,
-          contact: input.contact.trim(),
+           contact: `${input.email.trim()} · ${input.phone.trim()}`,
           verificationDocumentObjectPath:
             input.verificationDocument.objectPath,
           verificationDocumentFileName:
@@ -173,11 +174,16 @@ router.post("/b2b/business-profile/me", async (req, res): Promise<void> => {
       legalName: input.legalName.trim(),
       publicName: input.publicName.trim(),
       country: input.country.trim(),
+      city: input.city?.trim() || null,
+      contactName: input.contactName.trim(),
+      phone: input.phone.trim(),
+      email: input.email.trim().toLowerCase(),
       registrationNumber: input.registrationNumber.trim(),
       businessType: input.businessType.trim(),
       field: input.field.trim(),
+      roles: input.roles,
       website: input.website?.trim() || null,
-      contact: input.contact.trim(),
+      contact: `${input.email.trim()} · ${input.phone.trim()}`,
       verificationDocumentObjectPath:
         input.verificationDocument.objectPath,
       verificationDocumentFileName: input.verificationDocument.fileName.trim(),
@@ -191,6 +197,24 @@ router.post("/b2b/business-profile/me", async (req, res): Promise<void> => {
     { businessProfileId: profile.id },
     "B2B business profile submitted for verification",
   );
+
+  await db
+    .insert(b2bCompanyMembersTable)
+    .values({
+      businessProfileId: profile.id,
+      clerkUserId: userId,
+      fullName: input.contactName.trim(),
+      email: input.email.trim().toLowerCase(),
+      phone: input.phone.trim(),
+      role: "owner",
+      status: "active",
+      areas: ["operations", "logistics", "sales", "finance", "customer_relations"],
+      acceptedAt: new Date(),
+    })
+    .onConflictDoNothing({
+      target: [b2bCompanyMembersTable.businessProfileId, b2bCompanyMembersTable.email],
+    });
+
   res.status(201).json(serializeBusinessProfile(profile));
 });
 
@@ -231,6 +255,7 @@ router.get("/b2b/business-profiles/review", async (req, res): Promise<void> => {
     pageSize,
     total: countRows[0]?.count ?? 0,
   });
+
 });
 
 router.patch(

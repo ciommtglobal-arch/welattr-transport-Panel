@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { B2BBusinessRole } from './b2BBusinessRole';
 import type { B2BBusinessVerificationDocumentInput } from './b2BBusinessVerificationDocumentInput';
 
 export interface B2BBusinessProfileInput {
@@ -25,6 +26,22 @@ export interface B2BBusinessProfileInput {
   country: string;
   /**
      * @minLength 2
+     * @maxLength 120
+     */
+  city?: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  contactName: string;
+  /**
+     * @minLength 5
+     * @maxLength 40
+     */
+  phone: string;
+  email: string;
+  /**
+     * @minLength 2
      * @maxLength 80
      */
   registrationNumber: string;
@@ -38,6 +55,11 @@ export interface B2BBusinessProfileInput {
      * @maxLength 140
      */
   field: string;
+  /**
+     * @minItems 1
+     * @maxItems 4
+     */
+  roles: B2BBusinessRole[];
   website?: string;
   /**
      * @minLength 5

@@ -1118,9 +1118,14 @@ export const GetMyB2BBusinessProfileResponse = zod.object({
   "legalName": zod.string(),
   "publicName": zod.string(),
   "country": zod.string(),
+  "city": zod.string().nullish(),
+  "contactName": zod.string().nullable(),
+  "phone": zod.string().nullable(),
+  "email": zod.email().nullable(),
   "registrationNumber": zod.string(),
   "businessType": zod.string(),
   "field": zod.string(),
+  "roles": zod.array(zod.enum(['producer', 'buyer', 'logistics', 'employer'])),
   "website": zod.url().nullish(),
   "contact": zod.string(),
   "verificationDocumentObjectPath": zod.string(),
@@ -1149,6 +1154,15 @@ export const createMyB2BBusinessProfileBodyPublicNameMax = 160;
 export const createMyB2BBusinessProfileBodyCountryMin = 2;
 export const createMyB2BBusinessProfileBodyCountryMax = 80;
 
+export const createMyB2BBusinessProfileBodyCityMin = 2;
+export const createMyB2BBusinessProfileBodyCityMax = 120;
+
+export const createMyB2BBusinessProfileBodyContactNameMin = 2;
+export const createMyB2BBusinessProfileBodyContactNameMax = 160;
+
+export const createMyB2BBusinessProfileBodyPhoneMin = 5;
+export const createMyB2BBusinessProfileBodyPhoneMax = 40;
+
 export const createMyB2BBusinessProfileBodyRegistrationNumberMin = 2;
 export const createMyB2BBusinessProfileBodyRegistrationNumberMax = 80;
 
@@ -1157,6 +1171,8 @@ export const createMyB2BBusinessProfileBodyBusinessTypeMax = 100;
 
 export const createMyB2BBusinessProfileBodyFieldMin = 2;
 export const createMyB2BBusinessProfileBodyFieldMax = 140;
+
+export const createMyB2BBusinessProfileBodyRolesMax = 4;
 
 export const createMyB2BBusinessProfileBodyContactMin = 5;
 export const createMyB2BBusinessProfileBodyContactMax = 180;
@@ -1172,9 +1188,14 @@ export const CreateMyB2BBusinessProfileBody = zod.object({
   "legalName": zod.string().min(createMyB2BBusinessProfileBodyLegalNameMin).max(createMyB2BBusinessProfileBodyLegalNameMax),
   "publicName": zod.string().min(createMyB2BBusinessProfileBodyPublicNameMin).max(createMyB2BBusinessProfileBodyPublicNameMax),
   "country": zod.string().min(createMyB2BBusinessProfileBodyCountryMin).max(createMyB2BBusinessProfileBodyCountryMax),
+  "city": zod.string().min(createMyB2BBusinessProfileBodyCityMin).max(createMyB2BBusinessProfileBodyCityMax).optional(),
+  "contactName": zod.string().min(createMyB2BBusinessProfileBodyContactNameMin).max(createMyB2BBusinessProfileBodyContactNameMax),
+  "phone": zod.string().min(createMyB2BBusinessProfileBodyPhoneMin).max(createMyB2BBusinessProfileBodyPhoneMax),
+  "email": zod.email(),
   "registrationNumber": zod.string().min(createMyB2BBusinessProfileBodyRegistrationNumberMin).max(createMyB2BBusinessProfileBodyRegistrationNumberMax),
   "businessType": zod.string().min(createMyB2BBusinessProfileBodyBusinessTypeMin).max(createMyB2BBusinessProfileBodyBusinessTypeMax),
   "field": zod.string().min(createMyB2BBusinessProfileBodyFieldMin).max(createMyB2BBusinessProfileBodyFieldMax),
+  "roles": zod.array(zod.enum(['producer', 'buyer', 'logistics', 'employer'])).min(1).max(createMyB2BBusinessProfileBodyRolesMax),
   "website": zod.url().optional(),
   "contact": zod.string().min(createMyB2BBusinessProfileBodyContactMin).max(createMyB2BBusinessProfileBodyContactMax),
   "verificationDocument": zod.object({
@@ -1190,9 +1211,14 @@ export const CreateMyB2BBusinessProfileResponse = zod.object({
   "legalName": zod.string(),
   "publicName": zod.string(),
   "country": zod.string(),
+  "city": zod.string().nullish(),
+  "contactName": zod.string().nullable(),
+  "phone": zod.string().nullable(),
+  "email": zod.email().nullable(),
   "registrationNumber": zod.string(),
   "businessType": zod.string(),
   "field": zod.string(),
+  "roles": zod.array(zod.enum(['producer', 'buyer', 'logistics', 'employer'])),
   "website": zod.url().nullish(),
   "contact": zod.string(),
   "verificationDocumentObjectPath": zod.string(),
@@ -1242,6 +1268,212 @@ export const RequestB2BBusinessVerificationUploadUrlResponse = zod.object({
 
 
 /**
+ * @summary List the signed-in user's company personnel
+ */
+export const GetMyB2BCompanyMembersResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int(),
+  "clerkUserId": zod.string().nullish(),
+  "fullName": zod.string(),
+  "email": zod.email(),
+  "phone": zod.string().nullish(),
+  "department": zod.string().nullish(),
+  "jobTitle": zod.string().nullish(),
+  "areas": zod.array(zod.string()),
+  "role": zod.enum(['owner', 'admin', 'manager', 'member']),
+  "status": zod.enum(['invited', 'active', 'revoked']),
+  "invitedAt": zod.coerce.date(),
+  "acceptedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "total": zod.int()
+})
+
+
+/**
+ * @summary Invite a personnel member to the signed-in user's company
+ */
+export const inviteB2BCompanyMemberBodyFullNameMin = 2;
+export const inviteB2BCompanyMemberBodyFullNameMax = 160;
+
+export const inviteB2BCompanyMemberBodyPhoneMax = 40;
+
+export const inviteB2BCompanyMemberBodyDepartmentMax = 120;
+
+export const inviteB2BCompanyMemberBodyJobTitleMax = 160;
+
+export const inviteB2BCompanyMemberBodyAreasItemMin = 2;
+export const inviteB2BCompanyMemberBodyAreasItemMax = 80;
+
+export const inviteB2BCompanyMemberBodyAreasMax = 5;
+
+
+
+export const InviteB2BCompanyMemberBody = zod.object({
+  "fullName": zod.string().min(inviteB2BCompanyMemberBodyFullNameMin).max(inviteB2BCompanyMemberBodyFullNameMax),
+  "email": zod.email(),
+  "phone": zod.string().max(inviteB2BCompanyMemberBodyPhoneMax).optional(),
+  "department": zod.string().max(inviteB2BCompanyMemberBodyDepartmentMax).optional(),
+  "jobTitle": zod.string().max(inviteB2BCompanyMemberBodyJobTitleMax).optional(),
+  "areas": zod.array(zod.string().min(inviteB2BCompanyMemberBodyAreasItemMin).max(inviteB2BCompanyMemberBodyAreasItemMax)).min(1).max(inviteB2BCompanyMemberBodyAreasMax),
+  "role": zod.enum(['owner', 'admin', 'manager', 'member']).optional()
+})
+
+export const InviteB2BCompanyMemberResponse = zod.object({
+  "member": zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int(),
+  "clerkUserId": zod.string().nullish(),
+  "fullName": zod.string(),
+  "email": zod.email(),
+  "phone": zod.string().nullish(),
+  "department": zod.string().nullish(),
+  "jobTitle": zod.string().nullish(),
+  "areas": zod.array(zod.string()),
+  "role": zod.enum(['owner', 'admin', 'manager', 'member']),
+  "status": zod.enum(['invited', 'active', 'revoked']),
+  "invitedAt": zod.coerce.date(),
+  "acceptedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}),
+  "inviteUrl": zod.string()
+})
+
+
+/**
+ * @summary Accept a company personnel invitation
+ */
+export const acceptB2BCompanyInvitationBodyTokenMin = 20;
+export const acceptB2BCompanyInvitationBodyTokenMax = 200;
+
+
+
+export const AcceptB2BCompanyInvitationBody = zod.object({
+  "token": zod.string().min(acceptB2BCompanyInvitationBodyTokenMin).max(acceptB2BCompanyInvitationBodyTokenMax)
+})
+
+export const AcceptB2BCompanyInvitationResponse = zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int(),
+  "clerkUserId": zod.string().nullish(),
+  "fullName": zod.string(),
+  "email": zod.email(),
+  "phone": zod.string().nullish(),
+  "department": zod.string().nullish(),
+  "jobTitle": zod.string().nullish(),
+  "areas": zod.array(zod.string()),
+  "role": zod.enum(['owner', 'admin', 'manager', 'member']),
+  "status": zod.enum(['invited', 'active', 'revoked']),
+  "invitedAt": zod.coerce.date(),
+  "acceptedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List tasks visible to the signed-in company member
+ */
+export const GetMyB2BCompanyTasksResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "area": zod.string(),
+  "dueDate": zod.coerce.date().nullable(),
+  "status": zod.enum(['pending', 'in_progress', 'completed']),
+  "assigneeMemberId": zod.int().nullable(),
+  "createdByClerkUserId": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "total": zod.int()
+})
+
+
+/**
+ * @summary Create a task in the signed-in user's company
+ */
+export const createB2BCompanyTaskBodyTitleMin = 2;
+export const createB2BCompanyTaskBodyTitleMax = 200;
+
+export const createB2BCompanyTaskBodyDescriptionMax = 4000;
+
+export const createB2BCompanyTaskBodyAreaMin = 2;
+export const createB2BCompanyTaskBodyAreaMax = 80;
+
+
+
+export const CreateB2BCompanyTaskBody = zod.object({
+  "title": zod.string().min(createB2BCompanyTaskBodyTitleMin).max(createB2BCompanyTaskBodyTitleMax),
+  "description": zod.string().max(createB2BCompanyTaskBodyDescriptionMax).optional(),
+  "area": zod.string().min(createB2BCompanyTaskBodyAreaMin).max(createB2BCompanyTaskBodyAreaMax),
+  "dueDate": zod.coerce.date().nullish(),
+  "assigneeMemberId": zod.int().nullish(),
+  "status": zod.enum(['pending', 'in_progress', 'completed']).optional()
+})
+
+export const CreateB2BCompanyTaskResponse = zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "area": zod.string(),
+  "dueDate": zod.coerce.date().nullable(),
+  "status": zod.enum(['pending', 'in_progress', 'completed']),
+  "assigneeMemberId": zod.int().nullable(),
+  "createdByClerkUserId": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update a company task
+ */
+export const UpdateB2BCompanyTaskParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateB2BCompanyTaskBodyTitleMin = 2;
+export const updateB2BCompanyTaskBodyTitleMax = 200;
+
+export const updateB2BCompanyTaskBodyDescriptionMax = 4000;
+
+export const updateB2BCompanyTaskBodyAreaMin = 2;
+export const updateB2BCompanyTaskBodyAreaMax = 80;
+
+
+
+export const UpdateB2BCompanyTaskBody = zod.object({
+  "title": zod.string().min(updateB2BCompanyTaskBodyTitleMin).max(updateB2BCompanyTaskBodyTitleMax).optional(),
+  "description": zod.string().max(updateB2BCompanyTaskBodyDescriptionMax).optional(),
+  "area": zod.string().min(updateB2BCompanyTaskBodyAreaMin).max(updateB2BCompanyTaskBodyAreaMax).optional(),
+  "dueDate": zod.coerce.date().nullish(),
+  "assigneeMemberId": zod.int().nullish(),
+  "status": zod.enum(['pending', 'in_progress', 'completed']).optional()
+})
+
+export const UpdateB2BCompanyTaskResponse = zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "area": zod.string(),
+  "dueDate": zod.coerce.date().nullable(),
+  "status": zod.enum(['pending', 'in_progress', 'completed']),
+  "assigneeMemberId": zod.int().nullable(),
+  "createdByClerkUserId": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
  * @summary List business profiles for staff verification
  */
 export const getB2BBusinessProfileReviewQueueQueryPageDefault = 1;
@@ -1263,9 +1495,14 @@ export const GetB2BBusinessProfileReviewQueueResponse = zod.object({
   "legalName": zod.string(),
   "publicName": zod.string(),
   "country": zod.string(),
+  "city": zod.string().nullish(),
+  "contactName": zod.string().nullable(),
+  "phone": zod.string().nullable(),
+  "email": zod.email().nullable(),
   "registrationNumber": zod.string(),
   "businessType": zod.string(),
   "field": zod.string(),
+  "roles": zod.array(zod.enum(['producer', 'buyer', 'logistics', 'employer'])),
   "website": zod.url().nullish(),
   "contact": zod.string(),
   "verificationDocumentObjectPath": zod.string(),
@@ -1307,9 +1544,14 @@ export const UpdateB2BBusinessProfileStatusResponse = zod.object({
   "legalName": zod.string(),
   "publicName": zod.string(),
   "country": zod.string(),
+  "city": zod.string().nullish(),
+  "contactName": zod.string().nullable(),
+  "phone": zod.string().nullable(),
+  "email": zod.email().nullable(),
   "registrationNumber": zod.string(),
   "businessType": zod.string(),
   "field": zod.string(),
+  "roles": zod.array(zod.enum(['producer', 'buyer', 'logistics', 'employer'])),
   "website": zod.url().nullish(),
   "contact": zod.string(),
   "verificationDocumentObjectPath": zod.string(),

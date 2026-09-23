@@ -6,15 +6,25 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { B2BBusinessProfileStatus } from './b2BBusinessProfileStatus';
+import type { B2BBusinessRole } from './b2BBusinessRole';
 
 export interface B2BBusinessProfile {
   id: number;
   legalName: string;
   publicName: string;
   country: string;
+  /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  contactName: string | null;
+  /** @nullable */
+  phone: string | null;
+  /** @nullable */
+  email: string | null;
   registrationNumber: string;
   businessType: string;
   field: string;
+  roles: B2BBusinessRole[];
   /** @nullable */
   website?: string | null;
   contact: string;

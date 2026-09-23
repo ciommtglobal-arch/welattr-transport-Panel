@@ -8,3 +8,4 @@ export * from "./media-items";
 export * from "./media-deliveries";
 export * from "./logistics-operations";
 export * from "./staff-profiles";
+export * from "./b2b-company-management";

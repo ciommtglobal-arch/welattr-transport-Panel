@@ -21,6 +21,7 @@ import {
   type B2BListing,
   type B2BEmploymentType,
   type B2BListingRole,
+  type B2BBusinessRole,
   type B2BBusinessProfile,
   type B2BBusinessProfileInput,
 } from "@workspace/api-client-react";
@@ -31,11 +32,15 @@ type BusinessProfileForm = {
   legalName: string;
   publicName: string;
   country: string;
+  city: string;
+  contactName: string;
+  phone: string;
+  email: string;
   registrationNumber: string;
   businessType: string;
   field: string;
+  roles: B2BBusinessRole[];
   website: string;
-  contact: string;
 };
 
 type ListingSocials = {
@@ -65,6 +70,13 @@ const emptyListingSocials: ListingSocials = {
   telegram: "",
   tiktok: "",
 };
+
+const businessRoleOptions: Array<[B2BBusinessRole, string]> = [
+  ["producer", "Üretici"],
+  ["buyer", "Alıcı"],
+  ["logistics", "Lojistik / Hizmet"],
+  ["employer", "İşveren"],
+];
 
 const statusCopy: Record<
   B2BBusinessProfile["status"],
@@ -278,11 +290,15 @@ function VerificationForm({
       legalName: initialProfile?.legalName ?? "",
       publicName: initialProfile?.publicName ?? "",
       country: initialProfile?.country ?? "",
+      city: initialProfile?.city ?? "",
+      contactName: initialProfile?.contactName ?? "",
+      phone: initialProfile?.phone ?? "",
+      email: initialProfile?.email ?? "",
       registrationNumber: initialProfile?.registrationNumber ?? "",
       businessType: initialProfile?.businessType ?? "",
       field: initialProfile?.field ?? "",
+      roles: initialProfile?.roles ?? [],
       website: initialProfile?.website ?? "",
-      contact: initialProfile?.contact ?? "",
     };
 
     if (initialProfile || typeof window === "undefined") {
@@ -344,11 +360,16 @@ function VerificationForm({
         legalName: form.legalName.trim(),
         publicName: form.publicName.trim(),
         country: form.country.trim(),
+        city: form.city.trim() || undefined,
+        contactName: form.contactName.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim().toLowerCase(),
         registrationNumber: form.registrationNumber.trim(),
         businessType: form.businessType.trim(),
         field: form.field.trim(),
+        roles: form.roles,
         website: form.website.trim() || undefined,
-        contact: form.contact.trim(),
+        contact: `${form.email.trim()} · ${form.phone.trim()}`,
         verificationDocument: {
           objectPath: upload.objectPath,
           fileName: document.name,
@@ -431,15 +452,57 @@ function VerificationForm({
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
-          <Field label="Yasal unvan" value={form.legalName} onChange={(v) => updateField("legalName", v)} required />
-          <Field label="Yayınlanacak işletme adı" value={form.publicName} onChange={(v) => updateField("publicName", v)} required />
+          <Field label="Firma adı / yasal unvan" value={form.legalName} onChange={(v) => updateField("legalName", v)} required />
+          <Field label="Yayınlanacak firma adı" value={form.publicName} onChange={(v) => updateField("publicName", v)} required />
           <Field label="Ülke" value={form.country} onChange={(v) => updateField("country", v)} required placeholder="Türkiye, Birleşik Krallık..." />
+          <Field label="Şehir" value={form.city} onChange={(v) => updateField("city", v)} required placeholder="İstanbul, Erbil..." />
+          <Field label="Yetkili adı soyadı" value={form.contactName} onChange={(v) => updateField("contactName", v)} required />
+          <Field label="Telefon" value={form.phone} onChange={(v) => updateField("phone", v)} required placeholder="+90 ..." />
+          <Field label="E-posta" type="email" value={form.email} onChange={(v) => updateField("email", v)} required />
           <Field label="Vergi / şirket kayıt numarası" value={form.registrationNumber} onChange={(v) => updateField("registrationNumber", v)} required />
           <Field label="İşletme türü" value={form.businessType} onChange={(v) => updateField("businessType", v)} required placeholder="Üretici, fabrika, esnaf..." />
           <Field label="Faaliyet alanı" value={form.field} onChange={(v) => updateField("field", v)} required placeholder="Tekstil, gıda, lojistik..." />
           <Field label="Web sitesi" value={form.website} onChange={(v) => updateField("website", v)} placeholder="https://" />
-          <Field label="İletişim bilgisi" value={form.contact} onChange={(v) => updateField("contact", v)} required placeholder="E-posta veya telefon" />
         </div>
+
+        <fieldset className="mt-6">
+          <legend className="mb-3 text-sm text-foreground/70">
+            Firma rolü <span className="text-primary">*</span>
+          </legend>
+          <p className="mb-3 text-xs text-foreground/50">
+            Firmanızın MMT Connect’te hangi alanlarda görünmesini istediğinizi seçin.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {businessRoleOptions.map(([value, label]) => {
+              const selected = form.roles.includes(value);
+              return (
+                <label
+                  key={value}
+                  className={`flex cursor-pointer items-center gap-3 border p-4 text-sm font-semibold transition-colors ${
+                    selected
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border/70 hover:border-primary/50"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={() =>
+                      setForm((current) => ({
+                        ...current,
+                        roles: selected
+                          ? current.roles.filter((role) => role !== value)
+                          : [...current.roles, value],
+                      }))
+                    }
+                    className="h-4 w-4 accent-primary"
+                  />
+                  {label}
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
 
         <label className="mt-6 block">
           <span className="mb-2 block text-sm text-foreground/70">
@@ -933,6 +996,7 @@ function Field({
   required = false,
   placeholder,
   readOnly = false,
+  type = "text",
 }: {
   label: string;
   value: string;
@@ -940,6 +1004,7 @@ function Field({
   required?: boolean;
   placeholder?: string;
   readOnly?: boolean;
+  type?: "text" | "email";
 }) {
   return (
     <label className="block text-sm">
@@ -947,7 +1012,7 @@ function Field({
         {label} {required && <span className="text-primary">*</span>}
       </span>
       <input
-        type="text"
+        type={type}
         value={value}
         onChange={
           onChange ? (event) => onChange(event.target.value) : undefined

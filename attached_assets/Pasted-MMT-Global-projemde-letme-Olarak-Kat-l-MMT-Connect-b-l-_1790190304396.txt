@@ -1,0 +1,18 @@
+MMT Global projemde “İşletme Olarak Katıl / MMT Connect” bölümünü sadeleştir ve çalışan bir firma-personel yönetim sistemi ekle. Mevcut projeyi inceleyerek değişiklikleri doğrudan uygula.
+
+1. SAYFAYI KOLAYLAŞTIR
+    Tekrarlanan açıklamaları kaldır. Turuncu ve koyu renkli tasarımı koru. Mobilde yana kaydırılan, gizli kalan sekmeler yerine görünür ve büyük düğmeler kullan: “Firma Kaydı”, “Giriş Yap”, “Firma Panelim”.
+2. FİRMA KAYDI
+    Firma adı, sektör, ülke/şehir, yetkili adı, telefon ve e-posta alanları olsun. Üretici, alıcı, lojistik/hizmet ve işveren rolleri seçilebilsin. Zorunlu alanları açıkça belirt. Kayıt ve firma doğrulama durumlarını ayrı göster; doğrulanmamış firmayı onaylı gösterme.
+3. FİRMAYA BAĞLI PERSONEL
+    Firma yöneticisi personel ekleyebilsin ve davet edebilsin. Ad soyad, e-posta, telefon, departman ve görev alanları olsun. Personel kendi hesabıyla giriş yapsın ve ilgili firmaya bağlansın. Daveti kabul etmeden hesabı aktif sayma.
+4. ALANLARA GÖREVLENDİRME
+    Operasyon, lojistik, satış, finans ve müşteri ilişkileri alanları oluştur. Firma yöneticisi yeni alan ekleyebilsin, bir personele birden fazla alan atayabilsin. Görevlerde başlık, açıklama, sorumlu personel, ilgili alan, son tarih ve durum olsun. Durumlar: Bekliyor, Devam Ediyor, Tamamlandı.
+5. YETKİLER
+    MMT platform sahibi yönetici yetkisi bende olsun. Firma yöneticisi yalnızca kendi firmasını ve ekibini yönetsin. Personel yalnızca yetkili olduğu alanları ve görevleri görsün. Personel bilgilerini herkese açık ilan sayfasında gösterme. Yetki kontrollerini sunucuda da uygula; kullanıcı kendi yetkisini yükseltemesin.
+6. GERÇEK KAYIT VE TEST
+    Mevcut giriş sistemi ve veritabanını kullan. Firma, personel ve görevler kalıcı kaydedilsin; sayfa yenilenince kaybolmasın. Boş liste, yükleniyor ve hata durumlarını ayrı göster. Mevcut ilanları ve verileri koru.
+
+Firma kaydı, giriş, personel daveti, görev atama ve farklı firmaların birbirinin özel verilerine erişememesi akışlarını test et. Sadece tasarım veya örnek veri hazırlama; işlevleri tamamla. Harici ayar veya DNS eksikliği varsa açıkça bildir.
+
+Önce önizlemede çalışır hale getir ve yaptığın değişiklikleri göster. Canlı yayına geçmeden önce bana haber ver.

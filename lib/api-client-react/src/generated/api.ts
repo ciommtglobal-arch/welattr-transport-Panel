@@ -24,6 +24,15 @@ import type {
   B2BBusinessProfileInput,
   B2BBusinessProfilePage,
   B2BBusinessProfileStatusUpdate,
+  B2BCompanyInvitationAcceptInput,
+  B2BCompanyMember,
+  B2BCompanyMemberInput,
+  B2BCompanyMemberInvitation,
+  B2BCompanyMemberPage,
+  B2BCompanyTask,
+  B2BCompanyTaskInput,
+  B2BCompanyTaskPage,
+  B2BCompanyTaskUpdate,
   B2BListing,
   B2BListingImageUploadInput,
   B2BListingInput,
@@ -2725,6 +2734,481 @@ export const useRequestB2BBusinessVerificationUploadUrl = <TError = ErrorType<Er
         TContext
       > => {
       return useMutation(getRequestB2BBusinessVerificationUploadUrlMutationOptions(options));
+    }
+
+export const getGetMyB2BCompanyMembersUrl = () => {
+
+
+
+
+  return `/api/b2b/business-profile/members`
+}
+
+/**
+ * @summary List the signed-in user's company personnel
+ */
+export const getMyB2BCompanyMembers = async ( options?: Parameters<typeof customFetch>[1]): Promise<B2BCompanyMemberPage> => {
+
+  return customFetch<B2BCompanyMemberPage>(getGetMyB2BCompanyMembersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyB2BCompanyMembersQueryKey = () => {
+    return [
+    `/api/b2b/business-profile/members`
+    ] as const;
+    }
+
+
+export const getGetMyB2BCompanyMembersQueryOptions = <TData = Awaited<ReturnType<typeof getMyB2BCompanyMembers>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyB2BCompanyMembers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyB2BCompanyMembersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyB2BCompanyMembers>>> = ({ signal }) => getMyB2BCompanyMembers({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyB2BCompanyMembers>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyB2BCompanyMembersQueryResult = NonNullable<Awaited<ReturnType<typeof getMyB2BCompanyMembers>>>
+export type GetMyB2BCompanyMembersQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List the signed-in user's company personnel
+ */
+
+export function useGetMyB2BCompanyMembers<TData = Awaited<ReturnType<typeof getMyB2BCompanyMembers>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyB2BCompanyMembers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyB2BCompanyMembersQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getInviteB2BCompanyMemberUrl = () => {
+
+
+
+
+  return `/api/b2b/business-profile/members`
+}
+
+/**
+ * @summary Invite a personnel member to the signed-in user's company
+ */
+export const inviteB2BCompanyMember = async (b2BCompanyMemberInput: B2BCompanyMemberInput, options?: Parameters<typeof customFetch>[1]): Promise<B2BCompanyMemberInvitation> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BCompanyMemberInvitation>(getInviteB2BCompanyMemberUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BCompanyMemberInput)
+  }
+);}
+
+
+
+
+
+export const getInviteB2BCompanyMemberMutationKey = () => ['inviteB2BCompanyMember'] as const;
+
+export const getInviteB2BCompanyMemberMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof inviteB2BCompanyMember>>, TError,InviteB2BCompanyMemberMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof inviteB2BCompanyMember>>, TError,InviteB2BCompanyMemberMutationVariables, TContext> => {
+
+const mutationKey = getInviteB2BCompanyMemberMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof inviteB2BCompanyMember>>, InviteB2BCompanyMemberMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  inviteB2BCompanyMember(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type InviteB2BCompanyMemberMutationResult = NonNullable<Awaited<ReturnType<typeof inviteB2BCompanyMember>>>
+    export type InviteB2BCompanyMemberMutationBody = BodyType<B2BCompanyMemberInput>
+    export type InviteB2BCompanyMemberMutationError = ErrorType<ErrorResponse>
+    export type InviteB2BCompanyMemberMutationVariables = {data: BodyType<B2BCompanyMemberInput>}
+
+    /**
+ * @summary Invite a personnel member to the signed-in user's company
+ */
+export const useInviteB2BCompanyMember = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof inviteB2BCompanyMember>>, TError,InviteB2BCompanyMemberMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof inviteB2BCompanyMember>>,
+        TError,
+        InviteB2BCompanyMemberMutationVariables,
+        TContext
+      > => {
+      return useMutation(getInviteB2BCompanyMemberMutationOptions(options));
+    }
+
+export const getAcceptB2BCompanyInvitationUrl = () => {
+
+
+
+
+  return `/api/b2b/business-profile/members/invitations/accept`
+}
+
+/**
+ * @summary Accept a company personnel invitation
+ */
+export const acceptB2BCompanyInvitation = async (b2BCompanyInvitationAcceptInput: B2BCompanyInvitationAcceptInput, options?: Parameters<typeof customFetch>[1]): Promise<B2BCompanyMember> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BCompanyMember>(getAcceptB2BCompanyInvitationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BCompanyInvitationAcceptInput)
+  }
+);}
+
+
+
+
+
+export const getAcceptB2BCompanyInvitationMutationKey = () => ['acceptB2BCompanyInvitation'] as const;
+
+export const getAcceptB2BCompanyInvitationMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptB2BCompanyInvitation>>, TError,AcceptB2BCompanyInvitationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof acceptB2BCompanyInvitation>>, TError,AcceptB2BCompanyInvitationMutationVariables, TContext> => {
+
+const mutationKey = getAcceptB2BCompanyInvitationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof acceptB2BCompanyInvitation>>, AcceptB2BCompanyInvitationMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  acceptB2BCompanyInvitation(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AcceptB2BCompanyInvitationMutationResult = NonNullable<Awaited<ReturnType<typeof acceptB2BCompanyInvitation>>>
+    export type AcceptB2BCompanyInvitationMutationBody = BodyType<B2BCompanyInvitationAcceptInput>
+    export type AcceptB2BCompanyInvitationMutationError = ErrorType<ErrorResponse>
+    export type AcceptB2BCompanyInvitationMutationVariables = {data: BodyType<B2BCompanyInvitationAcceptInput>}
+
+    /**
+ * @summary Accept a company personnel invitation
+ */
+export const useAcceptB2BCompanyInvitation = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptB2BCompanyInvitation>>, TError,AcceptB2BCompanyInvitationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof acceptB2BCompanyInvitation>>,
+        TError,
+        AcceptB2BCompanyInvitationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAcceptB2BCompanyInvitationMutationOptions(options));
+    }
+
+export const getGetMyB2BCompanyTasksUrl = () => {
+
+
+
+
+  return `/api/b2b/business-profile/tasks`
+}
+
+/**
+ * @summary List tasks visible to the signed-in company member
+ */
+export const getMyB2BCompanyTasks = async ( options?: Parameters<typeof customFetch>[1]): Promise<B2BCompanyTaskPage> => {
+
+  return customFetch<B2BCompanyTaskPage>(getGetMyB2BCompanyTasksUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyB2BCompanyTasksQueryKey = () => {
+    return [
+    `/api/b2b/business-profile/tasks`
+    ] as const;
+    }
+
+
+export const getGetMyB2BCompanyTasksQueryOptions = <TData = Awaited<ReturnType<typeof getMyB2BCompanyTasks>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyB2BCompanyTasks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyB2BCompanyTasksQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyB2BCompanyTasks>>> = ({ signal }) => getMyB2BCompanyTasks({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyB2BCompanyTasks>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyB2BCompanyTasksQueryResult = NonNullable<Awaited<ReturnType<typeof getMyB2BCompanyTasks>>>
+export type GetMyB2BCompanyTasksQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List tasks visible to the signed-in company member
+ */
+
+export function useGetMyB2BCompanyTasks<TData = Awaited<ReturnType<typeof getMyB2BCompanyTasks>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyB2BCompanyTasks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyB2BCompanyTasksQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateB2BCompanyTaskUrl = () => {
+
+
+
+
+  return `/api/b2b/business-profile/tasks`
+}
+
+/**
+ * @summary Create a task in the signed-in user's company
+ */
+export const createB2BCompanyTask = async (b2BCompanyTaskInput: B2BCompanyTaskInput, options?: Parameters<typeof customFetch>[1]): Promise<B2BCompanyTask> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BCompanyTask>(getCreateB2BCompanyTaskUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BCompanyTaskInput)
+  }
+);}
+
+
+
+
+
+export const getCreateB2BCompanyTaskMutationKey = () => ['createB2BCompanyTask'] as const;
+
+export const getCreateB2BCompanyTaskMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createB2BCompanyTask>>, TError,CreateB2BCompanyTaskMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createB2BCompanyTask>>, TError,CreateB2BCompanyTaskMutationVariables, TContext> => {
+
+const mutationKey = getCreateB2BCompanyTaskMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createB2BCompanyTask>>, CreateB2BCompanyTaskMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createB2BCompanyTask(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateB2BCompanyTaskMutationResult = NonNullable<Awaited<ReturnType<typeof createB2BCompanyTask>>>
+    export type CreateB2BCompanyTaskMutationBody = BodyType<B2BCompanyTaskInput>
+    export type CreateB2BCompanyTaskMutationError = ErrorType<ErrorResponse>
+    export type CreateB2BCompanyTaskMutationVariables = {data: BodyType<B2BCompanyTaskInput>}
+
+    /**
+ * @summary Create a task in the signed-in user's company
+ */
+export const useCreateB2BCompanyTask = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createB2BCompanyTask>>, TError,CreateB2BCompanyTaskMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createB2BCompanyTask>>,
+        TError,
+        CreateB2BCompanyTaskMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateB2BCompanyTaskMutationOptions(options));
+    }
+
+export const getUpdateB2BCompanyTaskUrl = (id: number,) => {
+
+
+
+
+  return `/api/b2b/business-profile/tasks/${id}`
+}
+
+/**
+ * @summary Update a company task
+ */
+export const updateB2BCompanyTask = async (id: number,
+    b2BCompanyTaskUpdate: B2BCompanyTaskUpdate, options?: Parameters<typeof customFetch>[1]): Promise<B2BCompanyTask> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BCompanyTask>(getUpdateB2BCompanyTaskUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BCompanyTaskUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateB2BCompanyTaskMutationKey = () => ['updateB2BCompanyTask'] as const;
+
+export const getUpdateB2BCompanyTaskMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateB2BCompanyTask>>, TError,UpdateB2BCompanyTaskMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateB2BCompanyTask>>, TError,UpdateB2BCompanyTaskMutationVariables, TContext> => {
+
+const mutationKey = getUpdateB2BCompanyTaskMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateB2BCompanyTask>>, UpdateB2BCompanyTaskMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateB2BCompanyTask(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateB2BCompanyTaskMutationResult = NonNullable<Awaited<ReturnType<typeof updateB2BCompanyTask>>>
+    export type UpdateB2BCompanyTaskMutationBody = BodyType<B2BCompanyTaskUpdate>
+    export type UpdateB2BCompanyTaskMutationError = ErrorType<ErrorResponse>
+    export type UpdateB2BCompanyTaskMutationVariables = {id: number;data: BodyType<B2BCompanyTaskUpdate>}
+
+    /**
+ * @summary Update a company task
+ */
+export const useUpdateB2BCompanyTask = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateB2BCompanyTask>>, TError,UpdateB2BCompanyTaskMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateB2BCompanyTask>>,
+        TError,
+        UpdateB2BCompanyTaskMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateB2BCompanyTaskMutationOptions(options));
     }
 
 export const getGetB2BBusinessProfileReviewQueueUrl = (params?: GetB2BBusinessProfileReviewQueueParams,) => {
