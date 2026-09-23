@@ -1220,6 +1220,14 @@ function PanelLoading() {
 }
 
 function PanelSignedOut() {
+  const inviteToken =
+    typeof window === "undefined"
+      ? ""
+      : new URLSearchParams(window.location.search).get("invite") ?? "";
+  const inviteQuery = inviteToken
+    ? `?invite=${encodeURIComponent(inviteToken)}`
+    : "";
+
   return (
     <main className="flex min-h-[100dvh] items-center justify-center bg-background px-5">
       <section className="max-w-xl border border-border/70 bg-card p-8 text-center md:p-12">
@@ -1232,11 +1240,19 @@ function PanelSignedOut() {
           Firma personeli, davet kabulü ve görev yönetimi için giriş yapın.
         </p>
         <Link
-          href="/sign-in"
+          href={`/sign-in${inviteQuery}`}
           className="mt-7 inline-flex items-center gap-2 bg-primary px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] text-primary-foreground"
         >
           Giriş yap
         </Link>
+        {inviteToken ? (
+          <Link
+            href={`/sign-up${inviteQuery}`}
+            className="mt-4 inline-flex items-center gap-2 border border-primary/40 px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] text-primary"
+          >
+            İlk kez hesap oluştur
+          </Link>
+        ) : null}
       </section>
     </main>
   );

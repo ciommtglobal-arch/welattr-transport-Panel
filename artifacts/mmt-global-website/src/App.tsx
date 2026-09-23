@@ -130,14 +130,33 @@ function stripBase(path: string) {
     : path;
 }
 
+function getInviteToken() {
+  if (typeof window === 'undefined') return '';
+  return new URLSearchParams(window.location.search).get('invite') ?? '';
+}
+
+function getInviteAwarePanelRedirect(fallback: string) {
+  const inviteToken = getInviteToken();
+  return inviteToken
+    ? `${basePath}/b2b-agi/panel?invite=${encodeURIComponent(inviteToken)}`
+    : fallback;
+}
+
+function getInviteAwareAuthUrl(path: string) {
+  const inviteToken = getInviteToken();
+  return inviteToken
+    ? `${path}?invite=${encodeURIComponent(inviteToken)}`
+    : path;
+}
+
 function SignInPage() {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
       <SignIn
         routing="path"
         path={`${basePath}/sign-in`}
-        signUpUrl={`${basePath}/sign-up`}
-        fallbackRedirectUrl={`${basePath}/b2b-agi/katil`}
+        signUpUrl={getInviteAwareAuthUrl(`${basePath}/sign-up`)}
+        fallbackRedirectUrl={getInviteAwarePanelRedirect(`${basePath}/b2b-agi/katil`)}
       />
     </div>
   );
@@ -176,7 +195,7 @@ function SignUpPage() {
         routing="path"
         path={`${basePath}/sign-up`}
         signInUrl={`${basePath}/sign-in`}
-        fallbackRedirectUrl={`${basePath}/b2b-agi/katil?welcome=1`}
+        fallbackRedirectUrl={getInviteAwarePanelRedirect(`${basePath}/b2b-agi/katil?welcome=1`)}
       />
     </div>
   );
