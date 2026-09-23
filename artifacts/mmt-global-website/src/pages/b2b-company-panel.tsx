@@ -120,7 +120,7 @@ function CompanyPanelContent({
   const tasks = tasksQuery.data?.items ?? [];
   const currentMember = members.find((member) => member.clerkUserId === userId);
   const currentRole: B2BCompanyMemberRole =
-    currentMember?.role ?? "member";
+    currentMember?.role ?? (members.length === 0 ? "owner" : "member");
   const canManageCompany =
     currentRole === "owner" ||
     currentRole === "admin" ||
