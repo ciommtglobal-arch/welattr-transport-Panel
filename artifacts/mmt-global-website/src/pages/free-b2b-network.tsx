@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import {
   ArrowLeft,
@@ -45,6 +45,17 @@ export default function FreeB2BNetworkPage() {
   const [activeTab, setActiveTab] = useState<
     "explore" | "requests" | "submit"
   >("explore");
+  const tabContentRef = useRef<HTMLDivElement>(null);
+
+  function selectTab(tab: "explore" | "requests" | "submit") {
+    setActiveTab(tab);
+    window.requestAnimationFrame(() => {
+      tabContentRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }
 
   useEffect(() => {
     document.title = `${t("b2b_title")} | MMT Global`;
@@ -95,15 +106,14 @@ export default function FreeB2BNetworkPage() {
 
         <section className="mx-auto max-w-7xl px-6 py-10 md:px-12 md:py-16 w-full flex-1">
           <div className="mb-8 grid gap-3 border-b border-border/70 pb-8 sm:grid-cols-3">
-            <button
-              type="button"
-              onClick={() => setActiveTab("submit")}
+            <Link
+              href="/b2b-agi/katil"
               className="flex min-h-14 items-center justify-center gap-3 bg-primary px-5 py-4 text-center text-xs font-bold uppercase tracking-[0.13em] text-primary-foreground transition-colors hover:bg-primary/85"
-              data-testid="button-business-registration"
+              data-testid="link-business-registration"
             >
               <Building2 size={17} />
               Firma Kaydı
-            </button>
+            </Link>
             <Link
               href="/sign-in"
               className="flex min-h-14 items-center justify-center gap-3 border border-border/70 bg-card px-5 py-4 text-center text-xs font-bold uppercase tracking-[0.13em] transition-colors hover:border-primary hover:text-primary"
@@ -125,7 +135,7 @@ export default function FreeB2BNetworkPage() {
           <div className="grid gap-3 border-b border-border/70 mb-10 sm:grid-cols-3">
             <button
               type="button"
-              onClick={() => setActiveTab("explore")}
+              onClick={() => selectTab("explore")}
               className={`min-h-12 px-3 py-3 text-xs font-semibold tracking-[0.15em] uppercase transition-colors border-b-2 ${
                 activeTab === "explore"
                   ? "border-primary text-primary"
@@ -136,7 +146,7 @@ export default function FreeB2BNetworkPage() {
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("requests")}
+              onClick={() => selectTab("requests")}
               className={`min-h-12 px-3 py-3 text-xs font-semibold tracking-[0.15em] uppercase transition-colors border-b-2 ${
                 activeTab === "requests"
                   ? "border-primary text-primary"
@@ -147,7 +157,7 @@ export default function FreeB2BNetworkPage() {
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("submit")}
+              onClick={() => selectTab("submit")}
               className={`min-h-12 px-3 py-3 text-xs font-semibold tracking-[0.15em] uppercase transition-colors border-b-2 ${
                 activeTab === "submit"
                   ? "border-primary text-primary"
@@ -158,7 +168,10 @@ export default function FreeB2BNetworkPage() {
             </button>
           </div>
 
-          <div className="animate-slide-up-fade">
+          <div
+            ref={tabContentRef}
+            className="scroll-mt-6 animate-slide-up-fade"
+          >
             {activeTab === "explore" ? (
               <ExploreView />
             ) : activeTab === "requests" ? (
