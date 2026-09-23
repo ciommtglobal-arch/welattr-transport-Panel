@@ -70,3 +70,17 @@ mtime_ms = 1790171268168
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/6120a74d-4a77-4db0-9af1-d652344a8e1a/76f7b641-5b21-4f6c-a861-ec62e4bfe387"
 storage_version_token = "1790171278683338"
 content_type = "image/png"
+
+[[outputs]]
+id = "lGnoxFYeO7OWQ7fkNrufp"
+uri = "file://attached_assets/mmt-connect-public-preview.jpg"
+type = "image"
+title = "MMT Global Connect public sayfa görseli"
+description = "Telegram grubunda MMT Connect duyurusuyla birlikte yayınlanan public sayfa önizlemesi."
+logical_id = "889739cb-ddad-4e98-b951-b378b8b4eb90"
+content_hash = "sha256:fa3c19063262f01a682ed3bd356cea8e6ca9bfdd9e36d4f88ea2eab60b8ddc77"
+size = 85324
+mtime_ms = 1790192252243
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/889739cb-ddad-4e98-b951-b378b8b4eb90/e4ecb1fe-3443-45fa-b41b-df2dd1c0c2df"
+storage_version_token = "1790192318991411"
+content_type = "image/jpeg"
