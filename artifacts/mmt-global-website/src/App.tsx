@@ -277,6 +277,7 @@ function ClerkApp() {
     location === '/staff/sorumluluk-merkezi' ||
      location === '/staff/operasyon-masasi' ||
     location.startsWith('/staff/giris') ||
+     location.startsWith('/staff/kayit') ||
     location === '/b2b-agi' ||
     location.startsWith('/b2b-agi/ilan/') ||
     location === '/b2b-agi/katil' ||
