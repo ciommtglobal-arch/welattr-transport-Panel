@@ -74,6 +74,25 @@ const defaultAreas = [
   "müşteri ilişkileri",
 ];
 
+const roleLabels: Record<B2BCompanyMemberRole, string> = {
+  owner: "Firma sahibi",
+  admin: "Firma yöneticisi",
+  manager: "Alan yöneticisi",
+  member: "Personel",
+};
+
+const areaLabels: Record<string, string> = {
+  operations: "operasyon",
+  logistics: "lojistik",
+  sales: "satış",
+  finance: "finans",
+  customer_relations: "müşteri ilişkileri",
+};
+
+function formatArea(area: string) {
+  return areaLabels[area] ?? area;
+}
+
 export default function B2BCompanyPanel() {
   const { isLoaded, isSignedIn, userId } = useAuth();
   const [inviteToken] = useState(() =>
@@ -133,6 +152,7 @@ function CompanyPanelContent({
     currentRole === "owner" ||
     currentRole === "admin" ||
     currentRole === "manager";
+  const canInviteMembers = currentRole === "owner" || currentRole === "admin";
   const canManage = canManageCompany;
   const canManageTasks = canManageCompany;
   const canReviewApprovals = canManageCompany;
@@ -267,7 +287,7 @@ function CompanyPanelContent({
 
           <MembersSection
             members={members}
-            canManage={canManage}
+            canManage={canInviteMembers}
             inviteResult={inviteResult}
             setInviteResult={setInviteResult}
             onError={setError}
@@ -736,7 +756,9 @@ function MembersSection({
                 </span>
               </div>
               <p className="mt-3 text-xs leading-5 text-foreground/55">
-                {member.jobTitle ?? "Görev alanı belirtilmedi"} · {member.areas.join(", ")}
+                {roleLabels[member.role]} ·{" "}
+                {member.jobTitle ?? "Görev alanı belirtilmedi"} ·{" "}
+                {member.areas.map(formatArea).join(", ")}
               </p>
             </div>
           ))
