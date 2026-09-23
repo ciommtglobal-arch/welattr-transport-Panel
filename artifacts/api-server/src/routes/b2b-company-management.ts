@@ -2,8 +2,11 @@ import { createHash, randomBytes } from "node:crypto";
 import { Router, type IRouter } from "express";
 import {
   AcceptB2BCompanyInvitationBody,
+  CreateB2BCompanyRequestBody,
   CreateB2BCompanyTaskBody,
   InviteB2BCompanyMemberBody,
+  UpdateB2BCompanyRequestBody,
+  UpdateB2BCompanyRequestParams,
   UpdateB2BCompanyTaskParams,
   UpdateB2BCompanyTaskBody,
 } from "@workspace/api-zod";
@@ -15,9 +18,11 @@ import {
 } from "drizzle-orm";
 import {
   b2bCompanyMembersTable,
+  b2bCompanyRequestsTable,
   b2bCompanyTasksTable,
   db,
   type B2BCompanyMember,
+  type B2BCompanyRequest,
   type B2BCompanyTask,
 } from "@workspace/db";
 import { requireMyCompany } from "../lib/companyAuth";
@@ -63,6 +68,23 @@ function serializeTask(task: B2BCompanyTask) {
     createdByClerkUserId: task.createdByClerkUserId,
     createdAt: task.createdAt.toISOString(),
     updatedAt: task.updatedAt.toISOString(),
+  };
+}
+
+function serializeRequest(request: B2BCompanyRequest, requesterName: string) {
+  return {
+    id: request.id,
+    businessProfileId: request.businessProfileId,
+    requesterMemberId: request.requesterMemberId,
+    requesterName,
+    title: request.title,
+    description: request.description,
+    area: request.area,
+    priority: request.priority,
+    status: request.status,
+    managerNote: request.managerNote,
+    createdAt: request.createdAt.toISOString(),
+    updatedAt: request.updatedAt.toISOString(),
   };
 }
 
@@ -247,6 +269,150 @@ router.post(
       .returning();
 
     res.json(serializeMember(accepted));
+  },
+);
+
+router.get(
+  "/b2b/business-profile/requests",
+  async (req, res): Promise<void> => {
+    const authorization = await requireMyCompany(req, res);
+    if (!authorization) return;
+
+    const [requests, members] = await Promise.all([
+      db
+        .select()
+        .from(b2bCompanyRequestsTable)
+        .where(eq(b2bCompanyRequestsTable.businessProfileId, authorization.profile.id))
+        .orderBy(desc(b2bCompanyRequestsTable.createdAt)),
+      db
+        .select({
+          id: b2bCompanyMembersTable.id,
+          fullName: b2bCompanyMembersTable.fullName,
+        })
+        .from(b2bCompanyMembersTable)
+        .where(eq(b2bCompanyMembersTable.businessProfileId, authorization.profile.id)),
+    ]);
+
+    const memberNames = new Map(members.map((member) => [member.id, member.fullName]));
+    const canSeeAll =
+      authorization.member.role === "owner" ||
+      authorization.member.role === "admin" ||
+      authorization.member.role === "manager";
+    const visibleRequests = canSeeAll
+      ? requests
+      : requests.filter(
+          (request) => request.requesterMemberId === authorization.member.id,
+        );
+
+    res.json({
+      items: visibleRequests.map((request) =>
+        serializeRequest(
+          request,
+          memberNames.get(request.requesterMemberId) ?? "Firma personeli",
+        ),
+      ),
+      total: visibleRequests.length,
+    });
+  },
+);
+
+router.post(
+  "/b2b/business-profile/requests",
+  async (req, res): Promise<void> => {
+    const authorization = await requireMyCompany(req, res);
+    if (!authorization) return;
+
+    const parsed = CreateB2BCompanyRequestBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({
+        error: parsed.error.issues[0]?.message ?? "Talep bilgileri geçersiz.",
+      });
+      return;
+    }
+
+    const input = parsed.data;
+    const [request] = await db
+      .insert(b2bCompanyRequestsTable)
+      .values({
+        businessProfileId: authorization.profile.id,
+        requesterMemberId: authorization.member.id,
+        title: input.title.trim(),
+        description: input.description?.trim() ?? "",
+        area: input.area.trim(),
+        priority: input.priority ?? "normal",
+      })
+      .returning();
+
+    req.log.info(
+      {
+        businessProfileId: authorization.profile.id,
+        requestId: request.id,
+        requesterMemberId: authorization.member.id,
+      },
+      "B2B company internal request created",
+    );
+
+    res.status(201).json(serializeRequest(request, authorization.member.fullName));
+  },
+);
+
+router.patch(
+  "/b2b/business-profile/requests/:id",
+  async (req, res): Promise<void> => {
+    const authorization = await requireMyCompany(req, res, [
+      "owner",
+      "admin",
+      "manager",
+    ]);
+    if (!authorization) return;
+
+    const params = UpdateB2BCompanyRequestParams.safeParse(req.params);
+    const parsed = UpdateB2BCompanyRequestBody.safeParse(req.body);
+    if (!params.success || !parsed.success) {
+      res.status(400).json({ error: "Talep güncellemesi geçersiz." });
+      return;
+    }
+
+    const [request] = await db
+      .select()
+      .from(b2bCompanyRequestsTable)
+      .where(
+        and(
+          eq(b2bCompanyRequestsTable.id, params.data.id),
+          eq(
+            b2bCompanyRequestsTable.businessProfileId,
+            authorization.profile.id,
+          ),
+        ),
+      )
+      .limit(1);
+    if (!request) {
+      res.status(404).json({ error: "Talep bulunamadı." });
+      return;
+    }
+
+    const input = parsed.data;
+    const [updated] = await db
+      .update(b2bCompanyRequestsTable)
+      .set({
+        ...(input.status !== undefined ? { status: input.status } : {}),
+        ...(input.managerNote !== undefined
+          ? { managerNote: input.managerNote.trim() }
+          : {}),
+        updatedAt: new Date(),
+      })
+      .where(eq(b2bCompanyRequestsTable.id, request.id))
+      .returning();
+
+    const [requester] = await db
+      .select({ fullName: b2bCompanyMembersTable.fullName })
+      .from(b2bCompanyMembersTable)
+      .where(eq(b2bCompanyMembersTable.id, updated.requesterMemberId))
+      .limit(1);
+
+    res.json(
+      serializeRequest(updated, requester?.fullName ?? "Firma personeli"),
+    );
   },
 );
 

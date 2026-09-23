@@ -1434,6 +1434,24 @@ export const B2BCompanyTaskStatus = {
   completed: 'completed',
 } as const;
 
+export type B2BCompanyRequestStatus = typeof B2BCompanyRequestStatus[keyof typeof B2BCompanyRequestStatus];
+
+
+export const B2BCompanyRequestStatus = {
+  pending: 'pending',
+  in_progress: 'in_progress',
+  resolved: 'resolved',
+  rejected: 'rejected',
+} as const;
+
+export type B2BCompanyRequestPriority = typeof B2BCompanyRequestPriority[keyof typeof B2BCompanyRequestPriority];
+
+
+export const B2BCompanyRequestPriority = {
+  normal: 'normal',
+  urgent: 'urgent',
+} as const;
+
 export interface B2BCompanyMemberInput {
   /**
      * @minLength 2
@@ -1556,6 +1574,48 @@ export interface B2BCompanyTask {
 
 export interface B2BCompanyTaskPage {
   items: B2BCompanyTask[];
+  total: number;
+}
+
+export interface B2BCompanyRequestInput {
+  /**
+     * @minLength 2
+     * @maxLength 200
+     */
+  title: string;
+  /** @maxLength 4000 */
+  description?: string;
+  /**
+     * @minLength 2
+     * @maxLength 80
+     */
+  area: string;
+  priority?: B2BCompanyRequestPriority;
+}
+
+export interface B2BCompanyRequestUpdate {
+  status?: B2BCompanyRequestStatus;
+  /** @maxLength 4000 */
+  managerNote?: string;
+}
+
+export interface B2BCompanyRequest {
+  id: number;
+  businessProfileId: number;
+  requesterMemberId: number;
+  requesterName: string;
+  title: string;
+  description: string;
+  area: string;
+  priority: B2BCompanyRequestPriority;
+  status: B2BCompanyRequestStatus;
+  managerNote: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface B2BCompanyRequestPage {
+  items: B2BCompanyRequest[];
   total: number;
 }
 

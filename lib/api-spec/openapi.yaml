@@ -1326,6 +1326,113 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profile/requests:
+    get:
+      operationId: getMyB2BCompanyRequests
+      tags: [b2b-company]
+      summary: List internal requests visible to the signed-in company member
+      responses:
+        "200":
+          description: Company requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompanyRequestPage"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Company access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createB2BCompanyRequest
+      tags: [b2b-company]
+      summary: Create an internal request for the signed-in company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BCompanyRequestInput"
+      responses:
+        "201":
+          description: Company request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompanyRequest"
+        "400":
+          description: Invalid company request data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Company access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profile/requests/{id}:
+    patch:
+      operationId: updateB2BCompanyRequest
+      tags: [b2b-company]
+      summary: Update an internal company request
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BCompanyRequestUpdate"
+      responses:
+        "200":
+          description: Updated company request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompanyRequest"
+        "400":
+          description: Invalid company request update
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Company manager access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Company request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /b2b/business-profile/tasks/{id}:
     patch:
       operationId: updateB2BCompanyTask
@@ -3809,6 +3916,12 @@ components:
     B2BCompanyTaskStatus:
       type: string
       enum: [pending, in_progress, completed]
+    B2BCompanyRequestStatus:
+      type: string
+      enum: [pending, in_progress, resolved, rejected]
+    B2BCompanyRequestPriority:
+      type: string
+      enum: [normal, urgent]
     B2BCompanyMemberInput:
       type: object
       additionalProperties: false
@@ -4011,5 +4124,84 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/B2BCompanyTask"
+        total:
+          type: integer
+    B2BCompanyRequestInput:
+      type: object
+      additionalProperties: false
+      required: [title, area]
+      properties:
+        title:
+          type: string
+          minLength: 2
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 4000
+        area:
+          type: string
+          minLength: 2
+          maxLength: 80
+        priority:
+          $ref: "#/components/schemas/B2BCompanyRequestPriority"
+    B2BCompanyRequestUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          $ref: "#/components/schemas/B2BCompanyRequestStatus"
+        managerNote:
+          type: string
+          maxLength: 4000
+    B2BCompanyRequest:
+      type: object
+      required:
+        - id
+        - businessProfileId
+        - requesterMemberId
+        - requesterName
+        - title
+        - description
+        - area
+        - priority
+        - status
+        - managerNote
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+        businessProfileId:
+          type: integer
+        requesterMemberId:
+          type: integer
+        requesterName:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        area:
+          type: string
+        priority:
+          $ref: "#/components/schemas/B2BCompanyRequestPriority"
+        status:
+          $ref: "#/components/schemas/B2BCompanyRequestStatus"
+        managerNote:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    B2BCompanyRequestPage:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/B2BCompanyRequest"
         total:
           type: integer

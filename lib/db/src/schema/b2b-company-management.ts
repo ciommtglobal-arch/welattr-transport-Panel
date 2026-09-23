@@ -32,6 +32,18 @@ export const b2bCompanyTaskStatusEnum = pgEnum("b2b_company_task_status", [
   "completed",
 ]);
 
+export const b2bCompanyRequestStatusEnum = pgEnum("b2b_company_request_status", [
+  "pending",
+  "in_progress",
+  "resolved",
+  "rejected",
+]);
+
+export const b2bCompanyRequestPriorityEnum = pgEnum(
+  "b2b_company_request_priority",
+  ["normal", "urgent"],
+);
+
 export const b2bCompanyMembersTable = pgTable(
   "b2b_company_members",
   {
@@ -108,6 +120,41 @@ export const b2bCompanyTasksTable = pgTable(
   ],
 );
 
+export const b2bCompanyRequestsTable = pgTable(
+  "b2b_company_requests",
+  {
+    id: serial("id").primaryKey(),
+    businessProfileId: integer("business_profile_id")
+      .notNull()
+      .references(() => b2bBusinessProfilesTable.id, { onDelete: "cascade" }),
+    requesterMemberId: integer("requester_member_id")
+      .notNull()
+      .references(() => b2bCompanyMembersTable.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    area: text("area").notNull(),
+    priority: b2bCompanyRequestPriorityEnum("priority")
+      .notNull()
+      .default("normal"),
+    status: b2bCompanyRequestStatusEnum("status")
+      .notNull()
+      .default("pending"),
+    managerNote: text("manager_note").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index("b2b_company_requests_profile_idx").on(table.businessProfileId),
+    index("b2b_company_requests_requester_idx").on(table.requesterMemberId),
+    index("b2b_company_requests_status_idx").on(table.status),
+  ],
+);
+
 export const insertB2BCompanyMemberSchema = createInsertSchema(
   b2bCompanyMembersTable,
 ).omit({
@@ -126,9 +173,21 @@ export const insertB2BCompanyTaskSchema = createInsertSchema(
   updatedAt: true,
 });
 
+export const insertB2BCompanyRequestSchema = createInsertSchema(
+  b2bCompanyRequestsTable,
+).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type B2BCompanyMember = typeof b2bCompanyMembersTable.$inferSelect;
 export type InsertB2BCompanyMember = z.infer<
   typeof insertB2BCompanyMemberSchema
 >;
 export type B2BCompanyTask = typeof b2bCompanyTasksTable.$inferSelect;
 export type InsertB2BCompanyTask = z.infer<typeof insertB2BCompanyTaskSchema>;
+export type B2BCompanyRequest = typeof b2bCompanyRequestsTable.$inferSelect;
+export type InsertB2BCompanyRequest = z.infer<
+  typeof insertB2BCompanyRequestSchema
+>;

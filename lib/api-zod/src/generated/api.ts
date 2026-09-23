@@ -1433,6 +1433,96 @@ export const CreateB2BCompanyTaskResponse = zod.object({
 
 
 /**
+ * @summary List internal requests visible to the signed-in company member
+ */
+export const GetMyB2BCompanyRequestsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int(),
+  "requesterMemberId": zod.int(),
+  "requesterName": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "area": zod.string(),
+  "priority": zod.enum(['normal', 'urgent']),
+  "status": zod.enum(['pending', 'in_progress', 'resolved', 'rejected']),
+  "managerNote": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "total": zod.int()
+})
+
+
+/**
+ * @summary Create an internal request for the signed-in company
+ */
+export const createB2BCompanyRequestBodyTitleMin = 2;
+export const createB2BCompanyRequestBodyTitleMax = 200;
+
+export const createB2BCompanyRequestBodyDescriptionMax = 4000;
+
+export const createB2BCompanyRequestBodyAreaMin = 2;
+export const createB2BCompanyRequestBodyAreaMax = 80;
+
+
+
+export const CreateB2BCompanyRequestBody = zod.object({
+  "title": zod.string().min(createB2BCompanyRequestBodyTitleMin).max(createB2BCompanyRequestBodyTitleMax),
+  "description": zod.string().max(createB2BCompanyRequestBodyDescriptionMax).optional(),
+  "area": zod.string().min(createB2BCompanyRequestBodyAreaMin).max(createB2BCompanyRequestBodyAreaMax),
+  "priority": zod.enum(['normal', 'urgent']).optional()
+})
+
+export const CreateB2BCompanyRequestResponse = zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int(),
+  "requesterMemberId": zod.int(),
+  "requesterName": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "area": zod.string(),
+  "priority": zod.enum(['normal', 'urgent']),
+  "status": zod.enum(['pending', 'in_progress', 'resolved', 'rejected']),
+  "managerNote": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update an internal company request
+ */
+export const UpdateB2BCompanyRequestParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateB2BCompanyRequestBodyManagerNoteMax = 4000;
+
+
+
+export const UpdateB2BCompanyRequestBody = zod.object({
+  "status": zod.enum(['pending', 'in_progress', 'resolved', 'rejected']).optional(),
+  "managerNote": zod.string().max(updateB2BCompanyRequestBodyManagerNoteMax).optional()
+})
+
+export const UpdateB2BCompanyRequestResponse = zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int(),
+  "requesterMemberId": zod.int(),
+  "requesterName": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "area": zod.string(),
+  "priority": zod.enum(['normal', 'urgent']),
+  "status": zod.enum(['pending', 'in_progress', 'resolved', 'rejected']),
+  "managerNote": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
  * @summary Update a company task
  */
 export const UpdateB2BCompanyTaskParams = zod.object({

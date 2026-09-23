@@ -6,9 +6,11 @@ import {
   CheckCircle2,
   Clipboard,
   Copy,
+  Inbox,
   LayoutDashboard,
   Loader2,
   Mail,
+  MessageSquareText,
   Plus,
   ShieldCheck,
   Users,
@@ -16,18 +18,25 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import {
   acceptB2BCompanyInvitation,
+  createB2BCompanyRequest,
   createB2BCompanyTask,
   getGetMyB2BCompanyMembersQueryKey,
+  getGetMyB2BCompanyRequestsQueryKey,
   getGetMyB2BCompanyTasksQueryKey,
   getGetMyB2BBusinessProfileQueryKey,
   inviteB2BCompanyMember,
+  updateB2BCompanyRequest,
   updateB2BCompanyTask,
   useGetMyB2BCompanyMembers,
+  useGetMyB2BCompanyRequests,
   useGetMyB2BCompanyTasks,
   useGetMyB2BBusinessProfile,
   type B2BBusinessProfile,
   type B2BCompanyMember,
   type B2BCompanyMemberRole,
+  type B2BCompanyRequest,
+  type B2BCompanyRequestPriority,
+  type B2BCompanyRequestStatus,
   type B2BCompanyTaskStatus,
 } from "@workspace/api-client-react";
 
@@ -35,6 +44,13 @@ const taskStatuses: Array<[B2BCompanyTaskStatus, string]> = [
   ["pending", "Bekliyor"],
   ["in_progress", "Devam Ediyor"],
   ["completed", "Tamamlandı"],
+];
+
+const requestStatuses: Array<[B2BCompanyRequestStatus, string]> = [
+  ["pending", "Bekliyor"],
+  ["in_progress", "İnceleniyor"],
+  ["resolved", "Çözüldü"],
+  ["rejected", "Uygun değil"],
 ];
 
 const defaultAreas = [
@@ -77,6 +93,7 @@ function CompanyPanelContent({
 }) {
   const queryClient = useQueryClient();
   const membersQuery = useGetMyB2BCompanyMembers();
+  const requestsQuery = useGetMyB2BCompanyRequests();
   const tasksQuery = useGetMyB2BCompanyTasks();
   const [inviteToken, setInviteToken] = useState(() =>
     typeof window === "undefined"
@@ -84,6 +101,7 @@ function CompanyPanelContent({
       : new URLSearchParams(window.location.search).get("invite") ?? "",
   );
   const members = membersQuery.data?.items ?? [];
+  const requests = requestsQuery.data?.items ?? [];
   const tasks = tasksQuery.data?.items ?? [];
   const currentMember = members.find((member) => member.clerkUserId === userId);
   const currentRole: B2BCompanyMemberRole =
@@ -230,6 +248,18 @@ function CompanyPanelContent({
             }
           />
         </div>
+
+        <RequestsSection
+          requests={requests}
+          canSubmit={Boolean(currentMember)}
+          canManage={canManage}
+          onError={setError}
+          onSaved={() =>
+            queryClient.invalidateQueries({
+              queryKey: getGetMyB2BCompanyRequestsQueryKey(),
+            })
+          }
+        />
 
         <TasksSection
           tasks={tasks}
@@ -416,6 +446,254 @@ function MembersSection({
             daveti kabul etmelidir. Kabul edilene kadar aktif sayılmaz.
           </p>
         </div>
+      ) : null}
+    </section>
+  );
+}
+
+function RequestsSection({
+  requests,
+  canSubmit,
+  canManage,
+  onError,
+  onSaved,
+}: {
+  requests: B2BCompanyRequest[];
+  canSubmit: boolean;
+  canManage: boolean;
+  onError: (value: string) => void;
+  onSaved: () => void;
+}) {
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    area: "operasyon",
+    priority: "normal" as B2BCompanyRequestPriority,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
+
+  async function handleCreate(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    onError("");
+    setIsSubmitting(true);
+    try {
+      await createB2BCompanyRequest({
+        title: form.title.trim(),
+        description: form.description.trim() || undefined,
+        area: form.area.trim(),
+        priority: form.priority,
+      });
+      setForm({
+        title: "",
+        description: "",
+        area: "operasyon",
+        priority: "normal",
+      });
+      onSaved();
+    } catch (requestError) {
+      onError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Personel talebi gönderilemedi.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function updateStatus(id: number, status: B2BCompanyRequestStatus) {
+    onError("");
+    setUpdatingId(id);
+    try {
+      await updateB2BCompanyRequest(id, { status });
+      onSaved();
+    } catch (requestError) {
+      onError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Talep durumu güncellenemedi.",
+      );
+    } finally {
+      setUpdatingId(null);
+    }
+  }
+
+  return (
+    <section className="border border-primary/25 bg-card p-6 md:p-8">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+        <div>
+          <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+            <Inbox size={15} />
+            Firma içi talepler
+          </p>
+          <h2 className="mt-3 text-2xl font-semibold">
+            Personel talepleri size ulaşsın
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground/60">
+            Personel iş, satın alma, operasyon veya müşteri ilişkileriyle ilgili
+            ihtiyacını buradan iletir. Siz ve yetkili yöneticiler talepleri
+            görür, durumunu günceller.
+          </p>
+        </div>
+        <span className="inline-flex items-center gap-2 border border-border/70 px-3 py-2 font-mono text-xs">
+          <MessageSquareText size={14} />
+          {requests.length} talep
+        </span>
+      </div>
+
+      {requests.length === 0 ? (
+        <p className="mt-6 border border-dashed border-border/70 p-4 text-sm text-foreground/55">
+          Henüz firma içi talep gönderilmedi.
+        </p>
+      ) : (
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {requests.map((request) => (
+            <article key={request.id} className="border border-border/70 p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`text-[10px] font-bold uppercase tracking-[0.14em] ${
+                        request.priority === "urgent"
+                          ? "text-destructive"
+                          : "text-primary"
+                      }`}
+                    >
+                      {request.priority === "urgent" ? "Acil" : request.area}
+                    </span>
+                    {request.priority === "urgent" ? (
+                      <span className="text-[10px] text-foreground/45">
+                        {request.area}
+                      </span>
+                    ) : null}
+                  </div>
+                  <h3 className="mt-2 text-lg font-semibold">{request.title}</h3>
+                  <p className="mt-1 text-xs text-foreground/50">
+                    Gönderen: {request.requesterName}
+                  </p>
+                </div>
+                {canManage ? (
+                  <select
+                    value={request.status}
+                    disabled={updatingId === request.id}
+                    onChange={(event) =>
+                      updateStatus(
+                        request.id,
+                        event.target.value as B2BCompanyRequestStatus,
+                      )
+                    }
+                    className="h-fit max-w-32 border border-border/70 bg-background px-2 py-2 text-xs outline-none focus:border-primary disabled:opacity-60"
+                    aria-label={`${request.title} talep durumu`}
+                  >
+                    {requestStatuses.map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary">
+                    {requestStatuses.find(([value]) => value === request.status)?.[1]}
+                  </span>
+                )}
+              </div>
+              <p className="mt-4 text-sm leading-6 text-foreground/65">
+                {request.description || "Açıklama eklenmedi."}
+              </p>
+              {request.managerNote ? (
+                <div className="mt-4 border-l-2 border-primary/50 bg-primary/5 px-3 py-2 text-xs leading-5 text-foreground/65">
+                  <span className="font-semibold text-primary">Yönetici notu: </span>
+                  {request.managerNote}
+                </div>
+              ) : null}
+              <p className="mt-5 flex items-center gap-2 border-t border-border/70 pt-4 text-xs text-foreground/45">
+                <span>{new Date(request.createdAt).toLocaleDateString("tr-TR")}</span>
+                <span>·</span>
+                <span>
+                  {request.status === "pending"
+                    ? "Yanıt bekliyor"
+                    : "Firma yöneticisi tarafından takip ediliyor"}
+                </span>
+              </p>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {canSubmit ? (
+        <form onSubmit={handleCreate} className="mt-7 border-t border-border/70 pt-6">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <Plus size={16} className="text-primary" />
+            Yeni talep gönder
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            <PanelField
+              label="Talep başlığı *"
+              value={form.title}
+              onChange={(value) =>
+                setForm((current) => ({ ...current, title: value }))
+              }
+              required
+            />
+            <PanelField
+              label="İlgili alan *"
+              value={form.area}
+              onChange={(value) =>
+                setForm((current) => ({ ...current, area: value }))
+              }
+              required
+              list="mmt-request-areas"
+            />
+            <label className="block text-sm">
+              <span className="mb-2 block text-foreground/70">Öncelik</span>
+              <select
+                value={form.priority}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    priority: event.target.value as B2BCompanyRequestPriority,
+                  }))
+                }
+                className="w-full border border-border/70 bg-background px-4 py-3 outline-none focus:border-primary"
+              >
+                <option value="normal">Normal</option>
+                <option value="urgent">Acil</option>
+              </select>
+            </label>
+          </div>
+          <datalist id="mmt-request-areas">
+            {defaultAreas.map((area) => (
+              <option key={area} value={area} />
+            ))}
+          </datalist>
+          <label className="mt-4 block text-sm">
+            <span className="mb-2 block text-foreground/70">Açıklama</span>
+            <textarea
+              value={form.description}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  description: event.target.value,
+                }))
+              }
+              rows={3}
+              className="w-full resize-y border border-border/70 bg-background px-4 py-3 outline-none focus:border-primary"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="mt-4 inline-flex items-center gap-2 bg-primary px-5 py-3 text-xs font-bold uppercase tracking-[0.13em] text-primary-foreground disabled:opacity-60"
+          >
+            {isSubmitting ? (
+              <Loader2 size={15} className="animate-spin" />
+            ) : (
+              <MessageSquareText size={15} />
+            )}
+            Talebi yöneticime gönder
+          </button>
+        </form>
       ) : null}
     </section>
   );
