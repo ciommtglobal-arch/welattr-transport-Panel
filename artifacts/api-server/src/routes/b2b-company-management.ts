@@ -136,7 +136,11 @@ router.get(
 router.post(
   "/b2b/business-profile/members",
   async (req, res): Promise<void> => {
-    const authorization = await requireMyCompany(req, res, ["owner", "admin"]);
+    const authorization = await requireMyCompany(req, res, [
+      "owner",
+      "admin",
+      "manager",
+    ]);
     if (!authorization) return;
 
     const parsed = InviteB2BCompanyMemberBody.safeParse(req.body);
@@ -148,6 +152,16 @@ router.post(
     }
 
     const input = parsed.data;
+    if (
+      authorization.member.role !== "owner" &&
+      (input.role === "owner" || input.role === "admin")
+    ) {
+      res.status(403).json({
+        error:
+          "Alan yöneticisi yalnızca personel veya alan yöneticisi davet edebilir.",
+      });
+      return;
+    }
     const email = input.email.trim().toLowerCase();
     const [existing] = await db
       .select({ id: b2bCompanyMembersTable.id })

@@ -152,12 +152,14 @@ function CompanyPanelContent({
     currentRole === "owner" ||
     currentRole === "admin" ||
     currentRole === "manager";
-  const canInviteMembers = currentRole === "owner" || currentRole === "admin";
+  const canInviteMembers =
+    currentRole === "owner" ||
+    currentRole === "admin" ||
+    currentRole === "manager";
   const canManage = canManageCompany;
   const canManageTasks = canManageCompany;
   const canReviewApprovals = canManageCompany;
-  const canDecideApprovals =
-    currentRole === "owner" || currentRole === "admin";
+  const canDecideApprovals = currentRole === "owner";
   const [inviteResult, setInviteResult] = useState("");
   const [error, setError] = useState("");
   const [isAccepting, setIsAccepting] = useState(false);
@@ -299,6 +301,7 @@ function CompanyPanelContent({
           <MembersSection
             members={members}
             canManage={canInviteMembers}
+            canGrantAdmin={currentRole === "owner"}
             inviteResult={inviteResult}
             setInviteResult={setInviteResult}
             onError={setError}
@@ -471,9 +474,9 @@ function WorkflowSection({
           </p>
           <h2 className="mt-3 text-2xl font-semibold">Kontrollü işlem akışı</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground/60">
-            Düşük riskli işler incelemeden sonra kısa sürede sistem tarafından
-            sonuçlandırılır. Finans, hukuk, dışa gönderim, silme ve yetki
-            değişikliği içeren işler manuel sahip kararını bekler.
+             Her işlem sistem tarafından sınıflandırılır ve firma sahibinin
+             onay akışına girer. Finans, hukuk, dışa gönderim, silme ve yetki
+             değişikliği içeren işler ayrıca riskli işlem olarak işaretlenir.
           </p>
         </div>
         <span className="inline-flex items-center gap-2 border border-border/70 px-3 py-2 font-mono text-xs">
@@ -664,6 +667,7 @@ function ApprovalCard({
 function MembersSection({
   members,
   canManage,
+  canGrantAdmin,
   inviteResult,
   setInviteResult,
   onError,
@@ -671,6 +675,7 @@ function MembersSection({
 }: {
   members: B2BCompanyMember[];
   canManage: boolean;
+  canGrantAdmin: boolean;
   inviteResult: string;
   setInviteResult: (value: string) => void;
   onError: (value: string) => void;
@@ -798,7 +803,9 @@ function MembersSection({
             >
               <option value="member">Personel</option>
               <option value="manager">Alan yöneticisi</option>
-              <option value="admin">Firma yöneticisi</option>
+               {canGrantAdmin ? (
+                 <option value="admin">Firma yöneticisi</option>
+               ) : null}
             </select>
             <button
               type="submit"

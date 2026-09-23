@@ -329,11 +329,7 @@ router.patch(
       return;
     }
     const isRejected = parsed.data.decision === "reject";
-    const nextStatus = isRejected
-      ? "rejected"
-      : existing.riskCategory === "none"
-        ? "auto_approved"
-        : "pending_owner";
+    const nextStatus = isRejected ? "rejected" : "pending_owner";
     const now = new Date();
     const [updated] = await db
       .update(workflowApprovalsTable)
@@ -347,9 +343,7 @@ router.patch(
             ? new Date(now.getTime() + ownerWindowMinutes * 60_000)
             : existing.decisionDueAt,
         autoDecisionAt:
-          nextStatus === "auto_approved"
-            ? now
-            : null,
+          null,
         updatedAt: now,
       })
       .where(eq(workflowApprovalsTable.id, existing.id))
@@ -375,7 +369,7 @@ router.patch(
 router.patch(
   "/b2b/business-profile/approvals/:id/owner-decision",
   async (req, res): Promise<void> => {
-    const authorization = await requireMyCompany(req, res, ["owner", "admin"]);
+    const authorization = await requireMyCompany(req, res, ["owner"]);
     if (!authorization) return;
     const params = DecideB2BWorkflowApprovalParams.safeParse(req.params);
     const parsed = DecideB2BWorkflowApprovalBody.safeParse(req.body);
