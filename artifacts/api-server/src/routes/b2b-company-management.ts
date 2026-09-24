@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { Router, type IRouter } from "express";
+import { clerkClient } from "@clerk/express";
 import {
   AcceptB2BCompanyInvitationBody,
   CreateB2BCompanyRequestBody,
@@ -34,6 +35,19 @@ const inviteLifetimeMs = 7 * 24 * 60 * 60 * 1000;
 
 function hashInviteToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
+}
+
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
+async function getAuthenticatedEmails(userId: string) {
+  const user = await clerkClient.users.getUser(userId);
+  return new Set(
+    user.emailAddresses
+      .map((emailAddress) => normalizeEmail(emailAddress.emailAddress))
+      .filter(Boolean),
+  );
 }
 
 function serializeMember(member: B2BCompanyMember) {
@@ -247,6 +261,28 @@ router.post(
     }
     if (!member.inviteExpiresAt || member.inviteExpiresAt <= new Date()) {
       res.status(400).json({ error: "Bu davetin süresi dolmuş." });
+      return;
+    }
+
+    let authenticatedEmails: Set<string>;
+    try {
+      authenticatedEmails = await getAuthenticatedEmails(userId);
+    } catch (error) {
+      req.log.error(
+        { err: error, clerkUserId: userId },
+        "Clerk user email lookup failed while accepting B2B invitation",
+      );
+      res.status(503).json({
+        error: "Hesabınızın e-posta doğrulaması şu anda kontrol edilemedi.",
+      });
+      return;
+    }
+
+    if (!authenticatedEmails.has(normalizeEmail(member.email))) {
+      res.status(403).json({
+        error:
+          "Bu davet, giriş yaptığınız hesabın e-posta adresiyle eşleşmiyor.",
+      });
       return;
     }
 

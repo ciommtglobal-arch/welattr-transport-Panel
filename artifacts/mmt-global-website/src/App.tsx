@@ -160,6 +160,10 @@ function getInviteAwareAuthUrl(path: string) {
     : path;
 }
 
+function normalizeRoutePath(path: string) {
+  return path.replace(/\/+$/, '') || '/';
+}
+
 function SignInPage() {
   rememberInviteToken();
 
@@ -303,24 +307,25 @@ function App() {
 function ClerkApp() {
   const [location, setLocation] = useLocation();
   const { locale } = useI18n();
+  const normalizedLocation = normalizeRoutePath(location);
   const clerkRoute =
-    location === '/staff/applications' ||
-    location === '/staff/ilanlar' ||
-    location === '/staff/medya-merkezi' ||
-    location === '/staff/b2b-dogrulamalar' ||
-    location === '/staff/b2b-sikayetler' ||
-    location === '/staff/b2b-talepler' ||
-    location === '/staff/sorumluluk-merkezi' ||
-     location === '/staff/operasyon-masasi' ||
-    location.startsWith('/staff/giris') ||
-     location.startsWith('/staff/kayit') ||
-    location === '/b2b-agi' ||
-    location.startsWith('/b2b-agi/ilan/') ||
-    location === '/b2b-agi/katil' ||
-     location === '/b2b-agi/panel' ||
-    location === '/b2b-agi/talep' ||
-    location.startsWith('/sign-in') ||
-    location.startsWith('/sign-up');
+    normalizedLocation === '/staff/applications' ||
+    normalizedLocation === '/staff/ilanlar' ||
+    normalizedLocation === '/staff/medya-merkezi' ||
+    normalizedLocation === '/staff/b2b-dogrulamalar' ||
+    normalizedLocation === '/staff/b2b-sikayetler' ||
+    normalizedLocation === '/staff/b2b-talepler' ||
+    normalizedLocation === '/staff/sorumluluk-merkezi' ||
+    normalizedLocation === '/staff/operasyon-masasi' ||
+    normalizedLocation.startsWith('/staff/giris') ||
+    normalizedLocation.startsWith('/staff/kayit') ||
+    normalizedLocation === '/b2b-agi' ||
+    normalizedLocation.startsWith('/b2b-agi/ilan/') ||
+    normalizedLocation === '/b2b-agi/katil' ||
+    normalizedLocation === '/b2b-agi/panel' ||
+    normalizedLocation === '/b2b-agi/talep' ||
+    normalizedLocation.startsWith('/sign-in') ||
+    normalizedLocation.startsWith('/sign-up');
   const routedContent = (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

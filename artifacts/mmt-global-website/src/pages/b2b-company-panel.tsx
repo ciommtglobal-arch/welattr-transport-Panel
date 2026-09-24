@@ -1,5 +1,5 @@
 import { FormEvent, useMemo, useState } from "react";
-import { useAuth } from "@clerk/react";
+import { useAuth, useUser } from "@clerk/react";
 import { Link } from "wouter";
 import {
   ArrowLeft,
@@ -95,6 +95,11 @@ function formatArea(area: string) {
 
 export default function B2BCompanyPanel() {
   const { isLoaded, isSignedIn, userId } = useAuth();
+  const { user } = useUser();
+  const accountEmail =
+    user?.primaryEmailAddress?.emailAddress ??
+    user?.emailAddresses[0]?.emailAddress ??
+    "";
   const [inviteToken] = useState(() =>
     typeof window === "undefined"
       ? ""
@@ -114,7 +119,15 @@ export default function B2BCompanyPanel() {
   if (!isSignedIn) return <PanelSignedOut />;
   if (inviteToken) return <InvitationAcceptance token={inviteToken} />;
   if (profileQuery.isLoading) return <PanelLoading />;
-  if (profileQuery.isError || !profileQuery.data) return <NoCompanyState />;
+  if (profileQuery.isError) {
+    const status = getApiErrorStatus(profileQuery.error);
+    return status === 404 ? (
+      <NoCompanyState accountEmail={accountEmail} />
+    ) : (
+      <PanelDataError accountEmail={accountEmail} status={status} />
+    );
+  }
+  if (!profileQuery.data) return <NoCompanyState accountEmail={accountEmail} />;
 
   return (
     <CompanyPanelContent
@@ -1370,7 +1383,64 @@ function PanelSignedOut() {
   );
 }
 
-function NoCompanyState() {
+function getApiErrorStatus(error: unknown) {
+  if (!error || typeof error !== "object" || !("status" in error)) {
+    return null;
+  }
+
+  const status = (error as { status?: unknown }).status;
+  return typeof status === "number" ? status : null;
+}
+
+function PanelDataError({
+  accountEmail,
+  status,
+}: {
+  accountEmail: string;
+  status: number | null;
+}) {
+  const isUnauthorized = status === 401;
+  const isForbidden = status === 403;
+
+  return (
+    <main className="flex min-h-[100dvh] items-center justify-center bg-background px-5">
+      <section className="max-w-xl border border-destructive/30 bg-card p-8 text-center md:p-12">
+        <AlertTriangle className="mx-auto text-destructive" size={34} />
+        <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+          MMT Connect / Firma Panelim
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold">
+          {isUnauthorized
+            ? "Oturum doğrulanamadı."
+            : isForbidden
+              ? "Firma paneli yetkisi bulunamadı."
+              : "Firma bilgileri alınamadı."}
+        </h1>
+        <p className="mt-4 text-sm leading-7 text-foreground/60">
+          {isUnauthorized
+            ? "Oturumunuzun süresi dolmuş olabilir. Yeniden giriş yapıp tekrar deneyin."
+            : isForbidden
+              ? "Bu hesap firma sahibi veya aktif ekip üyesi olarak yetkilendirilmemiş."
+              : "Sunucu firma bilgisini doğrulayamadı. Bu ekran firma kaydı yokmuş gibi gösterilmiyor."}
+        </p>
+        {accountEmail ? (
+          <p className="mt-4 break-all text-xs text-foreground/45">
+            Giriş yapılan hesap: {accountEmail}
+          </p>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="mt-7 inline-flex items-center gap-2 border border-primary px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] text-primary"
+        >
+          Tekrar dene
+        </button>
+      </section>
+    </main>
+  );
+}
+
+function NoCompanyState({ accountEmail }: { accountEmail: string }) {
   return (
     <main className="flex min-h-[100dvh] items-center justify-center bg-background px-5">
       <section className="max-w-xl border border-border/70 bg-card p-8 text-center md:p-12">
@@ -1378,16 +1448,24 @@ function NoCompanyState() {
         <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
           MMT Connect / Firma Panelim
         </p>
-        <h1 className="mt-3 text-3xl font-semibold">Henüz firma kaydı yok.</h1>
+        <h1 className="mt-3 text-3xl font-semibold">
+          Bu hesaba bağlı firma kaydı yok.
+        </h1>
         <p className="mt-4 text-sm leading-7 text-foreground/60">
-          Önce firma bilgilerinizi ve doğrulama belgenizi gönderin. Firma
-          kaydınız oluşunca bu panelden ekip ve görev yönetimi açılacak.
+          Firma sahibiyseniz kendi hesabınızla firma bilgilerinizi ve doğrulama
+          belgenizi gönderin. Çalışan hesabı kullanıyorsanız firma oluşturmayın;
+          firma sahibinin davet bağlantısını açın.
         </p>
+        {accountEmail ? (
+          <p className="mt-4 break-all text-xs text-foreground/45">
+            Giriş yapılan hesap: {accountEmail}
+          </p>
+        ) : null}
         <Link
           href="/b2b-agi/katil"
           className="mt-7 inline-flex items-center gap-2 bg-primary px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] text-primary-foreground"
         >
-          Firma kaydına geç
+          Firma sahibi olarak kaydı tamamla
         </Link>
       </section>
     </main>
