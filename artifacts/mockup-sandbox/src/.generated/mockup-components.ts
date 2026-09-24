@@ -2,5 +2,10 @@
 type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
 export const modules: ModuleMap = {
   "./components/mockups/mmt/MmtGlobalEditorial.tsx": () => import("../components/mockups/mmt/MmtGlobalEditorial.tsx"),
-  "./components/mockups/mmt/MmtGlobalNavigator.tsx": () => import("../components/mockups/mmt/MmtGlobalNavigator.tsx")
+  "./components/mockups/mmt/MmtGlobalNavigator.tsx": () => import("../components/mockups/mmt/MmtGlobalNavigator.tsx"),
+  "./components/mockups/mmt-corporate/CorporateHome.tsx": () => import("../components/mockups/mmt-corporate/CorporateHome.tsx"),
+  "./components/mockups/mmt-corporate/CurrentFounder.tsx": () => import("../components/mockups/mmt-corporate/CurrentFounder.tsx"),
+  "./components/mockups/mmt-corporate/CurrentHome.tsx": () => import("../components/mockups/mmt-corporate/CurrentHome.tsx"),
+  "./components/mockups/mmt-corporate/ExpertOverview.tsx": () => import("../components/mockups/mmt-corporate/ExpertOverview.tsx"),
+  "./components/mockups/mmt-corporate/FounderOverview.tsx": () => import("../components/mockups/mmt-corporate/FounderOverview.tsx")
 };

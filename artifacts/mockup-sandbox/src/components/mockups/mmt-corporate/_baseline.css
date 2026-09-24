@@ -1,0 +1,56 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap");
+
+.mmt-corporate-baseline {
+  --background: 215 28% 10%;
+  --foreground: 40 20% 97%;
+  --card: 215 25% 12%;
+  --card-foreground: 40 20% 97%;
+  --card-border: 215 20% 20%;
+  --popover: 215 25% 12%;
+  --popover-foreground: 40 20% 97%;
+  --popover-border: 215 20% 20%;
+  --primary: 21 89% 52%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 40 20% 95%;
+  --secondary-foreground: 215 28% 10%;
+  --muted: 215 20% 20%;
+  --muted-foreground: 215 15% 65%;
+  --accent: 215 20% 20%;
+  --accent-foreground: 40 20% 97%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 215 20% 20%;
+  --input: 215 20% 20%;
+  --ring: 21 89% 52%;
+  --app-font-sans: "Plus Jakarta Sans", sans-serif;
+  --app-font-serif: "Playfair Display", serif;
+  --app-font-mono: "Space Mono", monospace;
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+  --radius: 0rem;
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  font-family: var(--app-font-sans);
+}
+
+.mmt-corporate-baseline .animate-slide-up-fade {
+  animation: mmt-baseline-slide-up-fade 1s ease-out forwards;
+}
+
+.mmt-corporate-baseline .delay-150 { animation-delay: 150ms; }
+.mmt-corporate-baseline .delay-300 { animation-delay: 300ms; }
+.mmt-corporate-baseline .delay-500 { animation-delay: 500ms; }
+.mmt-corporate-baseline .delay-700 { animation-delay: 700ms; }
+.mmt-corporate-baseline .delay-1000 { animation-delay: 1000ms; }
+
+@keyframes mmt-baseline-slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
