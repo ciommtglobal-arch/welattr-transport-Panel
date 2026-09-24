@@ -5,7 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { MediaItemStatus } from './mediaItemStatus';
+import type { MediaPilotType } from './mediaPilotType';
 
 export interface MediaItemUpdate {
   /**
@@ -46,5 +46,11 @@ export interface MediaItemUpdate {
      * @nullable
      */
   size?: number | null;
-  status?: MediaItemStatus;
+  pilotType?: MediaPilotType;
+  includesTeamMembers?: boolean;
+  /**
+     * @maxLength 1000
+     * @nullable
+     */
+  consentNote?: string | null;
 }

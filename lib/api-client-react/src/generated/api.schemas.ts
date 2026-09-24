@@ -532,8 +532,52 @@ export type MediaItemStatus = typeof MediaItemStatus[keyof typeof MediaItemStatu
 
 export const MediaItemStatus = {
   draft: 'draft',
+  media_review: 'media_review',
+  founder_review: 'founder_review',
+  approved: 'approved',
+  publication_pending: 'publication_pending',
   published: 'published',
   archived: 'archived',
+} as const;
+
+export type MediaPilotType = typeof MediaPilotType[keyof typeof MediaPilotType];
+
+
+export const MediaPilotType = {
+  pilot_real: 'pilot_real',
+  test: 'test',
+} as const;
+
+export type MediaDecisionDecision = typeof MediaDecisionDecision[keyof typeof MediaDecisionDecision];
+
+
+export const MediaDecisionDecision = {
+  approve: 'approve',
+  reject: 'reject',
+} as const;
+
+export interface MediaDecision {
+  decision: MediaDecisionDecision;
+  /** @maxLength 1000 */
+  note?: string;
+}
+
+export interface MediaPublicationRecord {
+  /** @maxLength 1000 */
+  url: string;
+  /** @maxLength 2000 */
+  results?: string;
+}
+
+/**
+ * @nullable
+ */
+export type MediaItemPilotType = typeof MediaItemPilotType[keyof typeof MediaItemPilotType] | null;
+
+
+export const MediaItemPilotType = {
+  pilot_real: 'pilot_real',
+  test: 'test',
 } as const;
 
 export interface MediaItem {
@@ -551,6 +595,23 @@ export interface MediaItem {
   /** @nullable */
   size: number | null;
   status: MediaItemStatus;
+  /** @nullable */
+  pilotType: MediaItemPilotType;
+  includesTeamMembers: boolean;
+  /** @nullable */
+  consentNote: string | null;
+  /** @nullable */
+  mediaReviewedAt: string | null;
+  /** @nullable */
+  lastDecisionNote: string | null;
+  /** @nullable */
+  founderApprovedAt: string | null;
+  /** @nullable */
+  publicationUrl: string | null;
+  /** @nullable */
+  publicationResults: string | null;
+  /** @nullable */
+  publicationMethod: string | null;
   createdAt: string;
   updatedAt: string;
   /** @nullable */
@@ -596,7 +657,13 @@ export interface MediaItemInput {
      * @nullable
      */
   size?: number | null;
-  status?: MediaItemStatus;
+  pilotType?: MediaPilotType;
+  includesTeamMembers?: boolean;
+  /**
+     * @maxLength 1000
+     * @nullable
+     */
+  consentNote?: string | null;
 }
 
 export interface MediaItemUpdate {
@@ -638,14 +705,28 @@ export interface MediaItemUpdate {
      * @nullable
      */
   size?: number | null;
-  status?: MediaItemStatus;
+  pilotType?: MediaPilotType;
+  includesTeamMembers?: boolean;
+  /**
+     * @maxLength 1000
+     * @nullable
+     */
+  consentNote?: string | null;
 }
+
+export type MediaItemPagePermissions = {
+  canCreate: boolean;
+  canReview: boolean;
+  canApprove: boolean;
+  canPublish: boolean;
+};
 
 export interface MediaItemPage {
   items: MediaItem[];
   page: number;
   pageSize: number;
   total: number;
+  permissions: MediaItemPagePermissions;
 }
 
 export type MediaUploadUrlRequestContentType = typeof MediaUploadUrlRequestContentType[keyof typeof MediaUploadUrlRequestContentType];

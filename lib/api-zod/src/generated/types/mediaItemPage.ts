@@ -6,10 +6,12 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { MediaItem } from './mediaItem';
+import type { MediaItemPagePermissions } from './mediaItemPagePermissions';
 
 export interface MediaItemPage {
   items: MediaItem[];
   page: number;
   pageSize: number;
   total: number;
+  permissions: MediaItemPagePermissions;
 }

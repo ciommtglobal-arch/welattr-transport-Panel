@@ -27,16 +27,22 @@ import {
   requestMediaUploadUrl,
   type MediaItem,
   type MediaItemStatus,
+  type MediaPilotType,
   type MediaUploadUrlRequestContentType
 } from "@workspace/api-client-react";
+import { MediaApprovalActions } from "@/components/media-approval-actions";
 
 const statusLabels: Record<MediaItemStatus, string> = {
   draft: "Taslak",
+  media_review: "Medya incelemesi",
+  founder_review: "Kurucu onayı bekleniyor",
+  approved: "Kurucu onayladı — yayın bekleniyor",
+  publication_pending: "Bağlantı kaydedildi — kurucu teyidi bekleniyor",
   published: "Yayında",
   archived: "Arşivlendi",
 };
 
-const statusOptions = ["draft", "published", "archived"] as const;
+const statusOptions = ["draft", "media_review", "founder_review", "approved", "publication_pending", "published", "archived"] as const;
 
 function formatDate(value: string | Date) {
   return new Intl.DateTimeFormat("tr-TR", {
@@ -150,7 +156,7 @@ function MediaInbox() {
             Medya Merkezi
           </h1>
           <p className="mt-4 text-foreground/55 max-w-2xl">
-            Özel dosyaları, basın bültenlerini ve şirket içi medya varlıklarını buradan yükleyebilir ve yönetebilirsiniz.
+            PİLOT TANITIM — GERÇEK YAYIN ve TEST içerikleri ayrı tutulur. Gerçek yayın için medya incelemesi, kurucu onayı ve doğrulanmış yayın bağlantısı gerekir.
           </p>
         </div>
         
@@ -191,14 +197,14 @@ function MediaInbox() {
             </select>
           </label>
 
-          <button
+          {pageData?.permissions.canCreate && <button
             type="button"
             onClick={() => setSelectedId("new")}
             className="flex h-12 items-center gap-2 bg-primary px-6 text-sm font-semibold uppercase tracking-wider text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             <Plus size={16} />
             Yeni Kayıt
-          </button>
+          </button>}
         </div>
       </div>
 
@@ -260,7 +266,7 @@ function MediaInbox() {
                       item.status === 'archived' ? 'border-foreground/20 text-foreground/50 bg-foreground/5' :
                       'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10'
                     }`}>
-                      {statusLabels[item.status]}
+                          {item.status === "published" && !item.pilotType ? "Eski kayıt — yayın doğrulanmadı" : statusLabels[item.status]}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] font-medium text-foreground/40 mt-1">
@@ -285,26 +291,41 @@ function MediaInbox() {
 
         {/* Editor Column */}
         <div className="sticky top-28">
-          {selectedId === "new" ? (
+          {selectedId === "new" && pageData?.permissions.canCreate ? (
             <MediaEditor key="new" mode="create" onSave={() => {
               queryClient.invalidateQueries({ queryKey: getGetMediaItemsQueryKey() });
               setSelectedId(null);
             }} onCancel={() => setSelectedId(null)} />
           ) : selectedItem ? (
-            <MediaEditor key={selectedItem.id} mode="edit" item={selectedItem} onSave={() => {
-              queryClient.invalidateQueries({ queryKey: getGetMediaItemsQueryKey() });
-            }} onCancel={() => setSelectedId(null)} />
+            <div className="space-y-5">
+              {selectedItem.status === "draft" && pageData?.permissions.canCreate ? (
+                <MediaEditor key={selectedItem.id} mode="edit" item={selectedItem} onSave={() => {
+                  queryClient.invalidateQueries({ queryKey: getGetMediaItemsQueryKey() });
+                }} onCancel={() => setSelectedId(null)} />
+              ) : (
+                <div className="border border-border bg-card p-6">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-primary">{statusLabels[selectedItem.status]}</p>
+                  <h2 className="mt-3 text-xl font-semibold">{selectedItem.title}</h2>
+                  <p className="mt-3 whitespace-pre-wrap text-sm text-foreground/70">{selectedItem.summary}</p>
+                  {selectedItem.lastDecisionNote && <p className="mt-4 border-l-2 border-primary pl-3 text-sm">Son inceleme notu: {selectedItem.lastDecisionNote}</p>}
+                  <p className="mt-3 text-xs text-foreground/60">{selectedItem.pilotType === "test" ? "TEST — dışarı gönderilemez" : selectedItem.pilotType === "pilot_real" ? "PİLOT TANITIM — GERÇEK YAYIN" : "Eski kayıt — yayın durumu bu akışta doğrulanmadı"}</p>
+                  {selectedItem.publicationUrl && <a href={selectedItem.publicationUrl} target="_blank" rel="noopener noreferrer" className="mt-4 block break-all text-sm text-primary underline">Yayın bağlantısı: {selectedItem.publicationUrl}</a>}
+                  {selectedItem.publicationResults && <p className="mt-2 text-sm text-foreground/70">Sonuç: {selectedItem.publicationResults}</p>}
+                </div>
+              )}
+              {pageData && <MediaApprovalActions item={selectedItem} permissions={pageData.permissions} onChange={() => queryClient.invalidateQueries({ queryKey: getGetMediaItemsQueryKey() })} />}
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center border border-dashed border-border/60 bg-card/30 min-h-[400px] text-center px-6">
               <FileIcon className="h-12 w-12 text-foreground/10 mb-4" />
               <p className="text-foreground/50 font-medium">Görüntülemek veya düzenlemek için listeden bir kayıt seçin.</p>
-              <button
+              {pageData?.permissions.canCreate && <button
                 type="button"
                 onClick={() => setSelectedId("new")}
                 className="mt-6 text-sm font-semibold uppercase tracking-wider text-primary hover:underline"
               >
                 Veya yeni kayıt oluşturun
-              </button>
+              </button>}
             </div>
           )}
         </div>
@@ -327,7 +348,9 @@ function MediaEditor({
   const [title, setTitle] = useState(item?.title || "");
   const [summary, setSummary] = useState(item?.summary || "");
   const [category, setCategory] = useState(item?.category || "");
-  const [status, setStatus] = useState<MediaItemStatus>(item?.status || "draft");
+  const [pilotType, setPilotType] = useState<MediaPilotType>(item?.pilotType === "test" ? "test" : "pilot_real");
+  const [includesTeamMembers, setIncludesTeamMembers] = useState(item?.includesTeamMembers ?? false);
+  const [consentNote, setConsentNote] = useState(item?.consentNote ?? "");
   const [sourceUrl, setSourceUrl] = useState(item?.sourceUrl || "");
   
   // File upload state
@@ -418,7 +441,9 @@ function MediaEditor({
       title,
       summary,
       category,
-      status,
+      pilotType,
+      includesTeamMembers,
+      consentNote: includesTeamMembers ? consentNote.trim() || null : null,
       sourceUrl: sourceUrl || null,
       ...(finalObjectPath && selectedFile ? {
         objectPath: finalObjectPath,
@@ -490,9 +515,16 @@ function MediaEditor({
               required
               value={category}
               onChange={(e) => setCategory(e.target.value)}
+              list="media-pilot-categories"
               className="h-11 border border-input bg-background px-3 focus:border-primary outline-none transition-colors"
               placeholder="Örn: Basın Bülteni, Rapor, Eğitim"
             />
+            <datalist id="media-pilot-categories">
+              <option value="Altyapı hazırlığı" />
+              <option value="Ekip tanıtımı" />
+              <option value="Proje anlatımı" />
+              <option value="Pilot katılım duyurusu" />
+            </datalist>
           </label>
         </div>
 
@@ -510,15 +542,14 @@ function MediaEditor({
 
         <div className="grid gap-6 md:grid-cols-2">
           <label className="flex flex-col gap-2 text-sm font-medium">
-            Durum
+            İçerik türü
             <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as MediaItemStatus)}
+              value={pilotType}
+              onChange={(e) => setPilotType(e.target.value as MediaPilotType)}
               className="h-11 border border-input bg-background px-3 focus:border-primary outline-none transition-colors"
             >
-              {statusOptions.map((s) => (
-                <option key={s} value={s}>{statusLabels[s]}</option>
-              ))}
+              <option value="pilot_real">PİLOT TANITIM — GERÇEK YAYIN</option>
+              <option value="test">TEST — dış yayına kapalı</option>
             </select>
           </label>
           
@@ -536,6 +567,17 @@ function MediaEditor({
             </div>
           </label>
         </div>
+        {pilotType === "pilot_real" && <p className="border-l-2 border-primary pl-3 text-sm text-foreground/70">
+          Gerçek tanıtım metninde şu ifade aynen yer almalı: “MMT Global, uzman ekibiyle pilot çalışma ve altyapı doğrulama aşamasındadır.”
+        </p>}
+        <label className="flex items-start gap-3 text-sm">
+          <input type="checkbox" checked={includesTeamMembers} onChange={e => setIncludesTeamMembers(e.target.checked)} className="mt-1" />
+          İçerikte ekip üyelerinin adı, görüntüsü veya açıklaması var
+        </label>
+        {includesTeamMembers && <label className="flex flex-col gap-2 text-sm">
+          Ekip üyelerinden alınan izinlerin kaydı *
+          <textarea required value={consentNote} onChange={e => setConsentNote(e.target.value)} maxLength={1000} rows={2} className="border border-input bg-background p-3" placeholder="İzin alınan kişiler, kapsam ve tarih" />
+        </label>}
 
         <div className="border-t border-border pt-6 mt-2">
           <h3 className="text-sm font-semibold mb-4">Medya Dosyası</h3>

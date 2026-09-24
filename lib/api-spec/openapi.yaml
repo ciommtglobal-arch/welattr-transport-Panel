@@ -446,7 +446,7 @@ paths:
     post:
       operationId: publishMediaItem
       tags: [media]
-      summary: Yayınlanmış medya kaydını Telegram kanalına gönderir
+      summary: Kurucu onaylı gerçek pilot içeriğini Telegram'a gönderir
       parameters:
         - in: path
           name: id
@@ -491,6 +491,119 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+  /media/items/{id}/submit:
+    post:
+      operationId: submitMediaItem
+      tags: [media]
+      summary: Taslağı medya sorumlusu incelemesine gönderir
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: İncelemeye gönderildi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+  /media/items/{id}/review:
+    post:
+      operationId: reviewMediaItem
+      tags: [media]
+      summary: Medya sorumlusu içeriği inceler
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaDecision"
+      responses:
+        "200":
+          description: İnceleme kaydedildi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+  /media/items/{id}/founder-decision:
+    post:
+      operationId: decideMediaItem
+      tags: [media]
+      summary: Kurucu yayını onaylar veya gerekçeyle taslağa iade eder
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaDecision"
+      responses:
+        "200":
+          description: Kurucu kararı kaydedildi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+  /media/items/{id}/record-publication:
+    post:
+      operationId: recordMediaPublication
+      tags: [media]
+      summary: Manuel gerçek yayın bağlantısını ve sonucunu kaydeder
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaPublicationRecord"
+      responses:
+        "200":
+          description: Gerçek yayın bağlantısı kurucu teyidine gönderildi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+  /media/items/{id}/confirm-publication:
+    post:
+      operationId: confirmMediaPublication
+      tags: [media]
+      summary: Kurucu gerçek gönderi bağlantısını kontrol ederek yayını teyit eder
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Gerçek yayın teyit edildi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
   /media/uploads/request-url:
     post:
       operationId: requestMediaUploadUrl
@@ -3120,7 +3233,33 @@ components:
           description: İmzalı adresin geçerliliğinin sona erdiği zaman.
     MediaItemStatus:
       type: string
-      enum: [draft, published, archived]
+      enum: [draft, media_review, founder_review, approved, publication_pending, published, archived]
+    MediaPilotType:
+      type: string
+      enum: [pilot_real, test]
+    MediaDecision:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [approve, reject]
+        note:
+          type: string
+          maxLength: 1000
+    MediaPublicationRecord:
+      type: object
+      additionalProperties: false
+      required: [url]
+      properties:
+        url:
+          type: string
+          format: uri
+          maxLength: 1000
+        results:
+          type: string
+          maxLength: 2000
     MediaItem:
       type: object
       required:
@@ -3134,6 +3273,15 @@ components:
         - contentType
         - size
         - status
+        - pilotType
+        - includesTeamMembers
+        - consentNote
+        - mediaReviewedAt
+        - lastDecisionNote
+        - founderApprovedAt
+        - publicationUrl
+        - publicationResults
+        - publicationMethod
         - createdAt
         - updatedAt
         - publishedAt
@@ -3159,6 +3307,28 @@ components:
           type: [integer, "null"]
         status:
           $ref: "#/components/schemas/MediaItemStatus"
+        pilotType:
+          type: [string, "null"]
+          enum: [pilot_real, test, null]
+        includesTeamMembers:
+          type: boolean
+        consentNote:
+          type: [string, "null"]
+        mediaReviewedAt:
+          type: [string, "null"]
+          format: date-time
+        lastDecisionNote:
+          type: [string, "null"]
+        founderApprovedAt:
+          type: [string, "null"]
+          format: date-time
+        publicationUrl:
+          type: [string, "null"]
+          format: uri
+        publicationResults:
+          type: [string, "null"]
+        publicationMethod:
+          type: [string, "null"]
         createdAt:
           type: string
           format: date-time
@@ -3201,8 +3371,13 @@ components:
           type: [integer, "null"]
           minimum: 1
           maximum: 52428800
-        status:
-          $ref: "#/components/schemas/MediaItemStatus"
+        pilotType:
+          $ref: "#/components/schemas/MediaPilotType"
+        includesTeamMembers:
+          type: boolean
+        consentNote:
+          type: [string, "null"]
+          maxLength: 1000
     MediaItemUpdate:
       type: object
       additionalProperties: false
@@ -3235,11 +3410,16 @@ components:
           type: [integer, "null"]
           minimum: 1
           maximum: 52428800
-        status:
-          $ref: "#/components/schemas/MediaItemStatus"
+        pilotType:
+          $ref: "#/components/schemas/MediaPilotType"
+        includesTeamMembers:
+          type: boolean
+        consentNote:
+          type: [string, "null"]
+          maxLength: 1000
     MediaItemPage:
       type: object
-      required: [items, page, pageSize, total]
+      required: [items, page, pageSize, total, permissions]
       properties:
         items:
           type: array
@@ -3251,6 +3431,18 @@ components:
           type: integer
         total:
           type: integer
+        permissions:
+          type: object
+          required: [canCreate, canReview, canApprove, canPublish]
+          properties:
+            canCreate:
+              type: boolean
+            canReview:
+              type: boolean
+            canApprove:
+              type: boolean
+            canPublish:
+              type: boolean
     MediaUploadUrlRequest:
       type: object
       additionalProperties: false

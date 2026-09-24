@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { MediaItemPilotType } from './mediaItemPilotType';
 import type { MediaItemStatus } from './mediaItemStatus';
 
 export interface MediaItem {
@@ -22,6 +23,23 @@ export interface MediaItem {
   /** @nullable */
   size: number | null;
   status: MediaItemStatus;
+  /** @nullable */
+  pilotType: MediaItemPilotType;
+  includesTeamMembers: boolean;
+  /** @nullable */
+  consentNote: string | null;
+  /** @nullable */
+  mediaReviewedAt: Date | null;
+  /** @nullable */
+  lastDecisionNote: string | null;
+  /** @nullable */
+  founderApprovedAt: Date | null;
+  /** @nullable */
+  publicationUrl: string | null;
+  /** @nullable */
+  publicationResults: string | null;
+  /** @nullable */
+  publicationMethod: string | null;
   createdAt: Date;
   updatedAt: Date;
   /** @nullable */

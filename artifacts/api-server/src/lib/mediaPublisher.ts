@@ -9,6 +9,7 @@ import { and, eq } from "drizzle-orm";
 import { ObjectStorageService } from "./objectStorage";
 
 const objectStorageService = new ObjectStorageService();
+const PILOT_NOTICE = "MMT Global, uzman ekibiyle pilot çalışma ve altyapı doğrulama aşamasındadır.";
 
 type TelegramResponse = {
   ok?: boolean;
@@ -36,7 +37,7 @@ function getWebhookConfig() {
 
 function buildCaption(item: MediaItem) {
   const source = item.sourceUrl ? `\n\nKaynak: ${item.sourceUrl}` : "";
-  return `${item.title}\n\n${item.summary}${source}`.slice(0, 1024);
+  return `${PILOT_NOTICE}\n\n${item.title}\n\n${item.summary}${source}`.slice(0, 1024);
 }
 
 async function sendTelegram(item: MediaItem) {
@@ -54,7 +55,7 @@ async function sendTelegram(item: MediaItem) {
   form.set("chat_id", config.chatId);
 
   if (!item.objectPath) {
-    form.set("text", `${item.title}\n\n${item.summary}${item.sourceUrl ? `\n\nKaynak: ${item.sourceUrl}` : ""}`.slice(0, 4096));
+    form.set("text", `${PILOT_NOTICE}\n\n${item.title}\n\n${item.summary}${item.sourceUrl ? `\n\nKaynak: ${item.sourceUrl}` : ""}`.slice(0, 4096));
   } else {
     const file = await objectStorageService.getObjectEntityFile(item.objectPath);
     const [bytes] = await file.download();
@@ -199,6 +200,9 @@ export async function dispatchMediaToTelegram(mediaItemId: number) {
     .where(eq(mediaItemsTable.id, mediaItemId))
     .limit(1);
   if (!item) throw new Error("Medya kaydı bulunamadı.");
+  if (item.status !== "approved" || item.pilotType !== "pilot_real" || !item.founderApprovedAt) {
+    throw new Error("Yalnızca kurucu onaylı gerçek pilot içeriği gönderilebilir.");
+  }
 
   const delivery = await ensureDelivery(mediaItemId, "telegram");
   if (delivery.status === "sent") return delivery;
@@ -210,8 +214,9 @@ export async function dispatchMediaToTelegram(mediaItemId: number) {
       attempts: delivery.attempts + 1,
       updatedAt: new Date(),
     })
-    .where(eq(mediaDeliveriesTable.id, delivery.id))
+    .where(and(eq(mediaDeliveriesTable.id, delivery.id), eq(mediaDeliveriesTable.status, "pending")))
     .returning();
+  if (!sending) throw new Error("Telegram gönderimi zaten devam ediyor; kanalı kontrol edin.");
 
   try {
     const externalId = await sendTelegram(item);
@@ -239,6 +244,10 @@ export async function dispatchMediaToTelegram(mediaItemId: number) {
 }
 
 export async function dispatchMediaToDestinations(mediaItemId: number) {
+  const [item] = await db.select().from(mediaItemsTable).where(eq(mediaItemsTable.id, mediaItemId)).limit(1);
+  if (!item || item.status !== "approved" || item.pilotType !== "pilot_real" || !item.founderApprovedAt) {
+    throw new Error("TEST veya onaysız medya dış hedeflere gönderilemez.");
+  }
   const results = await Promise.allSettled([
     dispatchMediaToTelegram(mediaItemId),
     getWebhookConfig()
@@ -261,6 +270,9 @@ export async function dispatchMediaToWebhook(mediaItemId: number) {
     .where(eq(mediaItemsTable.id, mediaItemId))
     .limit(1);
   if (!item) throw new Error("Medya kaydı bulunamadı.");
+  if (item.status !== "approved" || item.pilotType !== "pilot_real" || !item.founderApprovedAt) {
+    throw new Error("TEST veya onaysız medya webhook'a gönderilemez.");
+  }
   if (!getWebhookConfig()) return null;
 
   const delivery = await ensureDelivery(mediaItemId, "webhook");
@@ -301,17 +313,7 @@ export async function dispatchMediaToWebhook(mediaItemId: number) {
 }
 
 export async function queuePublishedMediaDelivery(mediaItemId: number) {
-  const [item] = await db
-    .select({ status: mediaItemsTable.status })
-    .from(mediaItemsTable)
-    .where(eq(mediaItemsTable.id, mediaItemId))
-    .limit(1);
-  if (item?.status !== "published") return;
-
-  void dispatchMediaToDestinations(mediaItemId).catch((error) => {
-    console.error("Media delivery failed", {
-      mediaItemId,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  });
+  // Automatic delivery is intentionally disabled. A founder must explicitly
+  // request a real publication after both review stages.
+  void mediaItemId;
 }

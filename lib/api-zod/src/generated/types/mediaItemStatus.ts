@@ -11,6 +11,10 @@ export type MediaItemStatus = typeof MediaItemStatus[keyof typeof MediaItemStatu
 
 export const MediaItemStatus = {
   draft: 'draft',
+  media_review: 'media_review',
+  founder_review: 'founder_review',
+  approved: 'approved',
+  publication_pending: 'publication_pending',
   published: 'published',
   archived: 'archived',
 } as const;

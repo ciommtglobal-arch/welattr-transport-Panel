@@ -80,10 +80,12 @@ import type {
   LogisticsRequestStatusUpdate,
   LogisticsShipmentRecord,
   LogisticsStaffMember,
+  MediaDecision,
   MediaItem,
   MediaItemInput,
   MediaItemPage,
   MediaItemUpdate,
+  MediaPublicationRecord,
   MediaUploadUrlRequest,
   MediaUploadUrlResponse,
   MockPaymentResultInput,
@@ -954,7 +956,7 @@ export const getPublishMediaItemUrl = (id: number,) => {
 }
 
 /**
- * @summary Yayınlanmış medya kaydını Telegram kanalına gönderir
+ * @summary Kurucu onaylı gerçek pilot içeriğini Telegram'a gönderir
  */
 export const publishMediaItem = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<MediaItem> => {
 
@@ -1006,7 +1008,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type PublishMediaItemMutationVariables = {id: number}
 
     /**
- * @summary Yayınlanmış medya kaydını Telegram kanalına gönderir
+ * @summary Kurucu onaylı gerçek pilot içeriğini Telegram'a gönderir
  */
 export const usePublishMediaItem = <TError = ErrorType<ErrorEnvelope>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishMediaItem>>, TError,PublishMediaItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -1017,6 +1019,397 @@ export const usePublishMediaItem = <TError = ErrorType<ErrorEnvelope>,
         TContext
       > => {
       return useMutation(getPublishMediaItemMutationOptions(options));
+    }
+
+export const getSubmitMediaItemUrl = (id: number,) => {
+
+
+
+
+  return `/api/media/items/${id}/submit`
+}
+
+/**
+ * @summary Taslağı medya sorumlusu incelemesine gönderir
+ */
+export const submitMediaItem = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<MediaItem> => {
+
+  return customFetch<MediaItem>(getSubmitMediaItemUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getSubmitMediaItemMutationKey = () => ['submitMediaItem'] as const;
+
+export const getSubmitMediaItemMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitMediaItem>>, TError,SubmitMediaItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitMediaItem>>, TError,SubmitMediaItemMutationVariables, TContext> => {
+
+const mutationKey = getSubmitMediaItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitMediaItem>>, SubmitMediaItemMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  submitMediaItem(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitMediaItemMutationResult = NonNullable<Awaited<ReturnType<typeof submitMediaItem>>>
+
+    export type SubmitMediaItemMutationError = ErrorType<unknown>
+    export type SubmitMediaItemMutationVariables = {id: number}
+
+    /**
+ * @summary Taslağı medya sorumlusu incelemesine gönderir
+ */
+export const useSubmitMediaItem = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitMediaItem>>, TError,SubmitMediaItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitMediaItem>>,
+        TError,
+        SubmitMediaItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSubmitMediaItemMutationOptions(options));
+    }
+
+export const getReviewMediaItemUrl = (id: number,) => {
+
+
+
+
+  return `/api/media/items/${id}/review`
+}
+
+/**
+ * @summary Medya sorumlusu içeriği inceler
+ */
+export const reviewMediaItem = async (id: number,
+    mediaDecision: MediaDecision, options?: Parameters<typeof customFetch>[1]): Promise<MediaItem> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<MediaItem>(getReviewMediaItemUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(mediaDecision)
+  }
+);}
+
+
+
+
+
+export const getReviewMediaItemMutationKey = () => ['reviewMediaItem'] as const;
+
+export const getReviewMediaItemMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewMediaItem>>, TError,ReviewMediaItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reviewMediaItem>>, TError,ReviewMediaItemMutationVariables, TContext> => {
+
+const mutationKey = getReviewMediaItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reviewMediaItem>>, ReviewMediaItemMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  reviewMediaItem(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReviewMediaItemMutationResult = NonNullable<Awaited<ReturnType<typeof reviewMediaItem>>>
+    export type ReviewMediaItemMutationBody = BodyType<MediaDecision>
+    export type ReviewMediaItemMutationError = ErrorType<unknown>
+    export type ReviewMediaItemMutationVariables = {id: number;data: BodyType<MediaDecision>}
+
+    /**
+ * @summary Medya sorumlusu içeriği inceler
+ */
+export const useReviewMediaItem = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewMediaItem>>, TError,ReviewMediaItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reviewMediaItem>>,
+        TError,
+        ReviewMediaItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReviewMediaItemMutationOptions(options));
+    }
+
+export const getDecideMediaItemUrl = (id: number,) => {
+
+
+
+
+  return `/api/media/items/${id}/founder-decision`
+}
+
+/**
+ * @summary Kurucu yayını onaylar veya gerekçeyle taslağa iade eder
+ */
+export const decideMediaItem = async (id: number,
+    mediaDecision: MediaDecision, options?: Parameters<typeof customFetch>[1]): Promise<MediaItem> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<MediaItem>(getDecideMediaItemUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(mediaDecision)
+  }
+);}
+
+
+
+
+
+export const getDecideMediaItemMutationKey = () => ['decideMediaItem'] as const;
+
+export const getDecideMediaItemMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideMediaItem>>, TError,DecideMediaItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof decideMediaItem>>, TError,DecideMediaItemMutationVariables, TContext> => {
+
+const mutationKey = getDecideMediaItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof decideMediaItem>>, DecideMediaItemMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  decideMediaItem(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DecideMediaItemMutationResult = NonNullable<Awaited<ReturnType<typeof decideMediaItem>>>
+    export type DecideMediaItemMutationBody = BodyType<MediaDecision>
+    export type DecideMediaItemMutationError = ErrorType<unknown>
+    export type DecideMediaItemMutationVariables = {id: number;data: BodyType<MediaDecision>}
+
+    /**
+ * @summary Kurucu yayını onaylar veya gerekçeyle taslağa iade eder
+ */
+export const useDecideMediaItem = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideMediaItem>>, TError,DecideMediaItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof decideMediaItem>>,
+        TError,
+        DecideMediaItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDecideMediaItemMutationOptions(options));
+    }
+
+export const getRecordMediaPublicationUrl = (id: number,) => {
+
+
+
+
+  return `/api/media/items/${id}/record-publication`
+}
+
+/**
+ * @summary Manuel gerçek yayın bağlantısını ve sonucunu kaydeder
+ */
+export const recordMediaPublication = async (id: number,
+    mediaPublicationRecord: MediaPublicationRecord, options?: Parameters<typeof customFetch>[1]): Promise<MediaItem> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<MediaItem>(getRecordMediaPublicationUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(mediaPublicationRecord)
+  }
+);}
+
+
+
+
+
+export const getRecordMediaPublicationMutationKey = () => ['recordMediaPublication'] as const;
+
+export const getRecordMediaPublicationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordMediaPublication>>, TError,RecordMediaPublicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof recordMediaPublication>>, TError,RecordMediaPublicationMutationVariables, TContext> => {
+
+const mutationKey = getRecordMediaPublicationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recordMediaPublication>>, RecordMediaPublicationMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  recordMediaPublication(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecordMediaPublicationMutationResult = NonNullable<Awaited<ReturnType<typeof recordMediaPublication>>>
+    export type RecordMediaPublicationMutationBody = BodyType<MediaPublicationRecord>
+    export type RecordMediaPublicationMutationError = ErrorType<unknown>
+    export type RecordMediaPublicationMutationVariables = {id: number;data: BodyType<MediaPublicationRecord>}
+
+    /**
+ * @summary Manuel gerçek yayın bağlantısını ve sonucunu kaydeder
+ */
+export const useRecordMediaPublication = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordMediaPublication>>, TError,RecordMediaPublicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof recordMediaPublication>>,
+        TError,
+        RecordMediaPublicationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRecordMediaPublicationMutationOptions(options));
+    }
+
+export const getConfirmMediaPublicationUrl = (id: number,) => {
+
+
+
+
+  return `/api/media/items/${id}/confirm-publication`
+}
+
+/**
+ * @summary Kurucu gerçek gönderi bağlantısını kontrol ederek yayını teyit eder
+ */
+export const confirmMediaPublication = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<MediaItem> => {
+
+  return customFetch<MediaItem>(getConfirmMediaPublicationUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getConfirmMediaPublicationMutationKey = () => ['confirmMediaPublication'] as const;
+
+export const getConfirmMediaPublicationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmMediaPublication>>, TError,ConfirmMediaPublicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmMediaPublication>>, TError,ConfirmMediaPublicationMutationVariables, TContext> => {
+
+const mutationKey = getConfirmMediaPublicationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmMediaPublication>>, ConfirmMediaPublicationMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  confirmMediaPublication(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmMediaPublicationMutationResult = NonNullable<Awaited<ReturnType<typeof confirmMediaPublication>>>
+
+    export type ConfirmMediaPublicationMutationError = ErrorType<unknown>
+    export type ConfirmMediaPublicationMutationVariables = {id: number}
+
+    /**
+ * @summary Kurucu gerçek gönderi bağlantısını kontrol ederek yayını teyit eder
+ */
+export const useConfirmMediaPublication = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmMediaPublication>>, TError,ConfirmMediaPublicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof confirmMediaPublication>>,
+        TError,
+        ConfirmMediaPublicationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getConfirmMediaPublicationMutationOptions(options));
     }
 
 export const getRequestMediaUploadUrlUrl = () => {

@@ -189,7 +189,7 @@ export const getMediaItemsQueryPageSizeMax = 50;
 
 
 export const GetMediaItemsQueryParams = zod.object({
-  "status": zod.enum(['draft', 'published', 'archived']).optional(),
+  "status": zod.enum(['draft', 'media_review', 'founder_review', 'approved', 'publication_pending', 'published', 'archived']).optional(),
   "query": zod.coerce.string().max(getMediaItemsQueryQueryMax).optional(),
   "page": zod.coerce.number().int().min(1).default(getMediaItemsQueryPageDefault),
   "pageSize": zod.coerce.number().int().min(1).max(getMediaItemsQueryPageSizeMax).default(getMediaItemsQueryPageSizeDefault)
@@ -206,14 +206,29 @@ export const GetMediaItemsResponse = zod.object({
   "fileName": zod.string().nullable(),
   "contentType": zod.string().nullable(),
   "size": zod.int().nullable(),
-  "status": zod.enum(['draft', 'published', 'archived']),
+  "status": zod.enum(['draft', 'media_review', 'founder_review', 'approved', 'publication_pending', 'published', 'archived']),
+  "pilotType": zod.union([zod.literal('pilot_real'),zod.literal('test'),zod.literal(null)]).nullable(),
+  "includesTeamMembers": zod.boolean(),
+  "consentNote": zod.string().nullable(),
+  "mediaReviewedAt": zod.coerce.date().nullable(),
+  "lastDecisionNote": zod.string().nullable(),
+  "founderApprovedAt": zod.coerce.date().nullable(),
+  "publicationUrl": zod.url().nullable(),
+  "publicationResults": zod.string().nullable(),
+  "publicationMethod": zod.string().nullable(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date(),
   "publishedAt": zod.coerce.date().nullable()
 })),
   "page": zod.int(),
   "pageSize": zod.int(),
-  "total": zod.int()
+  "total": zod.int(),
+  "permissions": zod.object({
+  "canCreate": zod.boolean(),
+  "canReview": zod.boolean(),
+  "canApprove": zod.boolean(),
+  "canPublish": zod.boolean()
+})
 })
 
 
@@ -233,6 +248,8 @@ export const createMediaItemBodyContentTypeMax = 120;
 
 export const createMediaItemBodySizeMax = 52428800;
 
+export const createMediaItemBodyConsentNoteMax = 1000;
+
 
 
 export const CreateMediaItemBody = zod.object({
@@ -244,7 +261,9 @@ export const CreateMediaItemBody = zod.object({
   "fileName": zod.string().max(createMediaItemBodyFileNameMax).nullish(),
   "contentType": zod.string().max(createMediaItemBodyContentTypeMax).nullish(),
   "size": zod.int().min(1).max(createMediaItemBodySizeMax).nullish(),
-  "status": zod.enum(['draft', 'published', 'archived']).optional()
+  "pilotType": zod.enum(['pilot_real', 'test']).optional(),
+  "includesTeamMembers": zod.boolean().optional(),
+  "consentNote": zod.string().max(createMediaItemBodyConsentNoteMax).nullish()
 })
 
 export const CreateMediaItemResponse = zod.object({
@@ -257,7 +276,16 @@ export const CreateMediaItemResponse = zod.object({
   "fileName": zod.string().nullable(),
   "contentType": zod.string().nullable(),
   "size": zod.int().nullable(),
-  "status": zod.enum(['draft', 'published', 'archived']),
+  "status": zod.enum(['draft', 'media_review', 'founder_review', 'approved', 'publication_pending', 'published', 'archived']),
+  "pilotType": zod.union([zod.literal('pilot_real'),zod.literal('test'),zod.literal(null)]).nullable(),
+  "includesTeamMembers": zod.boolean(),
+  "consentNote": zod.string().nullable(),
+  "mediaReviewedAt": zod.coerce.date().nullable(),
+  "lastDecisionNote": zod.string().nullable(),
+  "founderApprovedAt": zod.coerce.date().nullable(),
+  "publicationUrl": zod.url().nullable(),
+  "publicationResults": zod.string().nullable(),
+  "publicationMethod": zod.string().nullable(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date(),
   "publishedAt": zod.coerce.date().nullable()
@@ -287,6 +315,8 @@ export const updateMediaItemBodyContentTypeMax = 120;
 
 export const updateMediaItemBodySizeMax = 52428800;
 
+export const updateMediaItemBodyConsentNoteMax = 1000;
+
 
 
 export const UpdateMediaItemBody = zod.object({
@@ -298,7 +328,9 @@ export const UpdateMediaItemBody = zod.object({
   "fileName": zod.string().max(updateMediaItemBodyFileNameMax).nullish(),
   "contentType": zod.string().max(updateMediaItemBodyContentTypeMax).nullish(),
   "size": zod.int().min(1).max(updateMediaItemBodySizeMax).nullish(),
-  "status": zod.enum(['draft', 'published', 'archived']).optional()
+  "pilotType": zod.enum(['pilot_real', 'test']).optional(),
+  "includesTeamMembers": zod.boolean().optional(),
+  "consentNote": zod.string().max(updateMediaItemBodyConsentNoteMax).nullish()
 })
 
 export const UpdateMediaItemResponse = zod.object({
@@ -311,7 +343,16 @@ export const UpdateMediaItemResponse = zod.object({
   "fileName": zod.string().nullable(),
   "contentType": zod.string().nullable(),
   "size": zod.int().nullable(),
-  "status": zod.enum(['draft', 'published', 'archived']),
+  "status": zod.enum(['draft', 'media_review', 'founder_review', 'approved', 'publication_pending', 'published', 'archived']),
+  "pilotType": zod.union([zod.literal('pilot_real'),zod.literal('test'),zod.literal(null)]).nullable(),
+  "includesTeamMembers": zod.boolean(),
+  "consentNote": zod.string().nullable(),
+  "mediaReviewedAt": zod.coerce.date().nullable(),
+  "lastDecisionNote": zod.string().nullable(),
+  "founderApprovedAt": zod.coerce.date().nullable(),
+  "publicationUrl": zod.url().nullable(),
+  "publicationResults": zod.string().nullable(),
+  "publicationMethod": zod.string().nullable(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date(),
   "publishedAt": zod.coerce.date().nullable()
@@ -335,7 +376,7 @@ export const RequestMediaItemDownloadUrlResponse = zod.object({
 
 
 /**
- * @summary Yayınlanmış medya kaydını Telegram kanalına gönderir
+ * @summary Kurucu onaylı gerçek pilot içeriğini Telegram'a gönderir
  */
 
 
@@ -354,7 +395,225 @@ export const PublishMediaItemResponse = zod.object({
   "fileName": zod.string().nullable(),
   "contentType": zod.string().nullable(),
   "size": zod.int().nullable(),
-  "status": zod.enum(['draft', 'published', 'archived']),
+  "status": zod.enum(['draft', 'media_review', 'founder_review', 'approved', 'publication_pending', 'published', 'archived']),
+  "pilotType": zod.union([zod.literal('pilot_real'),zod.literal('test'),zod.literal(null)]).nullable(),
+  "includesTeamMembers": zod.boolean(),
+  "consentNote": zod.string().nullable(),
+  "mediaReviewedAt": zod.coerce.date().nullable(),
+  "lastDecisionNote": zod.string().nullable(),
+  "founderApprovedAt": zod.coerce.date().nullable(),
+  "publicationUrl": zod.url().nullable(),
+  "publicationResults": zod.string().nullable(),
+  "publicationMethod": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Taslağı medya sorumlusu incelemesine gönderir
+ */
+
+
+
+export const SubmitMediaItemParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const SubmitMediaItemResponse = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "sourceUrl": zod.url().nullable(),
+  "hasFile": zod.boolean(),
+  "fileName": zod.string().nullable(),
+  "contentType": zod.string().nullable(),
+  "size": zod.int().nullable(),
+  "status": zod.enum(['draft', 'media_review', 'founder_review', 'approved', 'publication_pending', 'published', 'archived']),
+  "pilotType": zod.union([zod.literal('pilot_real'),zod.literal('test'),zod.literal(null)]).nullable(),
+  "includesTeamMembers": zod.boolean(),
+  "consentNote": zod.string().nullable(),
+  "mediaReviewedAt": zod.coerce.date().nullable(),
+  "lastDecisionNote": zod.string().nullable(),
+  "founderApprovedAt": zod.coerce.date().nullable(),
+  "publicationUrl": zod.url().nullable(),
+  "publicationResults": zod.string().nullable(),
+  "publicationMethod": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Medya sorumlusu içeriği inceler
+ */
+
+
+
+export const ReviewMediaItemParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const reviewMediaItemBodyNoteMax = 1000;
+
+
+
+export const ReviewMediaItemBody = zod.object({
+  "decision": zod.enum(['approve', 'reject']),
+  "note": zod.string().max(reviewMediaItemBodyNoteMax).optional()
+})
+
+export const ReviewMediaItemResponse = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "sourceUrl": zod.url().nullable(),
+  "hasFile": zod.boolean(),
+  "fileName": zod.string().nullable(),
+  "contentType": zod.string().nullable(),
+  "size": zod.int().nullable(),
+  "status": zod.enum(['draft', 'media_review', 'founder_review', 'approved', 'publication_pending', 'published', 'archived']),
+  "pilotType": zod.union([zod.literal('pilot_real'),zod.literal('test'),zod.literal(null)]).nullable(),
+  "includesTeamMembers": zod.boolean(),
+  "consentNote": zod.string().nullable(),
+  "mediaReviewedAt": zod.coerce.date().nullable(),
+  "lastDecisionNote": zod.string().nullable(),
+  "founderApprovedAt": zod.coerce.date().nullable(),
+  "publicationUrl": zod.url().nullable(),
+  "publicationResults": zod.string().nullable(),
+  "publicationMethod": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Kurucu yayını onaylar veya gerekçeyle taslağa iade eder
+ */
+
+
+
+export const DecideMediaItemParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const decideMediaItemBodyNoteMax = 1000;
+
+
+
+export const DecideMediaItemBody = zod.object({
+  "decision": zod.enum(['approve', 'reject']),
+  "note": zod.string().max(decideMediaItemBodyNoteMax).optional()
+})
+
+export const DecideMediaItemResponse = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "sourceUrl": zod.url().nullable(),
+  "hasFile": zod.boolean(),
+  "fileName": zod.string().nullable(),
+  "contentType": zod.string().nullable(),
+  "size": zod.int().nullable(),
+  "status": zod.enum(['draft', 'media_review', 'founder_review', 'approved', 'publication_pending', 'published', 'archived']),
+  "pilotType": zod.union([zod.literal('pilot_real'),zod.literal('test'),zod.literal(null)]).nullable(),
+  "includesTeamMembers": zod.boolean(),
+  "consentNote": zod.string().nullable(),
+  "mediaReviewedAt": zod.coerce.date().nullable(),
+  "lastDecisionNote": zod.string().nullable(),
+  "founderApprovedAt": zod.coerce.date().nullable(),
+  "publicationUrl": zod.url().nullable(),
+  "publicationResults": zod.string().nullable(),
+  "publicationMethod": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Manuel gerçek yayın bağlantısını ve sonucunu kaydeder
+ */
+
+
+
+export const RecordMediaPublicationParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const recordMediaPublicationBodyUrlMax = 1000;
+
+export const recordMediaPublicationBodyResultsMax = 2000;
+
+
+
+export const RecordMediaPublicationBody = zod.object({
+  "url": zod.url().max(recordMediaPublicationBodyUrlMax),
+  "results": zod.string().max(recordMediaPublicationBodyResultsMax).optional()
+})
+
+export const RecordMediaPublicationResponse = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "sourceUrl": zod.url().nullable(),
+  "hasFile": zod.boolean(),
+  "fileName": zod.string().nullable(),
+  "contentType": zod.string().nullable(),
+  "size": zod.int().nullable(),
+  "status": zod.enum(['draft', 'media_review', 'founder_review', 'approved', 'publication_pending', 'published', 'archived']),
+  "pilotType": zod.union([zod.literal('pilot_real'),zod.literal('test'),zod.literal(null)]).nullable(),
+  "includesTeamMembers": zod.boolean(),
+  "consentNote": zod.string().nullable(),
+  "mediaReviewedAt": zod.coerce.date().nullable(),
+  "lastDecisionNote": zod.string().nullable(),
+  "founderApprovedAt": zod.coerce.date().nullable(),
+  "publicationUrl": zod.url().nullable(),
+  "publicationResults": zod.string().nullable(),
+  "publicationMethod": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "publishedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Kurucu gerçek gönderi bağlantısını kontrol ederek yayını teyit eder
+ */
+
+
+
+export const ConfirmMediaPublicationParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const ConfirmMediaPublicationResponse = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "sourceUrl": zod.url().nullable(),
+  "hasFile": zod.boolean(),
+  "fileName": zod.string().nullable(),
+  "contentType": zod.string().nullable(),
+  "size": zod.int().nullable(),
+  "status": zod.enum(['draft', 'media_review', 'founder_review', 'approved', 'publication_pending', 'published', 'archived']),
+  "pilotType": zod.union([zod.literal('pilot_real'),zod.literal('test'),zod.literal(null)]).nullable(),
+  "includesTeamMembers": zod.boolean(),
+  "consentNote": zod.string().nullable(),
+  "mediaReviewedAt": zod.coerce.date().nullable(),
+  "lastDecisionNote": zod.string().nullable(),
+  "founderApprovedAt": zod.coerce.date().nullable(),
+  "publicationUrl": zod.url().nullable(),
+  "publicationResults": zod.string().nullable(),
+  "publicationMethod": zod.string().nullable(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date(),
   "publishedAt": zod.coerce.date().nullable()

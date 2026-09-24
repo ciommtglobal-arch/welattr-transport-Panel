@@ -12,6 +12,10 @@ import { z } from "zod/v4";
 
 export const mediaItemStatusEnum = pgEnum("media_item_status", [
   "draft",
+  "media_review",
+  "founder_review",
+  "approved",
+  "publication_pending",
   "published",
   "archived",
 ]);
@@ -29,6 +33,17 @@ export const mediaItemsTable = pgTable(
     contentType: text("content_type"),
     size: integer("size"),
     status: mediaItemStatusEnum("status").notNull().default("draft"),
+    pilotType: text("pilot_type"),
+    includesTeamMembers: integer("includes_team_members").notNull().default(0),
+    consentNote: text("consent_note"),
+    mediaReviewedBy: text("media_reviewed_by"),
+    mediaReviewedAt: timestamp("media_reviewed_at", { withTimezone: true }),
+    lastDecisionNote: text("last_decision_note"),
+    founderApprovedBy: text("founder_approved_by"),
+    founderApprovedAt: timestamp("founder_approved_at", { withTimezone: true }),
+    publicationUrl: text("publication_url"),
+    publicationResults: text("publication_results"),
+    publicationMethod: text("publication_method"),
     createdByClerkUserId: text("created_by_clerk_user_id").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -58,3 +73,12 @@ export const insertMediaItemSchema = createInsertSchema(mediaItemsTable).omit({
 
 export type MediaItem = typeof mediaItemsTable.$inferSelect;
 export type InsertMediaItem = z.infer<typeof insertMediaItemSchema>;
+
+export const mediaItemEventsTable = pgTable("media_item_events", {
+  id: serial("id").primaryKey(),
+  mediaItemId: integer("media_item_id").notNull().references(() => mediaItemsTable.id),
+  actorClerkUserId: text("actor_clerk_user_id").notNull(),
+  action: text("action").notNull(),
+  note: text("note"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
