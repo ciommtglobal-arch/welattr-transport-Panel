@@ -1,6 +1,6 @@
 import { type ComponentProps, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ClerkProvider, SignIn, SignUp } from '@clerk/react';
+import { ClerkProvider, SignIn, SignUp, useAuth } from '@clerk/react';
 import { arSA, enUS, ruRU, trTR } from '@clerk/localizations';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
@@ -34,6 +34,7 @@ import LogisticsHubPage from '@/pages/logistics-hub';
 import DepartmentsOverviewPage, { DepartmentPage } from '@/pages/departments';
 import StaffResponsibilityCenter from '@/pages/staff-responsibility-center';
 import StaffOperationsDesk from '@/pages/staff-operations-desk';
+import { FounderDashboard, StaffWorkspaceRedirect } from '@/pages/staff-workspace';
 import {
   AboutPage,
   CareersPage,
@@ -180,13 +181,15 @@ function SignInPage() {
 }
 
 function StaffSignInPage() {
+  const { isLoaded, isSignedIn } = useAuth();
+  if (isLoaded && isSignedIn) return <Redirect to="/staff/yonlendir" />;
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
       <SignIn
         routing="path"
         path={`${basePath}/staff/giris`}
         signUpUrl={`${basePath}/staff/kayit`}
-        fallbackRedirectUrl={`${basePath}/staff/sorumluluk-merkezi`}
+        fallbackRedirectUrl={`${basePath}/staff/yonlendir`}
       />
     </div>
   );
@@ -199,7 +202,7 @@ function StaffSignUpPage() {
         routing="path"
         path={`${basePath}/staff/kayit`}
         signInUrl={`${basePath}/staff/giris`}
-        fallbackRedirectUrl={`${basePath}/staff/sorumluluk-merkezi`}
+        fallbackRedirectUrl={`${basePath}/staff/yonlendir`}
       />
     </div>
   );
@@ -261,6 +264,8 @@ function Router() {
         <Route path="/staff/b2b-sikayetler" component={StaffB2BReports} />
         <Route path="/staff/b2b-talepler" component={StaffB2BRequests} />
         <Route path="/staff/sorumluluk-merkezi" component={StaffResponsibilityCenter} />
+        <Route path="/staff/yonlendir" component={StaffWorkspaceRedirect} />
+        <Route path="/staff/yonetim-paneli" component={FounderDashboard} />
         <Route path="/staff/operasyon-masasi" component={StaffOperationsDesk} />
         <Route path="/staff/giris/*?" component={StaffSignInPage} />
         <Route path="/staff/kayit/*?" component={StaffSignUpPage} />
@@ -316,6 +321,8 @@ function ClerkApp() {
     normalizedLocation === '/staff/b2b-sikayetler' ||
     normalizedLocation === '/staff/b2b-talepler' ||
     normalizedLocation === '/staff/sorumluluk-merkezi' ||
+    normalizedLocation === '/staff/yonlendir' ||
+    normalizedLocation === '/staff/yonetim-paneli' ||
     normalizedLocation === '/staff/operasyon-masasi' ||
     normalizedLocation.startsWith('/staff/giris') ||
     normalizedLocation.startsWith('/staff/kayit') ||

@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { UserButton, useAuth } from "@clerk/react";
-import { Link } from "wouter";
+import { Link, Redirect } from "wouter";
 import {
   ArrowRight,
   BadgeCheck,
@@ -27,6 +27,8 @@ import {
   useCreateStaffRewardTransaction,
   useDecideStaffRewardTransaction,
   useGetOperationsDesk,
+  useGetStaffAccess,
+  getGetStaffAccessQueryKey,
   useGetStaffRewards,
   type StaffProfile,
   type StaffRewardSummary,
@@ -721,7 +723,21 @@ export default function StaffResponsibilityCenter() {
   return (
     <main className="min-h-[100dvh] bg-background text-foreground">
       <StaffHeader signedIn={Boolean(isSignedIn)} />
-      {!isLoaded ? <LoadingState /> : !isSignedIn ? <SignedOutState /> : <SignedInCenter />}
+      {!isLoaded ? <LoadingState /> : !isSignedIn ? <SignedOutState /> : <AuthorizedCenter />}
     </main>
   );
+}
+
+function AuthorizedCenter() {
+  const access = useGetStaffAccess({ query: { queryKey: getGetStaffAccessQueryKey(), retry: false } });
+  if (access.isPending) return <LoadingState />;
+  if (access.isError) return (
+    <section className="mx-auto max-w-xl px-5 py-20 text-center">
+      <h1 className="text-2xl font-semibold">Personel yetkiniz bulunamadı</h1>
+      <p className="mt-4 text-foreground/60">Bu alan için mevcut hesabınıza tanımlı bir yetki gerekiyor.</p>
+      <Link href="/b2b-agi/panel" className="mt-6 inline-block text-primary underline">Şirket paneline dön</Link>
+    </section>
+  );
+  if (access.data.role === "founder") return <Redirect to="/staff/yonetim-paneli" />;
+  return <SignedInCenter />;
 }

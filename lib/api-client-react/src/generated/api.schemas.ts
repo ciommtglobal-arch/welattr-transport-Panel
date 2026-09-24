@@ -2040,6 +2040,33 @@ status?: LogisticsShipmentStatus;
 requestId?: number;
 };
 
+export type GetStaffAccess200Role = typeof GetStaffAccess200Role[keyof typeof GetStaffAccess200Role];
+
+
+export const GetStaffAccess200Role = {
+  founder: 'founder',
+  admin: 'admin',
+  operations: 'operations',
+  finance: 'finance',
+  reviewer: 'reviewer',
+} as const;
+
+export type GetStaffAccess200Workspace = typeof GetStaffAccess200Workspace[keyof typeof GetStaffAccess200Workspace];
+
+
+export const GetStaffAccess200Workspace = {
+  '/staff/yonetim-paneli': '/staff/yonetim-paneli',
+  '/staff/sorumluluk-merkezi': '/staff/sorumluluk-merkezi',
+  '/staff/operasyon-masasi': '/staff/operasyon-masasi',
+  '/staff/applications': '/staff/applications',
+  '/staff/b2b-dogrulamalar': '/staff/b2b-dogrulamalar',
+} as const;
+
+export type GetStaffAccess200 = {
+  role: GetStaffAccess200Role;
+  workspace: GetStaffAccess200Workspace;
+};
+
 export type GetLimitApplicationsParams = {
 status?: LimitApplicationStatus;
 /**

@@ -6,6 +6,13 @@ import { trackEvent } from "@/lib/analytics";
 import CorporateFleetSection from "@/components/corporate-fleet-section";
 import { useI18n, type Locale } from "@/lib/i18n";
 
+const staffLabels: Record<Locale, { login: string; media: string }> = {
+  tr: { login: "Personel Girişi", media: "Medya Merkezi" },
+  en: { login: "Staff Sign In", media: "Media Center" },
+  ar: { login: "دخول الموظفين", media: "المركز الإعلامي" },
+  ru: { login: "Вход для сотрудников", media: "Медиацентр" },
+};
+
 // Make sure to use the generated image
 const HERO_BG = "/hero-bridge.jpg";
 const BUSINESS_CONTACTS_READY = false;
@@ -127,6 +134,7 @@ const homeCopy: Record<Locale, {
 export default function Home() {
   const { locale } = useI18n();
   const copy = homeCopy[locale];
+  const staff = staffLabels[locale];
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -260,6 +268,13 @@ export default function Home() {
             {copy.companyPanel}
           </Link>
         </div>
+        <Link
+          href="/staff/giris"
+          onClick={() => setMobileMenuOpen(false)}
+          className="w-full max-w-sm border border-primary bg-primary/10 px-5 py-4 text-center text-sm font-bold uppercase tracking-[0.12em] text-primary"
+        >
+          {staff.login}
+        </Link>
         <button onClick={() => scrollToSection("approach")} className="text-2xl font-semibold tracking-wide hover:text-primary transition-colors">
           {copy.navApproach}
         </button>
@@ -646,6 +661,10 @@ export default function Home() {
                <p className="text-sm text-foreground/60 font-light leading-relaxed">
                   {copy.footerDescription}
                </p>
+               <div className="mt-6 flex flex-col gap-3 text-sm">
+                 <Link href="/staff/giris" className="text-primary hover:underline">{staff.login}</Link>
+                 <Link href="/staff/medya-merkezi" className="text-foreground/60 hover:text-primary">{staff.media}</Link>
+               </div>
             </div>
             
             <div>

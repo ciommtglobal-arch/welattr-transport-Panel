@@ -5,9 +5,31 @@ import {
   type StaffProfile,
 } from "@workspace/db";
 import { asc } from "drizzle-orm";
-import { requireOperationsStaff, requireStaff } from "../lib/staffAuth";
+import { requireOperationsStaff, requireStaff, requireUser } from "../lib/staffAuth";
 
 const router: IRouter = Router();
+
+router.get("/staff/access", async (req, res): Promise<void> => {
+  const userId = requireUser(req, res);
+  if (!userId) return;
+  const founderId = process.env.MMT_FOUNDER_REVIEWER_CLERK_USER_ID?.trim();
+  if (founderId && userId === founderId) {
+    res.json({ role: "founder", workspace: "/staff/yonetim-paneli" });
+    return;
+  }
+  const authorization = await requireStaff(req, res);
+  if (!authorization) return;
+  const workspaces = {
+    admin: "/staff/sorumluluk-merkezi",
+    operations: "/staff/operasyon-masasi",
+    finance: "/staff/applications",
+    reviewer: "/staff/b2b-dogrulamalar",
+  } as const;
+  res.json({
+    role: authorization.staff.role,
+    workspace: workspaces[authorization.staff.role],
+  });
+});
 
 function serializeProfile(profile: StaffProfile) {
   return {

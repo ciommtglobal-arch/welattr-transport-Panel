@@ -1159,6 +1159,15 @@ export const GetStaffProfilesResponse = zod.array(GetStaffProfilesResponseItem)
 
 
 /**
+ * @summary Mevcut hesap için yetkili personel veya kurucu çalışma alanı
+ */
+export const GetStaffAccessResponse = zod.object({
+  "role": zod.enum(['founder', 'admin', 'operations', 'finance', 'reviewer']),
+  "workspace": zod.enum(['/staff/yonetim-paneli', '/staff/sorumluluk-merkezi', '/staff/operasyon-masasi', '/staff/applications', '/staff/b2b-dogrulamalar'])
+})
+
+
+/**
  * @summary Operasyon koordinasyon masası yetkisini ve kapsamını döndürür
  */
 export const GetOperationsDeskResponse = zod.object({

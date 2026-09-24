@@ -1047,6 +1047,38 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /staff/access:
+    get:
+      operationId: getStaffAccess
+      tags: [staff-profiles]
+      summary: Mevcut hesap için yetkili personel veya kurucu çalışma alanı
+      responses:
+        "200":
+          description: Yetkili çalışma alanı
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [role, workspace]
+                properties:
+                  role:
+                    type: string
+                    enum: [founder, admin, operations, finance, reviewer]
+                  workspace:
+                    type: string
+                    enum: [/staff/yonetim-paneli, /staff/sorumluluk-merkezi, /staff/operasyon-masasi, /staff/applications, /staff/b2b-dogrulamalar]
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Staff or founder access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /staff/operations-desk:
     get:
       operationId: getOperationsDesk

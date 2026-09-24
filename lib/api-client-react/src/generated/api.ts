@@ -63,6 +63,7 @@ import type {
   GetLimitApplicationsParams,
   GetLogisticsOperationsParams,
   GetMediaItemsParams,
+  GetStaffAccess200,
   HealthStatus,
   LimitApplication,
   LimitApplicationInput,
@@ -2576,6 +2577,83 @@ export function useGetStaffProfiles<TData = Awaited<ReturnType<typeof getStaffPr
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetStaffProfilesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetStaffAccessUrl = () => {
+
+
+
+
+  return `/api/staff/access`
+}
+
+/**
+ * @summary Mevcut hesap için yetkili personel veya kurucu çalışma alanı
+ */
+export const getStaffAccess = async ( options?: Parameters<typeof customFetch>[1]): Promise<GetStaffAccess200> => {
+
+  return customFetch<GetStaffAccess200>(getGetStaffAccessUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStaffAccessQueryKey = () => {
+    return [
+    `/api/staff/access`
+    ] as const;
+    }
+
+
+export const getGetStaffAccessQueryOptions = <TData = Awaited<ReturnType<typeof getStaffAccess>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffAccess>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStaffAccessQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStaffAccess>>> = ({ signal }) => getStaffAccess({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStaffAccess>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStaffAccessQueryResult = NonNullable<Awaited<ReturnType<typeof getStaffAccess>>>
+export type GetStaffAccessQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Mevcut hesap için yetkili personel veya kurucu çalışma alanı
+ */
+
+export function useGetStaffAccess<TData = Awaited<ReturnType<typeof getStaffAccess>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffAccess>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStaffAccessQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
