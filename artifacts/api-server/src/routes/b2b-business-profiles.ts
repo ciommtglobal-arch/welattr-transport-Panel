@@ -15,7 +15,7 @@ import {
 } from "@workspace/db";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage";
-import { requireStaff, requireUser } from "../lib/staffAuth";
+import { requireB2BReviewer, requireStaff, requireUser } from "../lib/staffAuth";
 import { requireMyCompany } from "../lib/companyAuth";
 
 const router: IRouter = Router();
@@ -237,7 +237,7 @@ router.post("/b2b/business-profile/me", async (req, res): Promise<void> => {
 });
 
 router.get("/b2b/business-profiles/review", async (req, res): Promise<void> => {
-  const authorization = await requireStaff(req, res);
+  const authorization = await requireB2BReviewer(req, res);
   if (!authorization) return;
 
   const parsed = GetB2BBusinessProfileReviewQueueQueryParams.safeParse(
@@ -249,9 +249,15 @@ router.get("/b2b/business-profiles/review", async (req, res): Promise<void> => {
   }
 
   const { status, page, pageSize } = parsed.data;
-  const where = status
-    ? eq(b2bBusinessProfilesTable.status, status)
-    : undefined;
+  const where = and(
+    status ? eq(b2bBusinessProfilesTable.status, status) : undefined,
+    authorization.founderReviewer
+      ? eq(
+          b2bBusinessProfilesTable.ownerClerkUserId,
+          authorization.userId,
+        )
+      : undefined,
+  );
   const offset = (page - 1) * pageSize;
   const [items, countRows] = await Promise.all([
     db
@@ -279,7 +285,7 @@ router.get("/b2b/business-profiles/review", async (req, res): Promise<void> => {
 router.patch(
   "/b2b/business-profiles/:id/status",
   async (req, res): Promise<void> => {
-    const authorization = await requireStaff(req, res);
+    const authorization = await requireB2BReviewer(req, res);
     if (!authorization) return;
 
     const params = UpdateB2BBusinessProfileStatusParams.safeParse(req.params);
@@ -298,6 +304,15 @@ router.patch(
       .limit(1);
     if (!existing) {
       res.status(404).json({ error: "İşletme profili bulunamadı." });
+      return;
+    }
+    if (
+      authorization.founderReviewer &&
+      existing.ownerClerkUserId !== authorization.userId
+    ) {
+      res.status(403).json({
+        error: "Kurucu doğrulama yetkisi yalnızca kendi firma profiliniz için geçerlidir.",
+      });
       return;
     }
 

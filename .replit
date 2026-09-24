@@ -72,6 +72,9 @@ TELEGRAM_VIP_CHANNEL_ID = "-1004409778193"
 VIP_ACCESS_DAYS = "30"
 VIP_PRICE_STARS = "250"
 
+[userenv.production]
+MMT_FOUNDER_REVIEWER_CLERK_USER_ID = "user_3JWCUrF5fmR47cyKeaW7dBTIwuG"
+
 [[ports]]
 localPort = 8080
 externalPort = 80
