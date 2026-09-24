@@ -21,6 +21,17 @@ import { requireMyCompany } from "../lib/companyAuth";
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
 
+function normalizeOptionalWebsite(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+
+  const cleaned = value
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .trim();
+
+  if (!cleaned) return undefined;
+  return /^https?:\/\//i.test(cleaned) ? cleaned : `https://${cleaned}`;
+}
+
 function serializeBusinessProfile(profile: B2BBusinessProfile) {
   return {
     id: profile.id,
@@ -96,7 +107,14 @@ router.post("/b2b/business-profile/me", async (req, res): Promise<void> => {
   const userId = requireUser(req, res);
   if (!userId) return;
 
-  const parsed = CreateMyB2BBusinessProfileBody.safeParse(req.body);
+  const requestBody =
+    req.body && typeof req.body === "object"
+      ? {
+          ...req.body,
+          website: normalizeOptionalWebsite(req.body.website),
+        }
+      : req.body;
+  const parsed = CreateMyB2BBusinessProfileBody.safeParse(requestBody);
   if (!parsed.success) {
     res.status(400).json({
       error:

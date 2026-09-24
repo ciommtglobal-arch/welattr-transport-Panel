@@ -17,3 +17,4 @@
 - [Public logistics hub](public-logistics-hub.md) — Keep approved logistics listings and published logistics media public on MMT Global; keep Shopify separate for physical products.
 - [B2B invitation auth flow](b2b-invitation-auth-flow.md) — Let authenticated invitees accept before the membership-gated company panel query runs; preserve the token through Clerk redirects.
 - [MMT Connect production onboarding](mmt-connect-production-onboarding.md) — Establish production ownership from the founder account; never copy development company records or create employee-owned duplicates.
+- [Mobile business-profile URLs](mobile-business-profile-urls.md) — Normalize optional website values before validation because mobile input can carry invisible characters.
