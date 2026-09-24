@@ -98,3 +98,45 @@ mtime_ms = 1790230906966
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/e8bb41c0-9bde-4890-9a03-2cd29af8daa1/5511a8e5-f885-40b9-bc0d-144c605f90ce"
 storage_version_token = "1790230915236066"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "OmeTfNPKU9WPCaeCvWdN-"
+uri = "file://screenshots/uzman-paneli-mobil-1.jpg"
+type = "image"
+title = "Uzman paneli — mobil 1/3"
+description = "Başlık ve bugünkü görevler, telefon ekranına sığan parça."
+logical_id = "2a3c5c33-4b06-41b8-9e65-7d728a5fd140"
+content_hash = "sha256:160dbcff5def06d02ff8f6c55bebe9b84c4cfaa55219cf79ae5e71176552dd5c"
+size = 33985
+mtime_ms = 1790231276358
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/2a3c5c33-4b06-41b8-9e65-7d728a5fd140/63a51f43-5010-4524-b77f-03d94316b3da"
+storage_version_token = "1790231288222782"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "peBGaOuvaShV0yvitrdPl"
+uri = "file://screenshots/uzman-paneli-mobil-2.jpg"
+type = "image"
+title = "Uzman paneli — mobil 2/3"
+description = "Atanmış dosyalar ve destek alanı."
+logical_id = "a23fc3e2-96b1-4d82-9bbb-e13b1d20c03b"
+content_hash = "sha256:757ac9b683ff904f1af351fad8de436445a39ffb0bd68effcb54a046ef681edc"
+size = 45998
+mtime_ms = 1790231276406
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/a23fc3e2-96b1-4d82-9bbb-e13b1d20c03b/c425c331-b7ba-4a3b-9d07-ef3eacb948fe"
+storage_version_token = "1790231289947259"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "N6hzrYRytmHPVBp-8lGJY"
+uri = "file://screenshots/uzman-paneli-mobil-3.jpg"
+type = "image"
+title = "Uzman paneli — mobil 3/3"
+description = "Destek ve son güncellemeler."
+logical_id = "f122ac7c-3b21-43dd-ae81-e9dac083c6da"
+content_hash = "sha256:865852f05c83c8bedfb5e161b017a7694bc1b3458962e050fce17a9c12b00e30"
+size = 25478
+mtime_ms = 1790231276454
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/f122ac7c-3b21-43dd-ae81-e9dac083c6da/73f8e00e-becf-4b73-b80a-92969f3f3479"
+storage_version_token = "1790231291249045"
+content_type = "image/jpeg"
