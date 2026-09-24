@@ -13,8 +13,11 @@ import {
   LayoutDashboard,
   Loader2,
   Mail,
+  MessageCircle,
   MessageSquareText,
   Plus,
+  Send,
+  Share2,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -706,6 +709,21 @@ function MembersSection({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inviteFormRef = useRef<HTMLFormElement>(null);
+  const inviteUrl =
+    typeof window === "undefined"
+      ? inviteResult
+      : `${window.location.origin}${inviteResult}`;
+  const inviteMessage =
+    "MMT Global firma ekibine katılmak için bu davet bağlantısını açın:";
+  const whatsappInviteUrl = `https://wa.me/?text=${encodeURIComponent(
+    `${inviteMessage}\n${inviteUrl}`,
+  )}`;
+  const telegramInviteUrl = `https://t.me/share/url?url=${encodeURIComponent(
+    inviteUrl,
+  )}&text=${encodeURIComponent(inviteMessage)}`;
+  const canUseNativeShare =
+    typeof navigator !== "undefined" &&
+    typeof navigator.share === "function";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -857,19 +875,60 @@ function MembersSection({
         <div className="mt-5 border border-primary/30 bg-primary/5 p-4">
           <p className="text-sm font-semibold">Davet bağlantısı hazır</p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-            <input readOnly value={`${window.location.origin}${inviteResult}`} className="min-w-0 flex-1 border border-border/70 bg-background px-3 py-2 text-xs" />
+            <input
+              readOnly
+              value={inviteUrl}
+              className="min-w-0 flex-1 border border-border/70 bg-background px-3 py-2 text-xs"
+            />
             <button
               type="button"
-              onClick={() => navigator.clipboard?.writeText(`${window.location.origin}${inviteResult}`)}
+              onClick={() => navigator.clipboard?.writeText(inviteUrl)}
               className="inline-flex items-center justify-center gap-2 border border-primary/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-primary"
             >
               <Copy size={14} />
               Kopyala
             </button>
           </div>
-          <p className="mt-2 text-xs leading-5 text-foreground/55">
-            Ekip üyesi bağlantıyı açıp kendi Clerk hesabıyla giriş yaptıktan sonra
-            daveti kabul etmelidir. Kabul edilene kadar aktif sayılmaz.
+          <div className="mt-3 grid gap-2 sm:flex sm:flex-wrap">
+            <a
+              href={whatsappInviteUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-2 border border-primary/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-primary"
+            >
+              <MessageCircle size={14} />
+              WhatsApp’tan gönder
+            </a>
+            <a
+              href={telegramInviteUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-2 border border-primary/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-primary"
+            >
+              <Send size={14} />
+              Telegram’dan gönder
+            </a>
+            {canUseNativeShare ? (
+              <button
+                type="button"
+                onClick={() =>
+                  navigator.share({
+                    title: "MMT Global firma daveti",
+                    text: inviteMessage,
+                    url: inviteUrl,
+                  })
+                }
+                className="inline-flex items-center justify-center gap-2 border border-primary/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-primary"
+              >
+                <Share2 size={14} />
+                Paylaş
+              </button>
+            ) : null}
+          </div>
+          <p className="mt-3 text-xs leading-5 text-foreground/55">
+            Karşı taraf bu bağlantıya dokunarak mevcut Clerk hesabıyla giriş
+            yapabilir veya yeni hesap oluşturabilir. Davet, yalnızca davet
+            e-postasıyla eşleşen hesapta kabul edilir.
           </p>
         </div>
       ) : null}
