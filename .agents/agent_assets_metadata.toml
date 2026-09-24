@@ -84,3 +84,17 @@ mtime_ms = 1790192252243
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/889739cb-ddad-4e98-b951-b378b8b4eb90/e4ecb1fe-3443-45fa-b41b-df2dd1c0c2df"
 storage_version_token = "1790192318991411"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "cgED6a12sByEQYdkSGJ_Q"
+uri = "file://screenshots/uzman-paneli-mobil.jpg"
+type = "image"
+title = "Uzman Paneli – Mobil Önizleme"
+description = "Telefon genişliğinde, tüm uzman paneli ekranını gösteren büyütülebilir görüntü."
+logical_id = "e8bb41c0-9bde-4890-9a03-2cd29af8daa1"
+content_hash = "sha256:5e8d7e5eaea73f2584228eee59731a8edd11b24939e766995efcbf9af4fb0482"
+size = 72865
+mtime_ms = 1790230906966
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/e8bb41c0-9bde-4890-9a03-2cd29af8daa1/5511a8e5-f885-40b9-bc0d-144c605f90ce"
+storage_version_token = "1790230915236066"
+content_type = "image/jpeg"
