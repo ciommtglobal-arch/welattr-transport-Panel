@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useRef, useState } from "react";
 import { useAuth, useUser } from "@clerk/react";
 import { Link } from "wouter";
 import {
@@ -705,6 +705,7 @@ function MembersSection({
     role: "member" as B2BCompanyMemberRole,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const inviteFormRef = useRef<HTMLFormElement>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -760,6 +761,21 @@ function MembersSection({
           {members.length} kişi
         </span>
       </div>
+      {canManage ? (
+        <button
+          type="button"
+          onClick={() =>
+            inviteFormRef.current?.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            })
+          }
+          className="mt-5 inline-flex items-center gap-2 bg-primary px-5 py-3 text-xs font-bold uppercase tracking-[0.13em] text-primary-foreground"
+        >
+          <Mail size={15} />
+          Davet Et
+        </button>
+      ) : null}
 
       <div className="mt-6 space-y-3">
         {members.length === 0 ? (
@@ -796,7 +812,11 @@ function MembersSection({
       </div>
 
       {canManage ? (
-        <form onSubmit={handleSubmit} className="mt-7 border-t border-border/70 pt-6">
+        <form
+          ref={inviteFormRef}
+          onSubmit={handleSubmit}
+          className="mt-7 border-t border-border/70 pt-6"
+        >
           <div className="flex items-center gap-2 text-sm font-semibold">
             <Plus size={16} className="text-primary" />
             Uzman ekip üyesi davet et
