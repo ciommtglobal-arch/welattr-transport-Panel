@@ -1,0 +1,59 @@
+MMT Global için ana tasarım hedefini netleştiriyorum: Uluslararası, çok şirketli ve çok bölgeli çalışmaya uygun kurumsal web sitesi ve yönetim altyapısı istiyorum.
+
+Önce devam eden yayın/API hatası düzeltmesini tamamla. Ardından mevcut projeyi, hesapları, verileri, dilleri ve çalışan özellikleri koruyarak aşağıdaki tasarımı uygula. Ayrı veya mükerrer uygulama oluşturma.
+
+KURUMSAL WEB SİTESİ
+
+Ana menü: Ana Sayfa, Kurumsal, Faaliyet Alanları, Uluslararası Ağ, İş Ortaklığı, İletişim ve Giriş.
+
+Faaliyet alanları: Lojistik ve taşımacılık, uluslararası ticaret, üretici–alıcı bağlantıları, finansman danışmanlığı, saha operasyonları, medya ve tanıtım. Mevcut diğer alanları koru; yeni alan eklenebilir olsun.
+
+Türkiye, Ukrayna, Dubai/BAE, Irak ve diğer çalışma bölgeleri yönetilebilir olsun. Her bölgenin “Planlanan”, “Pilot” veya “Aktif” durumu doğrulanmış bilgiyle belirlensin. Kurulmamış şirket, açılmamış ofis, olmayan lisans, iş ortaklığı, müşteri yorumu veya başarı rakamı üretme.
+
+TASARIM VE DİLLER
+
+Mevcut MMT logosunu ve kimliğini koru. Koyu lacivert, kırık beyaz ve ölçülü turuncu kullan. Kurumsal, sade, modern ve telefonda rahat kullanılan ekranlar hazırla. Başlıklar, sabit menüler ve düğmeler birbirini veya içeriği örtmesin.
+
+Projede mevcut olan bütün dilleri ve çevirileri koru: Türkçe, İngilizce, Arapça, Kürtçe, Rusça, Soranice ve Ukraynaca. Mevcut başka dil varsa kaldırma. Kürtçe seçeneğinin lehçesini incele; doğrulamadan adını değiştirme. Soranice ayrı seçenek olarak kalsın.
+
+Dil desteğini kurumsal site, giriş/kayıt, uzman ekranları, kurucu paneli, görevler, formlar, hata mesajları ve bildirimlerde kontrol et. Kullanıcının dil tercihi kaydedilsin. Arapça ve Soranicede sağdan sola düzeni uygula; menü, tablo ve mobil ekranları test et.
+
+Tarih, sayı ve para gösterimleri dile uygun olsun. Dil değişimi para birimini veya tutarı değiştirmesin. Eksik çevirileri listele; tamamlanmamış bir dili hazır gibi gösterme.
+
+YÖNETİM YAPISI
+
+Kuruluş/şirket → faaliyet alanı → bölge/operasyon birimi → ekip → görev/dosya ilişkisini destekle. Operasyon birimlerini hukuken kurulmuş şirket veya şube gibi gösterme.
+
+Her uzman kendi yetkili çalışma alanına açılsın. Birden fazla alanda görevli kullanıcı alan değiştirebilsin. Yetkisi kapsamında alt ekip kurabilsin, personel davet edebilsin ve görev atayabilsin. Davet edilen ekip üyesi mevcut firmaya katılsın; her çalışan için ayrı firma oluşturulmasın.
+
+Ekip, görev, belge, görüşme, takvim, gider ve raporlama ilgili iş dosyasıyla bağlantılı olsun. Her dosyada sorumlu, teslim tarihi, durum, eksikler ve işlem geçmişi bulunsun.
+
+Kurucu panelimde bütün alanların durumunu, sorumluları, geciken görevleri ve önemli onayları görebileyim.
+
+OTOMATİK İŞLEYİŞ VE YETKİLER
+
+Rutin işlemler yalnızca belirlediğim açık kurallarla otomatik ilerlesin. Eksik belge varsa “Tamamlanması bekleniyor” durumuna alınsın. Tanımlanmamış kuralları veya parasal sınırları tahmin ederek etkinleştirme; incelemeye gönder.
+
+Yeni alan/birim açılması, yönetici atanması, yetki artırma, ücret değişikliği, ticari taahhüt, ödeme ve kamuya açık yayınlar kurucu onayıma gelsin.
+
+Her onay ve ret için gerekçe, uygulanan kural, tarih ve işlemi yapan kişi veya sistem kaydedilsin. Gerekçeli düzeltme ve inceleme talebi mümkün olsun. Otomasyonu durdurabileceğim kontrol bulunsun.
+
+Yetkileri sunucuda da uygula. Hiç kimse kendi yetkisini yükseltemesin veya yetkisiz olduğu dosyalara erişemesin. Sistem içi finans dosyası onayını banka kredi/limit onayı gibi gösterme.
+
+PİLOT VE CANLI KULLANIM
+
+MMT Global gerçek bir girişimdir. Kendi uzman ekibimiz gerçek hesaplarıyla birkaç günlük pilot çalışma yapacak. Panelde “Pilot çalışma dönemi” bilgisi olsun.
+
+Deneme operasyon dosyaları TEST olarak işaretlensin ve gerçek işlerden ayrı tutulsun. TEST işlemleri gerçek ödeme, banka başvurusu, sevkiyat, sipariş, sözleşme veya dış bildirim başlatmasın.
+
+Banka/ödeme entegrasyonunu yalnızca ihtiyacı netleşince ele al. Önce sağlayıcının test ortamında doğrula. Küçük tutarlı gerçek ödeme gerekiyorsa tutarı, alıcıyı ve masrafları gösterip açık onayımı al. Ücret ve komisyon oranları henüz kesinleşmedi; otomatik tahsilat oluşturma.
+
+UYGULAMA SIRASI
+
+1. Devam eden yayın/API, firma–hesap bağlantısı ve davet sorunlarını tamamla.
+2. Mevcut ekranları, çalışan özellikleri ve eksikleri çıkar.
+3. Ana sayfa, kurucu paneli ve uzman çalışma ekranının mobil önizlemesini hazırla.
+4. Bu üç ekranı değerlendirdikten sonra diğer modülleri aynı tasarıma taşı.
+5. Davet → ekip katılımı → görev kabulü → teslim → onay akışını ve yetki sınırlarını test et.
+
+Her aşamada tamamlanan işi, gerçekten yapılan testleri, kalan eksikleri ve benim yapmam gereken tek sonraki adımı bildir. Görsel olarak hazırlanmış bir özelliği çalışan entegrasyon gibi sunma. Yayına almadan önce değişiklikleri ve test sonuçlarını göster.
