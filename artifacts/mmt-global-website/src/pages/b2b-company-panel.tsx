@@ -121,7 +121,10 @@ export default function B2BCompanyPanel() {
   const profileQuery = useGetMyB2BBusinessProfile({
     query: {
       queryKey: getGetMyB2BBusinessProfileQueryKey(),
-      retry: false,
+      retry: (failureCount, error) => {
+        const status = getApiErrorStatus(error);
+        return status !== 403 && status !== 404 && failureCount < 1;
+      },
       enabled: isLoaded && Boolean(isSignedIn) && !inviteToken,
     },
   });
@@ -135,7 +138,7 @@ export default function B2BCompanyPanel() {
     return status === 404 ? (
       <NoCompanyState accountEmail={accountEmail} />
     ) : (
-      <PanelDataError accountEmail={accountEmail} status={status} />
+      <PanelDataError accountEmail={accountEmail} status={status} retry={() => void profileQuery.refetch()} />
     );
   }
   if (!profileQuery.data) return <NoCompanyState accountEmail={accountEmail} />;
@@ -1767,9 +1770,11 @@ function getApiErrorStatus(error: unknown) {
 function PanelDataError({
   accountEmail,
   status,
+  retry,
 }: {
   accountEmail: string;
   status: number | null;
+  retry: () => void;
 }) {
   const isUnauthorized = status === 401;
   const isForbidden = status === 403;
@@ -1802,7 +1807,7 @@ function PanelDataError({
         ) : null}
         <button
           type="button"
-          onClick={() => window.location.reload()}
+          onClick={retry}
           className="mt-7 inline-flex items-center gap-2 border border-primary px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] text-primary"
         >
           Tekrar dene
