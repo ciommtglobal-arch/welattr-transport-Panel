@@ -9,6 +9,8 @@ MMT Global; lojistik, uluslararası ticaret, finansal başvurular, inşaat ürü
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
+- Replit Publish diffs the development and production database schemas and applies
+  production changes there. Never target production with Drizzle CLI or startup DDL.
 - Required env: `DATABASE_URL` — Postgres connection string
 - `POST /api/storage/uploads/cleanup-orphans` accepts `{ "dryRun": true }` for
   admin/operations staff. Omitting it or asking for real deletion returns 423:
