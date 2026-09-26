@@ -9,6 +9,8 @@ import {
   Clipboard,
   Copy,
   Clock3,
+  ChevronLeft,
+  ChevronRight,
   Inbox,
   LayoutDashboard,
   Loader2,
@@ -17,6 +19,7 @@ import {
   MessageCircle,
   MessageSquareText,
   Plus,
+  RefreshCw,
   Send,
   Share2,
   ShieldCheck,
@@ -25,11 +28,13 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import {
   acceptB2BCompanyInvitation,
+  addB2BCompanyTaskReport,
   createB2BCompanyRequest,
   createB2BCompanyTask,
   getGetMyB2BCompanyMembersQueryKey,
   getGetMyB2BCompanyRequestsQueryKey,
   getGetMyB2BCompanyTasksQueryKey,
+  getGetB2BCompanyTaskReportsQueryKey,
   getGetMyB2BBusinessProfileQueryKey,
   inviteB2BCompanyMember,
   updateB2BCompanyRequest,
@@ -38,6 +43,7 @@ import {
   useGetMyB2BCompanyRequests,
   useGetMyB2BCompanyTasks,
   useGetMyB2BBusinessProfile,
+  useGetB2BCompanyTaskReports,
   getGetB2BWorkflowApprovalsQueryKey,
   getGetWorkflowNotificationsQueryKey,
   useDecideB2BWorkflowApproval,
@@ -52,6 +58,7 @@ import {
   type B2BCompanyRequestPriority,
   type B2BCompanyRequestStatus,
   type B2BCompanyTaskStatus,
+  type B2BCompanyTask,
   type WorkflowApproval,
   type WorkflowApprovalStatus,
   type WorkflowNotification,
@@ -1362,26 +1369,14 @@ function TasksSection({
 
   async function updateStatus(taskId: number, status: B2BCompanyTaskStatus) {
     onError("");
-    try {
-      await updateB2BCompanyTask(taskId, { status });
-      onSaved();
-    } catch (taskError) {
-      onError(
-        taskError instanceof Error ? taskError.message : "Görev güncellenemedi.",
-      );
-    }
+    await updateB2BCompanyTask(taskId, { status });
+    onSaved();
   }
 
   async function updateAssignee(taskId: number, assigneeMemberId: number | null) {
     onError("");
-    try {
-      await updateB2BCompanyTask(taskId, { assigneeMemberId });
-      onSaved();
-    } catch (taskError) {
-      onError(
-        taskError instanceof Error ? taskError.message : "Görev sorumlusu güncellenemedi.",
-      );
-    }
+    await updateB2BCompanyTask(taskId, { assigneeMemberId });
+    onSaved();
   }
 
   return (
@@ -1451,62 +1446,218 @@ function TasksSection({
       ) : (
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {tasks.map((task) => {
-            const assignee = members.find((member) => member.id === task.assigneeMemberId);
-            const canUpdate = canManage || task.assigneeMemberId === userMemberId;
             return (
-              <article key={task.id} className="border border-border/70 p-5">
-                <div className="flex justify-between gap-4">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary">
-                      {task.area}
-                    </p>
-                    <h3 className="mt-2 text-lg font-semibold">{task.title}</h3>
-                  </div>
-                  {canUpdate ? (
-                    <select
-                      value={task.status}
-                      onChange={(event) => updateStatus(task.id, event.target.value as B2BCompanyTaskStatus)}
-                      className="h-fit border border-border/70 bg-background px-2 py-2 text-xs outline-none focus:border-primary"
-                      aria-label={`${task.title} durumu`}
-                    >
-                      {taskStatuses.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                    </select>
-                  ) : null}
-                </div>
-                <p className="mt-4 text-sm leading-6 text-foreground/65">
-                  {task.description || "Açıklama eklenmedi."}
-                </p>
-                {canManage ? (
-                  <label className="mt-4 block text-xs text-foreground/70">
-                    <span className="mb-2 block">Sorumluyu değiştir (pilot asistan dâhil)</span>
-                    <select
-                      value={activeMembers.some((member) => member.id === task.assigneeMemberId)
-                        ? String(task.assigneeMemberId) : ""}
-                      onChange={(event) => updateAssignee(
-                        task.id,
-                        event.target.value ? Number(event.target.value) : null,
-                      )}
-                      className="w-full border border-border/70 bg-background px-3 py-2 outline-none focus:border-primary"
-                    >
-                      <option value="">Atama yapılmadı</option>
-                      {activeMembers.map((member) => (
-                        <option key={member.id} value={member.id}>
-                          {member.fullName}{member.isPilotAssistant ? " · pilot asistan" : ""}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                ) : null}
-                <div className="mt-5 flex flex-wrap gap-3 border-t border-border/70 pt-4 text-xs text-foreground/50">
-                  <span>{assignee ? `Sorumlu: ${assignee.fullName}` : "Sorumlu atanmadı"}</span>
-                  <span>{task.dueDate ? `Son tarih: ${task.dueDate}` : "Son tarih yok"}</span>
-                </div>
-              </article>
+              <CompanyTaskCard
+                key={task.id}
+                task={task}
+                members={members}
+                activeMembers={activeMembers}
+                canManage={canManage}
+                canUpdate={canManage || task.assigneeMemberId === userMemberId}
+                canReadReports={canManage || members.some(
+                  (member) => member.id === userMemberId && member.status === "active",
+                ) && task.assigneeMemberId === userMemberId}
+                canReport={members.some(
+                  (member) => member.id === userMemberId && member.status === "active",
+                ) && task.assigneeMemberId === userMemberId}
+                onStatusChange={(status) => updateStatus(task.id, status)}
+                onAssigneeChange={(memberId) => updateAssignee(task.id, memberId)}
+              />
             );
           })}
         </div>
       )}
     </section>
+  );
+}
+
+function CompanyTaskCard({
+  task,
+  members,
+  activeMembers,
+  canManage,
+  canUpdate,
+  canReadReports,
+  canReport,
+  onStatusChange,
+  onAssigneeChange,
+}: {
+  task: Pick<B2BCompanyTask, "id" | "title" | "description" | "area" | "dueDate" | "status" | "assigneeMemberId">;
+  members: B2BCompanyMember[];
+  activeMembers: B2BCompanyMember[];
+  canManage: boolean;
+  canUpdate: boolean;
+  canReadReports: boolean;
+  canReport: boolean;
+  onStatusChange: (status: B2BCompanyTaskStatus) => Promise<void>;
+  onAssigneeChange: (memberId: number | null) => Promise<void>;
+}) {
+  const [isSaving, setIsSaving] = useState(false);
+  const [controlError, setControlError] = useState("");
+  const [expandedReports, setExpandedReports] = useState(false);
+  const [reportPage, setReportPage] = useState(1);
+  const [reportText, setReportText] = useState("");
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [reportError, setReportError] = useState("");
+  const [reportNotice, setReportNotice] = useState("");
+  const assignee = members.find((member) => member.id === task.assigneeMemberId);
+  const reportsQuery = useGetB2BCompanyTaskReports(
+    { taskId: task.id, page: reportPage, pageSize: 10 },
+    {
+      query: {
+        queryKey: getGetB2BCompanyTaskReportsQueryKey({ taskId: task.id, page: reportPage, pageSize: 10 }),
+        enabled: canReadReports && expandedReports,
+        retry: false,
+      },
+    },
+  );
+
+  async function saveControl(update: () => Promise<void>) {
+    setControlError("");
+    setIsSaving(true);
+    try {
+      await update();
+    } catch (taskError) {
+      const status = getApiErrorStatus(taskError);
+      setControlError(status === 409
+        ? "Bu görev henüz firma sahibi tarafından onaylanmamış olabilir. Sunucu güncellemeyi reddetti; görev değişmedi."
+        : taskError instanceof Error ? taskError.message : "Görev güncellenemedi.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function submitReport(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const content = reportText.trim();
+    if (!content || content.length > 2000) return;
+    setReportError("");
+    setReportNotice("");
+    setIsSubmittingReport(true);
+    try {
+      await addB2BCompanyTaskReport(task.id, { content });
+      setReportText("");
+      setReportNotice("İlerleme raporu kaydedildi.");
+      setExpandedReports(true);
+      if (reportPage !== 1) {
+        setReportPage(1);
+      } else if (expandedReports) {
+        void reportsQuery.refetch();
+      }
+    } catch (error) {
+      const status = getApiErrorStatus(error);
+      setReportError(status === 409
+        ? "Rapor gönderilemedi: görev firma sahibi tarafından onaylanmamış veya tamamlanmış olabilir. Sunucu raporu kabul etmedi."
+        : error instanceof Error ? error.message : "İlerleme raporu gönderilemedi.");
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  }
+
+  return (
+    <article className="border border-border/70 p-5">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary">{task.area}</p>
+          <h3 className="mt-2 text-lg font-semibold">{task.title}</h3>
+        </div>
+        {canUpdate ? (
+          <select
+            value={task.status}
+            disabled={isSaving}
+            onChange={(event) => void saveControl(() => onStatusChange(event.target.value as B2BCompanyTaskStatus))}
+            className="h-fit border border-border/70 bg-background px-2 py-2 text-xs outline-none focus:border-primary disabled:cursor-wait disabled:opacity-60"
+            aria-label={`${task.title} durumu`}
+          >
+            {taskStatuses.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        ) : null}
+      </div>
+      <p className="mt-4 text-sm leading-6 text-foreground/65">{task.description || "Açıklama eklenmedi."}</p>
+      {canReadReports ? (
+        <label className="mt-4 block text-xs text-foreground/70">
+          <span className="mb-2 block">Sorumluyu değiştir (pilot asistan dâhil)</span>
+          <select
+            value={activeMembers.some((member) => member.id === task.assigneeMemberId) ? String(task.assigneeMemberId) : ""}
+            disabled={isSaving}
+            onChange={(event) => void saveControl(() => onAssigneeChange(event.target.value ? Number(event.target.value) : null))}
+            className="w-full border border-border/70 bg-background px-3 py-2 outline-none focus:border-primary disabled:cursor-wait disabled:opacity-60"
+          >
+            <option value="">Atama yapılmadı</option>
+            {activeMembers.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.fullName}{member.isPilotAssistant ? " · pilot asistan" : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+      {controlError ? <p role="alert" className="mt-3 text-sm text-destructive">{controlError}</p> : null}
+      <div className="mt-5 flex flex-wrap gap-3 border-t border-border/70 pt-4 text-xs text-foreground/50">
+        <span>{assignee ? `Sorumlu: ${assignee.fullName}` : "Sorumlu atanmadı"}</span>
+        <span>{task.dueDate ? `Son tarih: ${task.dueDate}` : "Son tarih yok"}</span>
+      </div>
+
+      {canReport && task.status !== "completed" ? (
+        <form onSubmit={(event) => void submitReport(event)} className="mt-5 border-t border-border/70 pt-4">
+          <label className="block text-xs font-semibold">
+            <span className="mb-2 block">Kısa ilerleme raporu</span>
+            <textarea
+              value={reportText}
+              onChange={(event) => setReportText(event.target.value)}
+              rows={3}
+              maxLength={2000}
+              required
+              className="w-full resize-y border border-border/70 bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              placeholder="Görevdeki ilerlemeyi yazın…"
+            />
+          </label>
+          <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-xs text-foreground/50">{reportText.length}/2000 karakter. Onay durumu burada gösterilmiyor; sunucu reddederse nedenini bildireceğiz.</span>
+            <button type="submit" disabled={isSubmittingReport || !reportText.trim() || reportText.trim().length > 2000} className="inline-flex items-center justify-center gap-2 bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-60">
+              {isSubmittingReport ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+              Rapor gönder
+            </button>
+          </div>
+          {reportError ? <p role="alert" className="mt-3 text-sm text-destructive">{reportError}</p> : null}
+          {reportNotice ? <p role="status" className="mt-3 text-sm text-green-700">{reportNotice}</p> : null}
+        </form>
+      ) : null}
+
+      {canManage ? (
+        <div className="mt-5 border-t border-border/70 pt-4">
+          <button type="button" onClick={() => setExpandedReports((expanded) => !expanded)} aria-expanded={expandedReports} className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+            <MessageSquareText size={16} />
+            {expandedReports ? "Raporları gizle" : "İlerleme raporlarını görüntüle"}
+          </button>
+          {expandedReports ? (
+            <div className="mt-4 space-y-3">
+              {reportsQuery.isPending ? <p className="text-sm text-foreground/60">Raporlar yükleniyor…</p> : null}
+              {reportsQuery.isError ? (
+                <div className="text-sm text-destructive">
+                  <p>Raporlar yüklenemedi.</p>
+                  <button type="button" onClick={() => void reportsQuery.refetch()} className="mt-2 inline-flex items-center gap-2 underline"><RefreshCw size={14} />Yeniden dene</button>
+                </div>
+              ) : null}
+              {reportsQuery.isSuccess && reportsQuery.data.items.length === 0 ? <p className="text-sm text-foreground/55">Bu görev için henüz rapor yok.</p> : null}
+              {reportsQuery.data?.items.map((report) => (
+                <div key={report.id} className="border border-border/60 bg-background/50 p-3">
+                  <p className="whitespace-pre-wrap break-words text-sm leading-6">{report.content}</p>
+                  <p className="mt-2 text-[11px] text-foreground/50">{new Date(report.createdAt).toLocaleString("tr-TR")} · Üye #{report.authorMemberId}</p>
+                </div>
+              ))}
+              {reportsQuery.isSuccess ? (
+                <div className="flex items-center justify-between gap-3 text-xs">
+                  <button type="button" disabled={reportPage <= 1 || reportsQuery.isFetching} onClick={() => setReportPage((page) => page - 1)} className="inline-flex items-center gap-1 disabled:opacity-40"><ChevronLeft size={15} />Önceki</button>
+                  <span>{reportPage}. sayfa</span>
+                  <button type="button" disabled={!reportsQuery.data.hasMore || reportsQuery.isFetching} onClick={() => setReportPage((page) => page + 1)} className="inline-flex items-center gap-1 disabled:opacity-40">Sonraki<ChevronRight size={15} /></button>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </article>
   );
 }
 

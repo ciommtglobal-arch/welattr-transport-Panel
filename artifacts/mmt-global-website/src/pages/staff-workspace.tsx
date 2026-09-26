@@ -1,6 +1,12 @@
+import { useState } from "react";
 import { useAuth, UserButton } from "@clerk/react";
-import { getGetStaffAccessQueryKey, useGetStaffAccess } from "@workspace/api-client-react";
-import { ClipboardCheck, FileText, MapPinned, UsersRound } from "lucide-react";
+import {
+  getGetStaffAccessQueryKey,
+  getGetStaffB2BCompanyTaskReportsQueryKey,
+  useGetStaffAccess,
+  useGetStaffB2BCompanyTaskReports,
+} from "@workspace/api-client-react";
+import { ChevronLeft, ChevronRight, ClipboardCheck, FileText, MapPinned, RefreshCw, UsersRound } from "lucide-react";
 import { Link, Redirect } from "wouter";
 import "@/styles/mmt-corporate.css";
 
@@ -60,7 +66,7 @@ const founderPanels = [
   {
     title: "Devam eden ve geciken işler",
     icon: FileText,
-    text: "Canlı iş ve görev kuyruğu kurucu allowlist erişimiyle kullanılamıyor; bu sayfada görev kaydı veya sayı gösterilmez.",
+    text: "Görev ilerleme raporları, kurucuya özel salt okunur uç noktadan sayfalanarak sunulur.",
     href: "/staff/yonetim-paneli",
     link: "Bu görünümde kal",
   },
@@ -121,8 +127,63 @@ export function FounderDashboard() {
             </section>
           ))}
         </div>
+        <FounderTaskReports />
         <p className="mmt-note">Erişim, mevcut personel rolü ve kapsamıyla sınırlıdır. Bu sayfa yeni yetki sağlamaz.</p>
       </div>
     </main>
+  );
+}
+
+function FounderTaskReports() {
+  const [page, setPage] = useState(1);
+  const reports = useGetStaffB2BCompanyTaskReports(
+    { page, pageSize: 25 },
+    {
+      query: {
+        queryKey: getGetStaffB2BCompanyTaskReportsQueryKey({ page, pageSize: 25 }),
+        retry: false,
+      },
+    },
+  );
+
+  return (
+    <section className="mmt-panel" aria-labelledby="founder-task-reports-title">
+      <h2 id="founder-task-reports-title"><FileText size={18} aria-hidden="true" />Firma görev ilerleme raporları</h2>
+      <p className="mmt-management-sub">Kurucu allowlist erişimiyle sunulan salt okunur kayıtlar. Üye iletişim bilgileri gösterilmez.</p>
+      {reports.isPending ? <p className="mmt-empty-state" role="status">Görev raporları yükleniyor…</p> : null}
+      {reports.isError ? (
+        <div className="mmt-empty-state" role="alert">
+          <p>Görev raporları yüklenemedi. Erişim veya bağlantı doğrulanamadı.</p>
+          <button type="button" onClick={() => void reports.refetch()} className="mmt-action-link"><RefreshCw size={15} /> Yeniden dene</button>
+        </div>
+      ) : null}
+      {reports.isSuccess && reports.data.items.length === 0 ? (
+        <p className="mmt-empty-state">Henüz görev ilerleme raporu bulunmuyor.</p>
+      ) : null}
+      {reports.data?.items.length ? (
+        <>
+          <div className="mt-5 grid gap-3">
+            {reports.data.items.map((report) => (
+              <article key={report.id} className="min-w-0 border border-[var(--line)] bg-[var(--paper)] p-4">
+                <div className="flex flex-col justify-between gap-2 sm:flex-row">
+                  <div className="min-w-0">
+                    <p className="mmt-kicker">{report.taskArea} · Firma #{report.businessProfileId}</p>
+                    <h3 className="mt-2 break-words font-semibold">{report.taskTitle}</h3>
+                  </div>
+                  <span className="shrink-0 text-xs text-[var(--muted)]">Görev #{report.taskId}</span>
+                </div>
+                <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-[var(--ink)]">{report.content}</p>
+                <p className="mt-3 text-xs text-[var(--muted)]">Üye #{report.authorMemberId} · {new Date(report.createdAt).toLocaleString("tr-TR")}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-5 flex items-center justify-between gap-3 text-sm">
+            <button type="button" disabled={page <= 1 || reports.isFetching} onClick={() => setPage((current) => current - 1)} className="mmt-action-link disabled:opacity-40"><ChevronLeft size={16} /> Önceki</button>
+            <span className="text-xs text-[var(--muted)]">{reports.data.page}. sayfa</span>
+            <button type="button" disabled={!reports.data.hasMore || reports.isFetching} onClick={() => setPage((current) => current + 1)} className="mmt-action-link disabled:opacity-40">Sonraki <ChevronRight size={16} /></button>
+          </div>
+        </>
+      ) : null}
+    </section>
   );
 }

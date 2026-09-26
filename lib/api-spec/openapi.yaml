@@ -1848,6 +1848,152 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profile/tasks/{id}/reports:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+    post:
+      operationId: addB2BCompanyTaskReport
+      tags: [b2b-company]
+      summary: Append a progress report to an approved task assigned to the caller
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BCompanyTaskReportInput"
+      responses:
+        "201":
+          description: Progress report appended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompanyTaskReport"
+        "400":
+          description: Invalid report text
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Active assigned company membership required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Task not found or not visible
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Task owner approval required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /b2b/business-profile/task-reports:
+    get:
+      operationId: getB2BCompanyTaskReports
+      tags: [b2b-company]
+      summary: List reports visible to company management or the assigned member
+      parameters:
+        - in: query
+          name: taskId
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 25
+      responses:
+        "200":
+          description: Append-only task progress reports
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompanyTaskReportPage"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Company manager or active assigned member access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Task not found or not visible
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /b2b/staff/company-task-reports:
+    get:
+      operationId: getStaffB2BCompanyTaskReports
+      tags: [b2b-company]
+      summary: Allowlisted founder view of cross-company task reports
+      description: Read-only staff view; includes no member contact details.
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 25
+      responses:
+        "200":
+          description: Paged company task reports
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffB2BCompanyTaskReportPage"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Allowlisted founder access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /b2b/business-profile/requests:
     get:
       operationId: getMyB2BCompanyRequests
@@ -5336,6 +5482,79 @@ components:
             $ref: "#/components/schemas/B2BCompanyTask"
         total:
           type: integer
+    B2BCompanyTaskReportInput:
+      type: object
+      additionalProperties: false
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+    B2BCompanyTaskReport:
+      type: object
+      required: [id, taskId, authorMemberId, content, createdAt]
+      properties:
+        id:
+          type: integer
+        taskId:
+          type: integer
+        authorMemberId:
+          type: integer
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    B2BCompanyTaskReportPage:
+      type: object
+      required: [items, page, pageSize, hasMore]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/B2BCompanyTaskReport"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        hasMore:
+          type: boolean
+    StaffB2BCompanyTaskReport:
+      type: object
+      required: [id, businessProfileId, taskId, taskTitle, taskArea, authorMemberId, content, createdAt]
+      properties:
+        id:
+          type: integer
+        businessProfileId:
+          type: integer
+        taskId:
+          type: integer
+        taskTitle:
+          type: string
+        taskArea:
+          type: string
+        authorMemberId:
+          type: integer
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    StaffB2BCompanyTaskReportPage:
+      type: object
+      required: [items, page, pageSize, hasMore]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/StaffB2BCompanyTaskReport"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        hasMore:
+          type: boolean
     B2BCompanyRequestInput:
       type: object
       additionalProperties: false

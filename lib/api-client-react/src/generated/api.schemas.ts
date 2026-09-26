@@ -1986,6 +1986,47 @@ export interface B2BCompanyTaskPage {
   total: number;
 }
 
+export interface B2BCompanyTaskReportInput {
+  /**
+     * @minLength 1
+     * @maxLength 2000
+     */
+  content: string;
+}
+
+export interface B2BCompanyTaskReport {
+  id: number;
+  taskId: number;
+  authorMemberId: number;
+  content: string;
+  createdAt: string;
+}
+
+export interface B2BCompanyTaskReportPage {
+  items: B2BCompanyTaskReport[];
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+export interface StaffB2BCompanyTaskReport {
+  id: number;
+  businessProfileId: number;
+  taskId: number;
+  taskTitle: string;
+  taskArea: string;
+  authorMemberId: number;
+  content: string;
+  createdAt: string;
+}
+
+export interface StaffB2BCompanyTaskReportPage {
+  items: StaffB2BCompanyTaskReport[];
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
 export interface B2BCompanyRequestInput {
   /**
      * @minLength 2
@@ -2243,6 +2284,36 @@ page?: number;
 /**
  * @minimum 1
  * @maximum 100
+ */
+pageSize?: number;
+};
+
+export type GetB2BCompanyTaskReportsParams = {
+/**
+ * @minimum 1
+ */
+taskId: number;
+/**
+ * @minimum 1
+ * @maximum 1000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+pageSize?: number;
+};
+
+export type GetStaffB2BCompanyTaskReportsParams = {
+/**
+ * @minimum 1
+ * @maximum 1000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 50
  */
 pageSize?: number;
 };

@@ -128,6 +128,30 @@ export const b2bCompanyTasksTable = pgTable(
   ],
 );
 
+export const b2bCompanyTaskReportsTable = pgTable(
+  "b2b_company_task_reports",
+  {
+    id: serial("id").primaryKey(),
+    taskId: integer("task_id")
+      .notNull()
+      .references(() => b2bCompanyTasksTable.id),
+    authorMemberId: integer("author_member_id")
+      .notNull()
+      .references(() => b2bCompanyMembersTable.id),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("b2b_company_task_reports_task_created_idx").on(
+      table.taskId,
+      table.createdAt,
+    ),
+    index("b2b_company_task_reports_author_idx").on(table.authorMemberId),
+  ],
+);
+
 export const b2bCompanyRequestsTable = pgTable(
   "b2b_company_requests",
   {
@@ -181,6 +205,13 @@ export const insertB2BCompanyTaskSchema = createInsertSchema(
   updatedAt: true,
 });
 
+export const insertB2BCompanyTaskReportSchema = createInsertSchema(
+  b2bCompanyTaskReportsTable,
+).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertB2BCompanyRequestSchema = createInsertSchema(
   b2bCompanyRequestsTable,
 ).omit({
@@ -195,6 +226,11 @@ export type InsertB2BCompanyMember = z.infer<
 >;
 export type B2BCompanyTask = typeof b2bCompanyTasksTable.$inferSelect;
 export type InsertB2BCompanyTask = z.infer<typeof insertB2BCompanyTaskSchema>;
+export type B2BCompanyTaskReport =
+  typeof b2bCompanyTaskReportsTable.$inferSelect;
+export type InsertB2BCompanyTaskReport = z.infer<
+  typeof insertB2BCompanyTaskReportSchema
+>;
 export type B2BCompanyRequest = typeof b2bCompanyRequestsTable.$inferSelect;
 export type InsertB2BCompanyRequest = z.infer<
   typeof insertB2BCompanyRequestSchema

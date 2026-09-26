@@ -2229,6 +2229,99 @@ export const CreateB2BCompanyTaskResponse = zod.object({
 
 
 /**
+ * @summary Append a progress report to an approved task assigned to the caller
+ */
+
+
+
+export const AddB2BCompanyTaskReportParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const addB2BCompanyTaskReportBodyContentMax = 2000;
+
+
+
+export const AddB2BCompanyTaskReportBody = zod.object({
+  "content": zod.string().min(1).max(addB2BCompanyTaskReportBodyContentMax)
+})
+
+export const AddB2BCompanyTaskReportResponse = zod.object({
+  "id": zod.int(),
+  "taskId": zod.int(),
+  "authorMemberId": zod.int(),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List reports visible to company management or the assigned member
+ */
+
+export const getB2BCompanyTaskReportsQueryPageDefault = 1;
+export const getB2BCompanyTaskReportsQueryPageMax = 1000;
+
+export const getB2BCompanyTaskReportsQueryPageSizeDefault = 25;
+export const getB2BCompanyTaskReportsQueryPageSizeMax = 50;
+
+
+
+export const GetB2BCompanyTaskReportsQueryParams = zod.object({
+  "taskId": zod.coerce.number().int().min(1),
+  "page": zod.coerce.number().int().min(1).max(getB2BCompanyTaskReportsQueryPageMax).default(getB2BCompanyTaskReportsQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getB2BCompanyTaskReportsQueryPageSizeMax).default(getB2BCompanyTaskReportsQueryPageSizeDefault)
+})
+
+export const GetB2BCompanyTaskReportsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "taskId": zod.int(),
+  "authorMemberId": zod.int(),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "hasMore": zod.boolean()
+})
+
+
+/**
+ * Read-only staff view; includes no member contact details.
+ * @summary Allowlisted founder view of cross-company task reports
+ */
+export const getStaffB2BCompanyTaskReportsQueryPageDefault = 1;
+export const getStaffB2BCompanyTaskReportsQueryPageMax = 1000;
+
+export const getStaffB2BCompanyTaskReportsQueryPageSizeDefault = 25;
+export const getStaffB2BCompanyTaskReportsQueryPageSizeMax = 50;
+
+
+
+export const GetStaffB2BCompanyTaskReportsQueryParams = zod.object({
+  "page": zod.coerce.number().int().min(1).max(getStaffB2BCompanyTaskReportsQueryPageMax).default(getStaffB2BCompanyTaskReportsQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getStaffB2BCompanyTaskReportsQueryPageSizeMax).default(getStaffB2BCompanyTaskReportsQueryPageSizeDefault)
+})
+
+export const GetStaffB2BCompanyTaskReportsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "businessProfileId": zod.int(),
+  "taskId": zod.int(),
+  "taskTitle": zod.string(),
+  "taskArea": zod.string(),
+  "authorMemberId": zod.int(),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "hasMore": zod.boolean()
+})
+
+
+/**
  * @summary List internal requests visible to the signed-in company member
  */
 export const GetMyB2BCompanyRequestsResponse = zod.object({

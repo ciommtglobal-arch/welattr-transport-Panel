@@ -3,8 +3,15 @@ import { Router, type IRouter } from "express";
 import { clerkClient } from "@clerk/express";
 import {
   AcceptB2BCompanyInvitationBody,
+  AddB2BCompanyTaskReportResponse,
   CreateB2BCompanyRequestBody,
   CreateB2BCompanyTaskBody,
+  AddB2BCompanyTaskReportBody,
+  AddB2BCompanyTaskReportParams,
+  GetB2BCompanyTaskReportsQueryParams,
+  GetB2BCompanyTaskReportsResponse,
+  GetStaffB2BCompanyTaskReportsQueryParams,
+  GetStaffB2BCompanyTaskReportsResponse,
   InviteB2BCompanyMemberBody,
   UpdateB2BCompanyRequestBody,
   UpdateB2BCompanyRequestParams,
@@ -20,11 +27,13 @@ import {
 import {
   b2bCompanyMembersTable,
   b2bCompanyRequestsTable,
+  b2bCompanyTaskReportsTable,
   b2bCompanyTasksTable,
   db,
   type B2BCompanyMember,
   type B2BCompanyRequest,
   type B2BCompanyTask,
+  type B2BCompanyTaskReport,
 } from "@workspace/db";
 import { requireMyCompany } from "../lib/companyAuth";
 import { canViewCompanyMember, canViewCompanyTask } from "../lib/companyDelegation";
@@ -87,6 +96,16 @@ function serializeTask(task: B2BCompanyTask) {
     createdByClerkUserId: task.createdByClerkUserId,
     createdAt: task.createdAt.toISOString(),
     updatedAt: task.updatedAt.toISOString(),
+  };
+}
+
+function serializeTaskReport(report: B2BCompanyTaskReport) {
+  return {
+    id: report.id,
+    taskId: report.taskId,
+    authorMemberId: report.authorMemberId,
+    content: report.content,
+    createdAt: report.createdAt.toISOString(),
   };
 }
 
@@ -610,6 +629,204 @@ router.post(
     });
 
     res.status(201).json(serializeTask(task));
+  },
+);
+
+router.post(
+  "/b2b/business-profile/tasks/:id/reports",
+  async (req, res): Promise<void> => {
+    const authorization = await requireMyCompany(req, res);
+    if (!authorization) return;
+
+    const params = AddB2BCompanyTaskReportParams.safeParse(req.params);
+    const parsed = AddB2BCompanyTaskReportBody.safeParse(req.body);
+    if (!params.success || !parsed.success) {
+      res.status(400).json({
+        error: parsed.success
+          ? "Görev kimliği geçersiz."
+          : parsed.error.issues[0]?.message ?? "Görev raporu geçersiz.",
+      });
+      return;
+    }
+    const content = parsed.data.content.trim();
+    if (!content) {
+      res.status(400).json({ error: "Görev raporu metni boş olamaz." });
+      return;
+    }
+
+    const [task] = await db
+      .select()
+      .from(b2bCompanyTasksTable)
+      .where(
+        and(
+          eq(b2bCompanyTasksTable.id, params.data.id),
+          eq(
+            b2bCompanyTasksTable.businessProfileId,
+            authorization.profile.id,
+          ),
+        ),
+      )
+      .limit(1);
+    if (!task || !canViewCompanyTask(authorization.member, task)) {
+      res.status(404).json({ error: "Görev bulunamadı." });
+      return;
+    }
+    if (
+      authorization.member.status !== "active" ||
+      !authorization.member.clerkUserId ||
+      authorization.member.clerkUserId !== authorization.userId ||
+      task.assigneeMemberId !== authorization.member.id
+    ) {
+      res.status(403).json({
+        error: "Yalnızca aktif ve kendisine atanmış göreve rapor eklenebilir.",
+      });
+      return;
+    }
+    if (
+      !(await isWorkflowEntityApproved({
+        businessProfileId: authorization.profile.id,
+        entityType: "company_task",
+        entityId: task.id,
+      }))
+    ) {
+      res.status(409).json({
+        error: "Bu göreve rapor eklemek için sahip onayı gerekiyor.",
+      });
+      return;
+    }
+    if (task.status === "completed") {
+      res.status(409).json({ error: "Tamamlanan göreve yeni rapor eklenemez." });
+      return;
+    }
+
+    const [report] = await db
+      .insert(b2bCompanyTaskReportsTable)
+      .values({
+        taskId: task.id,
+        authorMemberId: authorization.member.id,
+        content,
+      })
+      .returning();
+    res
+      .status(201)
+      .json(AddB2BCompanyTaskReportResponse.parse(serializeTaskReport(report)));
+  },
+);
+
+router.get(
+  "/b2b/business-profile/task-reports",
+  async (req, res): Promise<void> => {
+    const authorization = await requireMyCompany(req, res);
+    if (!authorization) return;
+
+    const parsed = GetB2BCompanyTaskReportsQueryParams.safeParse(req.query);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Görev raporu araması geçersiz." });
+      return;
+    }
+    const { taskId, page, pageSize } = parsed.data;
+    const [task] = await db
+      .select()
+      .from(b2bCompanyTasksTable)
+      .where(
+        and(
+          eq(b2bCompanyTasksTable.id, taskId),
+          eq(
+            b2bCompanyTasksTable.businessProfileId,
+            authorization.profile.id,
+          ),
+        ),
+      )
+      .limit(1);
+    if (!task || !canViewCompanyTask(authorization.member, task)) {
+      res.status(404).json({ error: "Görev bulunamadı." });
+      return;
+    }
+    const isCompanyManager =
+      authorization.member.role === "owner" ||
+      authorization.member.role === "admin" ||
+      authorization.member.role === "manager";
+    const isActiveAssignedMember =
+      authorization.member.status === "active" &&
+      Boolean(authorization.member.clerkUserId) &&
+      authorization.member.clerkUserId === authorization.userId &&
+      task.assigneeMemberId === authorization.member.id;
+    if (!isCompanyManager && !isActiveAssignedMember) {
+      res.status(403).json({
+        error: "Firma görevi raporlarını görüntüleme yetkiniz bulunmuyor.",
+      });
+      return;
+    }
+
+    const reports = await db
+      .select()
+      .from(b2bCompanyTaskReportsTable)
+      .where(eq(b2bCompanyTaskReportsTable.taskId, task.id))
+      .orderBy(desc(b2bCompanyTaskReportsTable.createdAt))
+      .limit(pageSize + 1)
+      .offset((page - 1) * pageSize);
+    const hasMore = reports.length > pageSize;
+    res.json(
+      GetB2BCompanyTaskReportsResponse.parse({
+        items: reports.slice(0, pageSize).map(serializeTaskReport),
+        page,
+        pageSize,
+        hasMore,
+      }),
+    );
+  },
+);
+
+router.get(
+  "/b2b/staff/company-task-reports",
+  async (req, res): Promise<void> => {
+    const userId = requireUser(req, res);
+    if (!userId) return;
+    const founderId = process.env.MMT_FOUNDER_REVIEWER_CLERK_USER_ID?.trim();
+    if (!founderId || userId !== founderId) {
+      res.status(403).json({ error: "Kurucu personel erişimi gerekiyor." });
+      return;
+    }
+
+    const parsed = GetStaffB2BCompanyTaskReportsQueryParams.safeParse(
+      req.query,
+    );
+    if (!parsed.success) {
+      res.status(400).json({ error: "Görev raporu araması geçersiz." });
+      return;
+    }
+    const { page, pageSize } = parsed.data;
+    const reports = await db
+      .select({
+        id: b2bCompanyTaskReportsTable.id,
+        businessProfileId: b2bCompanyTasksTable.businessProfileId,
+        taskId: b2bCompanyTasksTable.id,
+        taskTitle: b2bCompanyTasksTable.title,
+        taskArea: b2bCompanyTasksTable.area,
+        authorMemberId: b2bCompanyTaskReportsTable.authorMemberId,
+        content: b2bCompanyTaskReportsTable.content,
+        createdAt: b2bCompanyTaskReportsTable.createdAt,
+      })
+      .from(b2bCompanyTaskReportsTable)
+      .innerJoin(
+        b2bCompanyTasksTable,
+        eq(b2bCompanyTaskReportsTable.taskId, b2bCompanyTasksTable.id),
+      )
+      .orderBy(desc(b2bCompanyTaskReportsTable.createdAt))
+      .limit(pageSize + 1)
+      .offset((page - 1) * pageSize);
+    const hasMore = reports.length > pageSize;
+    res.json(
+      GetStaffB2BCompanyTaskReportsResponse.parse({
+        items: reports.slice(0, pageSize).map((report) => ({
+          ...report,
+          createdAt: report.createdAt.toISOString(),
+        })),
+        page,
+        pageSize,
+        hasMore,
+      }),
+    );
   },
 );
 

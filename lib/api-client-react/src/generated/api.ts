@@ -36,6 +36,9 @@ import type {
   B2BCompanyTask,
   B2BCompanyTaskInput,
   B2BCompanyTaskPage,
+  B2BCompanyTaskReport,
+  B2BCompanyTaskReportInput,
+  B2BCompanyTaskReportPage,
   B2BCompanyTaskUpdate,
   B2BListing,
   B2BListingImageUploadInput,
@@ -65,6 +68,7 @@ import type {
   ErrorEnvelope,
   ErrorResponse,
   GetB2BBusinessProfileReviewQueueParams,
+  GetB2BCompanyTaskReportsParams,
   GetB2BListingReviewQueueParams,
   GetB2BListingsParams,
   GetB2BReportReviewQueueParams,
@@ -75,6 +79,7 @@ import type {
   GetLogisticsOperationsParams,
   GetMediaItemsParams,
   GetStaffAccess200,
+  GetStaffB2BCompanyTaskReportsParams,
   HealthStatus,
   LimitApplication,
   LimitApplicationInput,
@@ -110,6 +115,7 @@ import type {
   PaymentCheckoutSession,
   PaymentReadiness,
   PublicLogisticsMedia,
+  StaffB2BCompanyTaskReportPage,
   StaffProfile,
   StaffRewardPlan,
   StaffRewardPlanInput,
@@ -4863,6 +4869,256 @@ export const useCreateB2BCompanyTask = <TError = ErrorType<ErrorResponse>,
       > => {
       return useMutation(getCreateB2BCompanyTaskMutationOptions(options));
     }
+
+export const getAddB2BCompanyTaskReportUrl = (id: number,) => {
+
+
+
+
+  return `/api/b2b/business-profile/tasks/${id}/reports`
+}
+
+/**
+ * @summary Append a progress report to an approved task assigned to the caller
+ */
+export const addB2BCompanyTaskReport = async (id: number,
+    b2BCompanyTaskReportInput: B2BCompanyTaskReportInput, options?: Parameters<typeof customFetch>[1]): Promise<B2BCompanyTaskReport> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<B2BCompanyTaskReport>(getAddB2BCompanyTaskReportUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(b2BCompanyTaskReportInput)
+  }
+);}
+
+
+
+
+
+export const getAddB2BCompanyTaskReportMutationKey = () => ['addB2BCompanyTaskReport'] as const;
+
+export const getAddB2BCompanyTaskReportMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addB2BCompanyTaskReport>>, TError,AddB2BCompanyTaskReportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addB2BCompanyTaskReport>>, TError,AddB2BCompanyTaskReportMutationVariables, TContext> => {
+
+const mutationKey = getAddB2BCompanyTaskReportMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addB2BCompanyTaskReport>>, AddB2BCompanyTaskReportMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  addB2BCompanyTaskReport(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddB2BCompanyTaskReportMutationResult = NonNullable<Awaited<ReturnType<typeof addB2BCompanyTaskReport>>>
+    export type AddB2BCompanyTaskReportMutationBody = BodyType<B2BCompanyTaskReportInput>
+    export type AddB2BCompanyTaskReportMutationError = ErrorType<ErrorResponse>
+    export type AddB2BCompanyTaskReportMutationVariables = {id: number;data: BodyType<B2BCompanyTaskReportInput>}
+
+    /**
+ * @summary Append a progress report to an approved task assigned to the caller
+ */
+export const useAddB2BCompanyTaskReport = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addB2BCompanyTaskReport>>, TError,AddB2BCompanyTaskReportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addB2BCompanyTaskReport>>,
+        TError,
+        AddB2BCompanyTaskReportMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddB2BCompanyTaskReportMutationOptions(options));
+    }
+
+export const getGetB2BCompanyTaskReportsUrl = (params: GetB2BCompanyTaskReportsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/b2b/business-profile/task-reports?${stringifiedParams}` : `/api/b2b/business-profile/task-reports`
+}
+
+/**
+ * @summary List reports visible to company management or the assigned member
+ */
+export const getB2BCompanyTaskReports = async (params: GetB2BCompanyTaskReportsParams, options?: Parameters<typeof customFetch>[1]): Promise<B2BCompanyTaskReportPage> => {
+
+  return customFetch<B2BCompanyTaskReportPage>(getGetB2BCompanyTaskReportsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetB2BCompanyTaskReportsQueryKey = (params?: GetB2BCompanyTaskReportsParams,) => {
+    return [
+    `/api/b2b/business-profile/task-reports`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetB2BCompanyTaskReportsQueryOptions = <TData = Awaited<ReturnType<typeof getB2BCompanyTaskReports>>, TError = ErrorType<ErrorResponse>>(params: GetB2BCompanyTaskReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BCompanyTaskReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetB2BCompanyTaskReportsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getB2BCompanyTaskReports>>> = ({ signal }) => getB2BCompanyTaskReports(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getB2BCompanyTaskReports>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetB2BCompanyTaskReportsQueryResult = NonNullable<Awaited<ReturnType<typeof getB2BCompanyTaskReports>>>
+export type GetB2BCompanyTaskReportsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List reports visible to company management or the assigned member
+ */
+
+export function useGetB2BCompanyTaskReports<TData = Awaited<ReturnType<typeof getB2BCompanyTaskReports>>, TError = ErrorType<ErrorResponse>>(
+ params: GetB2BCompanyTaskReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getB2BCompanyTaskReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetB2BCompanyTaskReportsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetStaffB2BCompanyTaskReportsUrl = (params?: GetStaffB2BCompanyTaskReportsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/b2b/staff/company-task-reports?${stringifiedParams}` : `/api/b2b/staff/company-task-reports`
+}
+
+/**
+ * Read-only staff view; includes no member contact details.
+ * @summary Allowlisted founder view of cross-company task reports
+ */
+export const getStaffB2BCompanyTaskReports = async (params?: GetStaffB2BCompanyTaskReportsParams, options?: Parameters<typeof customFetch>[1]): Promise<StaffB2BCompanyTaskReportPage> => {
+
+  return customFetch<StaffB2BCompanyTaskReportPage>(getGetStaffB2BCompanyTaskReportsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStaffB2BCompanyTaskReportsQueryKey = (params?: GetStaffB2BCompanyTaskReportsParams,) => {
+    return [
+    `/api/b2b/staff/company-task-reports`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetStaffB2BCompanyTaskReportsQueryOptions = <TData = Awaited<ReturnType<typeof getStaffB2BCompanyTaskReports>>, TError = ErrorType<ErrorResponse>>(params?: GetStaffB2BCompanyTaskReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffB2BCompanyTaskReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStaffB2BCompanyTaskReportsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStaffB2BCompanyTaskReports>>> = ({ signal }) => getStaffB2BCompanyTaskReports(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStaffB2BCompanyTaskReports>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStaffB2BCompanyTaskReportsQueryResult = NonNullable<Awaited<ReturnType<typeof getStaffB2BCompanyTaskReports>>>
+export type GetStaffB2BCompanyTaskReportsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Allowlisted founder view of cross-company task reports
+ */
+
+export function useGetStaffB2BCompanyTaskReports<TData = Awaited<ReturnType<typeof getStaffB2BCompanyTaskReports>>, TError = ErrorType<ErrorResponse>>(
+ params?: GetStaffB2BCompanyTaskReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffB2BCompanyTaskReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStaffB2BCompanyTaskReportsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetMyB2BCompanyRequestsUrl = () => {
 
