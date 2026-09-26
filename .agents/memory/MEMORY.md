@@ -20,3 +20,4 @@
 - [Mobile business-profile URLs](mobile-business-profile-urls.md) — Normalize optional website values before validation because mobile input can carry invisible characters.
 - [Founder self-review boundary](founder-self-review-boundary.md) — If the founder reviews their own business, bind the exception to one allowlisted Clerk identity and that profile only.
 - [Media pilot publication](media-pilot-publication.md) — Manual links need a separate founder confirmation before “published”; TEST and legacy records never use external dispatch.
+- [MMT Connect delegation boundary](mmt-connect-delegation-boundary.md) — Area leaders can coordinate company work, but final affirmative approval belongs to the company owner.
