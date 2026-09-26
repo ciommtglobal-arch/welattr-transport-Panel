@@ -2,6 +2,7 @@ import { useAuth, UserButton } from "@clerk/react";
 import { getGetStaffAccessQueryKey, useGetStaffAccess } from "@workspace/api-client-react";
 import { BriefcaseBusiness, CircleHelp, ListChecks, RefreshCw } from "lucide-react";
 import { Link, Redirect } from "wouter";
+import { isStaffAccessDenied, StaffAccessUnavailable } from "./staff-workspace";
 import "@/styles/mmt-corporate.css";
 
 const workspaces = {
@@ -62,11 +63,13 @@ const previews = [
 
 export function ExpertDashboard() {
   const { isLoaded, isSignedIn } = useAuth();
-  const access = useGetStaffAccess({ query: { queryKey: getGetStaffAccessQueryKey(), enabled: isLoaded && Boolean(isSignedIn), retry: false } });
+  const access = useGetStaffAccess({ query: { queryKey: getGetStaffAccessQueryKey(), enabled: isLoaded && Boolean(isSignedIn) } });
   if (!isLoaded) return <AccessLoading />;
   if (!isSignedIn) return <Redirect to="/staff/giris" />;
   if (access.isPending) return <AccessLoading />;
-  if (access.isError || !access.data || access.data.role === "founder") return <AccessDenied />;
+  if (access.isError && isStaffAccessDenied(access.error)) return <AccessDenied />;
+  if (access.isError || !access.data) return <StaffAccessUnavailable retry={() => void access.refetch()} />;
+  if (access.data.role === "founder") return <AccessDenied />;
 
   const workspace = workspaces[access.data.role];
   const links = workspace.primary;

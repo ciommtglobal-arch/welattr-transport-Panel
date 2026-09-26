@@ -21,13 +21,31 @@ function AccessDenied() {
   );
 }
 
+export function isStaffAccessDenied(error: unknown) {
+  return typeof error === "object" && error !== null &&
+    "status" in error && error.status === 403;
+}
+
+export function StaffAccessUnavailable({ retry }: { retry: () => void }) {
+  return (
+    <main className="mmt-management-page">
+      <section className="mmt-panel">
+        <h1 className="mmt-management-title">Erişim kontrolü tamamlanamadı</h1>
+        <p className="mmt-management-sub">Oturum veya bağlantı şu anda doğrulanamadı. Bu durum tek başına yetkiniz olmadığı anlamına gelmez.</p>
+        <button type="button" onClick={retry} className="mmt-action-link">Yeniden dene</button>
+      </section>
+    </main>
+  );
+}
+
 export function StaffWorkspaceRedirect() {
   const { isLoaded, isSignedIn } = useAuth();
-  const access = useGetStaffAccess({ query: { queryKey: getGetStaffAccessQueryKey(), enabled: isLoaded && Boolean(isSignedIn), retry: false } });
+  const access = useGetStaffAccess({ query: { queryKey: getGetStaffAccessQueryKey(), enabled: isLoaded && Boolean(isSignedIn) } });
   if (!isLoaded) return <AccessLoading />;
   if (!isSignedIn) return <Redirect to="/staff/giris" />;
   if (access.isPending) return <AccessLoading />;
-  if (access.isError || !access.data) return <AccessDenied />;
+  if (access.isError && isStaffAccessDenied(access.error)) return <AccessDenied />;
+  if (access.isError || !access.data) return <StaffAccessUnavailable retry={() => void access.refetch()} />;
   return <Redirect to={access.data.workspace} />;
 }
 
@@ -64,12 +82,14 @@ const founderPanels = [
 
 export function FounderDashboard() {
   const { isLoaded, isSignedIn } = useAuth();
-  const access = useGetStaffAccess({ query: { queryKey: getGetStaffAccessQueryKey(), enabled: isLoaded && Boolean(isSignedIn), retry: false } });
+  const access = useGetStaffAccess({ query: { queryKey: getGetStaffAccessQueryKey(), enabled: isLoaded && Boolean(isSignedIn) } });
   if (!isLoaded) return <AccessLoading />;
   if (!isSignedIn) return <Redirect to="/staff/giris" />;
   if (access.isPending) return <AccessLoading />;
   // The server's founder allowlist is the source of founder access.
-  if (access.isError || access.data?.role !== "founder") return <AccessDenied />;
+  if (access.isError && isStaffAccessDenied(access.error)) return <AccessDenied />;
+  if (access.isError || !access.data) return <StaffAccessUnavailable retry={() => void access.refetch()} />;
+  if (access.data.role !== "founder") return <AccessDenied />;
 
   return (
     <main className="mmt-management-page">

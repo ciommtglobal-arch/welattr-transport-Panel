@@ -35,6 +35,7 @@ import {
   type StaffRewardTransactionKind,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { isStaffAccessDenied } from "./staff-workspace";
 
 type Responsibility = {
   id: string;
@@ -729,13 +730,20 @@ export default function StaffResponsibilityCenter() {
 }
 
 function AuthorizedCenter() {
-  const access = useGetStaffAccess({ query: { queryKey: getGetStaffAccessQueryKey(), retry: false } });
+  const access = useGetStaffAccess({ query: { queryKey: getGetStaffAccessQueryKey() } });
   if (access.isPending) return <LoadingState />;
-  if (access.isError) return (
+  if (access.isError && isStaffAccessDenied(access.error)) return (
     <section className="mx-auto max-w-xl px-5 py-20 text-center">
       <h1 className="text-2xl font-semibold">Personel yetkiniz bulunamadı</h1>
       <p className="mt-4 text-foreground/60">Bu alan için mevcut hesabınıza tanımlı bir yetki gerekiyor.</p>
       <Link href="/b2b-agi/panel" className="mt-6 inline-block text-primary underline">Şirket paneline dön</Link>
+    </section>
+  );
+  if (access.isError || !access.data) return (
+    <section className="mx-auto max-w-xl px-5 py-20 text-center">
+      <h1 className="text-2xl font-semibold">Erişim kontrolü tamamlanamadı</h1>
+      <p className="mt-4 text-foreground/60">Bağlantı veya oturum geçici olarak doğrulanamadı.</p>
+      <button type="button" onClick={() => void access.refetch()} className="mt-6 inline-block min-h-11 text-primary underline">Yeniden dene</button>
     </section>
   );
   if (access.data.role === "founder") return <Redirect to="/staff/yonetim-paneli" />;
