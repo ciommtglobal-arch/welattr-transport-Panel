@@ -163,16 +163,13 @@ describe("orphan upload cleanup", () => {
     expect(deleteObjectEntityFile).not.toHaveBeenCalled();
   });
 
-  it("deletes only old orphan objects and reports the cleanup", async () => {
+  it("refuses real deletion until the owner reviews the dry-run report", async () => {
     const response = await request(app)
       .post("/storage/uploads/cleanup-orphans")
       .send();
 
-    expect(response.status).toBe(200);
-    expect(response.body.deletedObjectPaths).toEqual([oldOrphanPath]);
-    expect(response.body.skippedReferencedObjectPaths).toEqual([]);
-    expect(response.body.failedObjects).toEqual([]);
-    expect(deleteObjectEntityFile).toHaveBeenCalledTimes(1);
-    expect(deleteObjectEntityFile).toHaveBeenCalledWith(objects[0].file);
+    expect(response.status).toBe(423);
+    expect(listObjectEntityFiles).not.toHaveBeenCalled();
+    expect(deleteObjectEntityFile).not.toHaveBeenCalled();
   });
 });

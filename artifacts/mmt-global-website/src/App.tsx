@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, type ComponentProps, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { ClerkProvider, SignIn, SignUp, useAuth, useClerk } from '@clerk/react';
 import { arSA, enUS, ruRU, trTR } from '@clerk/localizations';
@@ -13,48 +13,6 @@ import {
 } from '@/lib/i18n';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import NotFound from '@/pages/not-found';
-import CorporateHome from '@/pages/corporate-home';
-import Limit, { LimitChooser } from '@/pages/limit';
-import StaffApplications from '@/pages/staff-applications';
-import StaffB2BListings from '@/pages/staff-b2b-listings';
-import StaffB2BVerifications from '@/pages/staff-b2b-verifications';
-import StaffB2BReports from '@/pages/staff-b2b-reports';
-import DemoWallet from '@/pages/demo-wallet';
-import ConstructionStorePage from '@/pages/construction-store';
-import { ConstructionProductPage, ConstructionCartPage, ConstructionQuotePage } from '@/pages/construction-shop';
-import StaffConstructionQuotes from '@/pages/staff-construction-quotes';
-import PaymentPage, {
-  MockPaymentPage,
-  PaymentResultPage,
-  TestPaymentPage,
-} from '@/pages/payment';
-import FreeB2BNetworkPage from '@/pages/free-b2b-network';
-import B2BListingDetail from '@/pages/b2b-listing-detail';
-import B2BJoinPage from '@/pages/b2b-join';
-import B2BRequestPage from '@/pages/b2b-request';
-import B2BCompanyPanel from '@/pages/b2b-company-panel';
-import StaffB2BRequests from '@/pages/staff-b2b-requests';
-import StaffMediaCenter from '@/pages/staff-media-center';
-import LogisticsHubPage from '@/pages/logistics-hub';
-import DepartmentsOverviewPage, { DepartmentPage } from '@/pages/departments';
-import StaffResponsibilityCenter from '@/pages/staff-responsibility-center';
-import StaffOperationsDesk from '@/pages/staff-operations-desk';
-import { StaffExpertWorkspace } from '@/pages/staff-expert-workspace';
-import { FounderDashboard, StaffWorkspaceRedirect } from '@/pages/staff-workspace';
-import {
-  AboutPage,
-  CareersPage,
-  CookiePage,
-  ContactPage,
-  DeliveryPage,
-  DistanceSalesPage,
-  InvestmentsPage,
-  KvkkPage,
-  PrivacyPage,
-  RefundPage,
-  ServiceTermsPage,
-} from '@/pages/site-pages';
 import {
   Route,
   Redirect,
@@ -63,7 +21,93 @@ import {
   Router as WouterRouter,
 } from 'wouter';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        const status =
+          typeof error === 'object' && error !== null && 'status' in error
+            ? error.status
+            : undefined;
+        if (status === 401) return failureCount < 1;
+        if (status === 403) return false;
+        return failureCount < 2;
+      },
+    },
+  },
+});
+// The Clerk provider unmounts on public routes. Keep the previous identity
+// across that transition so a different user cannot inherit cached staff data.
+let lastClerkUserId: string | null | undefined;
+
+const NotFound = lazy(() => import('@/pages/not-found'));
+const CorporateHome = lazy(() => import('@/pages/corporate-home'));
+const LimitChooser = lazy(() =>
+  import('@/pages/limit').then((module) => ({ default: module.LimitChooser })),
+);
+const Limit = lazy(() => import('@/pages/limit'));
+const StaffApplications = lazy(() => import('@/pages/staff-applications'));
+const StaffB2BListings = lazy(() => import('@/pages/staff-b2b-listings'));
+const StaffB2BVerifications = lazy(() => import('@/pages/staff-b2b-verifications'));
+const StaffB2BReports = lazy(() => import('@/pages/staff-b2b-reports'));
+const DemoWallet = lazy(() => import('@/pages/demo-wallet'));
+const ConstructionStorePage = lazy(() => import('@/pages/construction-store'));
+const ConstructionProductPage = lazy(() =>
+  import('@/pages/construction-shop').then((module) => ({ default: module.ConstructionProductPage })),
+);
+const ConstructionCartPage = lazy(() =>
+  import('@/pages/construction-shop').then((module) => ({ default: module.ConstructionCartPage })),
+);
+const ConstructionQuotePage = lazy(() =>
+  import('@/pages/construction-shop').then((module) => ({ default: module.ConstructionQuotePage })),
+);
+const StaffConstructionQuotes = lazy(() => import('@/pages/staff-construction-quotes'));
+const PaymentPage = lazy(() => import('@/pages/payment'));
+const MockPaymentPage = lazy(() =>
+  import('@/pages/payment').then((module) => ({ default: module.MockPaymentPage })),
+);
+const PaymentResultPage = lazy(() =>
+  import('@/pages/payment').then((module) => ({ default: module.PaymentResultPage })),
+);
+const TestPaymentPage = lazy(() =>
+  import('@/pages/payment').then((module) => ({ default: module.TestPaymentPage })),
+);
+const FreeB2BNetworkPage = lazy(() => import('@/pages/free-b2b-network'));
+const B2BListingDetail = lazy(() => import('@/pages/b2b-listing-detail'));
+const B2BJoinPage = lazy(() => import('@/pages/b2b-join'));
+const B2BRequestPage = lazy(() => import('@/pages/b2b-request'));
+const B2BCompanyPanel = lazy(() => import('@/pages/b2b-company-panel'));
+const StaffB2BRequests = lazy(() => import('@/pages/staff-b2b-requests'));
+const StaffMediaCenter = lazy(() => import('@/pages/staff-media-center'));
+const LogisticsHubPage = lazy(() => import('@/pages/logistics-hub'));
+const DepartmentsOverviewPage = lazy(() =>
+  import('@/pages/departments').then((module) => ({ default: module.default })),
+);
+const DepartmentPage = lazy(() =>
+  import('@/pages/departments').then((module) => ({ default: module.DepartmentPage })),
+);
+const StaffResponsibilityCenter = lazy(() => import('@/pages/staff-responsibility-center'));
+const StaffOperationsDesk = lazy(() => import('@/pages/staff-operations-desk'));
+const StaffExpertWorkspace = lazy(() =>
+  import('@/pages/staff-expert-workspace').then((module) => ({ default: module.StaffExpertWorkspace })),
+);
+const StaffWorkspaceRedirect = lazy(() =>
+  import('@/pages/staff-workspace').then((module) => ({ default: module.StaffWorkspaceRedirect })),
+);
+const FounderDashboard = lazy(() =>
+  import('@/pages/staff-workspace').then((module) => ({ default: module.FounderDashboard })),
+);
+const AboutPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.AboutPage })));
+const CareersPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.CareersPage })));
+const CookiePage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.CookiePage })));
+const ContactPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.ContactPage })));
+const DeliveryPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.DeliveryPage })));
+const DistanceSalesPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.DistanceSalesPage })));
+const InvestmentsPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.InvestmentsPage })));
+const KvkkPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.KvkkPage })));
+const PrivacyPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.PrivacyPage })));
+const RefundPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.RefundPage })));
+const ServiceTermsPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.ServiceTermsPage })));
 const clerkPubKey = publishableKeyFromHost(
   window.location.hostname,
   import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
@@ -240,6 +284,7 @@ function SignUpPage() {
 function Router() {
   return (
     <RoutedErrorBoundary>
+      <Suspense fallback={<RouteLoading />}>
       <Switch>
         <Route path="/" component={PanelAwareHome} />
         <Route path="/limit" component={LimitChooser} />
@@ -293,7 +338,23 @@ function Router() {
         <Route path="/sign-up/*?" component={SignUpPage} />
         <Route component={NotFound} />
       </Switch>
+      </Suspense>
     </RoutedErrorBoundary>
+  );
+}
+
+function RouteLoading() {
+  const { locale } = useI18n();
+  const labels: Record<Locale, string> = {
+    tr: 'Yükleniyor…',
+    en: 'Loading…',
+    ar: 'جارٍ التحميل…',
+    ru: 'Загрузка…',
+  };
+  return (
+    <main className="flex min-h-[50vh] items-center justify-center bg-background px-5 text-sm text-muted-foreground" role="status">
+      {labels[locale]}
+    </main>
   );
 }
 function IndividualLimit() {
@@ -343,20 +404,18 @@ function PanelAwareHome() {
 function ClerkQueryClientCacheInvalidator() {
   const { addListener } = useClerk();
   const client = useQueryClient();
-  const previousUserId = useRef<string | null | undefined>(undefined);
 
   useEffect(() => {
     const unsubscribe = addListener(({ user }) => {
       const userId = user?.id ?? null;
-      if (previousUserId.current !== undefined && previousUserId.current !== userId) {
+      if (lastClerkUserId !== undefined && lastClerkUserId !== userId) {
         client.clear();
       }
-      previousUserId.current = userId;
+      lastClerkUserId = userId;
     });
 
     return () => {
       unsubscribe();
-      client.clear();
     };
   }, [addListener, client]);
 
@@ -368,20 +427,8 @@ function ClerkApp() {
   const { locale } = useI18n();
   const normalizedLocation = normalizeRoutePath(location);
   const clerkRoute =
-    normalizedLocation === '/staff/applications' ||
-    normalizedLocation === '/staff/ilanlar' ||
-    normalizedLocation === '/staff/medya-merkezi' ||
-    normalizedLocation === '/staff/b2b-dogrulamalar' ||
-    normalizedLocation === '/staff/b2b-sikayetler' ||
-    normalizedLocation === '/staff/b2b-talepler' ||
-    normalizedLocation === '/staff/insaat-teklifleri' ||
-    normalizedLocation === '/staff/sorumluluk-merkezi' ||
-    normalizedLocation === '/staff/yonlendir' ||
-    normalizedLocation === '/staff/yonetim-paneli' ||
-    normalizedLocation === '/staff/calisma-alani' ||
-    normalizedLocation === '/staff/operasyon-masasi' ||
-    normalizedLocation.startsWith('/staff/giris') ||
-    normalizedLocation.startsWith('/staff/kayit') ||
+    normalizedLocation === '/staff' ||
+    normalizedLocation.startsWith('/staff/') ||
     normalizedLocation === '/b2b-agi' ||
     normalizedLocation.startsWith('/b2b-agi/ilan/') ||
     normalizedLocation === '/b2b-agi/katil' ||

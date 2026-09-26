@@ -31,7 +31,7 @@ describe("orphan upload cleanup scheduler", () => {
     const stop = startOrphanUploadCleanupScheduler({
       runCleanup,
       logger,
-      env: { NODE_ENV: "production" },
+      env: { NODE_ENV: "production", ORPHAN_UPLOAD_CLEANUP_ENABLED: "true" },
     });
 
     await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
@@ -58,7 +58,7 @@ describe("orphan upload cleanup scheduler", () => {
     startOrphanUploadCleanupScheduler({
       runCleanup,
       logger,
-      env: { NODE_ENV: "production" },
+      env: { NODE_ENV: "production", ORPHAN_UPLOAD_CLEANUP_ENABLED: "true" },
     });
 
     await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
@@ -79,6 +79,7 @@ describe("orphan upload cleanup scheduler", () => {
         logger,
         env: {
           NODE_ENV: "production",
+          ORPHAN_UPLOAD_CLEANUP_ENABLED: "true",
           ORPHAN_UPLOAD_CLEANUP_INTERVAL_HOURS: "0",
         },
       }),

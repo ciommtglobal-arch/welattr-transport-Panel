@@ -74,6 +74,7 @@ VIP_PRICE_STARS = "250"
 
 [userenv.production]
 MMT_FOUNDER_REVIEWER_CLERK_USER_ID = "user_3JWCUrF5fmR47cyKeaW7dBTIwuG"
+ORPHAN_UPLOAD_CLEANUP_ENABLED = "false"
 
 [[ports]]
 localPort = 8080

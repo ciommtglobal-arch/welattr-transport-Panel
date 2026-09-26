@@ -10,19 +10,17 @@ MMT Global; lojistik, uluslararası ticaret, finansal başvurular, inşaat ürü
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
-- `POST /api/storage/uploads/cleanup-orphans` — scheduled maintenance endpoint for
-  removing unreferenced uploads. It defaults to a 24-hour retention window;
-  set `ORPHAN_UPLOAD_RETENTION_HOURS` to increase it. Admin or operations staff
-  can call it with `{ "dryRun": true }` to inspect candidates before deletion.
-- The API server also runs orphan-upload cleanup automatically after a five-minute
-  startup delay, then every 24 hours. It uses the configured retention window,
-  retries failures after one and five minutes, logs final failures, and takes a
-  PostgreSQL advisory lock so only one server instance cleans at a time.
-- Automatic cleanup is disabled by default in development and test environments.
-  Set `ORPHAN_UPLOAD_CLEANUP_ENABLED=true` to enable it there, or `false` to
-  disable it elsewhere. Set `ORPHAN_UPLOAD_CLEANUP_INTERVAL_HOURS` to change the
-  daily interval. The manual endpoint remains restricted to admin/operations
-  staff; the scheduled runner is an internal server operation.
+- `POST /api/storage/uploads/cleanup-orphans` accepts `{ "dryRun": true }` for
+  admin/operations staff. Omitting it or asking for real deletion returns 423:
+  **real deletion is locked until the owner reviews the dry-run report**.
+  Retention defaults to 24 hours (`ORPHAN_UPLOAD_RETENTION_HOURS`). Saved
+  application documents, verification documents, listing images, and media
+  references are excluded from candidates.
+- Automatic orphan scanning is disabled by default in every environment.
+  `ORPHAN_UPLOAD_CLEANUP_ENABLED=true` opts into scheduled **dry-run only**:
+  five-minute startup delay, then every 24 hours, with retry and a PostgreSQL
+  advisory lock. `ORPHAN_UPLOAD_CLEANUP_INTERVAL_HOURS` changes the interval.
+  Do not enable deletion or remove its code guard without explicit owner review.
 
 ## Stack
 

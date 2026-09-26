@@ -185,6 +185,11 @@ export async function cleanupOrphanUploads(
   dryRun: boolean,
   log?: Pick<Logger, "info" | "error">,
 ) {
+  // Destructive cleanup remains locked until the owner reviews the dry run.
+  // This also protects direct callers and the scheduler, not just the HTTP route.
+  if (!dryRun) {
+    throw new Error("Gerçek dosya silme, dry-run raporu incelenene kadar kapalı.");
+  }
   try {
     const retentionHours = getOrphanUploadRetentionHours();
     const cutoff = new Date(Date.now() - retentionHours * 60 * 60 * 1000);
@@ -285,6 +290,10 @@ router.post("/storage/uploads/cleanup-orphans", async (req, res) => {
   const parsedBody = CleanupOrphanUploadsBody.safeParse(req.body ?? {});
   if (!parsedBody.success) {
     res.status(400).json({ error: "Temizlik isteği geçersiz." });
+    return;
+  }
+  if (!parsedBody.data.dryRun) {
+    res.status(423).json({ error: "Gerçek silme kapalı. Yalnız {\"dryRun\":true} kabul edilir." });
     return;
   }
 

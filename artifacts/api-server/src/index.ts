@@ -46,7 +46,7 @@ app.listen(port, (err) => {
           return;
         }
 
-        const result = await cleanupOrphanUploads(false, logger);
+        const result = await cleanupOrphanUploads(true, logger);
         if (result.failedObjects.length > 0) {
           throw new Error(
             `${result.failedObjects.length} sahipsiz yükleme silinemedi.`,

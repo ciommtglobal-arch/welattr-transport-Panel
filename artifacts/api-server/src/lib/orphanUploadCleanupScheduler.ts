@@ -37,7 +37,8 @@ function isSchedulerEnabled(env: NodeJS.ProcessEnv) {
     );
   }
 
-  return env.NODE_ENV !== "development" && env.NODE_ENV !== "test";
+  // No scheduled work until the owner reviews a dry-run report.
+  return false;
 }
 
 export function startOrphanUploadCleanupScheduler({

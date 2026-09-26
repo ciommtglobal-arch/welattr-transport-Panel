@@ -40,7 +40,7 @@ function Header() {
         <div className="flex items-center gap-4">
           <Link
             href="/staff/sorumluluk-merkezi"
-            className="hidden text-[11px] font-bold uppercase tracking-[0.13em] text-foreground/55 hover:text-primary sm:inline"
+            className="text-[11px] font-bold uppercase tracking-[0.13em] text-foreground/55 hover:text-primary"
           >
             Sorumluluk merkezi
           </Link>
@@ -120,7 +120,6 @@ function OperationsDeskView() {
   const operations = useGetLogisticsOperations(undefined, {
     query: {
       queryKey: getGetLogisticsOperationsQueryKey(),
-      enabled: Boolean(desk.data),
     },
   });
 
