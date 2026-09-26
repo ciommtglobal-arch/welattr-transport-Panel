@@ -5,6 +5,7 @@ import { arSA, enUS, ruRU, trTR } from '@clerk/localizations';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { StaffSignInForm } from '@/components/staff-sign-in-form';
 import {
   I18nProvider,
   LanguageSelector,
@@ -243,15 +244,20 @@ function SignInPage() {
 
 function StaffSignInPage() {
   const { isLoaded, isSignedIn } = useAuth();
+  const [location] = useLocation();
   if (isLoaded && isSignedIn) return <Redirect to="/staff/yonlendir" />;
+  const standardSignIn = location === '/staff/giris/standart' ||
+    location.startsWith('/staff/giris/standart/');
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
-      <SignIn
-        routing="path"
-        path={`${basePath}/staff/giris`}
-        signUpUrl={`${basePath}/staff/kayit`}
-        fallbackRedirectUrl={`${basePath}/staff/yonlendir`}
-      />
+      {standardSignIn ? (
+        <SignIn
+          routing="path"
+          path={`${basePath}/staff/giris/standart`}
+          signUpUrl={`${basePath}/staff/kayit`}
+          fallbackRedirectUrl={`${basePath}/staff/yonlendir`}
+        />
+      ) : <StaffSignInForm />}
     </div>
   );
 }
