@@ -1,5 +1,5 @@
 import { FormEvent, useMemo, useRef, useState } from "react";
-import { useAuth, useUser } from "@clerk/react";
+import { useAuth, useClerk, useUser } from "@clerk/react";
 import { Link } from "wouter";
 import {
   ArrowLeft,
@@ -12,6 +12,7 @@ import {
   Inbox,
   LayoutDashboard,
   Loader2,
+  LogOut,
   Mail,
   MessageCircle,
   MessageSquareText,
@@ -201,6 +202,7 @@ function CompanyPanelContent({
           ? acceptError.message
           : "Davet kabul edilemedi.";
       if (
+        getApiErrorStatus(acceptError) === 404 ||
         message.includes("Davet bulunamadı") ||
         message.includes("daha önce kullanıldı")
       ) {
@@ -229,13 +231,16 @@ function CompanyPanelContent({
               MMT <span className="font-normal text-foreground/55">CONNECT</span>
             </span>
           </Link>
-          <Link
-            href="/b2b-agi"
-            className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-foreground/55 hover:text-primary"
-          >
-            <ArrowLeft size={15} />
-            B2B ağına dön
-          </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link
+              href="/b2b-agi"
+              className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-foreground/55 hover:text-primary"
+            >
+              <ArrowLeft size={15} />
+              B2B ağına dön
+            </Link>
+            <PanelSignOutButton />
+          </div>
         </div>
       </header>
 
@@ -389,11 +394,21 @@ function InvitationAcceptance({ token }: { token: string }) {
       window.history.replaceState(null, '', window.location.pathname);
       window.location.reload();
     } catch (acceptError) {
-      setError(
+      const message =
         acceptError instanceof Error
           ? acceptError.message
-          : 'Davet kabul edilemedi.',
-      );
+          : 'Davet kabul edilemedi.';
+      if (
+        getApiErrorStatus(acceptError) === 404 ||
+        message.includes('Davet bulunamadı') ||
+        message.includes('daha önce kullanıldı')
+      ) {
+        window.sessionStorage.removeItem('mmt-connect-invite');
+        window.history.replaceState(null, '', window.location.pathname);
+        window.location.reload();
+        return;
+      }
+      setError(message);
     } finally {
       setIsAccepting(false);
     }
@@ -1641,6 +1656,9 @@ function PanelDataError({
         >
           Tekrar dene
         </button>
+        <div className="mt-4">
+          <PanelSignOutButton />
+        </div>
       </section>
     </main>
   );
@@ -1673,7 +1691,25 @@ function NoCompanyState({ accountEmail }: { accountEmail: string }) {
         >
           Firma sahibi olarak kaydı tamamla
         </Link>
+        <div className="mt-4">
+          <PanelSignOutButton />
+        </div>
       </section>
     </main>
+  );
+}
+
+function PanelSignOutButton() {
+  const { signOut } = useClerk();
+
+  return (
+    <button
+      type="button"
+      onClick={() => void signOut({ redirectUrl: import.meta.env.BASE_URL })}
+      className="inline-flex items-center justify-center gap-2 border border-border/70 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-foreground/60 transition-colors hover:border-primary hover:text-primary"
+    >
+      <LogOut size={15} />
+      Çıkış yap
+    </button>
   );
 }

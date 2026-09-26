@@ -1,6 +1,6 @@
-import { type ComponentProps, type ReactNode } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ClerkProvider, SignIn, SignUp, useAuth } from '@clerk/react';
+import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { ClerkProvider, SignIn, SignUp, useAuth, useClerk } from '@clerk/react';
 import { arSA, enUS, ruRU, trTR } from '@clerk/localizations';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
@@ -22,7 +22,11 @@ import StaffB2BVerifications from '@/pages/staff-b2b-verifications';
 import StaffB2BReports from '@/pages/staff-b2b-reports';
 import DemoWallet from '@/pages/demo-wallet';
 import ConstructionStorePage from '@/pages/construction-store';
-import PaymentPage, { MockPaymentPage, PaymentResultPage } from '@/pages/payment';
+import PaymentPage, {
+  MockPaymentPage,
+  PaymentResultPage,
+  TestPaymentPage,
+} from '@/pages/payment';
 import FreeB2BNetworkPage from '@/pages/free-b2b-network';
 import B2BListingDetail from '@/pages/b2b-listing-detail';
 import B2BJoinPage from '@/pages/b2b-join';
@@ -169,6 +173,12 @@ function normalizeRoutePath(path: string) {
 
 function SignInPage() {
   rememberInviteToken();
+  const { isLoaded, isSignedIn } = useAuth();
+  const panelUrl = getInviteAwarePanelRedirect(`${basePath}/b2b-agi/panel`);
+
+  if (isLoaded && isSignedIn) {
+    return <Redirect to={stripBase(panelUrl)} />;
+  }
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
@@ -176,7 +186,7 @@ function SignInPage() {
         routing="path"
         path={`${basePath}/sign-in`}
         signUpUrl={getInviteAwareAuthUrl(`${basePath}/sign-up`)}
-        fallbackRedirectUrl={getInviteAwarePanelRedirect(`${basePath}/b2b-agi/katil`)}
+        fallbackRedirectUrl={panelUrl}
       />
     </div>
   );
@@ -246,6 +256,7 @@ function Router() {
         <Route path="/birimler" component={DepartmentsOverviewPage} />
         <Route path="/birimler/:slug" component={DepartmentPage} />
         <Route path="/odeme" component={PaymentPage} />
+        <Route path="/odeme/test-baslat" component={TestPaymentPage} />
         <Route path="/odeme/test" component={MockPaymentPage} />
         <Route path="/odeme/sonuc" component={PaymentResultPage} />
         <Route path="/hakkimizda" component={AboutPage} />
@@ -279,7 +290,6 @@ function Router() {
     </RoutedErrorBoundary>
   );
 }
-
 function IndividualLimit() {
   return <Limit category="individual" />;
 }
@@ -324,6 +334,29 @@ function PanelAwareHome() {
   return <CorporateHome />;
 }
 
+function ClerkQueryClientCacheInvalidator() {
+  const { addListener } = useClerk();
+  const client = useQueryClient();
+  const previousUserId = useRef<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    const unsubscribe = addListener(({ user }) => {
+      const userId = user?.id ?? null;
+      if (previousUserId.current !== undefined && previousUserId.current !== userId) {
+        client.clear();
+      }
+      previousUserId.current = userId;
+    });
+
+    return () => {
+      unsubscribe();
+      client.clear();
+    };
+  }, [addListener, client]);
+
+  return null;
+}
+
 function ClerkApp() {
   const [location, setLocation] = useLocation();
   const { locale } = useI18n();
@@ -351,6 +384,7 @@ function ClerkApp() {
     normalizedLocation.startsWith('/sign-up');
   const routedContent = (
     <QueryClientProvider client={queryClient}>
+      {clerkRoute ? <ClerkQueryClientCacheInvalidator /> : null}
       <TooltipProvider>
         <Router />
         <Toaster />

@@ -1,16 +1,19 @@
-import { FormEvent, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
   CircleAlert,
+  CreditCard,
   ExternalLink,
   Loader2,
   ShieldCheck,
 } from "lucide-react";
 import { Link } from "wouter";
 import {
+  useCreatePaymentCheckout,
   useCreateTamiHostedPaymentSession,
+  useGetPaymentReadiness,
   useGetTamiPaymentStatus,
   useSetMockPaymentResult,
 } from "@workspace/api-client-react";
@@ -66,7 +69,7 @@ function PaymentShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function PaymentPage() {
+export function TestPaymentPage() {
   const [amount, setAmount] = useState("1000");
   const [currency, setCurrency] = useState<Currency>("TRY");
   const [fullName, setFullName] = useState("");
@@ -429,7 +432,7 @@ export function PaymentResultPage() {
         )}
         <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
           <Link
-            href="/odeme"
+            href="/odeme/test-baslat"
             className="inline-flex items-center justify-center gap-2 bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white"
           >
             Yeni test işlemi
@@ -484,5 +487,262 @@ function Field({
         className="w-full border border-border bg-background px-4 py-3 outline-none transition-colors focus:border-primary"
       />
     </label>
+  );
+}
+
+const currencies = ["TRY", "EUR", "USD"] as const;
+
+export default function InvoicePaymentPage() {
+  const readiness = useGetPaymentReadiness();
+  const [invoiceReference, setInvoiceReference] = useState("");
+  const [amount, setAmount] = useState("");
+  const [currency, setCurrency] = useState<(typeof currencies)[number]>("TRY");
+  const [description, setDescription] = useState("");
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    document.title = "Fatura Ödeme | MMT Global";
+  }, []);
+
+  const checkout = useCreatePaymentCheckout({
+    mutation: {
+      onSuccess: (session) => {
+        window.location.assign(session.checkoutUrl);
+      },
+      onError: (error) => {
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : "Ödeme başlatılamadı. Lütfen daha sonra tekrar deneyin.",
+        );
+      },
+    },
+  });
+
+  const canStartCheckout =
+    readiness.data?.liveEnabled === true &&
+    readiness.data.bankAccountVerified &&
+    readiness.data.providerApproved &&
+    !checkout.isPending;
+
+  const submitPayment = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setMessage("");
+
+    if (!canStartCheckout) {
+      setMessage(
+        "Çevrimiçi tahsilat, şirket hesabı ve lisanslı Sanal POS onayları doğrulanana kadar kapalıdır.",
+      );
+      return;
+    }
+
+    checkout.mutate({
+      data: { invoiceReference, amount, currency, description },
+    });
+  };
+
+  return (
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border/70 bg-background/95">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-12">
+          <Link href="/" className="group flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-br-xl rounded-tl-xl bg-primary text-lg font-bold text-primary-foreground transition-transform group-hover:scale-95">
+              M
+            </span>
+            <span className="text-lg font-semibold tracking-wider">
+              MMT <span className="font-light opacity-80">GLOBAL</span>
+            </span>
+          </Link>
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/65 transition-colors hover:text-primary"
+          >
+            <ArrowLeft size={15} />
+            Ana sayfa
+          </Link>
+        </div>
+      </header>
+
+      <section className="relative overflow-hidden bg-secondary px-6 py-16 text-secondary-foreground md:px-12 md:py-20">
+        <div className="pointer-events-none absolute -right-24 -top-32 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative mx-auto max-w-7xl">
+          <p className="mb-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-secondary-foreground/55">
+            <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+            MMT Global / Kurumsal tahsilat
+          </p>
+          <h1 className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight md:text-7xl">
+            Fatura ödemenizi
+            <span className="block font-serif font-normal italic text-primary">
+              güvenle başlatın.
+            </span>
+          </h1>
+          <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-secondary-foreground/70">
+            Yalnızca MMT Global tarafından düzenlenmiş hizmet faturaları için
+            ödeme bilgilerini kullanın. Tutar ve açıklama faturanızla aynı
+            olmalıdır.
+          </p>
+        </div>
+      </section>
+
+      <section className="px-6 py-12 md:px-12 md:py-20">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+          <form
+            onSubmit={submitPayment}
+            className="space-y-7 border border-border/70 bg-card p-6 md:p-10"
+          >
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
+                Fatura bilgileri
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold">
+                Ödeme tutarını girin
+              </h2>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              <label className="space-y-2 text-sm font-medium">
+                <span>Fatura / hizmet referansı</span>
+                <input
+                  required
+                  maxLength={80}
+                  autoComplete="off"
+                  value={invoiceReference}
+                  onChange={(event) => setInvoiceReference(event.target.value)}
+                  placeholder="Faturanızdaki referans"
+                  className="min-h-12 w-full border border-border bg-background px-4 text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+                />
+              </label>
+
+              <label className="space-y-2 text-sm font-medium">
+                <span>Ödenecek tutar</span>
+                <div className="flex">
+                  <input
+                    required
+                    inputMode="decimal"
+                    pattern="(?=.*[1-9])[0-9]{1,9}(\.[0-9]{1,2})?"
+                    value={amount}
+                    onChange={(event) => setAmount(event.target.value)}
+                    placeholder="0,00"
+                    className="min-h-12 min-w-0 flex-1 border border-r-0 border-border bg-background px-4 text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+                  />
+                  <select
+                    aria-label="Para birimi"
+                    value={currency}
+                    onChange={(event) =>
+                      setCurrency(event.target.value as (typeof currencies)[number])
+                    }
+                    className="min-h-12 border border-border bg-background px-3 text-foreground outline-none focus:border-primary"
+                  >
+                    {currencies.map((item) => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </label>
+            </div>
+
+            <label className="block space-y-2 text-sm font-medium">
+              <span>Ödeme açıklaması</span>
+              <textarea
+                required
+                maxLength={240}
+                rows={3}
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="Faturadaki hizmet veya ürün açıklaması"
+                className="w-full resize-y border border-border bg-background px-4 py-3 text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+              />
+            </label>
+
+            {message && (
+              <div
+                role="alert"
+                className="flex gap-3 border border-destructive/40 bg-destructive/10 p-4 text-sm leading-relaxed text-foreground"
+              >
+                <CircleAlert className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+                <span>{message}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={!canStartCheckout}
+              className="flex min-h-14 w-full items-center justify-center gap-3 bg-primary px-6 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
+            >
+              {checkout.isPending ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <CreditCard className="h-5 w-5" />
+              )}
+              Güvenli ödemeye geç
+            </button>
+            <p className="text-center text-xs leading-relaxed text-foreground/50">
+              Ödeme şu anda kapalıdır. Onay tamamlandığında bu adım sizi
+              sağlayıcının güvenli 3D Secure ödeme sayfasına yönlendirecektir.
+            </p>
+          </form>
+
+          <aside className="space-y-6">
+            <div className="border border-border/70 bg-secondary p-6 text-secondary-foreground md:p-8">
+              <div className="flex items-center gap-3">
+                <ShieldCheck className="h-6 w-6 text-primary" />
+                <h2 className="text-lg font-semibold">Ödeme güvenliği</h2>
+              </div>
+              <ul className="mt-6 space-y-4 text-sm leading-relaxed text-secondary-foreground/70">
+                <li>Kart bilgileri MMT Global sitesinde istenmez veya saklanmaz.</li>
+                <li>
+                  Tahsilat, şirket hesabı ve sağlayıcı onayları doğrulanmadan
+                  başlatılmaz.
+                </li>
+                <li>Ödeme sağlayıcısının 3D Secure ekranı kullanılacaktır.</li>
+              </ul>
+            </div>
+
+            <div
+              role="status"
+              aria-live="polite"
+              className="border border-primary/35 bg-primary/5 p-6 md:p-8"
+            >
+              <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
+                Tahsilat durumu
+              </p>
+              {readiness.isLoading ? (
+                <p className="mt-3 text-sm text-foreground/70">
+                  Ödeme uygunluğu kontrol ediliyor…
+                </p>
+              ) : readiness.isError ? (
+                <p className="mt-3 text-sm leading-relaxed text-foreground/70">
+                  Ödeme uygunluğu doğrulanamadı. Güvenlik nedeniyle çevrimiçi
+                  tahsilat başlatılamıyor.
+                </p>
+              ) : readiness.data?.liveEnabled ? (
+                <p className="mt-3 text-sm leading-relaxed text-foreground/70">
+                  Fatura bilgilerinizi kontrol edin. Devam ettiğinizde
+                  sağlayıcının güvenli ödeme sayfasına yönlendirileceksiniz.
+                </p>
+              ) : (
+                <p className="mt-3 text-sm leading-relaxed text-foreground/70">
+                  Şirket hesabı ve lisanslı Sanal POS için gerekli yazılı
+                  onaylar doğrulanana kadar çevrimiçi tahsilat kapalıdır.
+                </p>
+              )}
+            </div>
+
+            <p className="text-sm leading-relaxed text-foreground/55">
+              Fatura veya ödeme durumunuzla ilgili destek için{" "}
+              <a
+                href="mailto:info@mmtglobal.com"
+                className="font-semibold text-primary underline underline-offset-4"
+              >
+                info@mmtglobal.com
+              </a>{" "}
+              adresine yazın.
+            </p>
+          </aside>
+        </div>
+      </section>
+    </main>
   );
 }

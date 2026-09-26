@@ -98,6 +98,43 @@ export const SetMockPaymentResultResponse = zod.object({
 
 
 /**
+ * @summary Reports whether company payment prerequisites have been verified
+ */
+export const GetPaymentReadinessResponse = zod.object({
+  "bankAccountVerified": zod.boolean(),
+  "providerApproved": zod.boolean(),
+  "liveEnabled": zod.boolean(),
+  "cardDataCollected": zod.boolean()
+})
+
+
+/**
+ * Accepts invoice details only. Card data must never be submitted to or stored
+ * by this API. Until company bank and licensed provider approvals are verified,
+ * the server rejects every checkout request.
+ * @summary Starts a hosted payment checkout when compliance approval is complete
+ */
+export const createPaymentCheckoutBodyInvoiceReferenceMax = 80;
+
+export const createPaymentCheckoutBodyAmountRegExp = new RegExp('^\\d{1,9}(\\.\\d{1,2})?$');
+export const createPaymentCheckoutBodyDescriptionMax = 240;
+
+
+
+export const CreatePaymentCheckoutBody = zod.object({
+  "invoiceReference": zod.string().min(1).max(createPaymentCheckoutBodyInvoiceReferenceMax),
+  "amount": zod.string().regex(createPaymentCheckoutBodyAmountRegExp),
+  "currency": zod.enum(['TRY', 'EUR', 'USD']),
+  "description": zod.string().min(1).max(createPaymentCheckoutBodyDescriptionMax)
+})
+
+export const CreatePaymentCheckoutResponse = zod.object({
+  "checkoutUrl": zod.url().describe('Hosted URL returned by the licensed provider; never a card form hosted by MMT'),
+  "paymentReference": zod.string()
+})
+
+
+/**
  * @summary Başvuru belgesi için kısa süreli imzalı okuma adresi oluşturur
  */
 export const requestObjectDownloadUrlBodyObjectPathRegExp = new RegExp('^/objects/uploads/[a-zA-Z0-9-]+$');

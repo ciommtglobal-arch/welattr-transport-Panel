@@ -6,6 +6,8 @@ const authState = vi.hoisted(() => ({
   userId: null as string | null,
   active: null as number | null,
   documentSaved: false,
+  businessProfileSaved: false,
+  businessProfileOwner: null as string | null,
 }));
 
 const mockTables = vi.hoisted(() => ({
@@ -18,6 +20,7 @@ const mockTables = vi.hoisted(() => ({
   },
   b2bBusinessProfilesTable: {
     verificationDocumentObjectPath: "verification_document_object_path",
+    ownerClerkUserId: "owner_clerk_user_id",
   },
   mediaItemsTable: {
     objectPath: "media_object_path",
@@ -39,10 +42,17 @@ vi.mock("@workspace/db", () => ({
                 ? [{ objectPath }]
                 : []
               : table === mockTables.b2bBusinessProfilesTable
-                ? []
+                ? authState.businessProfileSaved
+                  ? [
+                      {
+                        objectPath,
+                        ownerClerkUserId: authState.businessProfileOwner,
+                      },
+                    ]
+                  : []
                 : table === mockTables.mediaItemsTable
                   ? []
-              : authState.active === 1
+              : table === mockTables.staffUsersTable && authState.active === 1
                 ? [
                     {
                       id: 1,
@@ -92,6 +102,9 @@ describe("secure document download URLs", () => {
     authState.userId = "clerk-user-1";
     authState.active = 1;
     authState.documentSaved = true;
+    authState.businessProfileSaved = false;
+    authState.businessProfileOwner = null;
+    vi.stubEnv("MMT_FOUNDER_REVIEWER_CLERK_USER_ID", "");
     getObjectEntityFile.mockReset();
     fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
@@ -99,6 +112,7 @@ describe("secure document download URLs", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
     vi.useRealTimers();
   });
 
@@ -181,6 +195,65 @@ describe("secure document download URLs", () => {
       method: "GET",
       expires_at: "2026-09-02T12:05:00.000Z",
     });
+  });
+
+  it("allows the allowlisted founder to download their own B2B verification document", async () => {
+    authState.userId = "founder-user";
+    authState.active = null;
+    authState.documentSaved = false;
+    authState.businessProfileSaved = true;
+    authState.businessProfileOwner = "founder-user";
+    vi.stubEnv("MMT_FOUNDER_REVIEWER_CLERK_USER_ID", "founder-user");
+    getObjectEntityFile.mockResolvedValue(existingFile);
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({ signed_url: "https://signed.example/doc" }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      ),
+    );
+
+    const response = await request(app)
+      .post("/storage/objects/request-download-url")
+      .send({ objectPath });
+
+    expect(response.status).toBe(200);
+    expect(response.body.downloadURL).toBe("https://signed.example/doc");
+    expect(getObjectEntityFile).toHaveBeenCalledWith(objectPath);
+  });
+
+  it("denies the allowlisted founder another owner's B2B verification document", async () => {
+    authState.userId = "founder-user";
+    authState.active = null;
+    authState.documentSaved = false;
+    authState.businessProfileSaved = true;
+    authState.businessProfileOwner = "another-founder";
+    vi.stubEnv("MMT_FOUNDER_REVIEWER_CLERK_USER_ID", "founder-user");
+
+    const response = await request(app)
+      .post("/storage/objects/request-download-url")
+      .send({ objectPath });
+
+    expect(response.status).toBe(403);
+    expect(getObjectEntityFile).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("denies the allowlisted founder access to limit application documents", async () => {
+    authState.userId = "founder-user";
+    authState.active = null;
+    authState.documentSaved = true;
+    vi.stubEnv("MMT_FOUNDER_REVIEWER_CLERK_USER_ID", "founder-user");
+
+    const response = await request(app)
+      .post("/storage/objects/request-download-url")
+      .send({ objectPath });
+
+    expect(response.status).toBe(403);
+    expect(getObjectEntityFile).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("rejects invalid object paths before signing", async () => {

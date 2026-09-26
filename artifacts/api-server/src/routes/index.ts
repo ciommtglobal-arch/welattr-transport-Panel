@@ -15,12 +15,13 @@ import staffProfilesRouter from "./staff-profiles";
 import b2bCompanyManagementRouter from "./b2b-company-management";
 import workflowRouter from "./workflow";
 import staffRewardsRouter from "./staff-rewards";
+import paymentsRouter from "./payments";
 
 const router: IRouter = Router();
-
 router.use(healthRouter);
 router.use(limitApplicationsRouter);
 router.use(storageRouter);
+router.use(paymentsRouter);
 router.use(tamiPaymentsRouter);
 router.use(b2bListingsRouter);
 router.use(b2bBusinessProfilesRouter);
@@ -32,7 +33,6 @@ router.use(publicLogisticsRouter);
 router.use(logisticsOperationsRouter);
 router.use(staffProfilesRouter);
 router.use(b2bCompanyManagementRouter);
-  router.use(workflowRouter);
-  router.use(staffRewardsRouter);
-
+router.use(workflowRouter);
+router.use(staffRewardsRouter);
 export default router;

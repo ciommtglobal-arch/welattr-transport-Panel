@@ -46,6 +46,7 @@ async function getAuthenticatedEmails(userId: string) {
   const user = await clerkClient.users.getUser(userId);
   return new Set(
     user.emailAddresses
+      .filter((emailAddress) => emailAddress.verification?.status === "verified")
       .map((emailAddress) => normalizeEmail(emailAddress.emailAddress))
       .filter(Boolean),
   );

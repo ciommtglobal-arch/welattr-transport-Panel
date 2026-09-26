@@ -3,11 +3,11 @@ name: MMT Connect auth callbacks
 description: The authentication flow decision for MMT Connect business onboarding.
 ---
 
-MMT Connect sign-in and sign-up must use the dedicated full-page Clerk routes, not modal auth buttons. Both flows should have an explicit fallback return to the business-profile route after authentication or email verification.
+MMT Connect sign-in and sign-up must use dedicated full-page Clerk routes, not modal auth buttons. Existing-account sign-in returns to the company panel; new-account sign-up returns to business-profile onboarding after email verification. Invitees reach invitation acceptance before membership-gated panel queries.
 
-**Why:** The modal flow did not provide a stable route/callback boundary for the verification completion and could send an existing or newly verified user back to another password screen.
+**Why:** The modal flow did not provide a stable route/callback boundary for verification completion and could send an existing or newly verified user back to another password screen. Sending an existing company member through registration adds an unnecessary step.
 
-**How to apply:** Keep `/sign-in/*?` and `/sign-up/*?` as the canonical Clerk routes, link to them from `/b2b-agi/katil`, and preserve the profile-route fallback when changing auth UI.
+**How to apply:** Keep `/sign-in/*?` and `/sign-up/*?` as canonical Clerk routes, preserve the distinct panel/onboarding fallbacks, and retain invitation tokens through both flows.
 
 The user confirmed this full-page flow works in the preview after email verification.
 

@@ -18,7 +18,7 @@ import {
   ObjectNotFoundError,
   ObjectStorageService,
 } from "../lib/objectStorage";
-import { requireStaff } from "../lib/staffAuth";
+import { requireB2BReviewer, requireStaff } from "../lib/staffAuth";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -80,7 +80,8 @@ async function getReferencedObjectPaths(objectPaths: string[]) {
 }
 
 router.post("/storage/objects/request-download-url", async (req, res) => {
-  if (!(await requireStaff(req, res))) return;
+  const authorization = await requireB2BReviewer(req, res);
+  if (!authorization) return;
 
   const parsed = RequestObjectDownloadUrlBody.safeParse(req.body);
   if (!parsed.success) {
@@ -99,6 +100,7 @@ router.post("/storage/objects/request-download-url", async (req, res) => {
   const [businessProfile] = await db
     .select({
       objectPath: b2bBusinessProfilesTable.verificationDocumentObjectPath,
+      ownerClerkUserId: b2bBusinessProfilesTable.ownerClerkUserId,
     })
     .from(b2bBusinessProfilesTable)
     .where(
@@ -108,6 +110,17 @@ router.post("/storage/objects/request-download-url", async (req, res) => {
       ),
     )
     .limit(1);
+
+  if (
+    authorization.founderReviewer &&
+    businessProfile?.ownerClerkUserId !== authorization.userId
+  ) {
+    res.status(403).json({
+      error:
+        "Kurucu doğrulama yetkisi yalnızca kendi firma doğrulama belgeniz için geçerlidir.",
+    });
+    return;
+  }
 
   if (!document && !businessProfile) {
     res.status(404).json({ error: "Belge bulunamadı." });

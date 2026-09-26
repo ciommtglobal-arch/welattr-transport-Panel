@@ -80,6 +80,44 @@ export interface TamiPaymentStatus {
   errorMessage?: string | null;
 }
 
+export interface PaymentReadiness {
+  bankAccountVerified: boolean;
+  providerApproved: boolean;
+  liveEnabled: boolean;
+  cardDataCollected: boolean;
+}
+
+export type PaymentCheckoutInputCurrency = typeof PaymentCheckoutInputCurrency[keyof typeof PaymentCheckoutInputCurrency];
+
+
+export const PaymentCheckoutInputCurrency = {
+  TRY: 'TRY',
+  EUR: 'EUR',
+  USD: 'USD',
+} as const;
+
+export interface PaymentCheckoutInput {
+  /**
+     * @minLength 1
+     * @maxLength 80
+     */
+  invoiceReference: string;
+  /** @pattern ^\d{1,9}(\.\d{1,2})?$ */
+  amount: string;
+  currency: PaymentCheckoutInputCurrency;
+  /**
+     * @minLength 1
+     * @maxLength 240
+     */
+  description: string;
+}
+
+export interface PaymentCheckoutSession {
+  /** Hosted URL returned by the licensed provider; never a card form hosted by MMT */
+  checkoutUrl: string;
+  paymentReference: string;
+}
+
 export type MockPaymentResultInputStatus = typeof MockPaymentResultInputStatus[keyof typeof MockPaymentResultInputStatus];
 
 

@@ -95,6 +95,9 @@ import type {
   OperationsDesk,
   OrphanUploadCleanupRequest,
   OrphanUploadCleanupResponse,
+  PaymentCheckoutInput,
+  PaymentCheckoutSession,
+  PaymentReadiness,
   PublicLogisticsMedia,
   StaffProfile,
   StaffRewardPlan,
@@ -383,6 +386,166 @@ export const useSetMockPaymentResult = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getSetMockPaymentResultMutationOptions(options));
+    }
+
+export const getGetPaymentReadinessUrl = () => {
+
+
+
+
+  return `/api/payments/readiness`
+}
+
+/**
+ * @summary Reports whether company payment prerequisites have been verified
+ */
+export const getPaymentReadiness = async ( options?: Parameters<typeof customFetch>[1]): Promise<PaymentReadiness> => {
+
+  return customFetch<PaymentReadiness>(getGetPaymentReadinessUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPaymentReadinessQueryKey = () => {
+    return [
+    `/api/payments/readiness`
+    ] as const;
+    }
+
+
+export const getGetPaymentReadinessQueryOptions = <TData = Awaited<ReturnType<typeof getPaymentReadiness>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPaymentReadiness>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPaymentReadinessQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPaymentReadiness>>> = ({ signal }) => getPaymentReadiness({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPaymentReadiness>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPaymentReadinessQueryResult = NonNullable<Awaited<ReturnType<typeof getPaymentReadiness>>>
+export type GetPaymentReadinessQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Reports whether company payment prerequisites have been verified
+ */
+
+export function useGetPaymentReadiness<TData = Awaited<ReturnType<typeof getPaymentReadiness>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPaymentReadiness>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPaymentReadinessQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreatePaymentCheckoutUrl = () => {
+
+
+
+
+  return `/api/payments/checkout`
+}
+
+/**
+ * Accepts invoice details only. Card data must never be submitted to or stored
+ * by this API. Until company bank and licensed provider approvals are verified,
+ * the server rejects every checkout request.
+ * @summary Starts a hosted payment checkout when compliance approval is complete
+ */
+export const createPaymentCheckout = async (paymentCheckoutInput: PaymentCheckoutInput, options?: Parameters<typeof customFetch>[1]): Promise<PaymentCheckoutSession> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<PaymentCheckoutSession>(getCreatePaymentCheckoutUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(paymentCheckoutInput)
+  }
+);}
+
+
+
+
+
+export const getCreatePaymentCheckoutMutationKey = () => ['createPaymentCheckout'] as const;
+
+export const getCreatePaymentCheckoutMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPaymentCheckout>>, TError,CreatePaymentCheckoutMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createPaymentCheckout>>, TError,CreatePaymentCheckoutMutationVariables, TContext> => {
+
+const mutationKey = getCreatePaymentCheckoutMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPaymentCheckout>>, CreatePaymentCheckoutMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createPaymentCheckout(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreatePaymentCheckoutMutationResult = NonNullable<Awaited<ReturnType<typeof createPaymentCheckout>>>
+    export type CreatePaymentCheckoutMutationBody = BodyType<PaymentCheckoutInput>
+    export type CreatePaymentCheckoutMutationError = ErrorType<ErrorEnvelope>
+    export type CreatePaymentCheckoutMutationVariables = {data: BodyType<PaymentCheckoutInput>}
+
+    /**
+ * @summary Starts a hosted payment checkout when compliance approval is complete
+ */
+export const useCreatePaymentCheckout = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPaymentCheckout>>, TError,CreatePaymentCheckoutMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createPaymentCheckout>>,
+        TError,
+        CreatePaymentCheckoutMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreatePaymentCheckoutMutationOptions(options));
     }
 
 export const getRequestObjectDownloadUrlUrl = () => {

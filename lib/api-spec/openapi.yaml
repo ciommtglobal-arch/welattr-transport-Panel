@@ -149,6 +149,52 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /payments/readiness:
+    get:
+      operationId: getPaymentReadiness
+      tags: [payments]
+      summary: Reports whether company payment prerequisites have been verified
+      responses:
+        "200":
+          description: Payment readiness; live payments remain disabled until verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentReadiness"
+  /payments/checkout:
+    post:
+      operationId: createPaymentCheckout
+      tags: [payments]
+      summary: Starts a hosted payment checkout when compliance approval is complete
+      description: |
+        Accepts invoice details only. Card data must never be submitted to or stored
+        by this API. Until company bank and licensed provider approvals are verified,
+        the server rejects every checkout request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentCheckoutInput"
+      responses:
+        "201":
+          description: Hosted checkout created by the approved payment provider
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentCheckoutSession"
+        "400":
+          description: Invalid invoice payment details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: Company bank or payment provider approval is incomplete
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
   /storage/objects/request-download-url:
     post:
       tags: [Storage]
@@ -2690,6 +2736,53 @@ components:
     PaymentMode:
       type: string
       enum: [mock, tami]
+    PaymentReadiness:
+      type: object
+      additionalProperties: false
+      required:
+        - bankAccountVerified
+        - providerApproved
+        - liveEnabled
+        - cardDataCollected
+      properties:
+        bankAccountVerified:
+          type: boolean
+        providerApproved:
+          type: boolean
+        liveEnabled:
+          type: boolean
+        cardDataCollected:
+          type: boolean
+    PaymentCheckoutInput:
+      type: object
+      additionalProperties: false
+      required: [invoiceReference, amount, currency, description]
+      properties:
+        invoiceReference:
+          type: string
+          minLength: 1
+          maxLength: 80
+        amount:
+          type: string
+          pattern: '^\d{1,9}(\.\d{1,2})?$'
+        currency:
+          type: string
+          enum: [TRY, EUR, USD]
+        description:
+          type: string
+          minLength: 1
+          maxLength: 240
+    PaymentCheckoutSession:
+      type: object
+      additionalProperties: false
+      required: [checkoutUrl, paymentReference]
+      properties:
+        checkoutUrl:
+          type: string
+          format: uri
+          description: Hosted URL returned by the licensed provider; never a card form hosted by MMT
+        paymentReference:
+          type: string
     MockPaymentResultInput:
       type: object
       additionalProperties: false
