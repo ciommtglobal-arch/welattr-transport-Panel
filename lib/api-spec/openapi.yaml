@@ -15,7 +15,7 @@ tags:
   - name: Storage
     description: Özel başvuru belgeleri için güvenli depolama işlemleri
   - name: payments
-    description: Test ve Tami hosted ödeme işlemleri
+    description: Şimdilik yalnızca test ödeme akışı; canlı sağlayıcı kodu devre dışı
   - name: b2b-listings
     description: Moderated free B2B listing operations
   - name: b2b-businesses
@@ -33,9 +33,9 @@ paths:
       tags: [payments]
       summary: Kart bilgilerini MMT sistemine almadan ödeme oturumu oluşturur
       description: |
-        PAYMENT_MODE=mock olduğunda gerçek tahsilat yapmadan test ödeme sayfası
-        üretir. Canlı sağlayıcı modunda kart numarası ve güvenlik kodu bu API'ye
-        gönderilmez; müşteri sağlayıcının hosted ödeme sayfasına yönlendirilir.
+        Canlı tahsilat kapalıdır; ortam ayarından bağımsız olarak gerçek ödeme
+        almadan test ödeme sayfası üretir. Kart numarası ve güvenlik kodu bu API'ye
+        gönderilmez. Canlıya geçiş ayrıca onaylanmalıdır.
       requestBody:
         required: true
         content:

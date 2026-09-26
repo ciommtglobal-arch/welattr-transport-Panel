@@ -40,6 +40,7 @@ MMT Global; lojistik, uluslararası ticaret, finansal başvurular, inşaat ürü
 - New staff must not receive management access on signup. Evaluate their work and practical test first, then assign narrowly scoped area permissions in stages; a design preview must not change existing accounts or roles.
 - Every operational workflow must have an owner, reference ID, status, next action, risk/exception state and approval boundary.
 - Financial website flows are pre-application and pre-assessment flows; they must never promise guaranteed credit, funding or approval.
+- Sanal POS remains mock-only until the owner explicitly approves live merchant onboarding. Never interpret a simulated successful payment as real collection or fulfillment.
 - WhatsApp and Telegram are coordination channels, not systems of record; credentials, bank access, payment card data, verification codes and sensitive personal documents must not be shared there.
 
 ## Product

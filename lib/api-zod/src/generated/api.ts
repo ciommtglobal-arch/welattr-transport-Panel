@@ -9,9 +9,9 @@ import * as zod from 'zod';
 
 
 /**
- * PAYMENT_MODE=mock olduğunda gerçek tahsilat yapmadan test ödeme sayfası
- * üretir. Canlı sağlayıcı modunda kart numarası ve güvenlik kodu bu API'ye
- * gönderilmez; müşteri sağlayıcının hosted ödeme sayfasına yönlendirilir.
+ * Canlı tahsilat kapalıdır; ortam ayarından bağımsız olarak gerçek ödeme
+ * almadan test ödeme sayfası üretir. Kart numarası ve güvenlik kodu bu API'ye
+ * gönderilmez. Canlıya geçiş ayrıca onaylanmalıdır.
  * @summary Kart bilgilerini MMT sistemine almadan ödeme oturumu oluşturur
  */
 export const createTamiHostedPaymentSessionBodyAmountMax = 10000000;

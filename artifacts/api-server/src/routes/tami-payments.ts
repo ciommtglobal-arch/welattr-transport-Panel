@@ -11,8 +11,10 @@ const router: IRouter = Router();
 
 type PaymentMode = "mock" | "tami";
 
-function getPaymentMode(): PaymentMode {
-  return process.env.PAYMENT_MODE?.trim().toLowerCase() === "tami" ? "tami" : "mock";
+export function getPaymentMode(): PaymentMode {
+  // Live collection remains disabled until merchant onboarding is explicitly approved.
+  // Do not let an old deployment variable silently turn real payments back on.
+  return "mock";
 }
 
 function getTamiEnvironment() {

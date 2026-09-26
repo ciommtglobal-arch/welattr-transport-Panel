@@ -113,6 +113,10 @@ export default function PaymentPage() {
             hizmet tahsilatları içindir. Ücretsiz B2B ağımızdaki temel tanıtım ve
             bağlantı hizmetleri için ödeme gerekmez.
           </p>
+          <p className="mt-6 max-w-2xl border-l-2 border-primary bg-primary/10 px-4 py-3 text-sm font-semibold leading-relaxed">
+            TEST MODU: Bu sayfa yalnızca ödeme akışını simüle eder. Gerçek kart bilgisi
+            istenmez ve gerçek tahsilat yapılmaz.
+          </p>
         </div>
       </section>
 
@@ -213,7 +217,7 @@ export default function PaymentPage() {
               </>
             ) : (
               <>
-                Ödeme sayfasını aç
+                Test ödeme akışını aç
                 <ArrowRight size={16} />
               </>
             )}
@@ -381,6 +385,7 @@ export function PaymentResultPage() {
   });
   const status = statusQuery.data?.status ?? (callbackResult === "failed" ? "failed" : "pending");
   const isSuccess = status === "success";
+  const isMock = statusQuery.data?.providerOrderStatus === "MOCK";
 
   return (
     <PaymentShell>
@@ -398,11 +403,13 @@ export function PaymentResultPage() {
           Ödeme sonucu
         </p>
         <h1 className="mt-3 text-4xl font-semibold md:text-6xl">
-          {isSuccess ? "Ödeme doğrulandı." : status === "failed" ? "Ödeme tamamlanamadı." : "Ödeme durumu kontrol ediliyor."}
+          {isMock && isSuccess ? "Test başarılı simüle edildi." : isMock && status === "failed" ? "Test başarısız simüle edildi." : isSuccess ? "Ödeme doğrulandı." : status === "failed" ? "Ödeme tamamlanamadı." : "Ödeme durumu kontrol ediliyor."}
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-foreground/65">
           {statusQuery.isError
             ? getApiErrorMessage(statusQuery.error)
+            : isMock
+              ? "Bu işlem yalnızca bir testtir. Gerçek kart kullanılmadı ve tahsilat yapılmadı."
             : isSuccess
               ? "İşleminiz ödeme sağlayıcısı tarafından başarılı olarak bildirildi."
               : "İşlem sonucu henüz kesinleşmediyse bu sayfa birkaç saniye içinde yeniden kontrol edilir."}
@@ -425,7 +432,7 @@ export function PaymentResultPage() {
             href="/odeme"
             className="inline-flex items-center justify-center gap-2 bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white"
           >
-            Yeni ödeme
+            Yeni test işlemi
             <ArrowRight size={16} />
           </Link>
           <Link
