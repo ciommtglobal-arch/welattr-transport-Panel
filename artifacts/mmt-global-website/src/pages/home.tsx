@@ -511,6 +511,7 @@ export default function Home() {
               icon={<Building2 className="w-8 h-8" />}
                title={copy.construction}
                desc={copy.approachDescription}
+               href="/insaat-magaza"
             />
             <EcosystemCard 
               icon={<Tv className="w-8 h-8" />}
@@ -686,7 +687,7 @@ export default function Home() {
               <ul className="space-y-4 text-sm text-foreground/60">
                   <li><Link href="/birimler/lojistik" className="hover:text-primary transition-colors">{copy.logistics}</Link></li>
                  <li><span className="hover:text-primary transition-colors cursor-pointer">{copy.healthTourism}</span></li>
-                 <li><span className="hover:text-primary transition-colors cursor-pointer">{copy.construction}</span></li>
+                 <li><Link href="/insaat-magaza" className="hover:text-primary transition-colors" data-testid="link-footer-construction">{copy.construction}</Link></li>
                 <li>
                    <Link href="/birimler" className="hover:text-primary transition-colors">
                      {copy.financeMedia}

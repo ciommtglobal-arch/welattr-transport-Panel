@@ -6,8 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ConstructionCatalogCollectionsItem = {
-  id: string;
-  title: string;
-  handle: string;
+export type GetConstructionCatalogParams = {
+after?: string;
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+first?: number;
 };

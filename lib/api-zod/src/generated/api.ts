@@ -692,6 +692,16 @@ export const RequestMediaUploadUrlResponse = zod.object({
 /**
  * @summary Shopify inşaat ürünleri kataloğunu okur
  */
+export const getConstructionCatalogQueryFirstDefault = 20;
+export const getConstructionCatalogQueryFirstMax = 50;
+
+
+
+export const GetConstructionCatalogQueryParams = zod.object({
+  "after": zod.coerce.string().optional(),
+  "first": zod.coerce.number().int().min(1).max(getConstructionCatalogQueryFirstMax).default(getConstructionCatalogQueryFirstDefault)
+})
+
 export const GetConstructionCatalogResponse = zod.object({
   "connected": zod.boolean(),
   "shopName": zod.string(),
@@ -712,15 +722,326 @@ export const GetConstructionCatalogResponse = zod.object({
   "id": zod.string(),
   "title": zod.string(),
   "price": zod.string(),
-  "inventoryQuantity": zod.int().nullable()
-}))
+  "currency": zod.string(),
+  "inventoryQuantity": zod.int().nullable(),
+  "availableForSale": zod.boolean(),
+  "quoteRequired": zod.boolean()
 })),
   "collections": zod.array(zod.object({
   "id": zod.string(),
   "title": zod.string(),
   "handle": zod.string()
+})),
+  "quoteRequired": zod.boolean()
+})),
+  "collections": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "handle": zod.string()
+})),
+  "pageInfo": zod.object({
+  "hasNextPage": zod.boolean(),
+  "endCursor": zod.string().nullable()
+})
+})
+
+
+export const GetConstructionProductParams = zod.object({
+  "handle": zod.coerce.string()
+})
+
+export const GetConstructionProductResponse = zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "handle": zod.string(),
+  "description": zod.string(),
+  "category": zod.string(),
+  "vendor": zod.string(),
+  "imageUrl": zod.string().nullable(),
+  "imageAlt": zod.string().nullable(),
+  "price": zod.string().nullable(),
+  "currency": zod.string().nullable(),
+  "inventory": zod.int().nullable(),
+  "variants": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "price": zod.string(),
+  "currency": zod.string(),
+  "inventoryQuantity": zod.int().nullable(),
+  "availableForSale": zod.boolean(),
+  "quoteRequired": zod.boolean()
+})),
+  "collections": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "handle": zod.string()
+})),
+  "quoteRequired": zod.boolean()
+})
+
+
+export const createConstructionCartBodyQuantityMax = 1000;
+
+
+
+export const CreateConstructionCartBody = zod.object({
+  "variantId": zod.string(),
+  "quantity": zod.int().min(1).max(createConstructionCartBodyQuantityMax)
+})
+
+export const CreateConstructionCartResponse = zod.object({
+  "id": zod.string(),
+  "totalAmount": zod.string(),
+  "currency": zod.string(),
+  "lines": zod.array(zod.object({
+  "id": zod.string(),
+  "variantId": zod.string(),
+  "quantity": zod.int(),
+  "title": zod.string(),
+  "price": zod.string(),
+  "currency": zod.string()
 }))
 })
+
+
+export const GetConstructionCartParams = zod.object({
+  "cartId": zod.coerce.string()
+})
+
+export const GetConstructionCartResponse = zod.object({
+  "id": zod.string(),
+  "totalAmount": zod.string(),
+  "currency": zod.string(),
+  "lines": zod.array(zod.object({
+  "id": zod.string(),
+  "variantId": zod.string(),
+  "quantity": zod.int(),
+  "title": zod.string(),
+  "price": zod.string(),
+  "currency": zod.string()
+}))
+})
+
+
+export const AddConstructionCartLineParams = zod.object({
+  "cartId": zod.coerce.string()
+})
+
+export const addConstructionCartLineBodyQuantityMax = 1000;
+
+
+
+export const AddConstructionCartLineBody = zod.object({
+  "variantId": zod.string(),
+  "quantity": zod.int().min(1).max(addConstructionCartLineBodyQuantityMax)
+})
+
+export const AddConstructionCartLineResponse = zod.object({
+  "id": zod.string(),
+  "totalAmount": zod.string(),
+  "currency": zod.string(),
+  "lines": zod.array(zod.object({
+  "id": zod.string(),
+  "variantId": zod.string(),
+  "quantity": zod.int(),
+  "title": zod.string(),
+  "price": zod.string(),
+  "currency": zod.string()
+}))
+})
+
+
+export const UpdateConstructionCartLineParams = zod.object({
+  "cartId": zod.coerce.string()
+})
+
+export const updateConstructionCartLineBodyQuantityMax = 1000;
+
+
+
+export const UpdateConstructionCartLineBody = zod.object({
+  "lineId": zod.string(),
+  "quantity": zod.int().min(1).max(updateConstructionCartLineBodyQuantityMax)
+})
+
+export const UpdateConstructionCartLineResponse = zod.object({
+  "id": zod.string(),
+  "totalAmount": zod.string(),
+  "currency": zod.string(),
+  "lines": zod.array(zod.object({
+  "id": zod.string(),
+  "variantId": zod.string(),
+  "quantity": zod.int(),
+  "title": zod.string(),
+  "price": zod.string(),
+  "currency": zod.string()
+}))
+})
+
+
+export const RemoveConstructionCartLineParams = zod.object({
+  "cartId": zod.coerce.string()
+})
+
+export const RemoveConstructionCartLineBody = zod.object({
+  "lineId": zod.string()
+})
+
+export const RemoveConstructionCartLineResponse = zod.object({
+  "id": zod.string(),
+  "totalAmount": zod.string(),
+  "currency": zod.string(),
+  "lines": zod.array(zod.object({
+  "id": zod.string(),
+  "variantId": zod.string(),
+  "quantity": zod.int(),
+  "title": zod.string(),
+  "price": zod.string(),
+  "currency": zod.string()
+}))
+})
+
+
+/**
+ * Fails closed by default. A server operator must independently verify
+ * merchant Shopify test gateway activation or live payment/shipping readiness,
+ * then attest the connected shop domain and mode in server configuration.
+ * Configuration alone does not activate a Shopify test gateway.
+ * The server revalidates every cart line and only then requests the Shopify
+ * hosted checkout URL; no card details are processed here.
+ */
+export const CheckoutConstructionCartParams = zod.object({
+  "cartId": zod.coerce.string()
+})
+
+export const CheckoutConstructionCartResponse = zod.object({
+  "checkoutUrl": zod.url()
+})
+
+
+/**
+ * Public submission; response does not echo contact details.
+ */
+
+export const createConstructionQuoteBodyDimensionsMax = 500;
+
+export const createConstructionQuoteBodyDeliveryLocationMax = 500;
+
+export const createConstructionQuoteBodyContactNameMax = 200;
+
+export const createConstructionQuoteBodyContactPhoneMin = 5;
+export const createConstructionQuoteBodyContactPhoneMax = 60;
+
+export const createConstructionQuoteBodyNotesMax = 2000;
+
+export const createConstructionQuoteBodyWebsiteMax = 200;
+
+
+
+export const CreateConstructionQuoteBody = zod.object({
+  "quantity": zod.int().min(1),
+  "dimensions": zod.string().min(1).max(createConstructionQuoteBodyDimensionsMax),
+  "deliveryLocation": zod.string().min(1).max(createConstructionQuoteBodyDeliveryLocationMax),
+  "contactName": zod.string().min(1).max(createConstructionQuoteBodyContactNameMax),
+  "contactEmail": zod.email(),
+  "contactPhone": zod.string().min(createConstructionQuoteBodyContactPhoneMin).max(createConstructionQuoteBodyContactPhoneMax),
+  "productId": zod.string().optional(),
+  "variantId": zod.string().optional(),
+  "notes": zod.string().max(createConstructionQuoteBodyNotesMax).optional(),
+  "website": zod.string().max(createConstructionQuoteBodyWebsiteMax).optional().describe('Leave blank; spam honeypot.')
+})
+
+export const CreateConstructionQuoteResponse = zod.object({
+  "id": zod.int(),
+  "reference": zod.string(),
+  "status": zod.enum(['new', 'reviewing', 'quoted', 'closed']),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * Staff only
+ */
+
+export const listConstructionQuotesResponseOneDimensionsMax = 500;
+
+export const listConstructionQuotesResponseOneDeliveryLocationMax = 500;
+
+export const listConstructionQuotesResponseOneContactNameMax = 200;
+
+export const listConstructionQuotesResponseOneContactPhoneMin = 5;
+export const listConstructionQuotesResponseOneContactPhoneMax = 60;
+
+export const listConstructionQuotesResponseOneNotesMax = 2000;
+
+export const listConstructionQuotesResponseOneWebsiteMax = 200;
+
+
+
+export const ListConstructionQuotesResponseItem = zod.object({
+  "quantity": zod.int().min(1),
+  "dimensions": zod.string().min(1).max(listConstructionQuotesResponseOneDimensionsMax),
+  "deliveryLocation": zod.string().min(1).max(listConstructionQuotesResponseOneDeliveryLocationMax),
+  "contactName": zod.string().min(1).max(listConstructionQuotesResponseOneContactNameMax),
+  "contactEmail": zod.email(),
+  "contactPhone": zod.string().min(listConstructionQuotesResponseOneContactPhoneMin).max(listConstructionQuotesResponseOneContactPhoneMax),
+  "productId": zod.string().optional(),
+  "variantId": zod.string().optional(),
+  "notes": zod.string().max(listConstructionQuotesResponseOneNotesMax).optional(),
+  "website": zod.string().max(listConstructionQuotesResponseOneWebsiteMax).optional().describe('Leave blank; spam honeypot.')
+}).and(zod.object({
+  "id": zod.int(),
+  "reference": zod.string(),
+  "status": zod.enum(['new', 'reviewing', 'quoted', 'closed']),
+  "createdAt": zod.coerce.date()
+}))
+export const ListConstructionQuotesResponse = zod.array(ListConstructionQuotesResponseItem)
+
+
+/**
+ * Staff only
+ */
+export const UpdateConstructionQuoteStatusParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UpdateConstructionQuoteStatusBody = zod.object({
+  "status": zod.enum(['new', 'reviewing', 'quoted', 'closed'])
+})
+
+
+export const updateConstructionQuoteStatusResponseOneDimensionsMax = 500;
+
+export const updateConstructionQuoteStatusResponseOneDeliveryLocationMax = 500;
+
+export const updateConstructionQuoteStatusResponseOneContactNameMax = 200;
+
+export const updateConstructionQuoteStatusResponseOneContactPhoneMin = 5;
+export const updateConstructionQuoteStatusResponseOneContactPhoneMax = 60;
+
+export const updateConstructionQuoteStatusResponseOneNotesMax = 2000;
+
+export const updateConstructionQuoteStatusResponseOneWebsiteMax = 200;
+
+
+
+export const UpdateConstructionQuoteStatusResponse = zod.object({
+  "quantity": zod.int().min(1),
+  "dimensions": zod.string().min(1).max(updateConstructionQuoteStatusResponseOneDimensionsMax),
+  "deliveryLocation": zod.string().min(1).max(updateConstructionQuoteStatusResponseOneDeliveryLocationMax),
+  "contactName": zod.string().min(1).max(updateConstructionQuoteStatusResponseOneContactNameMax),
+  "contactEmail": zod.email(),
+  "contactPhone": zod.string().min(updateConstructionQuoteStatusResponseOneContactPhoneMin).max(updateConstructionQuoteStatusResponseOneContactPhoneMax),
+  "productId": zod.string().optional(),
+  "variantId": zod.string().optional(),
+  "notes": zod.string().max(updateConstructionQuoteStatusResponseOneNotesMax).optional(),
+  "website": zod.string().max(updateConstructionQuoteStatusResponseOneWebsiteMax).optional().describe('Leave blank; spam honeypot.')
+}).and(zod.object({
+  "id": zod.int(),
+  "reference": zod.string(),
+  "status": zod.enum(['new', 'reviewing', 'quoted', 'closed']),
+  "createdAt": zod.coerce.date()
+}))
 
 
 /**

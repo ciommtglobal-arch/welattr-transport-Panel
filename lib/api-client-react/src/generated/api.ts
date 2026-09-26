@@ -51,7 +51,17 @@ import type {
   B2BRequestInput,
   B2BRequestPage,
   B2BRequestStatusUpdate,
+  ConstructionCart,
+  ConstructionCartLineInput,
+  ConstructionCartLineRemove,
+  ConstructionCartLineUpdate,
   ConstructionCatalog,
+  ConstructionCatalogProduct,
+  ConstructionCheckout,
+  ConstructionQuote,
+  ConstructionQuoteInput,
+  ConstructionQuoteReference,
+  ConstructionQuoteStatusUpdate,
   ErrorEnvelope,
   ErrorResponse,
   GetB2BBusinessProfileReviewQueueParams,
@@ -60,6 +70,7 @@ import type {
   GetB2BReportReviewQueueParams,
   GetB2BRequestReviewQueueParams,
   GetB2BRequestsParams,
+  GetConstructionCatalogParams,
   GetLimitApplicationsParams,
   GetLogisticsOperationsParams,
   GetMediaItemsParams,
@@ -1656,20 +1667,27 @@ export const useRequestMediaUploadUrl = <TError = ErrorType<ErrorEnvelope>,
       return useMutation(getRequestMediaUploadUrlMutationOptions(options));
     }
 
-export const getGetConstructionCatalogUrl = () => {
+export const getGetConstructionCatalogUrl = (params?: GetConstructionCatalogParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/storefront/construction/catalog`
+  return stringifiedParams.length > 0 ? `/api/storefront/construction/catalog?${stringifiedParams}` : `/api/storefront/construction/catalog`
 }
 
 /**
  * @summary Shopify inşaat ürünleri kataloğunu okur
  */
-export const getConstructionCatalog = async ( options?: Parameters<typeof customFetch>[1]): Promise<ConstructionCatalog> => {
+export const getConstructionCatalog = async (params?: GetConstructionCatalogParams, options?: Parameters<typeof customFetch>[1]): Promise<ConstructionCatalog> => {
 
-  return customFetch<ConstructionCatalog>(getGetConstructionCatalogUrl(),
+  return customFetch<ConstructionCatalog>(getGetConstructionCatalogUrl(params),
   {
     ...options,
     method: 'GET'
@@ -1682,23 +1700,23 @@ export const getConstructionCatalog = async ( options?: Parameters<typeof custom
 
 
 
-export const getGetConstructionCatalogQueryKey = () => {
+export const getGetConstructionCatalogQueryKey = (params?: GetConstructionCatalogParams,) => {
     return [
-    `/api/storefront/construction/catalog`
+    `/api/storefront/construction/catalog`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetConstructionCatalogQueryOptions = <TData = Awaited<ReturnType<typeof getConstructionCatalog>>, TError = ErrorType<ErrorEnvelope>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConstructionCatalog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetConstructionCatalogQueryOptions = <TData = Awaited<ReturnType<typeof getConstructionCatalog>>, TError = ErrorType<ErrorEnvelope>>(params?: GetConstructionCatalogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConstructionCatalog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetConstructionCatalogQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetConstructionCatalogQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getConstructionCatalog>>> = ({ signal }) => getConstructionCatalog({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getConstructionCatalog>>> = ({ signal }) => getConstructionCatalog(params, { signal, ...requestOptions });
 
 
 
@@ -1716,11 +1734,11 @@ export type GetConstructionCatalogQueryError = ErrorType<ErrorEnvelope>
  */
 
 export function useGetConstructionCatalog<TData = Awaited<ReturnType<typeof getConstructionCatalog>>, TError = ErrorType<ErrorEnvelope>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConstructionCatalog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: GetConstructionCatalogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConstructionCatalog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetConstructionCatalogQueryOptions(options)
+  const queryOptions = getGetConstructionCatalogQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -1732,6 +1750,752 @@ export function useGetConstructionCatalog<TData = Awaited<ReturnType<typeof getC
 
 
 
+
+export const getGetConstructionProductUrl = (handle: string,) => {
+
+
+
+
+  return `/api/storefront/construction/products/${handle}`
+}
+
+export const getConstructionProduct = async (handle: string, options?: Parameters<typeof customFetch>[1]): Promise<ConstructionCatalogProduct> => {
+
+  return customFetch<ConstructionCatalogProduct>(getGetConstructionProductUrl(handle),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetConstructionProductQueryKey = (handle: string,) => {
+    return [
+    `/api/storefront/construction/products/${handle}`
+    ] as const;
+    }
+
+
+export const getGetConstructionProductQueryOptions = <TData = Awaited<ReturnType<typeof getConstructionProduct>>, TError = ErrorType<void>>(handle: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConstructionProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetConstructionProductQueryKey(handle);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getConstructionProduct>>> = ({ signal }) => getConstructionProduct(handle, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: handle !== null && handle !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getConstructionProduct>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetConstructionProductQueryResult = NonNullable<Awaited<ReturnType<typeof getConstructionProduct>>>
+export type GetConstructionProductQueryError = ErrorType<void>
+
+
+
+export function useGetConstructionProduct<TData = Awaited<ReturnType<typeof getConstructionProduct>>, TError = ErrorType<void>>(
+ handle: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConstructionProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetConstructionProductQueryOptions(handle,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateConstructionCartUrl = () => {
+
+
+
+
+  return `/api/storefront/construction/cart`
+}
+
+export const createConstructionCart = async (constructionCartLineInput: ConstructionCartLineInput, options?: Parameters<typeof customFetch>[1]): Promise<ConstructionCart> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<ConstructionCart>(getCreateConstructionCartUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(constructionCartLineInput)
+  }
+);}
+
+
+
+
+
+export const getCreateConstructionCartMutationKey = () => ['createConstructionCart'] as const;
+
+export const getCreateConstructionCartMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createConstructionCart>>, TError,CreateConstructionCartMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createConstructionCart>>, TError,CreateConstructionCartMutationVariables, TContext> => {
+
+const mutationKey = getCreateConstructionCartMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createConstructionCart>>, CreateConstructionCartMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createConstructionCart(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateConstructionCartMutationResult = NonNullable<Awaited<ReturnType<typeof createConstructionCart>>>
+    export type CreateConstructionCartMutationBody = BodyType<ConstructionCartLineInput>
+    export type CreateConstructionCartMutationError = ErrorType<void>
+    export type CreateConstructionCartMutationVariables = {data: BodyType<ConstructionCartLineInput>}
+
+    export const useCreateConstructionCart = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createConstructionCart>>, TError,CreateConstructionCartMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createConstructionCart>>,
+        TError,
+        CreateConstructionCartMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateConstructionCartMutationOptions(options));
+    }
+
+export const getGetConstructionCartUrl = (cartId: string,) => {
+
+
+
+
+  return `/api/storefront/construction/cart/${cartId}`
+}
+
+export const getConstructionCart = async (cartId: string, options?: Parameters<typeof customFetch>[1]): Promise<ConstructionCart> => {
+
+  return customFetch<ConstructionCart>(getGetConstructionCartUrl(cartId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetConstructionCartQueryKey = (cartId: string,) => {
+    return [
+    `/api/storefront/construction/cart/${cartId}`
+    ] as const;
+    }
+
+
+export const getGetConstructionCartQueryOptions = <TData = Awaited<ReturnType<typeof getConstructionCart>>, TError = ErrorType<void>>(cartId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConstructionCart>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetConstructionCartQueryKey(cartId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getConstructionCart>>> = ({ signal }) => getConstructionCart(cartId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: cartId !== null && cartId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getConstructionCart>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetConstructionCartQueryResult = NonNullable<Awaited<ReturnType<typeof getConstructionCart>>>
+export type GetConstructionCartQueryError = ErrorType<void>
+
+
+
+export function useGetConstructionCart<TData = Awaited<ReturnType<typeof getConstructionCart>>, TError = ErrorType<void>>(
+ cartId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConstructionCart>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetConstructionCartQueryOptions(cartId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getAddConstructionCartLineUrl = (cartId: string,) => {
+
+
+
+
+  return `/api/storefront/construction/cart/${cartId}/lines`
+}
+
+export const addConstructionCartLine = async (cartId: string,
+    constructionCartLineInput: ConstructionCartLineInput, options?: Parameters<typeof customFetch>[1]): Promise<ConstructionCart> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<ConstructionCart>(getAddConstructionCartLineUrl(cartId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(constructionCartLineInput)
+  }
+);}
+
+
+
+
+
+export const getAddConstructionCartLineMutationKey = () => ['addConstructionCartLine'] as const;
+
+export const getAddConstructionCartLineMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addConstructionCartLine>>, TError,AddConstructionCartLineMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addConstructionCartLine>>, TError,AddConstructionCartLineMutationVariables, TContext> => {
+
+const mutationKey = getAddConstructionCartLineMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addConstructionCartLine>>, AddConstructionCartLineMutationVariables> = (props) => {
+          const {cartId,data} = props ?? {};
+
+          return  addConstructionCartLine(cartId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddConstructionCartLineMutationResult = NonNullable<Awaited<ReturnType<typeof addConstructionCartLine>>>
+    export type AddConstructionCartLineMutationBody = BodyType<ConstructionCartLineInput>
+    export type AddConstructionCartLineMutationError = ErrorType<unknown>
+    export type AddConstructionCartLineMutationVariables = {cartId: string;data: BodyType<ConstructionCartLineInput>}
+
+    export const useAddConstructionCartLine = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addConstructionCartLine>>, TError,AddConstructionCartLineMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addConstructionCartLine>>,
+        TError,
+        AddConstructionCartLineMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddConstructionCartLineMutationOptions(options));
+    }
+
+export const getUpdateConstructionCartLineUrl = (cartId: string,) => {
+
+
+
+
+  return `/api/storefront/construction/cart/${cartId}/lines`
+}
+
+export const updateConstructionCartLine = async (cartId: string,
+    constructionCartLineUpdate: ConstructionCartLineUpdate, options?: Parameters<typeof customFetch>[1]): Promise<ConstructionCart> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<ConstructionCart>(getUpdateConstructionCartLineUrl(cartId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(constructionCartLineUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateConstructionCartLineMutationKey = () => ['updateConstructionCartLine'] as const;
+
+export const getUpdateConstructionCartLineMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateConstructionCartLine>>, TError,UpdateConstructionCartLineMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateConstructionCartLine>>, TError,UpdateConstructionCartLineMutationVariables, TContext> => {
+
+const mutationKey = getUpdateConstructionCartLineMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateConstructionCartLine>>, UpdateConstructionCartLineMutationVariables> = (props) => {
+          const {cartId,data} = props ?? {};
+
+          return  updateConstructionCartLine(cartId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateConstructionCartLineMutationResult = NonNullable<Awaited<ReturnType<typeof updateConstructionCartLine>>>
+    export type UpdateConstructionCartLineMutationBody = BodyType<ConstructionCartLineUpdate>
+    export type UpdateConstructionCartLineMutationError = ErrorType<unknown>
+    export type UpdateConstructionCartLineMutationVariables = {cartId: string;data: BodyType<ConstructionCartLineUpdate>}
+
+    export const useUpdateConstructionCartLine = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateConstructionCartLine>>, TError,UpdateConstructionCartLineMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateConstructionCartLine>>,
+        TError,
+        UpdateConstructionCartLineMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateConstructionCartLineMutationOptions(options));
+    }
+
+export const getRemoveConstructionCartLineUrl = (cartId: string,) => {
+
+
+
+
+  return `/api/storefront/construction/cart/${cartId}/lines`
+}
+
+export const removeConstructionCartLine = async (cartId: string,
+    constructionCartLineRemove: ConstructionCartLineRemove, options?: Parameters<typeof customFetch>[1]): Promise<ConstructionCart> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<ConstructionCart>(getRemoveConstructionCartLineUrl(cartId),
+  {
+    ...options,
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(constructionCartLineRemove)
+  }
+);}
+
+
+
+
+
+export const getRemoveConstructionCartLineMutationKey = () => ['removeConstructionCartLine'] as const;
+
+export const getRemoveConstructionCartLineMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeConstructionCartLine>>, TError,RemoveConstructionCartLineMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeConstructionCartLine>>, TError,RemoveConstructionCartLineMutationVariables, TContext> => {
+
+const mutationKey = getRemoveConstructionCartLineMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeConstructionCartLine>>, RemoveConstructionCartLineMutationVariables> = (props) => {
+          const {cartId,data} = props ?? {};
+
+          return  removeConstructionCartLine(cartId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveConstructionCartLineMutationResult = NonNullable<Awaited<ReturnType<typeof removeConstructionCartLine>>>
+    export type RemoveConstructionCartLineMutationBody = BodyType<ConstructionCartLineRemove>
+    export type RemoveConstructionCartLineMutationError = ErrorType<unknown>
+    export type RemoveConstructionCartLineMutationVariables = {cartId: string;data: BodyType<ConstructionCartLineRemove>}
+
+    export const useRemoveConstructionCartLine = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeConstructionCartLine>>, TError,RemoveConstructionCartLineMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof removeConstructionCartLine>>,
+        TError,
+        RemoveConstructionCartLineMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRemoveConstructionCartLineMutationOptions(options));
+    }
+
+export const getCheckoutConstructionCartUrl = (cartId: string,) => {
+
+
+
+
+  return `/api/storefront/construction/cart/${cartId}/checkout`
+}
+
+/**
+ * Fails closed by default. A server operator must independently verify
+ * merchant Shopify test gateway activation or live payment/shipping readiness,
+ * then attest the connected shop domain and mode in server configuration.
+ * Configuration alone does not activate a Shopify test gateway.
+ * The server revalidates every cart line and only then requests the Shopify
+ * hosted checkout URL; no card details are processed here.
+ */
+export const checkoutConstructionCart = async (cartId: string, options?: Parameters<typeof customFetch>[1]): Promise<ConstructionCheckout> => {
+
+  return customFetch<ConstructionCheckout>(getCheckoutConstructionCartUrl(cartId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCheckoutConstructionCartMutationKey = () => ['checkoutConstructionCart'] as const;
+
+export const getCheckoutConstructionCartMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof checkoutConstructionCart>>, TError,CheckoutConstructionCartMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof checkoutConstructionCart>>, TError,CheckoutConstructionCartMutationVariables, TContext> => {
+
+const mutationKey = getCheckoutConstructionCartMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof checkoutConstructionCart>>, CheckoutConstructionCartMutationVariables> = (props) => {
+          const {cartId} = props ?? {};
+
+          return  checkoutConstructionCart(cartId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CheckoutConstructionCartMutationResult = NonNullable<Awaited<ReturnType<typeof checkoutConstructionCart>>>
+
+    export type CheckoutConstructionCartMutationError = ErrorType<ErrorEnvelope>
+    export type CheckoutConstructionCartMutationVariables = {cartId: string}
+
+    export const useCheckoutConstructionCart = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof checkoutConstructionCart>>, TError,CheckoutConstructionCartMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof checkoutConstructionCart>>,
+        TError,
+        CheckoutConstructionCartMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCheckoutConstructionCartMutationOptions(options));
+    }
+
+export const getCreateConstructionQuoteUrl = () => {
+
+
+
+
+  return `/api/storefront/construction/quotes`
+}
+
+/**
+ * Public submission; response does not echo contact details.
+ */
+export const createConstructionQuote = async (constructionQuoteInput: ConstructionQuoteInput, options?: Parameters<typeof customFetch>[1]): Promise<ConstructionQuoteReference> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<ConstructionQuoteReference>(getCreateConstructionQuoteUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(constructionQuoteInput)
+  }
+);}
+
+
+
+
+
+export const getCreateConstructionQuoteMutationKey = () => ['createConstructionQuote'] as const;
+
+export const getCreateConstructionQuoteMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createConstructionQuote>>, TError,CreateConstructionQuoteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createConstructionQuote>>, TError,CreateConstructionQuoteMutationVariables, TContext> => {
+
+const mutationKey = getCreateConstructionQuoteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createConstructionQuote>>, CreateConstructionQuoteMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createConstructionQuote(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateConstructionQuoteMutationResult = NonNullable<Awaited<ReturnType<typeof createConstructionQuote>>>
+    export type CreateConstructionQuoteMutationBody = BodyType<ConstructionQuoteInput>
+    export type CreateConstructionQuoteMutationError = ErrorType<void>
+    export type CreateConstructionQuoteMutationVariables = {data: BodyType<ConstructionQuoteInput>}
+
+    export const useCreateConstructionQuote = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createConstructionQuote>>, TError,CreateConstructionQuoteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createConstructionQuote>>,
+        TError,
+        CreateConstructionQuoteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateConstructionQuoteMutationOptions(options));
+    }
+
+export const getListConstructionQuotesUrl = () => {
+
+
+
+
+  return `/api/storefront/construction/quotes/staff`
+}
+
+/**
+ * Staff only
+ */
+export const listConstructionQuotes = async ( options?: Parameters<typeof customFetch>[1]): Promise<ConstructionQuote[]> => {
+
+  return customFetch<ConstructionQuote[]>(getListConstructionQuotesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListConstructionQuotesQueryKey = () => {
+    return [
+    `/api/storefront/construction/quotes/staff`
+    ] as const;
+    }
+
+
+export const getListConstructionQuotesQueryOptions = <TData = Awaited<ReturnType<typeof listConstructionQuotes>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listConstructionQuotes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListConstructionQuotesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listConstructionQuotes>>> = ({ signal }) => listConstructionQuotes({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listConstructionQuotes>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListConstructionQuotesQueryResult = NonNullable<Awaited<ReturnType<typeof listConstructionQuotes>>>
+export type ListConstructionQuotesQueryError = ErrorType<unknown>
+
+
+
+export function useListConstructionQuotes<TData = Awaited<ReturnType<typeof listConstructionQuotes>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listConstructionQuotes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListConstructionQuotesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateConstructionQuoteStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/storefront/construction/quotes/staff/${id}/status`
+}
+
+/**
+ * Staff only
+ */
+export const updateConstructionQuoteStatus = async (id: number,
+    constructionQuoteStatusUpdate: ConstructionQuoteStatusUpdate, options?: Parameters<typeof customFetch>[1]): Promise<ConstructionQuote> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<ConstructionQuote>(getUpdateConstructionQuoteStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(constructionQuoteStatusUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateConstructionQuoteStatusMutationKey = () => ['updateConstructionQuoteStatus'] as const;
+
+export const getUpdateConstructionQuoteStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateConstructionQuoteStatus>>, TError,UpdateConstructionQuoteStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateConstructionQuoteStatus>>, TError,UpdateConstructionQuoteStatusMutationVariables, TContext> => {
+
+const mutationKey = getUpdateConstructionQuoteStatusMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateConstructionQuoteStatus>>, UpdateConstructionQuoteStatusMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateConstructionQuoteStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateConstructionQuoteStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateConstructionQuoteStatus>>>
+    export type UpdateConstructionQuoteStatusMutationBody = BodyType<ConstructionQuoteStatusUpdate>
+    export type UpdateConstructionQuoteStatusMutationError = ErrorType<unknown>
+    export type UpdateConstructionQuoteStatusMutationVariables = {id: number;data: BodyType<ConstructionQuoteStatusUpdate>}
+
+    export const useUpdateConstructionQuoteStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateConstructionQuoteStatus>>, TError,UpdateConstructionQuoteStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateConstructionQuoteStatus>>,
+        TError,
+        UpdateConstructionQuoteStatusMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateConstructionQuoteStatusMutationOptions(options));
+    }
 
 export const getGetPublicLogisticsMediaUrl = () => {
 

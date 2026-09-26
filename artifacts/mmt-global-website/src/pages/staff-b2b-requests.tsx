@@ -77,6 +77,7 @@ function Header() {
           <Link href="/staff/b2b-dogrulamalar" className="staff-link">Doğrulamalar</Link>
           <Link href="/staff/ilanlar" className="staff-link">İlanlar</Link>
           <Link href="/staff/b2b-sikayetler" className="staff-link">Şikâyetler</Link>
+          <Link href="/staff/insaat-teklifleri" className="staff-link">İnşaat teklifleri</Link>
           <UserButton />
         </nav>
       </div>

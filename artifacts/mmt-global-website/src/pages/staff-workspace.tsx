@@ -80,6 +80,7 @@ export function FounderDashboard() {
             <Link href="/staff/yonetim-paneli" aria-current="page">Genel bakış</Link>
             <Link href="/staff/b2b-dogrulamalar">Firma doğrulaması</Link>
             <Link href="/staff/medya-merkezi">Medya Merkezi</Link>
+            <Link href="/staff/insaat-teklifleri">İnşaat teklifleri</Link>
           </nav>
           <UserButton />
         </header>

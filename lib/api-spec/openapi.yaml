@@ -26,6 +26,8 @@ tags:
     description: Lojistik talep, taşıyıcı ve operasyon yönetimi
   - name: staff-profiles
     description: Giriş yapmış personel için iç ekip profil taslakları
+  - name: storefront
+    description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
   /payments/tami/hosted-session:
     post:
@@ -697,6 +699,13 @@ paths:
       operationId: getConstructionCatalog
       tags: [storefront]
       summary: Shopify inşaat ürünleri kataloğunu okur
+      parameters:
+        - in: query
+          name: after
+          schema: { type: string }
+        - in: query
+          name: first
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
       responses:
         "200":
           description: Bağlı Shopify kataloğu
@@ -710,6 +719,184 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+  /storefront/construction/products/{handle}:
+    get:
+      operationId: getConstructionProduct
+      tags: [storefront]
+      parameters:
+        - in: path
+          name: handle
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Shopify product
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConstructionCatalogProduct" }
+        "404":
+          description: Product not found
+  /storefront/construction/cart:
+    post:
+      operationId: createConstructionCart
+      tags: [storefront]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ConstructionCartLineInput" }
+      responses:
+        "201":
+          description: Shopify cart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConstructionCart" }
+        "400":
+          description: Invalid or unavailable item
+  /storefront/construction/cart/{cartId}:
+    parameters:
+      - in: path
+        name: cartId
+        required: true
+        schema: { type: string }
+    get:
+      operationId: getConstructionCart
+      tags: [storefront]
+      responses:
+        "200":
+          description: Shopify cart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConstructionCart" }
+        "404":
+          description: Cart not found
+  /storefront/construction/cart/{cartId}/lines:
+    parameters:
+      - in: path
+        name: cartId
+        required: true
+        schema: { type: string }
+    post:
+      operationId: addConstructionCartLine
+      tags: [storefront]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ConstructionCartLineInput" }
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConstructionCart" }
+    patch:
+      operationId: updateConstructionCartLine
+      tags: [storefront]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ConstructionCartLineUpdate" }
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConstructionCart" }
+    delete:
+      operationId: removeConstructionCartLine
+      tags: [storefront]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ConstructionCartLineRemove" }
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConstructionCart" }
+  /storefront/construction/cart/{cartId}/checkout:
+    post:
+      operationId: checkoutConstructionCart
+      tags: [storefront]
+      description: |
+        Fails closed by default. A server operator must independently verify
+        merchant Shopify test gateway activation or live payment/shipping readiness,
+        then attest the connected shop domain and mode in server configuration.
+        Configuration alone does not activate a Shopify test gateway.
+        The server revalidates every cart line and only then requests the Shopify
+        hosted checkout URL; no card details are processed here.
+      parameters:
+        - in: path
+          name: cartId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Verified Shopify hosted checkout
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConstructionCheckout" }
+        "503":
+          description: Merchant checkout readiness not verified
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+  /storefront/construction/quotes:
+    post:
+      operationId: createConstructionQuote
+      tags: [storefront]
+      description: Public submission; response does not echo contact details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ConstructionQuoteInput" }
+      responses:
+        "201":
+          description: Quote reference
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConstructionQuoteReference" }
+        "429":
+          description: Too many submissions
+  /storefront/construction/quotes/staff:
+    get:
+      operationId: listConstructionQuotes
+      tags: [storefront]
+      description: Staff only
+      responses:
+        "200":
+          description: Submitted quotes
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ConstructionQuote" }
+  /storefront/construction/quotes/staff/{id}/status:
+    patch:
+      operationId: updateConstructionQuoteStatus
+      tags: [storefront]
+      description: Staff only
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ConstructionQuoteStatusUpdate" }
+      responses:
+        "200":
+          description: Updated quote
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConstructionQuote" }
   /public/logistics/media:
     get:
       operationId: getPublicLogisticsMedia
@@ -3646,7 +3833,7 @@ components:
           format: date-time
     ConstructionCatalogProductVariant:
       type: object
-      required: [id, title, price, inventoryQuantity]
+      required: [id, title, price, currency, inventoryQuantity, availableForSale, quoteRequired]
       properties:
         id:
           type: string
@@ -3654,8 +3841,14 @@ components:
           type: string
         price:
           type: string
+        currency:
+          type: string
         inventoryQuantity:
           type: [integer, "null"]
+        availableForSale:
+          type: boolean
+        quoteRequired:
+          type: boolean
     ConstructionCatalogProduct:
       type: object
       required:
@@ -3671,6 +3864,8 @@ components:
         - currency
         - inventory
         - variants
+        - collections
+        - quoteRequired
       properties:
         id:
           type: string
@@ -3698,9 +3893,15 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ConstructionCatalogProductVariant"
+        collections:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConstructionCollection"
+        quoteRequired:
+          type: boolean
     ConstructionCatalog:
       type: object
-      required: [connected, shopName, fetchedAt, products, collections]
+      required: [connected, shopName, fetchedAt, products, collections, pageInfo]
       properties:
         connected:
           type: boolean
@@ -3716,15 +3917,106 @@ components:
         collections:
           type: array
           items:
+            $ref: "#/components/schemas/ConstructionCollection"
+        pageInfo:
+          $ref: "#/components/schemas/ConstructionPageInfo"
+    ConstructionCollection:
+      type: object
+      required: [id, title, handle]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        handle: { type: string }
+    ConstructionPageInfo:
+      type: object
+      required: [hasNextPage, endCursor]
+      properties:
+        hasNextPage: { type: boolean }
+        endCursor: { type: [string, "null"] }
+    ConstructionCartLineInput:
+      type: object
+      required: [variantId, quantity]
+      properties:
+        variantId: { type: string }
+        quantity: { type: integer, minimum: 1, maximum: 1000 }
+    ConstructionCartLineUpdate:
+      type: object
+      required: [lineId, quantity]
+      properties:
+        lineId: { type: string }
+        quantity: { type: integer, minimum: 1, maximum: 1000 }
+    ConstructionCartLineRemove:
+      type: object
+      required: [lineId]
+      properties:
+        lineId: { type: string }
+    ConstructionCart:
+      type: object
+      required: [id, lines, totalAmount, currency]
+      properties:
+        id: { type: string }
+        totalAmount: { type: string }
+        currency: { type: string }
+        lines:
+          type: array
+          items:
             type: object
-            required: [id, title, handle]
+            required: [id, variantId, quantity, title, price, currency]
             properties:
-              id:
-                type: string
-              title:
-                type: string
-              handle:
-                type: string
+              id: { type: string }
+              variantId: { type: string }
+              quantity: { type: integer }
+              title: { type: string }
+              price: { type: string }
+              currency: { type: string }
+    ConstructionCheckout:
+      type: object
+      required: [checkoutUrl]
+      properties:
+        checkoutUrl: { type: string, format: uri }
+    ConstructionQuoteStatus:
+      type: string
+      enum: [new, reviewing, quoted, closed]
+    ConstructionQuoteStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status: { $ref: "#/components/schemas/ConstructionQuoteStatus" }
+    ConstructionQuoteInput:
+      type: object
+      required: [quantity, dimensions, deliveryLocation, contactName, contactEmail, contactPhone]
+      properties:
+        quantity: { type: integer, minimum: 1 }
+        dimensions: { type: string, minLength: 1, maxLength: 500 }
+        deliveryLocation: { type: string, minLength: 1, maxLength: 500 }
+        contactName: { type: string, minLength: 1, maxLength: 200 }
+        contactEmail: { type: string, format: email }
+        contactPhone: { type: string, minLength: 5, maxLength: 60 }
+        productId: { type: string }
+        variantId: { type: string }
+        notes: { type: string, maxLength: 2000 }
+        website:
+          type: string
+          description: Leave blank; spam honeypot.
+          maxLength: 200
+    ConstructionQuoteReference:
+      type: object
+      required: [id, reference, status, createdAt]
+      properties:
+        id: { type: integer }
+        reference: { type: string }
+        status: { $ref: "#/components/schemas/ConstructionQuoteStatus" }
+        createdAt: { type: string, format: date-time }
+    ConstructionQuote:
+      allOf:
+        - $ref: "#/components/schemas/ConstructionQuoteInput"
+        - type: object
+          required: [id, reference, status, createdAt]
+          properties:
+            id: { type: integer }
+            reference: { type: string }
+            status: { $ref: "#/components/schemas/ConstructionQuoteStatus" }
+            createdAt: { type: string, format: date-time }
     PublicLogisticsMedia:
       type: object
       required:

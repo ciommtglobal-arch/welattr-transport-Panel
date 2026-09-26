@@ -10,6 +10,9 @@ export interface ConstructionCatalogProductVariant {
   id: string;
   title: string;
   price: string;
+  currency: string;
   /** @nullable */
   inventoryQuantity: number | null;
+  availableForSale: boolean;
+  quoteRequired: boolean;
 }

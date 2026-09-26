@@ -53,7 +53,7 @@ const copy: Record<Locale, Copy> = {
       { title: "Uluslararası Ticaret ve B2B", text: "Üretici, alıcı ve iş ortakları için dijital B2B ağı mevcuttur. Her ilan ve bağlantı kendi inceleme sürecine tabidir.", status: "Dijital araç", ready: true, href: "/b2b-agi", link: "B2B ağını görüntüle" },
       { title: "Finansman Danışmanlığı", text: "İşletmeler için seçenek ve yönlendirme çalışması; doğrulanmış bir danışmanlık hizmeti olarak sunulmamaktadır.", status: "Hazırlık", ready: false },
       { title: "Sağlık Turizmi", text: "Sınır ötesi sağlık hizmetleri için olası uzmanlık ve iş birliği zemini; hizmet faaliyeti doğrulanmamıştır.", status: "Hazırlık", ready: false },
-      { title: "İnşaat ve Gelişim", text: "Proje, ürün ve uygulama ortaklıkları için gelişen çalışma alanı. Kapsam ve kullanılabilirlik ayrıca belirtilir.", status: "Hazırlık", ready: false },
+      { title: "İnşaat ve Gelişim", text: "Mezopotamya Build: MMT Global tarafından işletilen bağımsız inşaat malzemesi mağazası. Yetkili distribütörlük iddiası yoktur; ödeme doğrulama tamamlanana kadar kapalıdır.", status: "Mağaza / teklif", ready: true, href: "/insaat-magaza", link: "Mezopotamya Build mağazası" },
       { title: "Medya ve Tanıtım", text: "Kurumsal içerik ve medya araçları mevcuttur; onaylanmış bir duyuru veya yayınlanabilir pilot kaydı bulunmuyor.", status: "Dijital araç", ready: true, href: "/staff/yonlendir", link: "Çalışma alanı girişi" },
     ],
     regions: [
@@ -95,7 +95,7 @@ const copy: Record<Locale, Copy> = {
       { title: "International Trade and B2B", text: "A digital B2B network for producers, buyers and partners is available. Listings and connections are subject to their own review.", status: "Digital tools", ready: true, href: "/b2b-agi", link: "View B2B network" },
       { title: "Finance Advisory", text: "Options and referral work for businesses; this is not presented as a verified advisory service.", status: "In preparation", ready: false },
       { title: "Health Tourism", text: "A potential basis for expertise and cross-border healthcare partnerships; service operations are not verified.", status: "In preparation", ready: false },
-      { title: "Construction and Development", text: "An evolving area for project, product and implementation partnerships. Scope and availability are stated separately.", status: "In preparation", ready: false },
+      { title: "Construction and Development", text: "Mezopotamya Build: an independent construction materials store operated by MMT Global. No authorized distributor claim; checkout stays closed until verification.", status: "Store / quotes", ready: true, href: "/insaat-magaza", link: "Open Mezopotamya Build" },
       { title: "Media and Promotion", text: "Corporate content and media tools are available; there is no approved announcement or publishable pilot record.", status: "Digital tools", ready: true, href: "/staff/yonlendir", link: "Enter workspace" },
     ],
     regions: [
@@ -137,7 +137,7 @@ const copy: Record<Locale, Copy> = {
       { title: "التجارة الدولية وB2B", text: "تتوفر شبكة رقمية للمنتجين والمشترين والشركاء. وتخضع الإعلانات والاتصالات للمراجعة.", status: "أدوات رقمية", ready: true, href: "/b2b-agi", link: "عرض شبكة B2B" },
       { title: "استشارات التمويل", text: "عمل على الخيارات والإحالات للشركات؛ ولا يُعرض كخدمة استشارية مؤكدة.", status: "قيد الإعداد", ready: false },
       { title: "السياحة الصحية", text: "إطار محتمل للخبرات والشراكات الصحية العابرة للحدود؛ لم يتم تأكيد تشغيل الخدمات.", status: "قيد الإعداد", ready: false },
-      { title: "الإنشاء والتطوير", text: "مجال متطور لشراكات المشاريع والمنتجات والتنفيذ. يُوضح النطاق والتوفر على حدة.", status: "قيد الإعداد", ready: false },
+      { title: "الإنشاء والتطوير", text: "Mezopotamya Build: متجر مستقل لمواد البناء تديره MMT Global. لا ندّعي توزيعاً معتمداً؛ الدفع مغلق حتى اكتمال التحقق.", status: "متجر / عروض أسعار", ready: true, href: "/insaat-magaza", link: "فتح Mezopotamya Build" },
       { title: "الإعلام والترويج", text: "تتوفر أدوات للمحتوى المؤسسي والإعلام؛ ولا توجد إعلانات معتمدة أو سجلات تجارب قابلة للنشر.", status: "أدوات رقمية", ready: true, href: "/staff/yonlendir", link: "دخول مساحة العمل" },
     ],
     regions: [
@@ -179,7 +179,7 @@ const copy: Record<Locale, Copy> = {
       { title: "Международная торговля и B2B", text: "Доступна цифровая B2B-сеть для производителей, покупателей и партнёров. Объявления и контакты проходят отдельную проверку.", status: "Цифровые инструменты", ready: true, href: "/b2b-agi", link: "Открыть B2B-сеть" },
       { title: "Финансовый консалтинг", text: "Подготовка вариантов и направлений для бизнеса; это не заявляется как подтверждённая консультационная услуга.", status: "Подготовка", ready: false },
       { title: "Медицинский туризм", text: "Возможная основа для экспертизы и международного сотрудничества в здравоохранении; работа услуг не подтверждена.", status: "Подготовка", ready: false },
-      { title: "Строительство и развитие", text: "Развивающееся направление для партнёрства в проектах, продуктах и реализации. Объём и доступность указываются отдельно.", status: "Подготовка", ready: false },
+      { title: "Строительство и развитие", text: "Mezopotamya Build: независимый магазин стройматериалов под управлением MMT Global. Без заявлений об официальной дистрибуции; оплата закрыта до проверки.", status: "Магазин / расчёт", ready: true, href: "/insaat-magaza", link: "Открыть Mezopotamya Build" },
       { title: "Медиа и продвижение", text: "Доступны инструменты корпоративного контента и медиа; утверждённых объявлений и готовых к публикации пилотных записей нет.", status: "Цифровые инструменты", ready: true, href: "/staff/yonlendir", link: "Войти в рабочее пространство" },
     ],
     regions: [

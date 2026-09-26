@@ -5,13 +5,15 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { ConstructionCatalogCollectionsItem } from './constructionCatalogCollectionsItem';
 import type { ConstructionCatalogProduct } from './constructionCatalogProduct';
+import type { ConstructionCollection } from './constructionCollection';
+import type { ConstructionPageInfo } from './constructionPageInfo';
 
 export interface ConstructionCatalog {
   connected: boolean;
   shopName: string;
   fetchedAt: Date;
   products: ConstructionCatalogProduct[];
-  collections: ConstructionCatalogCollectionsItem[];
+  collections: ConstructionCollection[];
+  pageInfo: ConstructionPageInfo;
 }

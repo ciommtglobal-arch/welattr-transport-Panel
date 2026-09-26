@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ConstructionCatalogProductVariant } from './constructionCatalogProductVariant';
+import type { ConstructionCollection } from './constructionCollection';
 
 export interface ConstructionCatalogProduct {
   id: string;
@@ -25,4 +26,6 @@ export interface ConstructionCatalogProduct {
   /** @nullable */
   inventory: number | null;
   variants: ConstructionCatalogProductVariant[];
+  collections: ConstructionCollection[];
+  quoteRequired: boolean;
 }

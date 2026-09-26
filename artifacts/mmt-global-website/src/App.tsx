@@ -22,6 +22,8 @@ import StaffB2BVerifications from '@/pages/staff-b2b-verifications';
 import StaffB2BReports from '@/pages/staff-b2b-reports';
 import DemoWallet from '@/pages/demo-wallet';
 import ConstructionStorePage from '@/pages/construction-store';
+import { ConstructionProductPage, ConstructionCartPage, ConstructionQuotePage } from '@/pages/construction-shop';
+import StaffConstructionQuotes from '@/pages/staff-construction-quotes';
 import PaymentPage, {
   MockPaymentPage,
   PaymentResultPage,
@@ -246,6 +248,9 @@ function Router() {
         <Route path="/limit/konut" component={HousingLimit} />
         <Route path="/limit/tasit" component={VehicleLimit} />
         <Route path="/insaat-magaza" component={ConstructionStorePage} />
+        <Route path="/insaat-magaza/sepet" component={ConstructionCartPage} />
+        <Route path="/insaat-magaza/teklif" component={ConstructionQuotePage} />
+        <Route path="/insaat-magaza/urun/:handle" component={ConstructionProductPage} />
         <Route path="/cuzdan-demo" component={DemoWallet} />
         <Route path="/b2b-agi" component={FreeB2BNetworkPage} />
         <Route path="/b2b-agi/katil" component={B2BJoinPage} />
@@ -276,6 +281,7 @@ function Router() {
         <Route path="/staff/b2b-dogrulamalar" component={StaffB2BVerifications} />
         <Route path="/staff/b2b-sikayetler" component={StaffB2BReports} />
         <Route path="/staff/b2b-talepler" component={StaffB2BRequests} />
+        <Route path="/staff/insaat-teklifleri" component={StaffConstructionQuotes} />
         <Route path="/staff/sorumluluk-merkezi" component={StaffResponsibilityCenter} />
         <Route path="/staff/yonlendir" component={StaffWorkspaceRedirect} />
         <Route path="/staff/yonetim-paneli" component={FounderDashboard} />
@@ -368,6 +374,7 @@ function ClerkApp() {
     normalizedLocation === '/staff/b2b-dogrulamalar' ||
     normalizedLocation === '/staff/b2b-sikayetler' ||
     normalizedLocation === '/staff/b2b-talepler' ||
+    normalizedLocation === '/staff/insaat-teklifleri' ||
     normalizedLocation === '/staff/sorumluluk-merkezi' ||
     normalizedLocation === '/staff/yonlendir' ||
     normalizedLocation === '/staff/yonetim-paneli' ||

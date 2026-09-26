@@ -839,8 +839,17 @@ export interface ConstructionCatalogProductVariant {
   id: string;
   title: string;
   price: string;
+  currency: string;
   /** @nullable */
   inventoryQuantity: number | null;
+  availableForSale: boolean;
+  quoteRequired: boolean;
+}
+
+export interface ConstructionCollection {
+  id: string;
+  title: string;
+  handle: string;
 }
 
 export interface ConstructionCatalogProduct {
@@ -861,21 +870,129 @@ export interface ConstructionCatalogProduct {
   /** @nullable */
   inventory: number | null;
   variants: ConstructionCatalogProductVariant[];
+  collections: ConstructionCollection[];
+  quoteRequired: boolean;
 }
 
-export type ConstructionCatalogCollectionsItem = {
-  id: string;
-  title: string;
-  handle: string;
-};
+export interface ConstructionPageInfo {
+  hasNextPage: boolean;
+  /** @nullable */
+  endCursor: string | null;
+}
 
 export interface ConstructionCatalog {
   connected: boolean;
   shopName: string;
   fetchedAt: string;
   products: ConstructionCatalogProduct[];
-  collections: ConstructionCatalogCollectionsItem[];
+  collections: ConstructionCollection[];
+  pageInfo: ConstructionPageInfo;
 }
+
+export interface ConstructionCartLineInput {
+  variantId: string;
+  /**
+     * @minimum 1
+     * @maximum 1000
+     */
+  quantity: number;
+}
+
+export interface ConstructionCartLineUpdate {
+  lineId: string;
+  /**
+     * @minimum 1
+     * @maximum 1000
+     */
+  quantity: number;
+}
+
+export interface ConstructionCartLineRemove {
+  lineId: string;
+}
+
+export type ConstructionCartLinesItem = {
+  id: string;
+  variantId: string;
+  quantity: number;
+  title: string;
+  price: string;
+  currency: string;
+};
+
+export interface ConstructionCart {
+  id: string;
+  totalAmount: string;
+  currency: string;
+  lines: ConstructionCartLinesItem[];
+}
+
+export interface ConstructionCheckout {
+  checkoutUrl: string;
+}
+
+export type ConstructionQuoteStatus = typeof ConstructionQuoteStatus[keyof typeof ConstructionQuoteStatus];
+
+
+export const ConstructionQuoteStatus = {
+  new: 'new',
+  reviewing: 'reviewing',
+  quoted: 'quoted',
+  closed: 'closed',
+} as const;
+
+export interface ConstructionQuoteStatusUpdate {
+  status: ConstructionQuoteStatus;
+}
+
+export interface ConstructionQuoteInput {
+  /** @minimum 1 */
+  quantity: number;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  dimensions: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  deliveryLocation: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  contactName: string;
+  contactEmail: string;
+  /**
+     * @minLength 5
+     * @maxLength 60
+     */
+  contactPhone: string;
+  productId?: string;
+  variantId?: string;
+  /** @maxLength 2000 */
+  notes?: string;
+  /**
+     * Leave blank; spam honeypot.
+     * @maxLength 200
+     */
+  website?: string;
+}
+
+export interface ConstructionQuoteReference {
+  id: number;
+  reference: string;
+  status: ConstructionQuoteStatus;
+  createdAt: string;
+}
+
+export type ConstructionQuote = ConstructionQuoteInput & {
+  id: number;
+  reference: string;
+  status: ConstructionQuoteStatus;
+  createdAt: string;
+};
 
 export interface PublicLogisticsMedia {
   id: number;
@@ -2074,6 +2191,15 @@ page?: number;
  * @maximum 50
  */
 pageSize?: number;
+};
+
+export type GetConstructionCatalogParams = {
+after?: string;
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+first?: number;
 };
 
 export type GetLogisticsOperationsParams = {
