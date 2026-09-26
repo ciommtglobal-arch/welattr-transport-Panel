@@ -13,7 +13,9 @@ const screens: { id: Screen; label: string }[] = [
 ];
 
 export function MobileReview() {
-  const [screen, setScreen] = useState<Screen>("expert");
+  const requestedScreen = new URLSearchParams(window.location.search).get("screen");
+  const initialScreen = screens.find(({ id }) => id === requestedScreen)?.id ?? "expert";
+  const [screen, setScreen] = useState<Screen>(initialScreen);
 
   return (
     <div className="mmt-review">

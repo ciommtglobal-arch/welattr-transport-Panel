@@ -1,4 +1,4 @@
-import { type ComponentProps, type ReactNode } from 'react';
+import { useState, type ComponentProps, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ClerkProvider, SignIn, SignUp, useAuth } from '@clerk/react';
 import { arSA, enUS, ruRU, trTR } from '@clerk/localizations';
@@ -302,18 +302,74 @@ function App() {
   return (
     <I18nProvider>
       <WouterRouter base={basePath}>
-        <LanguageSelector />
-        <ClerkApp />
-        {import.meta.env.DEV && (
-          <a
-            href={`${window.location.origin}/__mockup/preview/mmt-corporate/MobileReview`}
-            className="fixed bottom-4 left-4 z-[100] max-w-[calc(100vw-2rem)] border border-orange-400 bg-[#0b1728] px-4 py-3 text-center text-sm font-bold text-white shadow-xl"
-          >
-            Mobil tasarım önizlemesini aç · Yalnız geliştirmede
-          </a>
-        )}
+        <DevPreviewGateway />
       </WouterRouter>
     </I18nProvider>
+  );
+}
+
+function DevPreviewGateway() {
+  const [location] = useLocation();
+  const [showExistingSite, setShowExistingSite] = useState(false);
+  const previewPath = `${window.location.origin}/__mockup/preview/mmt-corporate/MobileReview`;
+
+  if (import.meta.env.DEV && location === '/' && !showExistingSite) {
+    return (
+      <main className="flex min-h-dvh flex-col justify-center bg-[#0b1728] px-6 py-12 text-[#f4f1ea]">
+        <div className="mx-auto w-full max-w-xl">
+          <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-orange-400">
+            MMT Global · Geliştirme önizlemesi
+          </p>
+          <h1 className="mb-4 text-3xl font-bold leading-tight">
+            Yeni tasarımları inceleyin
+          </h1>
+          <p className="mb-8 text-base leading-relaxed text-slate-300">
+            Bunlar mevcut yönetim paneli değil. Bir ekran seçin; telefonunuzda
+            açıp kaydırabilir ve üstteki sekmelerle diğer tasarımlara geçebilirsiniz.
+          </p>
+          <div className="grid gap-3">
+            {[
+              ['Kurumsal ana sayfa', 'home'],
+              ['Yeni kurucu paneli', 'founder'],
+              ['Yeni uzman paneli', 'expert'],
+            ].map(([label, screen]) => (
+              <a
+                key={screen}
+                href={`${previewPath}?screen=${screen}`}
+                className="flex min-h-14 items-center justify-between border border-orange-400 bg-orange-600 px-5 py-3 font-bold text-white"
+              >
+                {label} <span aria-hidden="true">→</span>
+              </a>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowExistingSite(true)}
+            className="mt-8 min-h-12 text-left text-sm text-slate-300 underline underline-offset-4"
+          >
+            Mevcut siteyi ayrıca aç
+          </button>
+          <p className="mt-5 text-xs leading-relaxed text-slate-400">
+            Yalnızca tasarım önizlemesi. Gerçek hesaplar ve yetkiler değişmedi.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <>
+      <LanguageSelector />
+      <ClerkApp />
+      {import.meta.env.DEV && (
+        <a
+          href={previewPath}
+          className="fixed bottom-4 left-4 z-[100] max-w-[calc(100vw-2rem)] border border-orange-400 bg-[#0b1728] px-4 py-3 text-center text-sm font-bold text-white shadow-xl"
+        >
+          Yeni tasarım önizlemesini aç
+        </a>
+      )}
+    </>
   );
 }
 
