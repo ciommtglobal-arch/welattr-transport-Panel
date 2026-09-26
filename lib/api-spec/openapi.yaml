@@ -26,9 +26,238 @@ tags:
     description: Lojistik talep, taşıyıcı ve operasyon yönetimi
   - name: staff-profiles
     description: Giriş yapmış personel için iç ekip profil taslakları
+  - name: staff-trial
+    description: Founder-allowlisted, nonproduction trial candidate access, tasks and reports
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /staff/trial-candidates:
+    get:
+      operationId: getStaffTrialCandidates
+      tags: [staff-trial]
+      summary: Founder lists trial grants with verified email for identification
+      parameters:
+        - $ref: "#/components/parameters/TrialPage"
+        - $ref: "#/components/parameters/TrialPageSize"
+      responses:
+        "200":
+          description: Minimal, paginated candidate list
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffTrialCandidatePage" }
+        "401": { description: Authentication required }
+        "403": { description: Founder allowlist required }
+    post:
+      operationId: createStaffTrialCandidate
+      tags: [staff-trial]
+      summary: Founder grants trial access to an existing Clerk account
+      description: Server looks up the exact email in Clerk and grants only a single existing account with that verified email; does not create or promote an account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StaffTrialCandidateInput" }
+      responses:
+        "201":
+          description: Trial grant created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffTrialCandidate" }
+        "400": { description: "Extra input, no account, ambiguous email, or unverified email" }
+        "401": { description: Authentication required }
+        "403": { description: Founder allowlist required }
+        "409": { description: Trial record exists or target has an active staff_users account }
+        "502": { description: Clerk account could not be verified }
+  /staff/trial-candidates/{clerkUserId}/active:
+    patch:
+      operationId: updateStaffTrialCandidateActive
+      tags: [staff-trial]
+      summary: Founder activates or revokes a trial-only grant
+      parameters:
+        - in: path
+          name: clerkUserId
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 255 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StaffTrialCandidateActiveUpdate" }
+      responses:
+        "200":
+          description: Updated trial grant; no staff role is changed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffTrialCandidate" }
+        "401": { description: Authentication required }
+        "403": { description: Founder allowlist required }
+        "404": { description: Trial candidate not found }
+  /staff/trial-tasks:
+    get:
+      operationId: getStaffTrialTasks
+      tags: [staff-trial]
+      summary: Active candidate lists only their own trial tasks
+      parameters:
+        - $ref: "#/components/parameters/TrialPage"
+        - $ref: "#/components/parameters/TrialPageSize"
+      responses:
+        "200":
+          description: Candidate-owned task page
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffTrialTaskPage" }
+        "401": { description: Authentication required }
+        "403": { description: Active trial grant required }
+    post:
+      operationId: createStaffTrialTask
+      tags: [staff-trial]
+      summary: Founder assigns a task to an active trial candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StaffTrialTaskInput" }
+      responses:
+        "201":
+          description: Trial task created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffTrialTask" }
+        "400": { description: Candidate has no active trial grant }
+        "401": { description: Authentication required }
+        "403": { description: Founder allowlist required }
+  /staff/trial-tasks/{id}:
+    patch:
+      operationId: updateStaffTrialTask
+      tags: [staff-trial]
+      summary: Candidate updates only their own trial task progress and result
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StaffTrialTaskUpdate" }
+      responses:
+        "200":
+          description: Updated own task
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffTrialTask" }
+        "400": { description: Completed task must retain a nonempty final resultText }
+        "401": { description: Authentication required }
+        "403": { description: Active trial grant required }
+        "404": { description: Task not found or not owned }
+  /staff/trial-tasks/{id}/reports:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: integer, minimum: 1 }
+    get:
+      operationId: getStaffTrialTaskReports
+      tags: [staff-trial]
+      summary: Candidate reads reports for their own task
+      parameters:
+        - $ref: "#/components/parameters/TrialPage"
+        - $ref: "#/components/parameters/TrialPageSize"
+      responses:
+        "200":
+          description: Own task reports
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffTrialReportPage" }
+        "401": { description: Authentication required }
+        "403": { description: Active trial grant required }
+        "404": { description: Task not found or not owned }
+    post:
+      operationId: createStaffTrialReport
+      tags: [staff-trial]
+      summary: Candidate appends a nonempty report to their own task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StaffTrialReportInput" }
+      responses:
+        "201":
+          description: Report appended
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffTrialReport" }
+        "400": { description: Invalid or empty report }
+        "401": { description: Authentication required }
+        "403": { description: Active trial grant required }
+        "404": { description: Task not found or not owned }
+  /staff/trial-candidates/{clerkUserId}/tasks:
+    get:
+      operationId: getStaffTrialCandidateTasks
+      tags: [staff-trial]
+      summary: Founder reviews candidate task status, results and support details
+      parameters:
+        - in: path
+          name: clerkUserId
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 255 }
+        - $ref: "#/components/parameters/TrialPage"
+        - $ref: "#/components/parameters/TrialPageSize"
+      responses:
+        "200":
+          description: Paginated trial tasks and results with founder-only candidate identity
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffTrialCandidateTaskReviewPage" }
+        "401": { description: Authentication required }
+        "403": { description: Founder allowlist required }
+        "404": { description: Trial candidate not found }
+  /staff/trial-candidates/{clerkUserId}/reports:
+    get:
+      operationId: getStaffTrialCandidateReports
+      tags: [staff-trial]
+      summary: Founder reads a candidate's paginated trial reports
+      parameters:
+        - in: path
+          name: clerkUserId
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 255 }
+        - $ref: "#/components/parameters/TrialPage"
+        - $ref: "#/components/parameters/TrialPageSize"
+      responses:
+        "200":
+          description: Candidate reports with founder-only verified email; report author email and unrelated profile data are not included
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffTrialCandidateReportReviewPage" }
+        "401": { description: Authentication required }
+        "403": { description: Founder allowlist required }
+        "404": { description: Trial candidate not found }
+  /staff/trial-candidates/{clerkUserId}/evaluation:
+    patch:
+      operationId: updateStaffTrialCandidateEvaluation
+      tags: [staff-trial]
+      summary: Founder saves private evaluation notes without promoting candidate
+      parameters:
+        - in: path
+          name: clerkUserId
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 255 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StaffTrialCandidateEvaluationUpdate" }
+      responses:
+        "200":
+          description: Private note saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffTrialCandidate" }
+        "401": { description: Authentication required }
+        "403": { description: Founder allowlist required }
+        "404": { description: Trial candidate not found }
   /payments/tami/hosted-session:
     post:
       operationId: createTamiHostedPaymentSession
@@ -2997,7 +3226,147 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 components:
+  parameters:
+    TrialPage:
+      in: query
+      name: page
+      schema: { type: integer, minimum: 1, default: 1 }
+    TrialPageSize:
+      in: query
+      name: pageSize
+      schema: { type: integer, minimum: 1, maximum: 50, default: 25 }
   schemas:
+    StaffTrialCandidateInput:
+      type: object
+      additionalProperties: false
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          description: Exact verified account email; server trims and lowercases before Clerk lookup.
+    StaffTrialCandidateActiveUpdate:
+      type: object
+      additionalProperties: false
+      required: [active]
+      properties:
+        active: { type: boolean }
+    StaffTrialCandidateEvaluationUpdate:
+      type: object
+      additionalProperties: false
+      required: [evaluationNote]
+      properties:
+        evaluationNote: { type: [string, "null"], maxLength: 8000 }
+    StaffTrialCandidate:
+      type: object
+      required: [clerkUserId, verifiedEmail, active, evaluationNote, createdAt, updatedAt]
+      properties:
+        clerkUserId: { type: string }
+        verifiedEmail: { type: string, format: email }
+        active: { type: boolean }
+        evaluationNote: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    StaffTrialCandidatePage:
+      type: object
+      required: [items, page, pageSize, hasMore]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/StaffTrialCandidate" }
+        page: { type: integer }
+        pageSize: { type: integer }
+        hasMore: { type: boolean }
+    StaffTrialCandidateTaskReviewPage:
+      type: object
+      required: [candidate, items, page, pageSize, hasMore]
+      properties:
+        candidate: { $ref: "#/components/schemas/StaffTrialCandidate" }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/StaffTrialTask" }
+        page: { type: integer }
+        pageSize: { type: integer }
+        hasMore: { type: boolean }
+    StaffTrialTaskStatus:
+      type: string
+      enum: [open, in_progress, blocked, completed]
+    StaffTrialTaskInput:
+      type: object
+      additionalProperties: false
+      required: [clerkUserId, title]
+      properties:
+        clerkUserId: { type: string, minLength: 1, maxLength: 255 }
+        title: { type: string, minLength: 1, maxLength: 240 }
+        description: { type: string, maxLength: 8000 }
+    StaffTrialTaskUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        status: { $ref: "#/components/schemas/StaffTrialTaskStatus" }
+        resultText: { type: [string, "null"], maxLength: 8000 }
+        supportReceived: { type: boolean }
+        supportDetails: { type: [string, "null"], maxLength: 2000 }
+    StaffTrialTask:
+      type: object
+      required: [id, title, description, status, resultText, supportReceived, supportDetails, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/StaffTrialTaskStatus" }
+        resultText: { type: [string, "null"] }
+        supportReceived: { type: boolean }
+        supportDetails: { type: [string, "null"], maxLength: 2000 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    StaffTrialTaskPage:
+      type: object
+      required: [items, page, pageSize, hasMore]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/StaffTrialTask" }
+        page: { type: integer }
+        pageSize: { type: integer }
+        hasMore: { type: boolean }
+    StaffTrialReportInput:
+      type: object
+      additionalProperties: false
+      required: [content]
+      properties:
+        content: { type: string, minLength: 1, maxLength: 8000 }
+    StaffTrialReport:
+      type: object
+      required: [id, taskId, content, createdAt]
+      properties:
+        id: { type: integer }
+        taskId: { type: integer }
+        content: { type: string }
+        createdAt: { type: string, format: date-time }
+    StaffTrialReportPage:
+      type: object
+      required: [items, page, pageSize, hasMore]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/StaffTrialReport" }
+        page: { type: integer }
+        pageSize: { type: integer }
+        hasMore: { type: boolean }
+    StaffTrialCandidateReportReviewPage:
+      type: object
+      required: [candidate, items, page, pageSize, hasMore]
+      properties:
+        candidate: { $ref: "#/components/schemas/StaffTrialCandidate" }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/StaffTrialReport" }
+        page: { type: integer }
+        pageSize: { type: integer }
+        hasMore: { type: boolean }
     TamiHostedPaymentInput:
       type: object
       additionalProperties: false

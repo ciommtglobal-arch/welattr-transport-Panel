@@ -5,6 +5,146 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface StaffTrialCandidateInput {
+  /**
+     * Exact verified account email; server trims and lowercases before Clerk lookup.
+     * @maxLength 254
+     */
+  email: string;
+}
+
+export interface StaffTrialCandidateActiveUpdate {
+  active: boolean;
+}
+
+export interface StaffTrialCandidateEvaluationUpdate {
+  /**
+     * @maxLength 8000
+     * @nullable
+     */
+  evaluationNote: string | null;
+}
+
+export interface StaffTrialCandidate {
+  clerkUserId: string;
+  verifiedEmail: string;
+  active: boolean;
+  /** @nullable */
+  evaluationNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StaffTrialCandidatePage {
+  items: StaffTrialCandidate[];
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+export type StaffTrialTaskStatus = typeof StaffTrialTaskStatus[keyof typeof StaffTrialTaskStatus];
+
+
+export const StaffTrialTaskStatus = {
+  open: 'open',
+  in_progress: 'in_progress',
+  blocked: 'blocked',
+  completed: 'completed',
+} as const;
+
+export interface StaffTrialTask {
+  id: number;
+  title: string;
+  /** @nullable */
+  description: string | null;
+  status: StaffTrialTaskStatus;
+  /** @nullable */
+  resultText: string | null;
+  supportReceived: boolean;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  supportDetails: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StaffTrialCandidateTaskReviewPage {
+  candidate: StaffTrialCandidate;
+  items: StaffTrialTask[];
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+export interface StaffTrialTaskInput {
+  /**
+     * @minLength 1
+     * @maxLength 255
+     */
+  clerkUserId: string;
+  /**
+     * @minLength 1
+     * @maxLength 240
+     */
+  title: string;
+  /** @maxLength 8000 */
+  description?: string;
+}
+
+export interface StaffTrialTaskUpdate {
+  status?: StaffTrialTaskStatus;
+  /**
+     * @maxLength 8000
+     * @nullable
+     */
+  resultText?: string | null;
+  supportReceived?: boolean;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  supportDetails?: string | null;
+}
+
+export interface StaffTrialTaskPage {
+  items: StaffTrialTask[];
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+export interface StaffTrialReportInput {
+  /**
+     * @minLength 1
+     * @maxLength 8000
+     */
+  content: string;
+}
+
+export interface StaffTrialReport {
+  id: number;
+  taskId: number;
+  content: string;
+  createdAt: string;
+}
+
+export interface StaffTrialReportPage {
+  items: StaffTrialReport[];
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+export interface StaffTrialCandidateReportReviewPage {
+  candidate: StaffTrialCandidate;
+  items: StaffTrialReport[];
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
 export type PaymentCurrency = typeof PaymentCurrency[keyof typeof PaymentCurrency];
 
 
@@ -2216,6 +2356,70 @@ export interface WorkflowNotificationPage {
   total: number;
   unreadCount: number;
 }
+
+export type TrialPageParameter = number;
+
+export type TrialPageSizeParameter = number;
+
+export type GetStaffTrialCandidatesParams = {
+/**
+ * @minimum 1
+ */
+page?: TrialPageParameter;
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+pageSize?: TrialPageSizeParameter;
+};
+
+export type GetStaffTrialTasksParams = {
+/**
+ * @minimum 1
+ */
+page?: TrialPageParameter;
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+pageSize?: TrialPageSizeParameter;
+};
+
+export type GetStaffTrialTaskReportsParams = {
+/**
+ * @minimum 1
+ */
+page?: TrialPageParameter;
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+pageSize?: TrialPageSizeParameter;
+};
+
+export type GetStaffTrialCandidateTasksParams = {
+/**
+ * @minimum 1
+ */
+page?: TrialPageParameter;
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+pageSize?: TrialPageSizeParameter;
+};
+
+export type GetStaffTrialCandidateReportsParams = {
+/**
+ * @minimum 1
+ */
+page?: TrialPageParameter;
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+pageSize?: TrialPageSizeParameter;
+};
 
 export type GetMediaItemsParams = {
 status?: MediaItemStatus;

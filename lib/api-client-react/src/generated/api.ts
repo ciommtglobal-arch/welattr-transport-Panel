@@ -80,6 +80,11 @@ import type {
   GetMediaItemsParams,
   GetStaffAccess200,
   GetStaffB2BCompanyTaskReportsParams,
+  GetStaffTrialCandidateReportsParams,
+  GetStaffTrialCandidateTasksParams,
+  GetStaffTrialCandidatesParams,
+  GetStaffTrialTaskReportsParams,
+  GetStaffTrialTasksParams,
   HealthStatus,
   LimitApplication,
   LimitApplicationInput,
@@ -123,6 +128,20 @@ import type {
   StaffRewardTransactionDecision,
   StaffRewardTransactionInput,
   StaffRewardsResponse,
+  StaffTrialCandidate,
+  StaffTrialCandidateActiveUpdate,
+  StaffTrialCandidateEvaluationUpdate,
+  StaffTrialCandidateInput,
+  StaffTrialCandidatePage,
+  StaffTrialCandidateReportReviewPage,
+  StaffTrialCandidateTaskReviewPage,
+  StaffTrialReport,
+  StaffTrialReportInput,
+  StaffTrialReportPage,
+  StaffTrialTask,
+  StaffTrialTaskInput,
+  StaffTrialTaskPage,
+  StaffTrialTaskUpdate,
   TamiHostedPaymentInput,
   TamiHostedPaymentSession,
   TamiPaymentStatus,
@@ -163,6 +182,926 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetStaffTrialCandidatesUrl = (params?: GetStaffTrialCandidatesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/staff/trial-candidates?${stringifiedParams}` : `/api/staff/trial-candidates`
+}
+
+/**
+ * @summary Founder lists trial grants with verified email for identification
+ */
+export const getStaffTrialCandidates = async (params?: GetStaffTrialCandidatesParams, options?: Parameters<typeof customFetch>[1]): Promise<StaffTrialCandidatePage> => {
+
+  return customFetch<StaffTrialCandidatePage>(getGetStaffTrialCandidatesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStaffTrialCandidatesQueryKey = (params?: GetStaffTrialCandidatesParams,) => {
+    return [
+    `/api/staff/trial-candidates`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetStaffTrialCandidatesQueryOptions = <TData = Awaited<ReturnType<typeof getStaffTrialCandidates>>, TError = ErrorType<void>>(params?: GetStaffTrialCandidatesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialCandidates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStaffTrialCandidatesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStaffTrialCandidates>>> = ({ signal }) => getStaffTrialCandidates(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialCandidates>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStaffTrialCandidatesQueryResult = NonNullable<Awaited<ReturnType<typeof getStaffTrialCandidates>>>
+export type GetStaffTrialCandidatesQueryError = ErrorType<void>
+
+
+/**
+ * @summary Founder lists trial grants with verified email for identification
+ */
+
+export function useGetStaffTrialCandidates<TData = Awaited<ReturnType<typeof getStaffTrialCandidates>>, TError = ErrorType<void>>(
+ params?: GetStaffTrialCandidatesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialCandidates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStaffTrialCandidatesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateStaffTrialCandidateUrl = () => {
+
+
+
+
+  return `/api/staff/trial-candidates`
+}
+
+/**
+ * Server looks up the exact email in Clerk and grants only a single existing account with that verified email; does not create or promote an account.
+ * @summary Founder grants trial access to an existing Clerk account
+ */
+export const createStaffTrialCandidate = async (staffTrialCandidateInput: StaffTrialCandidateInput, options?: Parameters<typeof customFetch>[1]): Promise<StaffTrialCandidate> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<StaffTrialCandidate>(getCreateStaffTrialCandidateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(staffTrialCandidateInput)
+  }
+);}
+
+
+
+
+
+export const getCreateStaffTrialCandidateMutationKey = () => ['createStaffTrialCandidate'] as const;
+
+export const getCreateStaffTrialCandidateMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStaffTrialCandidate>>, TError,CreateStaffTrialCandidateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createStaffTrialCandidate>>, TError,CreateStaffTrialCandidateMutationVariables, TContext> => {
+
+const mutationKey = getCreateStaffTrialCandidateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createStaffTrialCandidate>>, CreateStaffTrialCandidateMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createStaffTrialCandidate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateStaffTrialCandidateMutationResult = NonNullable<Awaited<ReturnType<typeof createStaffTrialCandidate>>>
+    export type CreateStaffTrialCandidateMutationBody = BodyType<StaffTrialCandidateInput>
+    export type CreateStaffTrialCandidateMutationError = ErrorType<void>
+    export type CreateStaffTrialCandidateMutationVariables = {data: BodyType<StaffTrialCandidateInput>}
+
+    /**
+ * @summary Founder grants trial access to an existing Clerk account
+ */
+export const useCreateStaffTrialCandidate = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStaffTrialCandidate>>, TError,CreateStaffTrialCandidateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createStaffTrialCandidate>>,
+        TError,
+        CreateStaffTrialCandidateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateStaffTrialCandidateMutationOptions(options));
+    }
+
+export const getUpdateStaffTrialCandidateActiveUrl = (clerkUserId: string,) => {
+
+
+
+
+  return `/api/staff/trial-candidates/${clerkUserId}/active`
+}
+
+/**
+ * @summary Founder activates or revokes a trial-only grant
+ */
+export const updateStaffTrialCandidateActive = async (clerkUserId: string,
+    staffTrialCandidateActiveUpdate: StaffTrialCandidateActiveUpdate, options?: Parameters<typeof customFetch>[1]): Promise<StaffTrialCandidate> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<StaffTrialCandidate>(getUpdateStaffTrialCandidateActiveUrl(clerkUserId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(staffTrialCandidateActiveUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateStaffTrialCandidateActiveMutationKey = () => ['updateStaffTrialCandidateActive'] as const;
+
+export const getUpdateStaffTrialCandidateActiveMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateStaffTrialCandidateActive>>, TError,UpdateStaffTrialCandidateActiveMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateStaffTrialCandidateActive>>, TError,UpdateStaffTrialCandidateActiveMutationVariables, TContext> => {
+
+const mutationKey = getUpdateStaffTrialCandidateActiveMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateStaffTrialCandidateActive>>, UpdateStaffTrialCandidateActiveMutationVariables> = (props) => {
+          const {clerkUserId,data} = props ?? {};
+
+          return  updateStaffTrialCandidateActive(clerkUserId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateStaffTrialCandidateActiveMutationResult = NonNullable<Awaited<ReturnType<typeof updateStaffTrialCandidateActive>>>
+    export type UpdateStaffTrialCandidateActiveMutationBody = BodyType<StaffTrialCandidateActiveUpdate>
+    export type UpdateStaffTrialCandidateActiveMutationError = ErrorType<void>
+    export type UpdateStaffTrialCandidateActiveMutationVariables = {clerkUserId: string;data: BodyType<StaffTrialCandidateActiveUpdate>}
+
+    /**
+ * @summary Founder activates or revokes a trial-only grant
+ */
+export const useUpdateStaffTrialCandidateActive = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateStaffTrialCandidateActive>>, TError,UpdateStaffTrialCandidateActiveMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateStaffTrialCandidateActive>>,
+        TError,
+        UpdateStaffTrialCandidateActiveMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateStaffTrialCandidateActiveMutationOptions(options));
+    }
+
+export const getGetStaffTrialTasksUrl = (params?: GetStaffTrialTasksParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/staff/trial-tasks?${stringifiedParams}` : `/api/staff/trial-tasks`
+}
+
+/**
+ * @summary Active candidate lists only their own trial tasks
+ */
+export const getStaffTrialTasks = async (params?: GetStaffTrialTasksParams, options?: Parameters<typeof customFetch>[1]): Promise<StaffTrialTaskPage> => {
+
+  return customFetch<StaffTrialTaskPage>(getGetStaffTrialTasksUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStaffTrialTasksQueryKey = (params?: GetStaffTrialTasksParams,) => {
+    return [
+    `/api/staff/trial-tasks`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetStaffTrialTasksQueryOptions = <TData = Awaited<ReturnType<typeof getStaffTrialTasks>>, TError = ErrorType<void>>(params?: GetStaffTrialTasksParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialTasks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStaffTrialTasksQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStaffTrialTasks>>> = ({ signal }) => getStaffTrialTasks(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialTasks>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStaffTrialTasksQueryResult = NonNullable<Awaited<ReturnType<typeof getStaffTrialTasks>>>
+export type GetStaffTrialTasksQueryError = ErrorType<void>
+
+
+/**
+ * @summary Active candidate lists only their own trial tasks
+ */
+
+export function useGetStaffTrialTasks<TData = Awaited<ReturnType<typeof getStaffTrialTasks>>, TError = ErrorType<void>>(
+ params?: GetStaffTrialTasksParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialTasks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStaffTrialTasksQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateStaffTrialTaskUrl = () => {
+
+
+
+
+  return `/api/staff/trial-tasks`
+}
+
+/**
+ * @summary Founder assigns a task to an active trial candidate
+ */
+export const createStaffTrialTask = async (staffTrialTaskInput: StaffTrialTaskInput, options?: Parameters<typeof customFetch>[1]): Promise<StaffTrialTask> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<StaffTrialTask>(getCreateStaffTrialTaskUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(staffTrialTaskInput)
+  }
+);}
+
+
+
+
+
+export const getCreateStaffTrialTaskMutationKey = () => ['createStaffTrialTask'] as const;
+
+export const getCreateStaffTrialTaskMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStaffTrialTask>>, TError,CreateStaffTrialTaskMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createStaffTrialTask>>, TError,CreateStaffTrialTaskMutationVariables, TContext> => {
+
+const mutationKey = getCreateStaffTrialTaskMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createStaffTrialTask>>, CreateStaffTrialTaskMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createStaffTrialTask(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateStaffTrialTaskMutationResult = NonNullable<Awaited<ReturnType<typeof createStaffTrialTask>>>
+    export type CreateStaffTrialTaskMutationBody = BodyType<StaffTrialTaskInput>
+    export type CreateStaffTrialTaskMutationError = ErrorType<void>
+    export type CreateStaffTrialTaskMutationVariables = {data: BodyType<StaffTrialTaskInput>}
+
+    /**
+ * @summary Founder assigns a task to an active trial candidate
+ */
+export const useCreateStaffTrialTask = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStaffTrialTask>>, TError,CreateStaffTrialTaskMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createStaffTrialTask>>,
+        TError,
+        CreateStaffTrialTaskMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateStaffTrialTaskMutationOptions(options));
+    }
+
+export const getUpdateStaffTrialTaskUrl = (id: number,) => {
+
+
+
+
+  return `/api/staff/trial-tasks/${id}`
+}
+
+/**
+ * @summary Candidate updates only their own trial task progress and result
+ */
+export const updateStaffTrialTask = async (id: number,
+    staffTrialTaskUpdate: StaffTrialTaskUpdate, options?: Parameters<typeof customFetch>[1]): Promise<StaffTrialTask> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<StaffTrialTask>(getUpdateStaffTrialTaskUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(staffTrialTaskUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateStaffTrialTaskMutationKey = () => ['updateStaffTrialTask'] as const;
+
+export const getUpdateStaffTrialTaskMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateStaffTrialTask>>, TError,UpdateStaffTrialTaskMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateStaffTrialTask>>, TError,UpdateStaffTrialTaskMutationVariables, TContext> => {
+
+const mutationKey = getUpdateStaffTrialTaskMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateStaffTrialTask>>, UpdateStaffTrialTaskMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateStaffTrialTask(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateStaffTrialTaskMutationResult = NonNullable<Awaited<ReturnType<typeof updateStaffTrialTask>>>
+    export type UpdateStaffTrialTaskMutationBody = BodyType<StaffTrialTaskUpdate>
+    export type UpdateStaffTrialTaskMutationError = ErrorType<void>
+    export type UpdateStaffTrialTaskMutationVariables = {id: number;data: BodyType<StaffTrialTaskUpdate>}
+
+    /**
+ * @summary Candidate updates only their own trial task progress and result
+ */
+export const useUpdateStaffTrialTask = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateStaffTrialTask>>, TError,UpdateStaffTrialTaskMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateStaffTrialTask>>,
+        TError,
+        UpdateStaffTrialTaskMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateStaffTrialTaskMutationOptions(options));
+    }
+
+export const getGetStaffTrialTaskReportsUrl = (id: number,
+    params?: GetStaffTrialTaskReportsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/staff/trial-tasks/${id}/reports?${stringifiedParams}` : `/api/staff/trial-tasks/${id}/reports`
+}
+
+/**
+ * @summary Candidate reads reports for their own task
+ */
+export const getStaffTrialTaskReports = async (id: number,
+    params?: GetStaffTrialTaskReportsParams, options?: Parameters<typeof customFetch>[1]): Promise<StaffTrialReportPage> => {
+
+  return customFetch<StaffTrialReportPage>(getGetStaffTrialTaskReportsUrl(id,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStaffTrialTaskReportsQueryKey = (id: number,
+    params?: GetStaffTrialTaskReportsParams,) => {
+    return [
+    `/api/staff/trial-tasks/${id}/reports`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetStaffTrialTaskReportsQueryOptions = <TData = Awaited<ReturnType<typeof getStaffTrialTaskReports>>, TError = ErrorType<void>>(id: number,
+    params?: GetStaffTrialTaskReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialTaskReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStaffTrialTaskReportsQueryKey(id,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStaffTrialTaskReports>>> = ({ signal }) => getStaffTrialTaskReports(id,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialTaskReports>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStaffTrialTaskReportsQueryResult = NonNullable<Awaited<ReturnType<typeof getStaffTrialTaskReports>>>
+export type GetStaffTrialTaskReportsQueryError = ErrorType<void>
+
+
+/**
+ * @summary Candidate reads reports for their own task
+ */
+
+export function useGetStaffTrialTaskReports<TData = Awaited<ReturnType<typeof getStaffTrialTaskReports>>, TError = ErrorType<void>>(
+ id: number,
+    params?: GetStaffTrialTaskReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialTaskReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStaffTrialTaskReportsQueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateStaffTrialReportUrl = (id: number,) => {
+
+
+
+
+  return `/api/staff/trial-tasks/${id}/reports`
+}
+
+/**
+ * @summary Candidate appends a nonempty report to their own task
+ */
+export const createStaffTrialReport = async (id: number,
+    staffTrialReportInput: StaffTrialReportInput, options?: Parameters<typeof customFetch>[1]): Promise<StaffTrialReport> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<StaffTrialReport>(getCreateStaffTrialReportUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(staffTrialReportInput)
+  }
+);}
+
+
+
+
+
+export const getCreateStaffTrialReportMutationKey = () => ['createStaffTrialReport'] as const;
+
+export const getCreateStaffTrialReportMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStaffTrialReport>>, TError,CreateStaffTrialReportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createStaffTrialReport>>, TError,CreateStaffTrialReportMutationVariables, TContext> => {
+
+const mutationKey = getCreateStaffTrialReportMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createStaffTrialReport>>, CreateStaffTrialReportMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  createStaffTrialReport(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateStaffTrialReportMutationResult = NonNullable<Awaited<ReturnType<typeof createStaffTrialReport>>>
+    export type CreateStaffTrialReportMutationBody = BodyType<StaffTrialReportInput>
+    export type CreateStaffTrialReportMutationError = ErrorType<void>
+    export type CreateStaffTrialReportMutationVariables = {id: number;data: BodyType<StaffTrialReportInput>}
+
+    /**
+ * @summary Candidate appends a nonempty report to their own task
+ */
+export const useCreateStaffTrialReport = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStaffTrialReport>>, TError,CreateStaffTrialReportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createStaffTrialReport>>,
+        TError,
+        CreateStaffTrialReportMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateStaffTrialReportMutationOptions(options));
+    }
+
+export const getGetStaffTrialCandidateTasksUrl = (clerkUserId: string,
+    params?: GetStaffTrialCandidateTasksParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/staff/trial-candidates/${clerkUserId}/tasks?${stringifiedParams}` : `/api/staff/trial-candidates/${clerkUserId}/tasks`
+}
+
+/**
+ * @summary Founder reviews candidate task status, results and support details
+ */
+export const getStaffTrialCandidateTasks = async (clerkUserId: string,
+    params?: GetStaffTrialCandidateTasksParams, options?: Parameters<typeof customFetch>[1]): Promise<StaffTrialCandidateTaskReviewPage> => {
+
+  return customFetch<StaffTrialCandidateTaskReviewPage>(getGetStaffTrialCandidateTasksUrl(clerkUserId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStaffTrialCandidateTasksQueryKey = (clerkUserId: string,
+    params?: GetStaffTrialCandidateTasksParams,) => {
+    return [
+    `/api/staff/trial-candidates/${clerkUserId}/tasks`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetStaffTrialCandidateTasksQueryOptions = <TData = Awaited<ReturnType<typeof getStaffTrialCandidateTasks>>, TError = ErrorType<void>>(clerkUserId: string,
+    params?: GetStaffTrialCandidateTasksParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialCandidateTasks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStaffTrialCandidateTasksQueryKey(clerkUserId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStaffTrialCandidateTasks>>> = ({ signal }) => getStaffTrialCandidateTasks(clerkUserId,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: clerkUserId !== null && clerkUserId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialCandidateTasks>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStaffTrialCandidateTasksQueryResult = NonNullable<Awaited<ReturnType<typeof getStaffTrialCandidateTasks>>>
+export type GetStaffTrialCandidateTasksQueryError = ErrorType<void>
+
+
+/**
+ * @summary Founder reviews candidate task status, results and support details
+ */
+
+export function useGetStaffTrialCandidateTasks<TData = Awaited<ReturnType<typeof getStaffTrialCandidateTasks>>, TError = ErrorType<void>>(
+ clerkUserId: string,
+    params?: GetStaffTrialCandidateTasksParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialCandidateTasks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStaffTrialCandidateTasksQueryOptions(clerkUserId,params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetStaffTrialCandidateReportsUrl = (clerkUserId: string,
+    params?: GetStaffTrialCandidateReportsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/staff/trial-candidates/${clerkUserId}/reports?${stringifiedParams}` : `/api/staff/trial-candidates/${clerkUserId}/reports`
+}
+
+/**
+ * @summary Founder reads a candidate's paginated trial reports
+ */
+export const getStaffTrialCandidateReports = async (clerkUserId: string,
+    params?: GetStaffTrialCandidateReportsParams, options?: Parameters<typeof customFetch>[1]): Promise<StaffTrialCandidateReportReviewPage> => {
+
+  return customFetch<StaffTrialCandidateReportReviewPage>(getGetStaffTrialCandidateReportsUrl(clerkUserId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStaffTrialCandidateReportsQueryKey = (clerkUserId: string,
+    params?: GetStaffTrialCandidateReportsParams,) => {
+    return [
+    `/api/staff/trial-candidates/${clerkUserId}/reports`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetStaffTrialCandidateReportsQueryOptions = <TData = Awaited<ReturnType<typeof getStaffTrialCandidateReports>>, TError = ErrorType<void>>(clerkUserId: string,
+    params?: GetStaffTrialCandidateReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialCandidateReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStaffTrialCandidateReportsQueryKey(clerkUserId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStaffTrialCandidateReports>>> = ({ signal }) => getStaffTrialCandidateReports(clerkUserId,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: clerkUserId !== null && clerkUserId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialCandidateReports>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStaffTrialCandidateReportsQueryResult = NonNullable<Awaited<ReturnType<typeof getStaffTrialCandidateReports>>>
+export type GetStaffTrialCandidateReportsQueryError = ErrorType<void>
+
+
+/**
+ * @summary Founder reads a candidate's paginated trial reports
+ */
+
+export function useGetStaffTrialCandidateReports<TData = Awaited<ReturnType<typeof getStaffTrialCandidateReports>>, TError = ErrorType<void>>(
+ clerkUserId: string,
+    params?: GetStaffTrialCandidateReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStaffTrialCandidateReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStaffTrialCandidateReportsQueryOptions(clerkUserId,params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateStaffTrialCandidateEvaluationUrl = (clerkUserId: string,) => {
+
+
+
+
+  return `/api/staff/trial-candidates/${clerkUserId}/evaluation`
+}
+
+/**
+ * @summary Founder saves private evaluation notes without promoting candidate
+ */
+export const updateStaffTrialCandidateEvaluation = async (clerkUserId: string,
+    staffTrialCandidateEvaluationUpdate: StaffTrialCandidateEvaluationUpdate, options?: Parameters<typeof customFetch>[1]): Promise<StaffTrialCandidate> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<StaffTrialCandidate>(getUpdateStaffTrialCandidateEvaluationUrl(clerkUserId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(staffTrialCandidateEvaluationUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateStaffTrialCandidateEvaluationMutationKey = () => ['updateStaffTrialCandidateEvaluation'] as const;
+
+export const getUpdateStaffTrialCandidateEvaluationMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateStaffTrialCandidateEvaluation>>, TError,UpdateStaffTrialCandidateEvaluationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateStaffTrialCandidateEvaluation>>, TError,UpdateStaffTrialCandidateEvaluationMutationVariables, TContext> => {
+
+const mutationKey = getUpdateStaffTrialCandidateEvaluationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateStaffTrialCandidateEvaluation>>, UpdateStaffTrialCandidateEvaluationMutationVariables> = (props) => {
+          const {clerkUserId,data} = props ?? {};
+
+          return  updateStaffTrialCandidateEvaluation(clerkUserId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateStaffTrialCandidateEvaluationMutationResult = NonNullable<Awaited<ReturnType<typeof updateStaffTrialCandidateEvaluation>>>
+    export type UpdateStaffTrialCandidateEvaluationMutationBody = BodyType<StaffTrialCandidateEvaluationUpdate>
+    export type UpdateStaffTrialCandidateEvaluationMutationError = ErrorType<void>
+    export type UpdateStaffTrialCandidateEvaluationMutationVariables = {clerkUserId: string;data: BodyType<StaffTrialCandidateEvaluationUpdate>}
+
+    /**
+ * @summary Founder saves private evaluation notes without promoting candidate
+ */
+export const useUpdateStaffTrialCandidateEvaluation = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateStaffTrialCandidateEvaluation>>, TError,UpdateStaffTrialCandidateEvaluationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateStaffTrialCandidateEvaluation>>,
+        TError,
+        UpdateStaffTrialCandidateEvaluationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateStaffTrialCandidateEvaluationMutationOptions(options));
+    }
 
 export const getCreateTamiHostedPaymentSessionUrl = () => {
 

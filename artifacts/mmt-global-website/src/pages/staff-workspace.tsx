@@ -3,12 +3,15 @@ import { useAuth, UserButton } from "@clerk/react";
 import {
   getGetStaffAccessQueryKey,
   getGetStaffB2BCompanyTaskReportsQueryKey,
+  getGetStaffTrialTasksQueryKey,
   useGetStaffAccess,
   useGetStaffB2BCompanyTaskReports,
+  useGetStaffTrialTasks,
 } from "@workspace/api-client-react";
 import { ChevronLeft, ChevronRight, ClipboardCheck, FileText, MapPinned, RefreshCw, UsersRound } from "lucide-react";
 import { Link, Redirect } from "wouter";
 import "@/styles/mmt-corporate.css";
+import { FounderTrialCandidates } from "@/pages/staff-trial";
 
 function AccessLoading() {
   return <main className="mmt-management-page"><p className="mmt-note">Yetki kontrol ediliyor…</p></main>;
@@ -47,10 +50,23 @@ export function StaffAccessUnavailable({ retry }: { retry: () => void }) {
 export function StaffWorkspaceRedirect() {
   const { isLoaded, isSignedIn } = useAuth();
   const access = useGetStaffAccess({ query: { queryKey: getGetStaffAccessQueryKey(), enabled: isLoaded && Boolean(isSignedIn) } });
+  const trial = useGetStaffTrialTasks({ page: 1, pageSize: 1 }, {
+    query: {
+      queryKey: getGetStaffTrialTasksQueryKey({ page: 1, pageSize: 1 }),
+      enabled: import.meta.env.DEV && access.isError && isStaffAccessDenied(access.error),
+      retry: false,
+    },
+  });
   if (!isLoaded) return <AccessLoading />;
   if (!isSignedIn) return <Redirect to="/staff/giris" />;
   if (access.isPending) return <AccessLoading />;
-  if (access.isError && isStaffAccessDenied(access.error)) return <AccessDenied />;
+  if (access.isError && isStaffAccessDenied(access.error)) {
+    if (!import.meta.env.DEV) return <AccessDenied />;
+    if (trial.isPending) return <AccessLoading />;
+    if (trial.isSuccess) return <Redirect to="/staff/operasyon-masasi" />;
+    if (trial.isError && isStaffAccessDenied(trial.error)) return <AccessDenied />;
+    return <StaffAccessUnavailable retry={() => void trial.refetch()} />;
+  }
   if (access.isError || !access.data) return <StaffAccessUnavailable retry={() => void access.refetch()} />;
   return <Redirect to={access.data.workspace} />;
 }
@@ -128,6 +144,7 @@ export function FounderDashboard() {
           ))}
         </div>
         <FounderTaskReports />
+        {import.meta.env.DEV ? <FounderTrialCandidates /> : null}
         <p className="mmt-note">Erişim, mevcut personel rolü ve kapsamıyla sınırlıdır. Bu sayfa yeni yetki sağlamaz.</p>
       </div>
     </main>

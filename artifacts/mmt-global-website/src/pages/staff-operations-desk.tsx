@@ -3,11 +3,16 @@ import { BriefcaseBusiness, CircleAlert, ClipboardList, Loader2, ShieldCheck, Tr
 import { SignInButton, UserButton, useAuth } from "@clerk/react";
 import { Link } from "wouter";
 import {
+  getGetStaffTrialTasksQueryKey,
+  useGetStaffTrialTasks,
   useGetLogisticsOperations,
   getGetLogisticsOperationsQueryKey,
   useGetOperationsDesk,
+  getGetOperationsDeskQueryKey,
   type LogisticsShipmentStatus,
+  type OperationsDesk,
 } from "@workspace/api-client-react";
+import { TrialCandidateDesk } from "@/pages/staff-trial";
 
 const statusLabels: Record<LogisticsShipmentStatus, string> = {
   new_request: "Yeni talep",
@@ -60,8 +65,7 @@ function SignedOutState() {
       </p>
       <h1 className="mt-4 text-4xl font-semibold tracking-tight">Operasyon masası</h1>
       <p className="mt-5 max-w-md leading-7 text-foreground/60">
-        Abdurrahman Bey’in masa başı koordinasyon ve saha takip ekranına
-        erişmek için personel hesabınızla giriş yapın.
+        Personel veya etkin deneme erişiminizle kendi çalışma alanınıza giriş yapın.
       </p>
       <SignInButton mode="modal">
         <button className="mt-8 bg-primary px-7 py-4 text-xs font-bold uppercase tracking-[0.16em] text-white">
@@ -115,34 +119,92 @@ function Metric({
   );
 }
 
+function isForbidden(error: unknown) {
+  return typeof error === "object" && error !== null && "status" in error && error.status === 403;
+}
+
 function OperationsDeskView() {
-  const desk = useGetOperationsDesk();
-  const operations = useGetLogisticsOperations(undefined, {
+  const desk = useGetOperationsDesk({ query: { queryKey: getGetOperationsDeskQueryKey(), retry: false } });
+  const trial = useGetStaffTrialTasks({ page: 1, pageSize: 25 }, {
     query: {
-      queryKey: getGetLogisticsOperationsQueryKey(),
+      queryKey: getGetStaffTrialTasksQueryKey({ page: 1, pageSize: 25 }),
+      enabled: import.meta.env.DEV && desk.isError && isForbidden(desk.error),
+      retry: false,
     },
   });
 
-  if (desk.isLoading || operations.isLoading) {
+  if (desk.isPending) {
     return (
       <div className="flex min-h-[65vh] items-center justify-center gap-3 text-foreground/60">
         <Loader2 className="animate-spin text-primary" />
-        Operasyon masası hazırlanıyor
+        Erişim doğrulanıyor
       </div>
     );
   }
 
-  if (desk.isError) return <AccessError />;
+  if (desk.isError && isForbidden(desk.error)) {
+    if (!import.meta.env.DEV) return <AccessError />;
+    if (trial.isPending) {
+      return <div className="flex min-h-[65vh] items-center justify-center gap-3 text-foreground/60" role="status"><Loader2 className="animate-spin text-primary" />Deneme erişimi doğrulanıyor</div>;
+    }
+    if (trial.isSuccess) return <TrialCandidateDesk />;
+    if (trial.isError && isForbidden(trial.error)) return <AccessError />;
+    return (
+      <section className="mx-auto max-w-xl px-5 py-24 text-center">
+        <CircleAlert className="mx-auto h-10 w-10 text-primary" />
+        <h1 className="mt-5 text-3xl font-semibold">Deneme erişimi doğrulanamadı</h1>
+        <p className="mt-4 leading-7 text-foreground/60">Bağlantı hatası, erişiminiz olmadığı anlamına gelmez. Yeniden deneyin.</p>
+        <button type="button" onClick={() => void trial.refetch()} className="mt-6 inline-flex items-center gap-2 border border-primary px-5 py-3 text-sm font-bold text-primary"><Loader2 size={15} />Yeniden dene</button>
+      </section>
+    );
+  }
+  if (desk.isError) {
+    return (
+      <section className="mx-auto max-w-xl px-5 py-24 text-center">
+        <CircleAlert className="mx-auto h-10 w-10 text-primary" />
+        <h1 className="mt-5 text-3xl font-semibold">Erişim kontrolü tamamlanamadı</h1>
+        <p className="mt-4 leading-7 text-foreground/60">Oturum veya bağlantı şu anda doğrulanamadı. Bu, erişiminiz olmadığı anlamına gelmez.</p>
+        <button type="button" onClick={() => void desk.refetch()} className="mt-6 border border-primary px-5 py-3 text-sm font-bold text-primary">Yeniden dene</button>
+      </section>
+    );
+  }
 
-  if (operations.isError || !desk.data || !operations.data) {
+  if (!desk.data) return null;
+  return <StaffOperationsDeskView desk={desk.data} />;
+}
+
+function StaffOperationsDeskView({ desk }: { desk: OperationsDesk }) {
+  const operations = useGetLogisticsOperations(undefined, {
+    query: { queryKey: getGetLogisticsOperationsQueryKey(), retry: false },
+  });
+
+  if (operations.isPending) {
+    return (
+      <div className="flex min-h-[65vh] items-center justify-center gap-3 text-foreground/60">
+        <Loader2 className="animate-spin text-primary" />
+        Operasyon kayıtları hazırlanıyor
+      </div>
+    );
+  }
+  if (operations.isError && isForbidden(operations.error)) {
+    return (
+      <section className="mx-auto max-w-xl px-5 py-24 text-center">
+        <ShieldCheck className="mx-auto h-10 w-10 text-primary" />
+        <h1 className="mt-5 text-3xl font-semibold">Operasyon verilerine erişim reddedildi</h1>
+        <p className="mt-4 leading-7 text-foreground/60">Personel oturumunuz doğrulandı ancak bu kayıtlar için gerekli kapsam bulunmuyor.</p>
+      </section>
+    );
+  }
+  if (operations.isError || !operations.data) {
     return (
       <section className="mx-auto max-w-xl px-5 py-24 text-center">
         <CircleAlert className="mx-auto h-10 w-10 text-primary" />
         <h1 className="mt-5 text-3xl font-semibold">Operasyon verileri alınamadı</h1>
         <p className="mt-4 leading-7 text-foreground/60">
-          Yetki kontrolü geçti ancak operasyon kayıtları şu anda alınamadı.
-          Lütfen kısa süre sonra tekrar deneyin.
+          Personel yetkiniz doğrulandı ancak kayıtlar bağlantı nedeniyle alınamadı.
+          Erişim reddiyle ağ hatası birbirinden ayrıdır; bağlantıyı yeniden deneyin.
         </p>
+        <button type="button" onClick={() => void operations.refetch()} className="mt-6 border border-primary px-5 py-3 text-sm font-bold text-primary">Yeniden dene</button>
       </section>
     );
   }
@@ -159,18 +221,17 @@ function OperationsDeskView() {
           <div>
             <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-primary">
               <BriefcaseBusiness size={15} />
-              {desk.data.deskCode} / İç operasyon
+              {desk.deskCode} / İç operasyon
             </p>
             <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-[0.98] tracking-tight md:text-6xl">
-              {desk.data.deskTitle}
+              {desk.deskTitle}
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-foreground/60">
-              {desk.data.assignedTo} için masa başı koordinasyon, lojistik
-              görünürlük ve saha takip ekranı.
+              Yetkili personel için masa başı koordinasyon, lojistik görünürlük ve saha takip ekranı.
             </p>
           </div>
           <div className="border border-primary/25 bg-primary/10 px-4 py-3 text-xs font-semibold text-primary">
-            Aktif rol: {desk.data.role === "admin" ? "Yönetici" : "Operasyon"}
+            Aktif rol: {desk.role === "admin" ? "Yönetici" : "Operasyon"}
           </div>
         </div>
 
@@ -230,10 +291,6 @@ function OperationsDeskView() {
                 Ukrayna–Mersin hattında görev sahiplerini, riskleri ve sonraki
                 adımı tek kayıtta takip edin.
               </p>
-              <div className="mt-5 flex items-center gap-2 text-xs font-semibold text-primary">
-                <ClipboardList size={15} />
-                Abdurrahman Bey koordinasyonu
-              </div>
             </section>
 
             <section className="border border-border bg-card p-6">
@@ -242,7 +299,7 @@ function OperationsDeskView() {
                 <h2 className="font-semibold">Yetki çerçevesi</h2>
               </div>
               <ul className="mt-5 space-y-3 text-sm leading-6 text-foreground/65">
-                {desk.data.boundaries.map((boundary) => (
+                {desk.boundaries.map((boundary) => (
                   <li key={boundary} className="border-l-2 border-primary/50 pl-3">{boundary}</li>
                 ))}
               </ul>
@@ -255,7 +312,7 @@ function OperationsDeskView() {
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Günlük sorumluluk</p>
             <h2 className="mt-3 text-2xl font-semibold">Masadan sahaya net takip</h2>
             <ul className="mt-5 space-y-3 text-sm leading-7 text-secondary-foreground/70">
-              {desk.data.responsibilities.map((responsibility) => (
+              {desk.responsibilities.map((responsibility) => (
                 <li key={responsibility} className="flex gap-3">
                   <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                   {responsibility}

@@ -21,5 +21,5 @@
 - [Founder self-review boundary](founder-self-review-boundary.md) — If the founder reviews their own business, bind the exception to one allowlisted Clerk identity and that profile only.
 - [Media pilot publication](media-pilot-publication.md) — Manual links need a separate founder confirmation before “published”; TEST and legacy records never use external dispatch.
 - [MMT Connect delegation boundary](mmt-connect-delegation-boundary.md) — Area leaders can coordinate company work, but final affirmative approval belongs to the company owner.
-- [MMT Connect task workspace](mmt-connect-task-workspace.md) — Abdurrahman and assistant task status/reports belong in the company panel, not a new staff operations role.
+- [Staff trial workspace](staff-trial-workspace.md) — Candidate tasks/reports belong in the staff test area, but trial access must not grant permanent operations or manager roles.
 - [Completion review checkpoints](completion-review-checkpoints.md) — A rejected completion review can still commit current edits; inspect history before assuming work disappeared.

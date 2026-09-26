@@ -9,6 +9,381 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Founder lists trial grants with verified email for identification
+ */
+export const getStaffTrialCandidatesQueryPageDefault = 1;
+
+export const getStaffTrialCandidatesQueryPageSizeDefault = 25;
+export const getStaffTrialCandidatesQueryPageSizeMax = 50;
+
+
+
+export const GetStaffTrialCandidatesQueryParams = zod.object({
+  "page": zod.coerce.number().int().min(1).default(getStaffTrialCandidatesQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getStaffTrialCandidatesQueryPageSizeMax).default(getStaffTrialCandidatesQueryPageSizeDefault)
+})
+
+export const GetStaffTrialCandidatesResponse = zod.object({
+  "items": zod.array(zod.object({
+  "clerkUserId": zod.string(),
+  "verifiedEmail": zod.email(),
+  "active": zod.boolean(),
+  "evaluationNote": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "hasMore": zod.boolean()
+})
+
+
+/**
+ * Server looks up the exact email in Clerk and grants only a single existing account with that verified email; does not create or promote an account.
+ * @summary Founder grants trial access to an existing Clerk account
+ */
+export const createStaffTrialCandidateBodyEmailMax = 254;
+
+
+
+export const CreateStaffTrialCandidateBody = zod.object({
+  "email": zod.email().max(createStaffTrialCandidateBodyEmailMax).describe('Exact verified account email; server trims and lowercases before Clerk lookup.')
+})
+
+export const CreateStaffTrialCandidateResponse = zod.object({
+  "clerkUserId": zod.string(),
+  "verifiedEmail": zod.email(),
+  "active": zod.boolean(),
+  "evaluationNote": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Founder activates or revokes a trial-only grant
+ */
+export const updateStaffTrialCandidateActivePathClerkUserIdMax = 255;
+
+
+
+export const UpdateStaffTrialCandidateActiveParams = zod.object({
+  "clerkUserId": zod.coerce.string().min(1).max(updateStaffTrialCandidateActivePathClerkUserIdMax)
+})
+
+export const UpdateStaffTrialCandidateActiveBody = zod.object({
+  "active": zod.boolean()
+})
+
+export const UpdateStaffTrialCandidateActiveResponse = zod.object({
+  "clerkUserId": zod.string(),
+  "verifiedEmail": zod.email(),
+  "active": zod.boolean(),
+  "evaluationNote": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Active candidate lists only their own trial tasks
+ */
+export const getStaffTrialTasksQueryPageDefault = 1;
+
+export const getStaffTrialTasksQueryPageSizeDefault = 25;
+export const getStaffTrialTasksQueryPageSizeMax = 50;
+
+
+
+export const GetStaffTrialTasksQueryParams = zod.object({
+  "page": zod.coerce.number().int().min(1).default(getStaffTrialTasksQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getStaffTrialTasksQueryPageSizeMax).default(getStaffTrialTasksQueryPageSizeDefault)
+})
+
+export const getStaffTrialTasksResponseItemsItemSupportDetailsMax = 2000;
+
+
+
+export const GetStaffTrialTasksResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "description": zod.string().nullable(),
+  "status": zod.enum(['open', 'in_progress', 'blocked', 'completed']),
+  "resultText": zod.string().nullable(),
+  "supportReceived": zod.boolean(),
+  "supportDetails": zod.string().max(getStaffTrialTasksResponseItemsItemSupportDetailsMax).nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "hasMore": zod.boolean()
+})
+
+
+/**
+ * @summary Founder assigns a task to an active trial candidate
+ */
+export const createStaffTrialTaskBodyClerkUserIdMax = 255;
+
+export const createStaffTrialTaskBodyTitleMax = 240;
+
+export const createStaffTrialTaskBodyDescriptionMax = 8000;
+
+
+
+export const CreateStaffTrialTaskBody = zod.object({
+  "clerkUserId": zod.string().min(1).max(createStaffTrialTaskBodyClerkUserIdMax),
+  "title": zod.string().min(1).max(createStaffTrialTaskBodyTitleMax),
+  "description": zod.string().max(createStaffTrialTaskBodyDescriptionMax).optional()
+})
+
+export const createStaffTrialTaskResponseSupportDetailsMax = 2000;
+
+
+
+export const CreateStaffTrialTaskResponse = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "description": zod.string().nullable(),
+  "status": zod.enum(['open', 'in_progress', 'blocked', 'completed']),
+  "resultText": zod.string().nullable(),
+  "supportReceived": zod.boolean(),
+  "supportDetails": zod.string().max(createStaffTrialTaskResponseSupportDetailsMax).nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Candidate updates only their own trial task progress and result
+ */
+
+
+
+export const UpdateStaffTrialTaskParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const updateStaffTrialTaskBodyResultTextMax = 8000;
+
+export const updateStaffTrialTaskBodySupportDetailsMax = 2000;
+
+
+
+export const UpdateStaffTrialTaskBody = zod.object({
+  "status": zod.enum(['open', 'in_progress', 'blocked', 'completed']).optional(),
+  "resultText": zod.string().max(updateStaffTrialTaskBodyResultTextMax).nullish(),
+  "supportReceived": zod.boolean().optional(),
+  "supportDetails": zod.string().max(updateStaffTrialTaskBodySupportDetailsMax).nullish()
+})
+
+export const updateStaffTrialTaskResponseSupportDetailsMax = 2000;
+
+
+
+export const UpdateStaffTrialTaskResponse = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "description": zod.string().nullable(),
+  "status": zod.enum(['open', 'in_progress', 'blocked', 'completed']),
+  "resultText": zod.string().nullable(),
+  "supportReceived": zod.boolean(),
+  "supportDetails": zod.string().max(updateStaffTrialTaskResponseSupportDetailsMax).nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Candidate reads reports for their own task
+ */
+
+
+
+export const GetStaffTrialTaskReportsParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const getStaffTrialTaskReportsQueryPageDefault = 1;
+
+export const getStaffTrialTaskReportsQueryPageSizeDefault = 25;
+export const getStaffTrialTaskReportsQueryPageSizeMax = 50;
+
+
+
+export const GetStaffTrialTaskReportsQueryParams = zod.object({
+  "page": zod.coerce.number().int().min(1).default(getStaffTrialTaskReportsQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getStaffTrialTaskReportsQueryPageSizeMax).default(getStaffTrialTaskReportsQueryPageSizeDefault)
+})
+
+export const GetStaffTrialTaskReportsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "taskId": zod.int(),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "hasMore": zod.boolean()
+})
+
+
+/**
+ * @summary Candidate appends a nonempty report to their own task
+ */
+
+
+
+export const CreateStaffTrialReportParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const createStaffTrialReportBodyContentMax = 8000;
+
+
+
+export const CreateStaffTrialReportBody = zod.object({
+  "content": zod.string().min(1).max(createStaffTrialReportBodyContentMax)
+})
+
+export const CreateStaffTrialReportResponse = zod.object({
+  "id": zod.int(),
+  "taskId": zod.int(),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Founder reviews candidate task status, results and support details
+ */
+export const getStaffTrialCandidateTasksPathClerkUserIdMax = 255;
+
+
+
+export const GetStaffTrialCandidateTasksParams = zod.object({
+  "clerkUserId": zod.coerce.string().min(1).max(getStaffTrialCandidateTasksPathClerkUserIdMax)
+})
+
+export const getStaffTrialCandidateTasksQueryPageDefault = 1;
+
+export const getStaffTrialCandidateTasksQueryPageSizeDefault = 25;
+export const getStaffTrialCandidateTasksQueryPageSizeMax = 50;
+
+
+
+export const GetStaffTrialCandidateTasksQueryParams = zod.object({
+  "page": zod.coerce.number().int().min(1).default(getStaffTrialCandidateTasksQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getStaffTrialCandidateTasksQueryPageSizeMax).default(getStaffTrialCandidateTasksQueryPageSizeDefault)
+})
+
+export const getStaffTrialCandidateTasksResponseItemsItemSupportDetailsMax = 2000;
+
+
+
+export const GetStaffTrialCandidateTasksResponse = zod.object({
+  "candidate": zod.object({
+  "clerkUserId": zod.string(),
+  "verifiedEmail": zod.email(),
+  "active": zod.boolean(),
+  "evaluationNote": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}),
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "description": zod.string().nullable(),
+  "status": zod.enum(['open', 'in_progress', 'blocked', 'completed']),
+  "resultText": zod.string().nullable(),
+  "supportReceived": zod.boolean(),
+  "supportDetails": zod.string().max(getStaffTrialCandidateTasksResponseItemsItemSupportDetailsMax).nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "hasMore": zod.boolean()
+})
+
+
+/**
+ * @summary Founder reads a candidate's paginated trial reports
+ */
+export const getStaffTrialCandidateReportsPathClerkUserIdMax = 255;
+
+
+
+export const GetStaffTrialCandidateReportsParams = zod.object({
+  "clerkUserId": zod.coerce.string().min(1).max(getStaffTrialCandidateReportsPathClerkUserIdMax)
+})
+
+export const getStaffTrialCandidateReportsQueryPageDefault = 1;
+
+export const getStaffTrialCandidateReportsQueryPageSizeDefault = 25;
+export const getStaffTrialCandidateReportsQueryPageSizeMax = 50;
+
+
+
+export const GetStaffTrialCandidateReportsQueryParams = zod.object({
+  "page": zod.coerce.number().int().min(1).default(getStaffTrialCandidateReportsQueryPageDefault),
+  "pageSize": zod.coerce.number().int().min(1).max(getStaffTrialCandidateReportsQueryPageSizeMax).default(getStaffTrialCandidateReportsQueryPageSizeDefault)
+})
+
+export const GetStaffTrialCandidateReportsResponse = zod.object({
+  "candidate": zod.object({
+  "clerkUserId": zod.string(),
+  "verifiedEmail": zod.email(),
+  "active": zod.boolean(),
+  "evaluationNote": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}),
+  "items": zod.array(zod.object({
+  "id": zod.int(),
+  "taskId": zod.int(),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date()
+})),
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "hasMore": zod.boolean()
+})
+
+
+/**
+ * @summary Founder saves private evaluation notes without promoting candidate
+ */
+export const updateStaffTrialCandidateEvaluationPathClerkUserIdMax = 255;
+
+
+
+export const UpdateStaffTrialCandidateEvaluationParams = zod.object({
+  "clerkUserId": zod.coerce.string().min(1).max(updateStaffTrialCandidateEvaluationPathClerkUserIdMax)
+})
+
+export const updateStaffTrialCandidateEvaluationBodyEvaluationNoteMax = 8000;
+
+
+
+export const UpdateStaffTrialCandidateEvaluationBody = zod.object({
+  "evaluationNote": zod.string().max(updateStaffTrialCandidateEvaluationBodyEvaluationNoteMax).nullable()
+})
+
+export const UpdateStaffTrialCandidateEvaluationResponse = zod.object({
+  "clerkUserId": zod.string(),
+  "verifiedEmail": zod.email(),
+  "active": zod.boolean(),
+  "evaluationNote": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
  * Canlı tahsilat kapalıdır; ortam ayarından bağımsız olarak gerçek ödeme
  * almadan test ödeme sayfası üretir. Kart numarası ve güvenlik kodu bu API'ye
  * gönderilmez. Canlıya geçiş ayrıca onaylanmalıdır.

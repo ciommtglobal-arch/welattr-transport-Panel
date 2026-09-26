@@ -16,6 +16,7 @@ import b2bCompanyManagementRouter from "./b2b-company-management";
 import workflowRouter from "./workflow";
 import staffRewardsRouter from "./staff-rewards";
 import paymentsRouter from "./payments";
+import staffTrialRouter from "./staff-trial";
 
 const router: IRouter = Router();
 router.use(healthRouter);
@@ -32,6 +33,10 @@ router.use(storefrontRouter);
 router.use(publicLogisticsRouter);
 router.use(logisticsOperationsRouter);
 router.use(staffProfilesRouter);
+// Trial access is still awaiting explicit production approval; previews and development remain enabled.
+if (process.env.NODE_ENV !== "production") {
+  router.use(staffTrialRouter);
+}
 router.use(b2bCompanyManagementRouter);
 router.use(workflowRouter);
 router.use(staffRewardsRouter);

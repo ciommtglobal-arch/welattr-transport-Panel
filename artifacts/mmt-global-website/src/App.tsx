@@ -1,6 +1,6 @@
-import { lazy, Suspense, useEffect, type ComponentProps, type ReactNode } from 'react';
-import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
-import { ClerkProvider, SignIn, SignUp, useAuth, useClerk } from '@clerk/react';
+import { lazy, Suspense, useEffect, useMemo, type ComponentProps, type ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ClerkProvider, SignIn, SignUp, useAuth } from '@clerk/react';
 import { arSA, enUS, ruRU, trTR } from '@clerk/localizations';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
@@ -21,24 +21,27 @@ import {
   Router as WouterRouter,
 } from 'wouter';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: (failureCount, error) => {
-        const status =
-          typeof error === 'object' && error !== null && 'status' in error
-            ? error.status
-            : undefined;
-        if (status === 401) return failureCount < 1;
-        if (status === 403) return false;
-        return failureCount < 2;
+function createQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: (failureCount, error) => {
+          const status =
+            typeof error === 'object' && error !== null && 'status' in error
+              ? error.status
+              : undefined;
+          if (status === 401) return failureCount < 1;
+          if (status === 403) return false;
+          return failureCount < 2;
+        },
       },
     },
-  },
-});
-// The Clerk provider unmounts on public routes. Keep the previous identity
-// across that transition so a different user cannot inherit cached staff data.
-let lastClerkUserId: string | null | undefined;
+  });
+}
+
+// Public, non-Clerk routes can share cache; authenticated routes use a separate
+// client instance per Clerk identity below.
+const publicQueryClient = createQueryClient();
 
 const NotFound = lazy(() => import('@/pages/not-found'));
 const CorporateHome = lazy(() => import('@/pages/corporate-home'));
@@ -255,13 +258,16 @@ function StaffSignInPage() {
 
 function StaffSignUpPage() {
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-5 bg-background px-4 py-10">
       <SignUp
         routing="path"
         path={`${basePath}/staff/kayit`}
         signInUrl={`${basePath}/staff/giris`}
         fallbackRedirectUrl={`${basePath}/staff/yonlendir`}
       />
+      <p className="max-w-md text-center text-sm leading-6 text-foreground/60">
+        Hesap oluşturmak tek başına personel, kurucu veya deneme erişimi vermez. Bu erişimler ayrı olarak yetkilendirilir; kayıt ekranı herhangi bir rol ya da erişim tanımlamaz.
+      </p>
     </div>
   );
 }
@@ -401,25 +407,20 @@ function PanelAwareHome() {
   return <CorporateHome />;
 }
 
-function ClerkQueryClientCacheInvalidator() {
-  const { addListener } = useClerk();
-  const client = useQueryClient();
+function ClerkIdentityQueryProvider({ children }: { children: ReactNode }) {
+  const { isLoaded, isSignedIn, userId } = useAuth();
+  const identityKey = isSignedIn && userId ? userId : 'signed-out';
+  const client = useMemo(
+    () => isLoaded ? createQueryClient() : null,
+    [isLoaded, identityKey],
+  );
 
-  useEffect(() => {
-    const unsubscribe = addListener(({ user }) => {
-      const userId = user?.id ?? null;
-      if (lastClerkUserId !== undefined && lastClerkUserId !== userId) {
-        client.clear();
-      }
-      lastClerkUserId = userId;
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [addListener, client]);
-
-  return null;
+  if (!isLoaded || !client) return <RouteLoading />;
+  return (
+    <QueryClientProvider key={identityKey} client={client}>
+      {children}
+    </QueryClientProvider>
+  );
 }
 
 function ClerkApp() {
@@ -437,13 +438,10 @@ function ClerkApp() {
     normalizedLocation.startsWith('/sign-in') ||
     normalizedLocation.startsWith('/sign-up');
   const routedContent = (
-    <QueryClientProvider client={queryClient}>
-      {clerkRoute ? <ClerkQueryClientCacheInvalidator /> : null}
-      <TooltipProvider>
-        <Router />
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <TooltipProvider>
+      <Router />
+      <Toaster />
+    </TooltipProvider>
   );
 
   return (
@@ -458,10 +456,12 @@ function ClerkApp() {
         routerPush={(to) => setLocation(stripBase(to))}
         routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
       >
-        {routedContent}
+        <ClerkIdentityQueryProvider>{routedContent}</ClerkIdentityQueryProvider>
       </ClerkProvider>
     ) : (
-      routedContent
+      <QueryClientProvider client={publicQueryClient}>
+        {routedContent}
+      </QueryClientProvider>
     )
   );
 }
