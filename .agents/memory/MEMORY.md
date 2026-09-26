@@ -23,3 +23,4 @@
 - [MMT Connect delegation boundary](mmt-connect-delegation-boundary.md) — Area leaders can coordinate company work, but final affirmative approval belongs to the company owner.
 - [Staff trial workspace](staff-trial-workspace.md) — Candidate tasks/reports belong in the staff test area, but trial access must not grant permanent operations or manager roles.
 - [Completion review checkpoints](completion-review-checkpoints.md) — A rejected completion review can still commit current edits; inspect history before assuming work disappeared.
+- [Orphaned preview listeners](orphaned-preview-listeners.md) — A failed managed workflow can coexist with an older process still holding its port after runner recovery.
