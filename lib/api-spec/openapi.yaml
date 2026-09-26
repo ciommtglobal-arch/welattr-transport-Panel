@@ -4767,6 +4767,11 @@ components:
             maxLength: 80
         role:
           $ref: "#/components/schemas/B2BCompanyMemberRole"
+        isPilotAssistant:
+          type: boolean
+        leadMemberId:
+          type: integer
+          minimum: 1
     B2BCompanyMember:
       type: object
       required:
@@ -4777,6 +4782,8 @@ components:
         - areas
         - role
         - status
+        - isPilotAssistant
+        - leadMemberId
         - invitedAt
         - createdAt
         - updatedAt
@@ -4804,6 +4811,10 @@ components:
             type: string
         role:
           $ref: "#/components/schemas/B2BCompanyMemberRole"
+        isPilotAssistant:
+          type: boolean
+        leadMemberId:
+          type: [integer, "null"]
         status:
           $ref: "#/components/schemas/B2BCompanyMemberStatus"
         invitedAt:

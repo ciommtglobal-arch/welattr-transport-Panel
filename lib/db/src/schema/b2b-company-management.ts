@@ -1,4 +1,5 @@
 import {
+  boolean,
   date,
   index,
   integer,
@@ -8,6 +9,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -59,6 +61,11 @@ export const b2bCompanyMembersTable = pgTable(
     jobTitle: text("job_title"),
     areas: text("areas").array().notNull().default([]),
     role: b2bCompanyMemberRoleEnum("role").notNull().default("member"),
+    isPilotAssistant: boolean("is_pilot_assistant").notNull().default(false),
+    leadMemberId: integer("lead_member_id").references(
+      (): AnyPgColumn => b2bCompanyMembersTable.id,
+      { onDelete: "set null" },
+    ),
     status: b2bCompanyMemberStatusEnum("status").notNull().default("invited"),
     inviteTokenHash: text("invite_token_hash"),
     inviteExpiresAt: timestamp("invite_expires_at", { withTimezone: true }),
@@ -84,6 +91,7 @@ export const b2bCompanyMembersTable = pgTable(
     ),
     index("b2b_company_members_profile_idx").on(table.businessProfileId),
     index("b2b_company_members_clerk_user_idx").on(table.clerkUserId),
+    index("b2b_company_members_lead_idx").on(table.leadMemberId),
   ],
 );
 

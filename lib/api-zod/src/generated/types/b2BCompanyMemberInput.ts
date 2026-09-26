@@ -28,4 +28,7 @@ export interface B2BCompanyMemberInput {
      */
   areas: string[];
   role?: B2BCompanyMemberRole;
+  isPilotAssistant?: boolean;
+  /** @minimum 1 */
+  leadMemberId?: number;
 }

@@ -1711,6 +1711,8 @@ export const GetMyB2BCompanyMembersResponse = zod.object({
   "jobTitle": zod.string().nullish(),
   "areas": zod.array(zod.string()),
   "role": zod.enum(['owner', 'admin', 'manager', 'member']),
+  "isPilotAssistant": zod.boolean(),
+  "leadMemberId": zod.int().nullable(),
   "status": zod.enum(['invited', 'active', 'revoked']),
   "invitedAt": zod.coerce.date(),
   "acceptedAt": zod.coerce.date().nullish(),
@@ -1740,6 +1742,7 @@ export const inviteB2BCompanyMemberBodyAreasMax = 5;
 
 
 
+
 export const InviteB2BCompanyMemberBody = zod.object({
   "fullName": zod.string().min(inviteB2BCompanyMemberBodyFullNameMin).max(inviteB2BCompanyMemberBodyFullNameMax),
   "email": zod.email(),
@@ -1747,7 +1750,9 @@ export const InviteB2BCompanyMemberBody = zod.object({
   "department": zod.string().max(inviteB2BCompanyMemberBodyDepartmentMax).optional(),
   "jobTitle": zod.string().max(inviteB2BCompanyMemberBodyJobTitleMax).optional(),
   "areas": zod.array(zod.string().min(inviteB2BCompanyMemberBodyAreasItemMin).max(inviteB2BCompanyMemberBodyAreasItemMax)).min(1).max(inviteB2BCompanyMemberBodyAreasMax),
-  "role": zod.enum(['owner', 'admin', 'manager', 'member']).optional()
+  "role": zod.enum(['owner', 'admin', 'manager', 'member']).optional(),
+  "isPilotAssistant": zod.boolean().optional(),
+  "leadMemberId": zod.int().min(1).optional()
 })
 
 export const InviteB2BCompanyMemberResponse = zod.object({
@@ -1762,6 +1767,8 @@ export const InviteB2BCompanyMemberResponse = zod.object({
   "jobTitle": zod.string().nullish(),
   "areas": zod.array(zod.string()),
   "role": zod.enum(['owner', 'admin', 'manager', 'member']),
+  "isPilotAssistant": zod.boolean(),
+  "leadMemberId": zod.int().nullable(),
   "status": zod.enum(['invited', 'active', 'revoked']),
   "invitedAt": zod.coerce.date(),
   "acceptedAt": zod.coerce.date().nullish(),
@@ -1795,6 +1802,8 @@ export const AcceptB2BCompanyInvitationResponse = zod.object({
   "jobTitle": zod.string().nullish(),
   "areas": zod.array(zod.string()),
   "role": zod.enum(['owner', 'admin', 'manager', 'member']),
+  "isPilotAssistant": zod.boolean(),
+  "leadMemberId": zod.int().nullable(),
   "status": zod.enum(['invited', 'active', 'revoked']),
   "invitedAt": zod.coerce.date(),
   "acceptedAt": zod.coerce.date().nullish(),

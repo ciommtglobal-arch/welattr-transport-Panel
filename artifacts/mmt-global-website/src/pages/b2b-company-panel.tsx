@@ -170,8 +170,7 @@ function CompanyPanelContent({
     currentRole === "manager";
   const canInviteMembers =
     currentRole === "owner" ||
-    currentRole === "admin" ||
-    currentRole === "manager";
+    currentRole === "admin";
   const canManage = canManageCompany;
   const canManageTasks = canManageCompany;
   const canReviewApprovals = canManageCompany;
@@ -319,6 +318,7 @@ function CompanyPanelContent({
             members={members}
             canManage={canInviteMembers}
             canGrantAdmin={currentRole === "owner"}
+            currentMember={currentMember}
             inviteResult={inviteResult}
             setInviteResult={setInviteResult}
             onError={setError}
@@ -590,7 +590,11 @@ function ApprovalCard({
     expired: "Süresi geçti",
   };
   const canReviewThis = canReview && approval.status === "pending_reviewer";
-  const canDecideThis = canDecide && approval.status === "pending_owner";
+  const canDecideThis = canDecide && (
+    approval.status === "pending_owner" ||
+    (approval.status === "auto_approved" &&
+      (approval.entityType === "company_task" || approval.entityType === "company_request"))
+  );
 
   return (
     <article className="border border-border/70 p-5">
@@ -618,7 +622,10 @@ function ApprovalCard({
           <h3 className="mt-2 text-lg font-semibold">{approval.title}</h3>
         </div>
         <span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.1em] text-foreground/50">
-          {statusLabels[approval.status]}
+          {approval.status === "auto_approved" &&
+          (approval.entityType === "company_task" || approval.entityType === "company_request")
+            ? "Sahip onayı gerekli"
+            : statusLabels[approval.status]}
         </span>
       </div>
       {approval.summary ? (
@@ -685,6 +692,7 @@ function MembersSection({
   members,
   canManage,
   canGrantAdmin,
+  currentMember,
   inviteResult,
   setInviteResult,
   onError,
@@ -693,6 +701,7 @@ function MembersSection({
   members: B2BCompanyMember[];
   canManage: boolean;
   canGrantAdmin: boolean;
+  currentMember?: B2BCompanyMember;
   inviteResult: string;
   setInviteResult: (value: string) => void;
   onError: (value: string) => void;
@@ -706,7 +715,12 @@ function MembersSection({
     jobTitle: "",
     areas: "operasyon",
     role: "member" as B2BCompanyMemberRole,
+    isPilotAssistant: false,
+    leadMemberId: "",
   });
+  const leaders = members.filter(
+    (member) => member.role === "manager" && member.status !== "revoked",
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inviteFormRef = useRef<HTMLFormElement>(null);
   const inviteUrl =
@@ -729,6 +743,10 @@ function MembersSection({
     event.preventDefault();
     onError("");
     setInviteResult("");
+    if (form.isPilotAssistant && !form.leadMemberId) {
+      onError("Pilot asistan davetinden önce bağlı alan liderini seçin.");
+      return;
+    }
     setIsSubmitting(true);
     try {
       const result = await inviteB2BCompanyMember({
@@ -742,6 +760,10 @@ function MembersSection({
           .map((area) => area.trim())
           .filter(Boolean),
         role: form.role === "owner" ? "member" : form.role,
+        isPilotAssistant: form.isPilotAssistant,
+        leadMemberId: form.isPilotAssistant && form.leadMemberId
+          ? Number(form.leadMemberId)
+          : undefined,
       });
       setInviteResult(result.inviteUrl);
       setForm({
@@ -752,6 +774,8 @@ function MembersSection({
         jobTitle: "",
         areas: "operasyon",
         role: "member",
+        isPilotAssistant: false,
+        leadMemberId: "",
       });
       onSaved();
     } catch (inviteError) {
@@ -795,6 +819,11 @@ function MembersSection({
         </button>
       ) : null}
 
+      {currentMember?.role === "manager" ? (
+        <p className="mt-5 border border-primary/30 bg-primary/5 p-4 text-sm text-foreground/75">
+          Bağlı pilot asistanlar: {members.filter((member) => member.isPilotAssistant && member.leadMemberId === currentMember.id && member.status !== "revoked").map((member) => member.fullName).join(", ") || "Henüz yok"}. Veri girişleri taleplerde hazırlayan kişinin adıyla görünür; son olumlu onay firma sahibindedir.
+        </p>
+      ) : null}
       <div className="mt-6 space-y-3">
         {members.length === 0 ? (
           <p className="border border-dashed border-border/70 p-4 text-sm text-foreground/55">
@@ -824,6 +853,11 @@ function MembersSection({
                 {member.jobTitle ?? "Görev alanı belirtilmedi"} ·{" "}
                 {member.areas.map(formatArea).join(", ")}
               </p>
+              {member.isPilotAssistant ? (
+                <p className="mt-2 text-xs text-primary">
+                  Pilot asistan · Bağlı lider: {members.find((lead) => lead.id === member.leadMemberId)?.fullName ?? "Lider kaydı bulunamadı"}
+                </p>
+              ) : null}
             </div>
           ))
         )}
@@ -839,6 +873,36 @@ function MembersSection({
             <Plus size={16} className="text-primary" />
             Uzman ekip üyesi davet et
           </div>
+          <p className="mt-2 text-xs leading-5 text-foreground/60">
+            Alan lideri tüm şirket görevlerini ve taleplerini koordine eder; personel davetini firma sahibi/yöneticisi oluşturur. Pilot asistan yalnız kendi veri girişlerini ve kendisine atanmış görevleri yönetir. Son olumlu onay firma sahibindedir.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button type="button" onClick={() => setForm((current) => ({
+              ...current,
+              department: "Uluslararası Lojistik",
+              jobTitle: "Uluslararası İş Geliştirme ve Operasyon Lideri",
+              areas: "operasyon, lojistik, satış",
+              role: "manager",
+              isPilotAssistant: false,
+              leadMemberId: "",
+            }))} className="border border-primary/40 px-4 py-2 text-xs text-primary">
+              Lider yetki şablonu
+            </button>
+            <button type="button" disabled={leaders.length === 0} onClick={() => setForm((current) => ({
+              ...current,
+              department: "Operasyon",
+              jobTitle: "Operasyonel pilot asistan",
+              areas: "operasyon, lojistik",
+              role: "member",
+              isPilotAssistant: true,
+              leadMemberId: "",
+            }))} className="border border-primary/40 px-4 py-2 text-xs text-primary disabled:opacity-50">
+              Pilot asistan şablonu
+            </button>
+          </div>
+          {leaders.length === 0 ? (
+            <p className="mt-2 text-xs text-foreground/60">Pilot asistanı bağlamak için önce bir alan lideri daveti oluşturun.</p>
+          ) : null}
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <PanelField label="Ad soyad *" value={form.fullName} onChange={(value) => setForm((current) => ({ ...current, fullName: value }))} required />
             <PanelField label="E-posta *" type="email" value={form.email} onChange={(value) => setForm((current) => ({ ...current, email: value }))} required />
@@ -846,11 +910,31 @@ function MembersSection({
             <PanelField label="Departman" value={form.department} onChange={(value) => setForm((current) => ({ ...current, department: value }))} />
             <PanelField label="Görev alanı" value={form.jobTitle} onChange={(value) => setForm((current) => ({ ...current, jobTitle: value }))} />
             <PanelField label="Yetkili alanlar (virgülle)" value={form.areas} onChange={(value) => setForm((current) => ({ ...current, areas: value }))} required />
+            {form.isPilotAssistant && leaders.length > 0 ? (
+              <label className="block text-sm">
+                <span className="mb-2 block text-foreground/70">Bağlı alan lideri (pilot asistan için)</span>
+                <select
+                  value={form.leadMemberId}
+                  onChange={(event) => setForm((current) => ({ ...current, leadMemberId: event.target.value }))}
+                  className="w-full border border-border/70 bg-background px-4 py-3 outline-none focus:border-primary"
+                >
+                  <option value="">Bağlı alan liderini seçin</option>
+                  {leaders.map((leader) => (
+                    <option key={leader.id} value={leader.id}>{leader.fullName} ({leader.status === "invited" ? "Davet bekliyor" : "Aktif"})</option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
           </div>
           <div className="mt-4 flex flex-col gap-3 sm:flex-row">
             <select
               value={form.role}
-              onChange={(event) => setForm((current) => ({ ...current, role: event.target.value as B2BCompanyMemberRole }))}
+              onChange={(event) => setForm((current) => ({
+                ...current,
+                role: event.target.value as B2BCompanyMemberRole,
+                isPilotAssistant: event.target.value === "member" && current.isPilotAssistant,
+                leadMemberId: event.target.value === "member" ? current.leadMemberId : "",
+              }))}
               className="border border-border/70 bg-background px-4 py-3 text-sm outline-none focus:border-primary"
             >
               <option value="member">Uzman ekip üyesi</option>
@@ -859,6 +943,16 @@ function MembersSection({
                  <option value="admin">Sistem ve ekip yöneticisi</option>
                ) : null}
             </select>
+            {form.role === "member" ? (
+              <label className="flex items-center gap-2 text-xs text-foreground/70">
+                <input type="checkbox" checked={form.isPilotAssistant} disabled={leaders.length === 0}
+                  onChange={(event) => setForm((current) => ({
+                    ...current, isPilotAssistant: event.target.checked, leadMemberId: "",
+                  }))}
+                />
+                Bir alan liderine bağlı pilot asistan
+              </label>
+            ) : null}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -1263,6 +1357,18 @@ function TasksSection({
     }
   }
 
+  async function updateAssignee(taskId: number, assigneeMemberId: number | null) {
+    onError("");
+    try {
+      await updateB2BCompanyTask(taskId, { assigneeMemberId });
+      onSaved();
+    } catch (taskError) {
+      onError(
+        taskError instanceof Error ? taskError.message : "Görev sorumlusu güncellenemedi.",
+      );
+    }
+  }
+
   return (
     <section className="border border-border/70 bg-card p-6 md:p-8">
       <div className="flex items-start justify-between gap-4">
@@ -1355,6 +1461,27 @@ function TasksSection({
                 <p className="mt-4 text-sm leading-6 text-foreground/65">
                   {task.description || "Açıklama eklenmedi."}
                 </p>
+                {canManage ? (
+                  <label className="mt-4 block text-xs text-foreground/70">
+                    <span className="mb-2 block">Sorumluyu değiştir (pilot asistan dâhil)</span>
+                    <select
+                      value={activeMembers.some((member) => member.id === task.assigneeMemberId)
+                        ? String(task.assigneeMemberId) : ""}
+                      onChange={(event) => updateAssignee(
+                        task.id,
+                        event.target.value ? Number(event.target.value) : null,
+                      )}
+                      className="w-full border border-border/70 bg-background px-3 py-2 outline-none focus:border-primary"
+                    >
+                      <option value="">Atama yapılmadı</option>
+                      {activeMembers.map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.fullName}{member.isPilotAssistant ? " · pilot asistan" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
                 <div className="mt-5 flex flex-wrap gap-3 border-t border-border/70 pt-4 text-xs text-foreground/50">
                   <span>{assignee ? `Sorumlu: ${assignee.fullName}` : "Sorumlu atanmadı"}</span>
                   <span>{task.dueDate ? `Son tarih: ${task.dueDate}` : "Son tarih yok"}</span>

@@ -23,6 +23,9 @@ export interface B2BCompanyMember {
   jobTitle?: string | null;
   areas: string[];
   role: B2BCompanyMemberRole;
+  isPilotAssistant: boolean;
+  /** @nullable */
+  leadMemberId: number | null;
   status: B2BCompanyMemberStatus;
   invitedAt: Date;
   /** @nullable */

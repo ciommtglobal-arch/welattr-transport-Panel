@@ -27,8 +27,6 @@ import { requireMyCompany } from "../lib/companyAuth";
 import { requireUser } from "../lib/staffAuth";
 
 const router: IRouter = Router();
-const reviewWindowMinutes = 5;
-const ownerWindowMinutes = 15;
 
 const riskRules = [
   {
@@ -168,11 +166,9 @@ export async function createWorkflowApproval(input: {
   riskReason?: string | null;
 }) {
   const risk = classifyWorkflowRisk(input);
-  const now = new Date();
   const ownerSubmitted =
     Boolean(input.submittedByClerkUserId) &&
     input.submittedByClerkUserId === input.ownerClerkUserId;
-  const isAutoApproved = ownerSubmitted && risk.category === "none";
   const [approval] = await db
     .insert(workflowApprovalsTable)
     .values({
@@ -185,33 +181,20 @@ export async function createWorkflowApproval(input: {
       ownerClerkUserId: input.ownerClerkUserId,
       riskCategory: risk.category,
       riskReason: risk.reason,
-      status: isAutoApproved ? "auto_approved" : "pending_reviewer",
-      decisionDueAt: new Date(
-        now.getTime() +
-          (risk.category === "none"
-            ? reviewWindowMinutes
-            : ownerWindowMinutes) *
-            60_000,
-      ),
-      autoDecisionAt: isAutoApproved
-        ? now
-        : risk.category === "none"
-          ? new Date(now.getTime() + reviewWindowMinutes * 60_000)
-          : null,
+      status: ownerSubmitted ? "pending_owner" : "pending_reviewer",
+      decisionDueAt: null,
+      autoDecisionAt: null,
     })
     .returning();
 
-  if (!isAutoApproved) {
-    await notify(input.ownerClerkUserId, {
-      type: risk.category === "none" ? "approval" : "risk",
-      title: "Yeni onay işi bekliyor",
-      body:
-        risk.category === "none"
-          ? `${input.title} için Abdurrahman incelemesi bekleniyor.`
-          : `${input.title} manuel sahip onayı bekliyor: ${risk.reason}`,
-      approvalId: approval.id,
-    });
-  }
+  await notify(input.ownerClerkUserId, {
+    type: risk.category === "none" ? "approval" : "risk",
+    title: "Yeni onay işi bekliyor",
+    body: ownerSubmitted
+      ? `${input.title} için son sahip onayınız gerekiyor.`
+      : `${input.title} için ön inceleme, ardından son sahip onayı gerekiyor.`,
+    approvalId: approval.id,
+  });
   return approval;
 }
 
@@ -234,9 +217,7 @@ export async function isWorkflowEntityApproved(input: {
     .limit(1);
 
   return (
-    !approval ||
-    approval.status === "auto_approved" ||
-    approval.status === "approved"
+    approval?.status === "approved"
   );
 }
 
@@ -260,7 +241,7 @@ async function expireOverdueApprovals(businessProfileId: number) {
 router.get(
   "/b2b/business-profile/approvals",
   async (req, res): Promise<void> => {
-    const authorization = await requireMyCompany(req, res);
+    const authorization = await requireMyCompany(req, res, ["owner", "admin", "manager"]);
     if (!authorization) return;
     await expireOverdueApprovals(authorization.profile.id);
     const items = await db
@@ -278,11 +259,15 @@ router.get(
 router.post(
   "/b2b/business-profile/approvals",
   async (req, res): Promise<void> => {
-    const authorization = await requireMyCompany(req, res);
+    const authorization = await requireMyCompany(req, res, ["owner"]);
     if (!authorization) return;
     const parsed = CreateB2BWorkflowApprovalBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: "Onay kaydı bilgileri geçersiz." });
+      return;
+    }
+    if (parsed.data.entityType === "company_task" || parsed.data.entityType === "company_request") {
+      res.status(400).json({ error: "Firma görevi ve talebi onayı yalnız kayıt oluşturulurken açılır." });
       return;
     }
     const approval = await createWorkflowApproval({
@@ -338,10 +323,7 @@ router.patch(
         reviewerClerkUserId: authorization.userId,
         reviewerDecisionAt: now,
         decisionNote: parsed.data.note?.trim() || null,
-        decisionDueAt:
-          nextStatus === "pending_owner"
-            ? new Date(now.getTime() + ownerWindowMinutes * 60_000)
-            : existing.decisionDueAt,
+        decisionDueAt: null,
         autoDecisionAt:
           null,
         updatedAt: now,
@@ -387,7 +369,16 @@ router.patch(
             workflowApprovalsTable.businessProfileId,
             authorization.profile.id,
           ),
-          eq(workflowApprovalsTable.status, "pending_owner"),
+          or(
+            eq(workflowApprovalsTable.status, "pending_owner"),
+            and(
+              eq(workflowApprovalsTable.status, "auto_approved"),
+              or(
+                eq(workflowApprovalsTable.entityType, "company_task"),
+                eq(workflowApprovalsTable.entityType, "company_request"),
+              ),
+            ),
+          ),
         ),
       )
       .limit(1);

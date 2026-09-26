@@ -1721,6 +1721,9 @@ export interface B2BCompanyMemberInput {
      */
   areas: string[];
   role?: B2BCompanyMemberRole;
+  isPilotAssistant?: boolean;
+  /** @minimum 1 */
+  leadMemberId?: number;
 }
 
 export interface B2BCompanyMember {
@@ -1738,6 +1741,9 @@ export interface B2BCompanyMember {
   jobTitle?: string | null;
   areas: string[];
   role: B2BCompanyMemberRole;
+  isPilotAssistant: boolean;
+  /** @nullable */
+  leadMemberId: number | null;
   status: B2BCompanyMemberStatus;
   invitedAt: string;
   /** @nullable */

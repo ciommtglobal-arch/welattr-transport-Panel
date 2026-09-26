@@ -27,6 +27,7 @@ import {
   type B2BCompanyTask,
 } from "@workspace/db";
 import { requireMyCompany } from "../lib/companyAuth";
+import { canViewCompanyMember, canViewCompanyTask } from "../lib/companyDelegation";
 import { requireUser } from "../lib/staffAuth";
 import { createWorkflowApproval, isWorkflowEntityApproved } from "./workflow";
 
@@ -62,6 +63,8 @@ function serializeMember(member: B2BCompanyMember) {
     jobTitle: member.jobTitle,
     areas: member.areas,
     role: member.role,
+    isPilotAssistant: member.isPilotAssistant,
+    leadMemberId: member.leadMemberId,
     status: member.status,
     invitedAt: member.invitedAt.toISOString(),
     acceptedAt: member.acceptedAt?.toISOString() ?? null,
@@ -140,9 +143,12 @@ router.get(
       )
       .orderBy(desc(b2bCompanyMembersTable.createdAt));
 
+    const visibleMembers = members.filter((member) =>
+      canViewCompanyMember(authorization.member, member.id),
+    );
     res.json({
-      items: members.map(serializeMember),
-      total: members.length,
+      items: visibleMembers.map(serializeMember),
+      total: visibleMembers.length,
     });
   },
 );
@@ -153,7 +159,6 @@ router.post(
     const authorization = await requireMyCompany(req, res, [
       "owner",
       "admin",
-      "manager",
     ]);
     if (!authorization) return;
 
@@ -168,6 +173,13 @@ router.post(
 
     const input = parsed.data;
     if (
+      (input.isPilotAssistant && ((input.role && input.role !== "member") || !input.leadMemberId)) ||
+      (!input.isPilotAssistant && input.leadMemberId != null)
+    ) {
+      res.status(400).json({ error: "Pilot asistan, uzman ekip üyesi rolüyle bir alan liderine bağlanmalıdır." });
+      return;
+    }
+    if (
       authorization.member.role !== "owner" &&
       (input.role === "owner" || input.role === "admin")
     ) {
@@ -176,6 +188,23 @@ router.post(
           "Alan lideri yalnızca uzman ekip üyesi veya alan lideri davet edebilir.",
       });
       return;
+    }
+    if (input.leadMemberId != null) {
+      if (input.role && input.role !== "member") {
+        res.status(400).json({ error: "Pilot asistan yalnız uzman ekip üyesi olabilir." });
+        return;
+      }
+      const [lead] = await db.select().from(b2bCompanyMembersTable).where(
+        and(
+          eq(b2bCompanyMembersTable.id, input.leadMemberId),
+          eq(b2bCompanyMembersTable.businessProfileId, authorization.profile.id),
+          eq(b2bCompanyMembersTable.role, "manager"),
+        ),
+      ).limit(1);
+      if (!lead || lead.status === "revoked") {
+        res.status(400).json({ error: "Asistan yalnız bu firmadaki yetkili alan liderine bağlanabilir." });
+        return;
+      }
     }
     const email = input.email.trim().toLowerCase();
     const [existing] = await db
@@ -211,6 +240,8 @@ router.post(
         jobTitle: input.jobTitle?.trim() || null,
         areas: input.areas.map((area) => area.trim()),
         role: input.role === "owner" ? "member" : input.role ?? "member",
+        isPilotAssistant: input.isPilotAssistant ?? false,
+        leadMemberId: input.leadMemberId ?? null,
         status: "invited",
         inviteTokenHash: hashInviteToken(token),
         inviteExpiresAt: new Date(Date.now() + inviteLifetimeMs),
@@ -507,17 +538,9 @@ router.get(
       )
       .orderBy(desc(b2bCompanyTasksTable.createdAt));
 
-    const canSeeAll =
-      authorization.member.role === "owner" ||
-      authorization.member.role === "admin" ||
-      authorization.member.role === "manager";
-    const visibleTasks = canSeeAll
-      ? tasks
-      : tasks.filter(
-          (task) =>
-            task.assigneeMemberId === authorization.member.id ||
-            authorization.member.areas.includes(task.area),
-        );
+    const visibleTasks = tasks.filter((task) =>
+      canViewCompanyTask(authorization.member, task),
+    );
 
     res.json({
       items: visibleTasks.map(serializeTask),
