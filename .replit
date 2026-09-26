@@ -76,6 +76,9 @@ VIP_PRICE_STARS = "250"
 MMT_FOUNDER_REVIEWER_CLERK_USER_ID = "user_3JWCUrF5fmR47cyKeaW7dBTIwuG"
 ORPHAN_UPLOAD_CLEANUP_ENABLED = "false"
 
+[userenv.development]
+MMT_FOUNDER_REVIEWER_CLERK_USER_ID = "user_3JkMLrofYErCprsVsLHiIgoslrj"
+
 [[ports]]
 localPort = 8080
 externalPort = 80
