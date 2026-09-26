@@ -16,6 +16,12 @@ import {
 
 const router = Router();
 const base = "/storefront/construction";
+// Pause buyer-facing construction commerce without deleting catalog or quote records.
+// Staff can still review and update quotes that were submitted before closure.
+function storeClosed(_req: Request, res: Response) {
+  res.setHeader("Cache-Control", "no-store");
+  res.status(503).json({ error: "Construction products store is closed" });
+}
 function param(req: Request, key: string) {
   const value = req.params[key];
   return typeof value === "string" ? value : "";
@@ -46,7 +52,7 @@ function variantId(value: string) {
 function lineId(value: string) {
   return /^gid:\/\/shopify\/CartLine\/[^\s]{1,512}$/.test(value);
 }
-router.get(`${base}/catalog`, async (req, res) => {
+router.get(`${base}/catalog`, storeClosed, async (req, res) => {
   const parsed = GetConstructionCatalogQueryParams.safeParse(req.query);
   if (!parsed.success || (parsed.data.after && parsed.data.after.length > 1024)) {
     res.status(400).json({ error: "Invalid catalog pagination" });
@@ -56,7 +62,7 @@ router.get(`${base}/catalog`, async (req, res) => {
     res.json(await getConstructionCatalog(parsed.data.first, parsed.data.after));
   } catch (error) { shopifyError(error, res); }
 });
-router.get(`${base}/products/:handle`, async (req, res) => {
+router.get(`${base}/products/:handle`, storeClosed, async (req, res) => {
   const handle = param(req, "handle");
   if (!/^[a-zA-Z0-9][a-zA-Z0-9-]{0,255}$/.test(handle)) {
     res.status(400).json({ error: "Invalid product handle" }); return;
@@ -67,14 +73,14 @@ router.get(`${base}/products/:handle`, async (req, res) => {
     else res.json(product);
   } catch (error) { shopifyError(error, res); }
 });
-router.post(`${base}/cart`, async (req, res) => {
+router.post(`${base}/cart`, storeClosed, async (req, res) => {
   const body = parseBody(CreateConstructionCartBody, req, res);
   if (!body) return;
   if (!variantId(body.variantId)) { res.status(400).json({ error: "Invalid Shopify variant ID" }); return; }
   try { res.status(201).json(await createConstructionCart(body.variantId, body.quantity)); }
   catch (error) { shopifyError(error, res); }
 });
-router.get(`${base}/cart/:cartId`, async (req, res) => {
+router.get(`${base}/cart/:cartId`, storeClosed, async (req, res) => {
   const id = cartId(req, res);
   if (!id) return;
   try {
@@ -83,7 +89,7 @@ router.get(`${base}/cart/:cartId`, async (req, res) => {
     else res.json(cart);
   } catch (error) { shopifyError(error, res); }
 });
-router.post(`${base}/cart/:cartId/lines`, async (req, res) => {
+router.post(`${base}/cart/:cartId/lines`, storeClosed, async (req, res) => {
   const id = cartId(req, res);
   if (!id) return;
   const body = parseBody(AddConstructionCartLineBody, req, res);
@@ -92,7 +98,7 @@ router.post(`${base}/cart/:cartId/lines`, async (req, res) => {
   try { res.json(await addConstructionCartLine(id, body.variantId, body.quantity)); }
   catch (error) { shopifyError(error, res); }
 });
-router.patch(`${base}/cart/:cartId/lines`, async (req, res) => {
+router.patch(`${base}/cart/:cartId/lines`, storeClosed, async (req, res) => {
   const id = cartId(req, res);
   if (!id) return;
   const body = parseBody(UpdateConstructionCartLineBody, req, res);
@@ -101,7 +107,7 @@ router.patch(`${base}/cart/:cartId/lines`, async (req, res) => {
   try { res.json(await updateConstructionCartLine(id, body.lineId, body.quantity)); }
   catch (error) { shopifyError(error, res); }
 });
-router.delete(`${base}/cart/:cartId/lines`, async (req, res) => {
+router.delete(`${base}/cart/:cartId/lines`, storeClosed, async (req, res) => {
   const id = cartId(req, res);
   if (!id) return;
   const body = parseBody(RemoveConstructionCartLineBody, req, res);
@@ -110,7 +116,7 @@ router.delete(`${base}/cart/:cartId/lines`, async (req, res) => {
   try { res.json(await removeConstructionCartLine(id, body.lineId)); }
   catch (error) { shopifyError(error, res); }
 });
-router.post(`${base}/cart/:cartId/checkout`, async (req, res) => {
+router.post(`${base}/cart/:cartId/checkout`, storeClosed, async (req, res) => {
   const id = param(req, "cartId");
   if (!/^gid:\/\/shopify\/Cart\/[^\s]{1,512}$/.test(id)) {
     res.status(503).json({ error: "Shopify hosted checkout unavailable" }); return;
@@ -144,7 +150,7 @@ function quoteRateLimited(ip: string) {
   current.count += 1;
   return current.count > 5;
 }
-router.post(`${base}/quotes`, async (req, res) => {
+router.post(`${base}/quotes`, storeClosed, async (req, res) => {
   const input = req.body && typeof req.body === "object" && !Array.isArray(req.body)
     ? Object.fromEntries(Object.entries(req.body).map(([key, value]) => [key, typeof value === "string" ? value.trim() : value]))
     : req.body;

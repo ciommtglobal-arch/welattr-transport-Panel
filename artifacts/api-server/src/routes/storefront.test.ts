@@ -37,44 +37,39 @@ import router from "./storefront";
 const app = express();
 app.use(express.json());
 app.use("/api", router);
-describe("construction checkout gate", () => {
-  beforeEach(() => vi.mocked(checkoutConstructionCart).mockReset());
-  it("never exposes Shopify checkout URL even with a supplied cart ID", async () => {
-    vi.mocked(checkoutConstructionCart).mockRejectedValueOnce(new Error("Not verified"));
-    const response = await request(app).post("/api/storefront/construction/cart/gid%3A%2F%2Fshopify%2FCart%2F123/checkout");
-    expect(response.status).toBe(503);
-    expect(JSON.stringify(response.body)).not.toMatch(/checkoutUrl|https?:\/\//);
+describe("paused construction products store", () => {
+  beforeEach(() => {
+    vi.mocked(checkoutConstructionCart).mockReset();
+    quoteInsert.values = {};
   });
-  it("returns only a verified hosted checkout URL on an authorized request", async () => {
-    vi.mocked(checkoutConstructionCart).mockResolvedValueOnce({
-      checkoutUrl: "https://store.myshopify.com/checkouts/abc",
-    });
-    const response = await request(app).post("/api/storefront/construction/cart/gid%3A%2F%2Fshopify%2FCart%2F123/checkout");
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual({ checkoutUrl: "https://store.myshopify.com/checkouts/abc" });
+  it("blocks public product and cart reads", async () => {
+    const responses = await Promise.all([
+      request(app).get("/api/storefront/construction/catalog"),
+      request(app).get("/api/storefront/construction/products/example"),
+      request(app).get("/api/storefront/construction/cart/gid%3A%2F%2Fshopify%2FCart%2F123"),
+    ]);
+    for (const response of responses) {
+      expect(response.status).toBe(503);
+      expect(response.body).toEqual({ error: "Construction products store is closed" });
+      expect(response.headers["cache-control"]).toBe("no-store");
+    }
   });
-});
-describe("public construction quote", () => {
-  const body = {
-    quantity: 2, dimensions: "  200 x 100 cm  ", deliveryLocation: "  Istanbul  ",
-    contactName: "  Example Buyer  ", contactEmail: "  buyer@example.com  ",
-    contactPhone: "  5551234567  ",
-  };
-  it("trims submitted contact details and returns a PII-free receipt", async () => {
-    const response = await request(app).post("/api/storefront/construction/quotes").send(body);
-    expect(response.status).toBe(201);
-    expect(response.body).toMatchObject({ id: 1, status: "new" });
-    expect(quoteInsert.values).toMatchObject({
-      dimensions: "200 x 100 cm", deliveryLocation: "Istanbul",
-      contactName: "Example Buyer", contactEmail: "buyer@example.com",
-      contactPhone: "5551234567",
-    });
-    expect(JSON.stringify(response.body)).not.toMatch(/buyer@example.com|5551234567|Example Buyer|contact/i);
-  });
-  it("rejects a filled spam honeypot", async () => {
-    const response = await request(app).post("/api/storefront/construction/quotes")
-      .send({ ...body, website: "https://spam.example" });
-    expect(response.status).toBe(400);
+  it("blocks all new cart, checkout, and quote actions without changing records", async () => {
+    const cart = "/api/storefront/construction/cart/gid%3A%2F%2Fshopify%2FCart%2F123";
+    const responses = await Promise.all([
+      request(app).post("/api/storefront/construction/cart"),
+      request(app).post(`${cart}/lines`),
+      request(app).patch(`${cart}/lines`),
+      request(app).delete(`${cart}/lines`),
+      request(app).post(`${cart}/checkout`),
+      request(app).post("/api/storefront/construction/quotes"),
+    ]);
+    for (const response of responses) {
+      expect(response.status).toBe(503);
+      expect(response.body).toEqual({ error: "Construction products store is closed" });
+    }
+    expect(checkoutConstructionCart).not.toHaveBeenCalled();
+    expect(quoteInsert.values).toEqual({});
   });
 });
 describe("construction quote staff authorization", () => {
