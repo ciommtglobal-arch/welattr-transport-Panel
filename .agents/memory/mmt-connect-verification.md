@@ -62,9 +62,3 @@ During the founder-led launch, the founder's verified Clerk account is the initi
 **Why:** The project currently has no separate operations team, so the first legitimate application must not remain pending indefinitely; approval still stays behind the staff-only queue rather than becoming public self-approval.
 
 **How to apply:** Keep the reviewer route protected by the active staff table. Add future reviewers as separate staff records, and do not let arbitrary signed-in users claim the first admin role.
-
-New firms join through institutional business applications, not through team-member invitations. Existing firms must still be able to invite their own internal team members.
-
-**Why:** The user explicitly separated corporate onboarding from internal company access; removing old pending invitations was not a request to disable the team feature.
-
-**How to apply:** Keep business verification as the path for new firms and retain company-scoped, authorized team invitations for employees. Do not treat either flow as a replacement for the other.

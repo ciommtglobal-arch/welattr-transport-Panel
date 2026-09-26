@@ -8,3 +8,9 @@ Candidates should initially receive only trial-task access in the personnel test
 **Why:** The user corrected an earlier assumption that they were ready for permanent operations/manager assignments. Company-manager membership and a hardcoded operations-desk label are not authorization for a personnel role.
 
 **How to apply:** Keep trial grants separate from general `staff_users` operations/admin roles; never silently promote trial candidates or link an uncertain identity. Make founder evaluation read/write independent from candidate result submission.
+
+Personnel candidates may be taken into the organization only after the user's exam and evaluation. Keep company-internal team invitations available for established teams, but do not treat a pending invitation or trial participation as acceptance into staff.
+
+**Why:** The user clarified that “we will take them institutionally” referred to personnel candidates after the exam, not to new firms applying for business verification.
+
+**How to apply:** Do not promote, hire, or assign permanent authority to candidates before an explicit post-exam decision. Keep personnel evaluation separate from the business-profile application flow.
