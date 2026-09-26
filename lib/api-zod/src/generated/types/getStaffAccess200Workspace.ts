@@ -11,8 +11,5 @@ export type GetStaffAccess200Workspace = typeof GetStaffAccess200Workspace[keyof
 
 export const GetStaffAccess200Workspace = {
   '/staff/yonetim-paneli': '/staff/yonetim-paneli',
-  '/staff/sorumluluk-merkezi': '/staff/sorumluluk-merkezi',
-  '/staff/operasyon-masasi': '/staff/operasyon-masasi',
-  '/staff/applications': '/staff/applications',
-  '/staff/b2b-dogrulamalar': '/staff/b2b-dogrulamalar',
+  '/staff/calisma-alani': '/staff/calisma-alani',
 } as const;

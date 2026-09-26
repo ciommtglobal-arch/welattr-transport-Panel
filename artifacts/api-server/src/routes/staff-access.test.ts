@@ -46,11 +46,15 @@ describe("existing-account workspace routing", () => {
     expect(response.body).toEqual({ role: "founder", workspace: "/staff/yonetim-paneli" });
   });
 
-  it("routes existing finance staff to the finance workspace", async () => {
-    const response = await request(app).get("/staff/access");
-    expect(response.status).toBe(200);
-    expect(response.body.workspace).toBe("/staff/applications");
-  });
+  it.each(["admin", "operations", "finance", "reviewer"] as const)(
+    "routes existing %s staff to the shared workspace without changing their role",
+    async (role) => {
+      state.role = role;
+      const response = await request(app).get("/staff/access");
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ role, workspace: "/staff/calisma-alani" });
+    },
+  );
 
   it("does not give unrelated signed-in users a staff workspace", async () => {
     state.role = null;

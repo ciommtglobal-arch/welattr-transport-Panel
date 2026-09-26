@@ -1,4 +1,4 @@
-import { useState, type ComponentProps, type ReactNode } from 'react';
+import { type ComponentProps, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ClerkProvider, SignIn, SignUp, useAuth } from '@clerk/react';
 import { arSA, enUS, ruRU, trTR } from '@clerk/localizations';
@@ -14,7 +14,7 @@ import {
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
-import Home from '@/pages/home';
+import CorporateHome from '@/pages/corporate-home';
 import Limit, { LimitChooser } from '@/pages/limit';
 import StaffApplications from '@/pages/staff-applications';
 import StaffB2BListings from '@/pages/staff-b2b-listings';
@@ -34,6 +34,7 @@ import LogisticsHubPage from '@/pages/logistics-hub';
 import DepartmentsOverviewPage, { DepartmentPage } from '@/pages/departments';
 import StaffResponsibilityCenter from '@/pages/staff-responsibility-center';
 import StaffOperationsDesk from '@/pages/staff-operations-desk';
+import { StaffExpertWorkspace } from '@/pages/staff-expert-workspace';
 import { FounderDashboard, StaffWorkspaceRedirect } from '@/pages/staff-workspace';
 import {
   AboutPage,
@@ -63,6 +64,7 @@ const clerkPubKey = publishableKeyFromHost(
 );
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+const isStaffDomain = window.location.hostname.toLowerCase() === 'panel.mmtglobal.com.tr';
 type ClerkLocalization = NonNullable<
   ComponentProps<typeof ClerkProvider>["localization"]
 >;
@@ -227,7 +229,7 @@ function Router() {
   return (
     <RoutedErrorBoundary>
       <Switch>
-        <Route path="/" component={Home} />
+        <Route path="/" component={PanelAwareHome} />
         <Route path="/limit" component={LimitChooser} />
         <Route path="/limit/bireysel" component={IndividualLimit} />
         <Route path="/limit/ticari" component={CommercialLimit} />
@@ -266,6 +268,7 @@ function Router() {
         <Route path="/staff/sorumluluk-merkezi" component={StaffResponsibilityCenter} />
         <Route path="/staff/yonlendir" component={StaffWorkspaceRedirect} />
         <Route path="/staff/yonetim-paneli" component={FounderDashboard} />
+        <Route path="/staff/calisma-alani" component={StaffExpertWorkspace} />
         <Route path="/staff/operasyon-masasi" component={StaffOperationsDesk} />
         <Route path="/staff/giris/*?" component={StaffSignInPage} />
         <Route path="/staff/kayit/*?" component={StaffSignUpPage} />
@@ -302,75 +305,23 @@ function App() {
   return (
     <I18nProvider>
       <WouterRouter base={basePath}>
-        <DevPreviewGateway />
+        <PageLanguageSelector />
+        <ClerkApp />
       </WouterRouter>
     </I18nProvider>
   );
 }
 
-function DevPreviewGateway() {
+function PageLanguageSelector() {
   const [location] = useLocation();
-  const [showExistingSite, setShowExistingSite] = useState(false);
-  const previewPath = `${window.location.origin}/__mockup/preview/mmt-corporate/MobileReview`;
+  return location === '/' && !isStaffDomain ? null : <LanguageSelector />;
+}
 
-  if (import.meta.env.DEV && location === '/' && !showExistingSite) {
-    return (
-      <main className="flex min-h-dvh flex-col justify-center bg-[#0b1728] px-6 py-12 text-[#f4f1ea]">
-        <div className="mx-auto w-full max-w-xl">
-          <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-orange-400">
-            MMT Global · Geliştirme önizlemesi
-          </p>
-          <h1 className="mb-4 text-3xl font-bold leading-tight">
-            Yeni tasarımları inceleyin
-          </h1>
-          <p className="mb-8 text-base leading-relaxed text-slate-300">
-            Bunlar mevcut yönetim paneli değil. Bir ekran seçin; telefonunuzda
-            açıp kaydırabilir ve üstteki sekmelerle diğer tasarımlara geçebilirsiniz.
-          </p>
-          <div className="grid gap-3">
-            {[
-              ['Kurumsal ana sayfa', 'home'],
-              ['Yeni kurucu paneli', 'founder'],
-              ['Yeni uzman paneli', 'expert'],
-            ].map(([label, screen]) => (
-              <a
-                key={screen}
-                href={`${previewPath}?screen=${screen}`}
-                className="flex min-h-14 items-center justify-between border border-orange-400 bg-orange-600 px-5 py-3 font-bold text-white"
-              >
-                {label} <span aria-hidden="true">→</span>
-              </a>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowExistingSite(true)}
-            className="mt-8 min-h-12 text-left text-sm text-slate-300 underline underline-offset-4"
-          >
-            Mevcut siteyi ayrıca aç
-          </button>
-          <p className="mt-5 text-xs leading-relaxed text-slate-400">
-            Yalnızca tasarım önizlemesi. Gerçek hesaplar ve yetkiler değişmedi.
-          </p>
-        </div>
-      </main>
-    );
+function PanelAwareHome() {
+  if (isStaffDomain) {
+    return <Redirect to="/staff/yonlendir" />;
   }
-
-  return (
-    <>
-      <LanguageSelector />
-      <ClerkApp />
-      {import.meta.env.DEV && (
-        <a
-          href={previewPath}
-          className="fixed bottom-4 left-4 z-[100] max-w-[calc(100vw-2rem)] border border-orange-400 bg-[#0b1728] px-4 py-3 text-center text-sm font-bold text-white shadow-xl"
-        >
-          Yeni tasarım önizlemesini aç
-        </a>
-      )}
-    </>
-  );
+  return <CorporateHome />;
 }
 
 function ClerkApp() {
@@ -387,6 +338,7 @@ function ClerkApp() {
     normalizedLocation === '/staff/sorumluluk-merkezi' ||
     normalizedLocation === '/staff/yonlendir' ||
     normalizedLocation === '/staff/yonetim-paneli' ||
+    normalizedLocation === '/staff/calisma-alani' ||
     normalizedLocation === '/staff/operasyon-masasi' ||
     normalizedLocation.startsWith('/staff/giris') ||
     normalizedLocation.startsWith('/staff/kayit') ||
@@ -413,8 +365,8 @@ function ClerkApp() {
         proxyUrl={clerkProxyUrl}
         localization={clerkLocalizations[locale]}
         appearance={clerkAppearance}
-        signInUrl={`${basePath}/sign-in`}
-        signUpUrl={`${basePath}/sign-up`}
+        signInUrl={`${basePath}${isStaffDomain ? '/staff/giris' : '/sign-in'}`}
+        signUpUrl={`${basePath}${isStaffDomain ? '/staff/kayit' : '/sign-up'}`}
         routerPush={(to) => setLocation(stripBase(to))}
         routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
       >

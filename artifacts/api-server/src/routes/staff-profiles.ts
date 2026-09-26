@@ -20,10 +20,10 @@ router.get("/staff/access", async (req, res): Promise<void> => {
   const authorization = await requireStaff(req, res);
   if (!authorization) return;
   const workspaces = {
-    admin: "/staff/sorumluluk-merkezi",
-    operations: "/staff/operasyon-masasi",
-    finance: "/staff/applications",
-    reviewer: "/staff/b2b-dogrulamalar",
+    admin: "/staff/calisma-alani",
+    operations: "/staff/calisma-alani",
+    finance: "/staff/calisma-alani",
+    reviewer: "/staff/calisma-alani",
   } as const;
   res.json({
     role: authorization.staff.role,

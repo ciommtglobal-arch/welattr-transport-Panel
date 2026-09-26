@@ -1163,7 +1163,7 @@ export const GetStaffProfilesResponse = zod.array(GetStaffProfilesResponseItem)
  */
 export const GetStaffAccessResponse = zod.object({
   "role": zod.enum(['founder', 'admin', 'operations', 'finance', 'reviewer']),
-  "workspace": zod.enum(['/staff/yonetim-paneli', '/staff/sorumluluk-merkezi', '/staff/operasyon-masasi', '/staff/applications', '/staff/b2b-dogrulamalar'])
+  "workspace": zod.enum(['/staff/yonetim-paneli', '/staff/calisma-alani'])
 })
 
 

@@ -1066,7 +1066,7 @@ paths:
                     enum: [founder, admin, operations, finance, reviewer]
                   workspace:
                     type: string
-                    enum: [/staff/yonetim-paneli, /staff/sorumluluk-merkezi, /staff/operasyon-masasi, /staff/applications, /staff/b2b-dogrulamalar]
+                    enum: [/staff/yonetim-paneli, /staff/calisma-alani]
         "401":
           description: Authentication required
           content:
