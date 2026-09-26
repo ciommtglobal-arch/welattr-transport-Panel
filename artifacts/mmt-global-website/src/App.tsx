@@ -304,6 +304,14 @@ function App() {
       <WouterRouter base={basePath}>
         <LanguageSelector />
         <ClerkApp />
+        {import.meta.env.DEV && (
+          <a
+            href={`${window.location.origin}/__mockup/preview/mmt-corporate/MobileReview`}
+            className="fixed bottom-4 left-4 z-[100] max-w-[calc(100vw-2rem)] border border-orange-400 bg-[#0b1728] px-4 py-3 text-center text-sm font-bold text-white shadow-xl"
+          >
+            Mobil tasarım önizlemesini aç · Yalnız geliştirmede
+          </a>
+        )}
       </WouterRouter>
     </I18nProvider>
   );

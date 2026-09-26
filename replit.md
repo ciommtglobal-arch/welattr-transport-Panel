@@ -37,6 +37,7 @@ MMT Global; lojistik, uluslararası ticaret, finansal başvurular, inşaat ürü
 
 - Treat finance, logistics, MMT Connect, MMT Media, construction commerce and regional development as first-class business areas, not temporary side features.
 - Keep public website content, internal operations, financial review and role-specific data separated through explicit routes, permissions and server-side checks.
+- New staff must not receive management access on signup. Evaluate their work and practical test first, then assign narrowly scoped area permissions in stages; a design preview must not change existing accounts or roles.
 - Every operational workflow must have an owner, reference ID, status, next action, risk/exception state and approval boundary.
 - Financial website flows are pre-application and pre-assessment flows; they must never promise guaranteed credit, funding or approval.
 - WhatsApp and Telegram are coordination channels, not systems of record; credentials, bank access, payment card data, verification codes and sensitive personal documents must not be shared there.
