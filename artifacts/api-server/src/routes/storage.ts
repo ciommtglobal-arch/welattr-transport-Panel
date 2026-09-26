@@ -19,6 +19,7 @@ import {
   ObjectStorageService,
 } from "../lib/objectStorage";
 import { requireB2BReviewer, requireStaff } from "../lib/staffAuth";
+import type { Logger } from "pino";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -180,28 +181,10 @@ router.post("/storage/uploads/request-url", async (req, res) => {
  * permanently deletes objects. Use { "dryRun": true } to inspect candidates
  * without deleting anything.
  */
-router.post("/storage/uploads/cleanup-orphans", async (req, res) => {
-  const authorization = await requireStaff(req, res);
-  if (!authorization) return;
-
-  if (
-    authorization.staff.role !== "admin" &&
-    authorization.staff.role !== "operations"
-  ) {
-    res.status(403).json({
-      error: "Sahipsiz yükleme temizliği için yönetici yetkisi gerekiyor.",
-    });
-    return;
-  }
-
-  const parsedBody = CleanupOrphanUploadsBody.safeParse(req.body ?? {});
-  if (!parsedBody.success) {
-    res.status(400).json({ error: "Temizlik isteği geçersiz." });
-    return;
-  }
-
-  const dryRun = parsedBody.data.dryRun;
-
+export async function cleanupOrphanUploads(
+  dryRun: boolean,
+  log?: Pick<Logger, "info" | "error">,
+) {
   try {
     const retentionHours = getOrphanUploadRetentionHours();
     const cutoff = new Date(Date.now() - retentionHours * 60 * 60 * 1000);
@@ -252,7 +235,7 @@ router.post("/storage/uploads/cleanup-orphans", async (req, res) => {
             objectPath: object.objectPath,
             error: message,
           });
-          req.log?.error(
+          log?.error(
             { err: error, objectPath: object.objectPath },
             "Sahipsiz belge objesi silinemedi",
           );
@@ -260,7 +243,7 @@ router.post("/storage/uploads/cleanup-orphans", async (req, res) => {
       }
     }
 
-    req.log?.info(
+    log?.info(
       {
         dryRun: result.dryRun,
         retentionHours: result.retentionHours,
@@ -275,9 +258,39 @@ router.post("/storage/uploads/cleanup-orphans", async (req, res) => {
       },
       "Sahipsiz belge objesi temizliği tamamlandı",
     );
-    res.json(result);
+    return result;
   } catch (error) {
-    req.log?.error({ err: error }, "Sahipsiz belge objesi temizliği başarısız");
+    log?.error(
+      { err: error },
+      "Sahipsiz belge objesi temizliği başarısız",
+    );
+    throw error;
+  }
+}
+
+router.post("/storage/uploads/cleanup-orphans", async (req, res) => {
+  const authorization = await requireStaff(req, res);
+  if (!authorization) return;
+
+  if (
+    authorization.staff.role !== "admin" &&
+    authorization.staff.role !== "operations"
+  ) {
+    res.status(403).json({
+      error: "Sahipsiz yükleme temizliği için yönetici yetkisi gerekiyor.",
+    });
+    return;
+  }
+
+  const parsedBody = CleanupOrphanUploadsBody.safeParse(req.body ?? {});
+  if (!parsedBody.success) {
+    res.status(400).json({ error: "Temizlik isteği geçersiz." });
+    return;
+  }
+
+  try {
+    res.json(await cleanupOrphanUploads(parsedBody.data.dryRun, req.log));
+  } catch {
     res.status(500).json({
       error: "Sahipsiz belge objesi temizliği gerçekleştirilemedi.",
     });
