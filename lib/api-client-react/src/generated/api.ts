@@ -75,6 +75,8 @@ import type {
   GetB2BRequestReviewQueueParams,
   GetB2BRequestsParams,
   GetConstructionCatalogParams,
+  GetKasaRequestsParams,
+  GetKasaSummaryParams,
   GetLimitApplicationsParams,
   GetLogisticsOperationsParams,
   GetMediaItemsParams,
@@ -86,6 +88,17 @@ import type {
   GetStaffTrialTaskReportsParams,
   GetStaffTrialTasksParams,
   HealthStatus,
+  KasaAccess,
+  KasaBranch,
+  KasaBranchInput,
+  KasaBranchUpdate,
+  KasaPublicRequest,
+  KasaRequest,
+  KasaRequestInput,
+  KasaSummary,
+  KasaUser,
+  KasaUserGrant,
+  KasaUserUpdate,
   LimitApplication,
   LimitApplicationInput,
   LimitApplicationPage,
@@ -183,6 +196,957 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetKasaMeUrl = () => {
+
+
+
+
+  return `/api/kasa/me`
+}
+
+export const getKasaMe = async ( options?: Parameters<typeof customFetch>[1]): Promise<KasaAccess> => {
+
+  return customFetch<KasaAccess>(getGetKasaMeUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetKasaMeQueryKey = () => {
+    return [
+    `/api/kasa/me`
+    ] as const;
+    }
+
+
+export const getGetKasaMeQueryOptions = <TData = Awaited<ReturnType<typeof getKasaMe>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaMe>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetKasaMeQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getKasaMe>>> = ({ signal }) => getKasaMe({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getKasaMe>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetKasaMeQueryResult = NonNullable<Awaited<ReturnType<typeof getKasaMe>>>
+export type GetKasaMeQueryError = ErrorType<void>
+
+
+
+export function useGetKasaMe<TData = Awaited<ReturnType<typeof getKasaMe>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaMe>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetKasaMeQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSetupKasaOwnerUrl = () => {
+
+
+
+
+  return `/api/kasa/setup`
+}
+
+export const setupKasaOwner = async ( options?: Parameters<typeof customFetch>[1]): Promise<KasaUser> => {
+
+  return customFetch<KasaUser>(getSetupKasaOwnerUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getSetupKasaOwnerMutationKey = () => ['setupKasaOwner'] as const;
+
+export const getSetupKasaOwnerMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setupKasaOwner>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setupKasaOwner>>, TError,void, TContext> => {
+
+const mutationKey = getSetupKasaOwnerMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setupKasaOwner>>, void> = () => {
+
+
+          return  setupKasaOwner(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetupKasaOwnerMutationResult = NonNullable<Awaited<ReturnType<typeof setupKasaOwner>>>
+
+    export type SetupKasaOwnerMutationError = ErrorType<void>
+
+
+    export const useSetupKasaOwner = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setupKasaOwner>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setupKasaOwner>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getSetupKasaOwnerMutationOptions(options));
+    }
+
+export const getGetKasaBranchesUrl = () => {
+
+
+
+
+  return `/api/kasa/branches`
+}
+
+export const getKasaBranches = async ( options?: Parameters<typeof customFetch>[1]): Promise<KasaBranch[]> => {
+
+  return customFetch<KasaBranch[]>(getGetKasaBranchesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetKasaBranchesQueryKey = () => {
+    return [
+    `/api/kasa/branches`
+    ] as const;
+    }
+
+
+export const getGetKasaBranchesQueryOptions = <TData = Awaited<ReturnType<typeof getKasaBranches>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaBranches>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetKasaBranchesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getKasaBranches>>> = ({ signal }) => getKasaBranches({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getKasaBranches>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetKasaBranchesQueryResult = NonNullable<Awaited<ReturnType<typeof getKasaBranches>>>
+export type GetKasaBranchesQueryError = ErrorType<unknown>
+
+
+
+export function useGetKasaBranches<TData = Awaited<ReturnType<typeof getKasaBranches>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaBranches>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetKasaBranchesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateKasaBranchUrl = () => {
+
+
+
+
+  return `/api/kasa/branches`
+}
+
+export const createKasaBranch = async (kasaBranchInput: KasaBranchInput, options?: Parameters<typeof customFetch>[1]): Promise<KasaBranch> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<KasaBranch>(getCreateKasaBranchUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(kasaBranchInput)
+  }
+);}
+
+
+
+
+
+export const getCreateKasaBranchMutationKey = () => ['createKasaBranch'] as const;
+
+export const getCreateKasaBranchMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKasaBranch>>, TError,CreateKasaBranchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createKasaBranch>>, TError,CreateKasaBranchMutationVariables, TContext> => {
+
+const mutationKey = getCreateKasaBranchMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createKasaBranch>>, CreateKasaBranchMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createKasaBranch(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateKasaBranchMutationResult = NonNullable<Awaited<ReturnType<typeof createKasaBranch>>>
+    export type CreateKasaBranchMutationBody = BodyType<KasaBranchInput>
+    export type CreateKasaBranchMutationError = ErrorType<unknown>
+    export type CreateKasaBranchMutationVariables = {data: BodyType<KasaBranchInput>}
+
+    export const useCreateKasaBranch = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKasaBranch>>, TError,CreateKasaBranchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createKasaBranch>>,
+        TError,
+        CreateKasaBranchMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateKasaBranchMutationOptions(options));
+    }
+
+export const getUpdateKasaBranchUrl = (id: number,) => {
+
+
+
+
+  return `/api/kasa/branches/${id}`
+}
+
+export const updateKasaBranch = async (id: number,
+    kasaBranchUpdate: KasaBranchUpdate, options?: Parameters<typeof customFetch>[1]): Promise<KasaBranch> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<KasaBranch>(getUpdateKasaBranchUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(kasaBranchUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateKasaBranchMutationKey = () => ['updateKasaBranch'] as const;
+
+export const getUpdateKasaBranchMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKasaBranch>>, TError,UpdateKasaBranchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateKasaBranch>>, TError,UpdateKasaBranchMutationVariables, TContext> => {
+
+const mutationKey = getUpdateKasaBranchMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateKasaBranch>>, UpdateKasaBranchMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateKasaBranch(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateKasaBranchMutationResult = NonNullable<Awaited<ReturnType<typeof updateKasaBranch>>>
+    export type UpdateKasaBranchMutationBody = BodyType<KasaBranchUpdate>
+    export type UpdateKasaBranchMutationError = ErrorType<unknown>
+    export type UpdateKasaBranchMutationVariables = {id: number;data: BodyType<KasaBranchUpdate>}
+
+    export const useUpdateKasaBranch = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKasaBranch>>, TError,UpdateKasaBranchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateKasaBranch>>,
+        TError,
+        UpdateKasaBranchMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateKasaBranchMutationOptions(options));
+    }
+
+export const getGetKasaUsersUrl = () => {
+
+
+
+
+  return `/api/kasa/users`
+}
+
+export const getKasaUsers = async ( options?: Parameters<typeof customFetch>[1]): Promise<KasaUser[]> => {
+
+  return customFetch<KasaUser[]>(getGetKasaUsersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetKasaUsersQueryKey = () => {
+    return [
+    `/api/kasa/users`
+    ] as const;
+    }
+
+
+export const getGetKasaUsersQueryOptions = <TData = Awaited<ReturnType<typeof getKasaUsers>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaUsers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetKasaUsersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getKasaUsers>>> = ({ signal }) => getKasaUsers({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getKasaUsers>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetKasaUsersQueryResult = NonNullable<Awaited<ReturnType<typeof getKasaUsers>>>
+export type GetKasaUsersQueryError = ErrorType<unknown>
+
+
+
+export function useGetKasaUsers<TData = Awaited<ReturnType<typeof getKasaUsers>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaUsers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetKasaUsersQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGrantKasaUserUrl = () => {
+
+
+
+
+  return `/api/kasa/users`
+}
+
+export const grantKasaUser = async (kasaUserGrant: KasaUserGrant, options?: Parameters<typeof customFetch>[1]): Promise<KasaUser> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<KasaUser>(getGrantKasaUserUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(kasaUserGrant)
+  }
+);}
+
+
+
+
+
+export const getGrantKasaUserMutationKey = () => ['grantKasaUser'] as const;
+
+export const getGrantKasaUserMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof grantKasaUser>>, TError,GrantKasaUserMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof grantKasaUser>>, TError,GrantKasaUserMutationVariables, TContext> => {
+
+const mutationKey = getGrantKasaUserMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof grantKasaUser>>, GrantKasaUserMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  grantKasaUser(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GrantKasaUserMutationResult = NonNullable<Awaited<ReturnType<typeof grantKasaUser>>>
+    export type GrantKasaUserMutationBody = BodyType<KasaUserGrant>
+    export type GrantKasaUserMutationError = ErrorType<unknown>
+    export type GrantKasaUserMutationVariables = {data: BodyType<KasaUserGrant>}
+
+    export const useGrantKasaUser = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof grantKasaUser>>, TError,GrantKasaUserMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof grantKasaUser>>,
+        TError,
+        GrantKasaUserMutationVariables,
+        TContext
+      > => {
+      return useMutation(getGrantKasaUserMutationOptions(options));
+    }
+
+export const getUpdateKasaUserUrl = (id: number,) => {
+
+
+
+
+  return `/api/kasa/users/${id}`
+}
+
+export const updateKasaUser = async (id: number,
+    kasaUserUpdate: KasaUserUpdate, options?: Parameters<typeof customFetch>[1]): Promise<KasaUser> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<KasaUser>(getUpdateKasaUserUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(kasaUserUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateKasaUserMutationKey = () => ['updateKasaUser'] as const;
+
+export const getUpdateKasaUserMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKasaUser>>, TError,UpdateKasaUserMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateKasaUser>>, TError,UpdateKasaUserMutationVariables, TContext> => {
+
+const mutationKey = getUpdateKasaUserMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateKasaUser>>, UpdateKasaUserMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateKasaUser(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateKasaUserMutationResult = NonNullable<Awaited<ReturnType<typeof updateKasaUser>>>
+    export type UpdateKasaUserMutationBody = BodyType<KasaUserUpdate>
+    export type UpdateKasaUserMutationError = ErrorType<unknown>
+    export type UpdateKasaUserMutationVariables = {id: number;data: BodyType<KasaUserUpdate>}
+
+    export const useUpdateKasaUser = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKasaUser>>, TError,UpdateKasaUserMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateKasaUser>>,
+        TError,
+        UpdateKasaUserMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateKasaUserMutationOptions(options));
+    }
+
+export const getGetKasaRequestsUrl = (params?: GetKasaRequestsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/kasa/requests?${stringifiedParams}` : `/api/kasa/requests`
+}
+
+export const getKasaRequests = async (params?: GetKasaRequestsParams, options?: Parameters<typeof customFetch>[1]): Promise<KasaRequest[]> => {
+
+  return customFetch<KasaRequest[]>(getGetKasaRequestsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetKasaRequestsQueryKey = (params?: GetKasaRequestsParams,) => {
+    return [
+    `/api/kasa/requests`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetKasaRequestsQueryOptions = <TData = Awaited<ReturnType<typeof getKasaRequests>>, TError = ErrorType<unknown>>(params?: GetKasaRequestsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetKasaRequestsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getKasaRequests>>> = ({ signal }) => getKasaRequests(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getKasaRequests>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetKasaRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof getKasaRequests>>>
+export type GetKasaRequestsQueryError = ErrorType<unknown>
+
+
+
+export function useGetKasaRequests<TData = Awaited<ReturnType<typeof getKasaRequests>>, TError = ErrorType<unknown>>(
+ params?: GetKasaRequestsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetKasaRequestsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateKasaRequestUrl = () => {
+
+
+
+
+  return `/api/kasa/requests`
+}
+
+export const createKasaRequest = async (kasaRequestInput: KasaRequestInput, options?: Parameters<typeof customFetch>[1]): Promise<KasaRequest> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<KasaRequest>(getCreateKasaRequestUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(kasaRequestInput)
+  }
+);}
+
+
+
+
+
+export const getCreateKasaRequestMutationKey = () => ['createKasaRequest'] as const;
+
+export const getCreateKasaRequestMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKasaRequest>>, TError,CreateKasaRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createKasaRequest>>, TError,CreateKasaRequestMutationVariables, TContext> => {
+
+const mutationKey = getCreateKasaRequestMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createKasaRequest>>, CreateKasaRequestMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createKasaRequest(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateKasaRequestMutationResult = NonNullable<Awaited<ReturnType<typeof createKasaRequest>>>
+    export type CreateKasaRequestMutationBody = BodyType<KasaRequestInput>
+    export type CreateKasaRequestMutationError = ErrorType<unknown>
+    export type CreateKasaRequestMutationVariables = {data: BodyType<KasaRequestInput>}
+
+    export const useCreateKasaRequest = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKasaRequest>>, TError,CreateKasaRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createKasaRequest>>,
+        TError,
+        CreateKasaRequestMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateKasaRequestMutationOptions(options));
+    }
+
+export const getGetKasaRequestUrl = (id: number,) => {
+
+
+
+
+  return `/api/kasa/requests/${id}`
+}
+
+export const getKasaRequest = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<KasaRequest> => {
+
+  return customFetch<KasaRequest>(getGetKasaRequestUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetKasaRequestQueryKey = (id: number,) => {
+    return [
+    `/api/kasa/requests/${id}`
+    ] as const;
+    }
+
+
+export const getGetKasaRequestQueryOptions = <TData = Awaited<ReturnType<typeof getKasaRequest>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaRequest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetKasaRequestQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getKasaRequest>>> = ({ signal }) => getKasaRequest(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getKasaRequest>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetKasaRequestQueryResult = NonNullable<Awaited<ReturnType<typeof getKasaRequest>>>
+export type GetKasaRequestQueryError = ErrorType<void>
+
+
+
+export function useGetKasaRequest<TData = Awaited<ReturnType<typeof getKasaRequest>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaRequest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetKasaRequestQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetKasaPublicRequestUrl = (reference: string,) => {
+
+
+
+
+  return `/api/kasa/public/${reference}`
+}
+
+export const getKasaPublicRequest = async (reference: string, options?: Parameters<typeof customFetch>[1]): Promise<KasaPublicRequest> => {
+
+  return customFetch<KasaPublicRequest>(getGetKasaPublicRequestUrl(reference),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetKasaPublicRequestQueryKey = (reference: string,) => {
+    return [
+    `/api/kasa/public/${reference}`
+    ] as const;
+    }
+
+
+export const getGetKasaPublicRequestQueryOptions = <TData = Awaited<ReturnType<typeof getKasaPublicRequest>>, TError = ErrorType<void>>(reference: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaPublicRequest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetKasaPublicRequestQueryKey(reference);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getKasaPublicRequest>>> = ({ signal }) => getKasaPublicRequest(reference, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: reference !== null && reference !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getKasaPublicRequest>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetKasaPublicRequestQueryResult = NonNullable<Awaited<ReturnType<typeof getKasaPublicRequest>>>
+export type GetKasaPublicRequestQueryError = ErrorType<void>
+
+
+
+export function useGetKasaPublicRequest<TData = Awaited<ReturnType<typeof getKasaPublicRequest>>, TError = ErrorType<void>>(
+ reference: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaPublicRequest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetKasaPublicRequestQueryOptions(reference,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetKasaSummaryUrl = (params?: GetKasaSummaryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/kasa/summary?${stringifiedParams}` : `/api/kasa/summary`
+}
+
+export const getKasaSummary = async (params?: GetKasaSummaryParams, options?: Parameters<typeof customFetch>[1]): Promise<KasaSummary> => {
+
+  return customFetch<KasaSummary>(getGetKasaSummaryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetKasaSummaryQueryKey = (params?: GetKasaSummaryParams,) => {
+    return [
+    `/api/kasa/summary`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetKasaSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getKasaSummary>>, TError = ErrorType<void>>(params?: GetKasaSummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetKasaSummaryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getKasaSummary>>> = ({ signal }) => getKasaSummary(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getKasaSummary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetKasaSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getKasaSummary>>>
+export type GetKasaSummaryQueryError = ErrorType<void>
+
+
+
+export function useGetKasaSummary<TData = Awaited<ReturnType<typeof getKasaSummary>>, TError = ErrorType<void>>(
+ params?: GetKasaSummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetKasaSummaryQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetStaffTrialCandidatesUrl = (params?: GetStaffTrialCandidatesParams,) => {
   const normalizedParams = new URLSearchParams();

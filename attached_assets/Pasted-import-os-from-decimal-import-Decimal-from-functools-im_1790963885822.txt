@@ -1,0 +1,186 @@
+import os
+from decimal import Decimal
+from functools import wraps
+from flask import Flask, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)
+
+# Replit ortamında kalıcı SQLite veritabanı yapılandırması
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mmt_connect_secure.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db = SQLAlchemy(app)
+
+
+# 1. Veritabanı Modelleri (Kalıcı ve İzole Alan)
+class SecureUser(db.Model):
+  __tablename__ = "secure_users"
+  id = db.Column(db.Integer, primary_key=True)
+  telegram_id = db.Column(
+      db.String(50), unique=True, nullable=False, index=True
+  )
+  username = db.Column(db.String(100))
+  role = db.Column(
+      db.String(20), nullable=False
+  )  # 'admin' (CİO) veya 'cashier' (Kasiyer)
+  branch = db.Column(db.String(50), nullable=False)
+
+
+class SecureTransaction(db.Model):
+  __tablename__ = "secure_transactions"
+  id = db.Column(db.Integer, primary_key=True)
+  cashier_id = db.Column(
+      db.Integer, db.ForeignKey("secure_users.id"), nullable=False
+  )
+  # Yuvarlama hatalarını önlemek için Numeric(10,2) kullanıldı
+  amount = db.Column(db.Numeric(10, 2), nullable=False)
+  currency = db.Column(db.String(10), nullable=False, default="EUR")
+  status = db.Column(
+      db.String(20), nullable=False, default="PENDING"
+  )  # PENDING, COMPLETED, CANCELLED
+  branch = db.Column(db.String(50), nullable=False)
+  created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+  cashier = db.relationship(
+      "SecureUser", backref=db.backref("transactions", lazy=True)
+  )
+
+
+# Veritabanını oluştur
+with app.app_context():
+  db.create_all()
+
+
+# 2. Güvenli Sunucu Tarafı Kimlik Doğrulama Dekoratörü
+def secure_auth_required(required_role=None):
+  def decorator(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+      # İstemciden gelen Telegram ID'yi güvenli başlık (header) üzerinden alıyoruz
+      tg_id = request.headers.get("X-Telegram-ID")
+      if not tg_id:
+        return (
+            jsonify({
+                "error": (
+                    "Kimlik doğrulama başarısız: Telegram kimliği eksik."
+                )
+            }),
+            401,
+        )
+
+      user = SecureUser.query.filter_by(telegram_id=str(tg_id)).first()
+      if not user:
+        return jsonify({"error": "Yetkisiz erişim: Kullanıcı kayıtlı değil."}), 403
+
+      if required_role and user.role != required_role and user.role != "admin":
+        return (
+            jsonify({
+                "error": "Yetki yetersizliği: Bu işlem için rolünüz uygun değil."
+            }),
+            403,
+        )
+
+      request.current_user = user
+      return f(*args, **kwargs)
+
+    return decorated_function
+
+  return decorator
+
+
+# 3. Kasiyer Rotaları (Yalnızca kendi işlemlerini görür, hassas kasa verilerine erişemez)
+@app.route("/api/cashier/create-request", methods=["POST"])
+@secure_auth_required("cashier")
+def cashier_create_request():
+  data = request.json
+  try:
+    amount_str = str(data.get("amount"))
+    amount = Decimal(amount_str)
+    if amount <= 0:
+      raise ValueError()
+  except (TypeError, ValueError):
+    return jsonify({"error": "Geçersiz veya negatif tutar girdisi."}), 400
+
+  currency = data.get("currency", "EUR")
+  if currency not in ["EUR", "USD", "TRY"]:
+    return jsonify({"error": "Desteklenmeyen para birimi."}), 400
+
+  user = request.current_user
+
+  new_tx = SecureTransaction(
+      cashier_id=user.id,
+      amount=amount,
+      currency=currency,
+      status="PENDING",
+      branch=user.branch,
+  )
+  db.session.add(new_tx)
+  db.session.commit()
+
+  return jsonify({
+      "success": True,
+      "message": "Ödeme/QR talebi başarıyla oluşturuldu.",
+      "transaction_id": new_tx.id,
+      "amount": float(new_tx.amount),
+      "currency": new_tx.currency,
+      "status": new_tx.status,
+  })
+
+
+@app.route("/api/cashier/my-transactions", methods=["GET"])
+@secure_auth_required("cashier")
+def cashier_list_transactions():
+  user = request.current_user
+  # Kesin veri izolasyonu: Kasiyer yalnızca kendi id'sine ait kayıtları görebilir
+  txs = (
+      SecureTransaction.query.filter_by(cashier_id=user.id)
+      .order_by(SecureTransaction.created_at.desc())
+      .all()
+  )
+
+  result = [{
+      "id": tx.id,
+      "amount": float(tx.amount),
+      "currency": tx.currency,
+      "status": tx.status,
+      "date": tx.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+  } for tx in txs]
+
+  return jsonify({"success": True, "transactions": result})
+
+
+# 4. Yönetici / CİO Rotaları (Şube ve tarih filtreli, para birimleri ayrıştırılmış raporlar)
+@app.route("/api/admin/treasury-report", methods=["GET"])
+@secure_auth_required("admin")
+def admin_treasury_report():
+  branch_filter = request.args.get("branch")
+  status_filter = request.args.get("status", "COMPLETED")
+
+  query = SecureTransaction.query.filter_by(status=status_filter)
+  if branch_filter:
+    query = query.filter_by(branch=branch_filter)
+
+  transactions = query.all()
+
+  # Para birimlerinin birbirine karıştırılmasını önleyen gruplama
+  totals_by_currency = {}
+  for tx in transactions:
+    cur = tx.currency
+    totals_by_currency[cur] = totals_by_currency.get(cur, Decimal("0.00")) + tx.net_amount if hasattr(tx, 'net_amount') else totals_by_currency.get(cur, Decimal("0.00")) + tx.amount
+
+  formatted_totals = {cur: float(val) for cur, val in totals_by_currency.items()}
+
+  return jsonify({
+      "success": True,
+      "note": (
+          "Bu rapor operasyonel mutabakat amaçlıdır, yasal mali Z raporu"
+          " niteliği taşımaz."
+      ),
+      "filters": {"branch": branch_filter, "status": status_filter},
+      "totals_by_currency": formatted_totals,
+      "total_count": len(transactions),
+  })
+
+
+if __name__ == "__main__":
+  app.run(host="0.0.0.0", port=5000, debug=False)

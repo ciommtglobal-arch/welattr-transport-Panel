@@ -4,6 +4,7 @@ import pinoHttp from "pino-http";
 import { clerkMiddleware } from "@clerk/express";
 import { publishableKeyFromHost } from "@clerk/shared/keys";
 import router from "./routes";
+import kasaRouter from "./routes/kasa";
 import { logger } from "./lib/logger";
 import {
   CLERK_PROXY_PATH,
@@ -46,5 +47,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
+// Standalone Kasa browser calls preserve their artifact prefix.
+app.use("/kasa/api", kasaRouter);
 
 export default app;

@@ -5,6 +5,185 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type KasaUserRole = typeof KasaUserRole[keyof typeof KasaUserRole];
+
+
+export const KasaUserRole = {
+  admin: 'admin',
+  cashier: 'cashier',
+} as const;
+
+export interface KasaUser {
+  id: number;
+  name: string;
+  role: KasaUserRole;
+  /** @nullable */
+  branchId: number | null;
+  active: boolean;
+}
+
+export interface KasaAccess {
+  user: KasaUser | null;
+  canSetup: boolean;
+  liveEnabled: boolean;
+}
+
+export interface KasaBranch {
+  id: number;
+  name: string;
+  active: boolean;
+}
+
+export interface KasaBranchInput {
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  name: string;
+}
+
+export interface KasaBranchUpdate {
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  name: string;
+  active: boolean;
+}
+
+export type KasaUserGrantRole = typeof KasaUserGrantRole[keyof typeof KasaUserGrantRole];
+
+
+export const KasaUserGrantRole = {
+  admin: 'admin',
+  cashier: 'cashier',
+} as const;
+
+export interface KasaUserGrant {
+  /** @maxLength 255 */
+  email: string;
+  role: KasaUserGrantRole;
+  /**
+     * @minimum 1
+     * @nullable
+     */
+  branchId: number | null;
+}
+
+export type KasaUserUpdateRole = typeof KasaUserUpdateRole[keyof typeof KasaUserUpdateRole];
+
+
+export const KasaUserUpdateRole = {
+  admin: 'admin',
+  cashier: 'cashier',
+} as const;
+
+export interface KasaUserUpdate {
+  role: KasaUserUpdateRole;
+  /**
+     * @minimum 1
+     * @nullable
+     */
+  branchId: number | null;
+  active: boolean;
+}
+
+export type KasaRequestInputCurrency = typeof KasaRequestInputCurrency[keyof typeof KasaRequestInputCurrency];
+
+
+export const KasaRequestInputCurrency = {
+  TRY: 'TRY',
+  EUR: 'EUR',
+  USD: 'USD',
+} as const;
+
+export interface KasaRequestInput {
+  /** @pattern ^(0|[1-9]\d{0,7})(\.\d{1,2})?$ */
+  amount: string;
+  currency: KasaRequestInputCurrency;
+  /** @minimum 1 */
+  branchId: number;
+  /** @maxLength 500 */
+  note?: string;
+}
+
+export type KasaRequestCurrency = typeof KasaRequestCurrency[keyof typeof KasaRequestCurrency];
+
+
+export const KasaRequestCurrency = {
+  TRY: 'TRY',
+  EUR: 'EUR',
+  USD: 'USD',
+} as const;
+
+export type KasaRequestStatus = typeof KasaRequestStatus[keyof typeof KasaRequestStatus];
+
+
+export const KasaRequestStatus = {
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED',
+} as const;
+
+export interface KasaRequest {
+  id: number;
+  reference: string;
+  amount: string;
+  currency: KasaRequestCurrency;
+  branchId: number;
+  cashierId: number;
+  status: KasaRequestStatus;
+  note: string;
+  createdAt: string;
+}
+
+export type KasaPublicRequestCurrency = typeof KasaPublicRequestCurrency[keyof typeof KasaPublicRequestCurrency];
+
+
+export const KasaPublicRequestCurrency = {
+  TRY: 'TRY',
+  EUR: 'EUR',
+  USD: 'USD',
+} as const;
+
+export type KasaPublicRequestStatus = typeof KasaPublicRequestStatus[keyof typeof KasaPublicRequestStatus];
+
+
+export const KasaPublicRequestStatus = {
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED',
+} as const;
+
+export interface KasaPublicRequest {
+  amount: string;
+  currency: KasaPublicRequestCurrency;
+  status: KasaPublicRequestStatus;
+  liveEnabled: boolean;
+}
+
+export type KasaCurrencyTotalCurrency = typeof KasaCurrencyTotalCurrency[keyof typeof KasaCurrencyTotalCurrency];
+
+
+export const KasaCurrencyTotalCurrency = {
+  TRY: 'TRY',
+  EUR: 'EUR',
+  USD: 'USD',
+} as const;
+
+export interface KasaCurrencyTotal {
+  currency: KasaCurrencyTotalCurrency;
+  revenue: string;
+  pendingAmount: string;
+  pendingCount: number;
+  completedCount: number;
+}
+
+export interface KasaSummary {
+  totals: KasaCurrencyTotal[];
+  timezone: string;
+  fiscalReport: boolean;
+  liveEnabled: boolean;
+}
+
 export interface StaffTrialCandidateInput {
   /**
      * Exact verified account email; server trims and lowercases before Clerk lookup.
@@ -2379,6 +2558,28 @@ export interface WorkflowNotificationPage {
 export type TrialPageParameter = number;
 
 export type TrialPageSizeParameter = number;
+
+export type GetKasaRequestsParams = {
+/**
+ * @minimum 1
+ */
+branchId?: number;
+/**
+ * @pattern ^\d{4}-\d{2}-\d{2}$
+ */
+date?: string;
+};
+
+export type GetKasaSummaryParams = {
+/**
+ * @minimum 1
+ */
+branchId?: number;
+/**
+ * @pattern ^\d{4}-\d{2}-\d{2}$
+ */
+date?: string;
+};
 
 export type GetStaffTrialCandidatesParams = {
 /**

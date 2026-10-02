@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/kasa/"
+title = "MMT Kasa"
+description = "Bağımsız şube, kasiyer, QR ödeme talebi ve yönetici rapor uygulaması. Gerçek tahsilat kapalı."
+version = "1.0.0"
+id = "artifacts/kasa"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/kasa/" ]
+localPort = 19457
+
+[services.development]
+run = "pnpm --filter @workspace/kasa run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/kasa", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/kasa/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19457"
+BASE_PATH = "/kasa/"

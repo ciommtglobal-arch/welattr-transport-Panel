@@ -8,6 +8,238 @@
 import * as zod from 'zod';
 
 
+export const GetKasaMeResponse = zod.object({
+  "user": zod.union([zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "role": zod.enum(['admin', 'cashier']),
+  "branchId": zod.int().nullable(),
+  "active": zod.boolean()
+}),zod.null()]),
+  "canSetup": zod.boolean(),
+  "liveEnabled": zod.boolean()
+})
+
+
+export const SetupKasaOwnerResponse = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "role": zod.enum(['admin', 'cashier']),
+  "branchId": zod.int().nullable(),
+  "active": zod.boolean()
+})
+
+
+export const GetKasaBranchesResponseItem = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "active": zod.boolean()
+})
+export const GetKasaBranchesResponse = zod.array(GetKasaBranchesResponseItem)
+
+
+export const createKasaBranchBodyNameMax = 100;
+
+
+
+export const CreateKasaBranchBody = zod.object({
+  "name": zod.string().min(1).max(createKasaBranchBodyNameMax)
+})
+
+export const CreateKasaBranchResponse = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "active": zod.boolean()
+})
+
+
+
+
+
+export const UpdateKasaBranchParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const updateKasaBranchBodyNameMax = 100;
+
+
+
+export const UpdateKasaBranchBody = zod.object({
+  "name": zod.string().min(1).max(updateKasaBranchBodyNameMax),
+  "active": zod.boolean()
+})
+
+export const UpdateKasaBranchResponse = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "active": zod.boolean()
+})
+
+
+export const GetKasaUsersResponseItem = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "role": zod.enum(['admin', 'cashier']),
+  "branchId": zod.int().nullable(),
+  "active": zod.boolean()
+})
+export const GetKasaUsersResponse = zod.array(GetKasaUsersResponseItem)
+
+
+export const grantKasaUserBodyEmailMax = 255;
+
+
+
+
+export const GrantKasaUserBody = zod.object({
+  "email": zod.email().max(grantKasaUserBodyEmailMax),
+  "role": zod.enum(['admin', 'cashier']),
+  "branchId": zod.int().min(1).nullable()
+})
+
+export const GrantKasaUserResponse = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "role": zod.enum(['admin', 'cashier']),
+  "branchId": zod.int().nullable(),
+  "active": zod.boolean()
+})
+
+
+
+
+
+export const UpdateKasaUserParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+
+
+
+export const UpdateKasaUserBody = zod.object({
+  "role": zod.enum(['admin', 'cashier']),
+  "branchId": zod.int().min(1).nullable(),
+  "active": zod.boolean()
+})
+
+export const UpdateKasaUserResponse = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "role": zod.enum(['admin', 'cashier']),
+  "branchId": zod.int().nullable(),
+  "active": zod.boolean()
+})
+
+
+
+export const getKasaRequestsQueryDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+
+
+export const GetKasaRequestsQueryParams = zod.object({
+  "branchId": zod.coerce.number().int().min(1).optional(),
+  "date": zod.coerce.string().regex(getKasaRequestsQueryDateRegExp).optional()
+})
+
+export const GetKasaRequestsResponseItem = zod.object({
+  "id": zod.int(),
+  "reference": zod.string(),
+  "amount": zod.string(),
+  "currency": zod.enum(['TRY', 'EUR', 'USD']),
+  "branchId": zod.int(),
+  "cashierId": zod.int(),
+  "status": zod.enum(['PENDING', 'COMPLETED']),
+  "note": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+export const GetKasaRequestsResponse = zod.array(GetKasaRequestsResponseItem)
+
+
+export const createKasaRequestBodyAmountRegExp = new RegExp('^(0|[1-9]\\d{0,7})(\\.\\d{1,2})?$');
+
+export const createKasaRequestBodyNoteMax = 500;
+
+
+
+export const CreateKasaRequestBody = zod.object({
+  "amount": zod.string().regex(createKasaRequestBodyAmountRegExp),
+  "currency": zod.enum(['TRY', 'EUR', 'USD']),
+  "branchId": zod.int().min(1),
+  "note": zod.string().max(createKasaRequestBodyNoteMax).optional()
+})
+
+export const CreateKasaRequestResponse = zod.object({
+  "id": zod.int(),
+  "reference": zod.string(),
+  "amount": zod.string(),
+  "currency": zod.enum(['TRY', 'EUR', 'USD']),
+  "branchId": zod.int(),
+  "cashierId": zod.int(),
+  "status": zod.enum(['PENDING', 'COMPLETED']),
+  "note": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+
+
+
+
+
+export const GetKasaRequestParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const GetKasaRequestResponse = zod.object({
+  "id": zod.int(),
+  "reference": zod.string(),
+  "amount": zod.string(),
+  "currency": zod.enum(['TRY', 'EUR', 'USD']),
+  "branchId": zod.int(),
+  "cashierId": zod.int(),
+  "status": zod.enum(['PENDING', 'COMPLETED']),
+  "note": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+
+
+export const getKasaPublicRequestPathReferenceMin = 32;
+export const getKasaPublicRequestPathReferenceMax = 64;
+
+
+
+export const GetKasaPublicRequestParams = zod.object({
+  "reference": zod.coerce.string().min(getKasaPublicRequestPathReferenceMin).max(getKasaPublicRequestPathReferenceMax)
+})
+
+export const GetKasaPublicRequestResponse = zod.object({
+  "amount": zod.string(),
+  "currency": zod.enum(['TRY', 'EUR', 'USD']),
+  "status": zod.enum(['PENDING', 'COMPLETED']),
+  "liveEnabled": zod.boolean()
+})
+
+
+
+export const getKasaSummaryQueryDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+
+
+export const GetKasaSummaryQueryParams = zod.object({
+  "branchId": zod.coerce.number().int().min(1).optional(),
+  "date": zod.coerce.string().regex(getKasaSummaryQueryDateRegExp).optional()
+})
+
+export const GetKasaSummaryResponse = zod.object({
+  "totals": zod.array(zod.object({
+  "currency": zod.enum(['TRY', 'EUR', 'USD']),
+  "revenue": zod.string(),
+  "pendingAmount": zod.string(),
+  "pendingCount": zod.int(),
+  "completedCount": zod.int()
+})),
+  "timezone": zod.string(),
+  "fiscalReport": zod.boolean(),
+  "liveEnabled": zod.boolean()
+})
+
+
 /**
  * @summary Founder lists trial grants with verified email for identification
  */

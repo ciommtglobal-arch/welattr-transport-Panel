@@ -17,8 +17,10 @@ import workflowRouter from "./workflow";
 import staffRewardsRouter from "./staff-rewards";
 import paymentsRouter from "./payments";
 import staffTrialRouter from "./staff-trial";
+import kasaRouter from "./kasa";
 
 const router: IRouter = Router();
+router.use(kasaRouter);
 router.use(healthRouter);
 router.use(limitApplicationsRouter);
 router.use(storageRouter);

@@ -39,6 +39,7 @@ MMT Global; lojistik, uluslararası ticaret, finansal başvurular, inşaat ürü
 - `artifacts/api-server` — API routes, authentication boundaries and server-side business logic
 - `lib/db` — PostgreSQL schema and persistence source of truth
 - `telegram-bot` — operational Telegram bots
+- `artifacts/kasa` — standalone Turkish branch/cashier and QR request product, at `/kasa/`; separate Kasa grants, never MMT Connect or staff role grants
 - `attached_assets/generated_images` — approved brand and communication assets
 - `artifacts/mockup-sandbox` — isolated UI prototypes and visual variants
 
@@ -50,6 +51,8 @@ MMT Global; lojistik, uluslararası ticaret, finansal başvurular, inşaat ürü
 - Every operational workflow must have an owner, reference ID, status, next action, risk/exception state and approval boundary.
 - Financial website flows are pre-application and pre-assessment flows; they must never promise guaranteed credit, funding or approval.
 - Sanal POS remains mock-only until the owner explicitly approves live merchant onboarding. Never interpret a simulated successful payment as real collection or fulfillment.
+- Kasa is request-only, not mock checkout: no manual or simulated payment completion. QR displays minimal request information; revenue requires provider evidence and stays separated by currency. Daily reports are not fiscal Z reports.
+- Kasa's first owner must explicitly complete setup while signed in as the server-allowlisted `KASA_OWNER_CLERK_USER_ID` (falls back to the existing trusted founder allowlist). First signup never grants administration; Kasa grants never change other product roles.
 - WhatsApp and Telegram are coordination channels, not systems of record; credentials, bank access, payment card data, verification codes and sensitive personal documents must not be shared there.
 
 ## Product

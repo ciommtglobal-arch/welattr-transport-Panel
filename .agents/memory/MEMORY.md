@@ -25,3 +25,4 @@
 - [Completion review checkpoints](completion-review-checkpoints.md) — A rejected completion review can still commit current edits; inspect history before assuming work disappeared.
 - [Orphaned preview listeners](orphaned-preview-listeners.md) — A failed managed workflow can coexist with an older process still holding its port after runner recovery.
 - [Staff login device gap](staff-login-device-gap.md) — Controlled submissions reached Clerk, but the reported device-specific stall was not reproduced; do not claim real-account login is verified.
+- [Clerk test subjects](clerk-test-subjects.md) — Test helper subject overrides may be ignored; bind temporary dev fixtures to the actual unique test account, not the requested ID.
