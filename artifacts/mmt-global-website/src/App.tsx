@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, type ComponentProps, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState, type ComponentProps, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ClerkProvider, SignIn, SignUp, useAuth } from '@clerk/react';
 import { arSA, enUS, ruRU, trTR } from '@clerk/localizations';
@@ -6,6 +6,7 @@ import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { StaffSignInForm } from '@/components/staff-sign-in-form';
+import { getAuthNavigation } from '@/lib/auth-navigation';
 import {
   I18nProvider,
   LanguageSelector,
@@ -189,17 +190,23 @@ function stripBase(path: string) {
 
 function getInviteToken() {
   if (typeof window === 'undefined') return '';
-  return (
-    new URLSearchParams(window.location.search).get('invite') ??
-    window.sessionStorage.getItem('mmt-connect-invite') ??
-    ''
-  );
+  const token = new URLSearchParams(window.location.search).get('invite');
+  if (token !== null) return token;
+  try {
+    return window.sessionStorage.getItem('mmt-connect-invite') ?? '';
+  } catch {
+    return '';
+  }
 }
 
 function rememberInviteToken() {
   const inviteToken = getInviteToken();
   if (inviteToken && typeof window !== 'undefined') {
-    window.sessionStorage.setItem('mmt-connect-invite', inviteToken);
+    try {
+      window.sessionStorage.setItem('mmt-connect-invite', inviteToken);
+    } catch {
+      // Query parameters still carry the invite when storage is unavailable.
+    }
   }
 }
 
@@ -225,6 +232,11 @@ function SignInPage() {
   rememberInviteToken();
   const { isLoaded, isSignedIn } = useAuth();
   const panelUrl = getInviteAwarePanelRedirect(`${basePath}/b2b-agi/panel`);
+  const [location] = useLocation();
+  const navigation = getAuthNavigation('company', window.location.search, getInviteToken());
+  const simpleSignIn = normalizeRoutePath(location) === '/sign-in';
+  const standardPath = location.startsWith('/sign-in/standart')
+    ? '/sign-in/standart' : '/sign-in';
 
   if (isLoaded && isSignedIn) {
     return <Redirect to={stripBase(panelUrl)} />;
@@ -232,12 +244,20 @@ function SignInPage() {
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
-      <SignIn
+      {simpleSignIn ? (
+        <StaffSignInForm
+          redirectTo={navigation.returnPath}
+          alternativeSignInUrl={navigation.standardSignInUrl}
+          signUpUrl={navigation.signUpUrl}
+          companyPanel
+        />
+      ) : <SignIn
         routing="path"
-        path={`${basePath}/sign-in`}
+        path={`${basePath}${standardPath}`}
         signUpUrl={getInviteAwareAuthUrl(`${basePath}/sign-up`)}
         fallbackRedirectUrl={panelUrl}
-      />
+        forceRedirectUrl={panelUrl}
+      />}
     </div>
   );
 }
@@ -245,7 +265,9 @@ function SignInPage() {
 function StaffSignInPage() {
   const { isLoaded, isSignedIn } = useAuth();
   const [location] = useLocation();
-  if (isLoaded && isSignedIn) return <Redirect to="/staff/yonlendir" />;
+  const navigation = getAuthNavigation('staff', window.location.search, getInviteToken());
+  if (navigation.scope === 'company') rememberInviteToken();
+  if (isLoaded && isSignedIn) return <Redirect to={navigation.returnPath} />;
   const standardSignIn = location === '/staff/giris/standart' ||
     location.startsWith('/staff/giris/standart/');
   return (
@@ -254,22 +276,34 @@ function StaffSignInPage() {
         <SignIn
           routing="path"
           path={`${basePath}/staff/giris/standart`}
-          signUpUrl={`${basePath}/staff/kayit`}
-          fallbackRedirectUrl={`${basePath}/staff/yonlendir`}
+          signUpUrl={`${basePath}${navigation.signUpUrl}`}
+          fallbackRedirectUrl={`${basePath}${navigation.returnPath}`}
+          forceRedirectUrl={`${basePath}${navigation.returnPath}`}
         />
-      ) : <StaffSignInForm />}
+      ) : <StaffSignInForm
+        redirectTo={navigation.returnPath}
+        alternativeSignInUrl={navigation.standardSignInUrl}
+        signUpUrl={navigation.signUpUrl}
+        companyPanel={navigation.scope === 'company'}
+      />}
     </div>
   );
 }
 
 function StaffSignUpPage() {
+  const navigation = getAuthNavigation('staff', window.location.search, getInviteToken());
+  if (navigation.scope === 'company') rememberInviteToken();
+  const returnUrl = navigation.scope === 'company'
+    ? getInviteAwarePanelRedirect(`${basePath}/b2b-agi/katil?welcome=1`)
+    : `${basePath}/staff/yonlendir`;
   return (
     <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-5 bg-background px-4 py-10">
       <SignUp
         routing="path"
         path={`${basePath}/staff/kayit`}
-        signInUrl={`${basePath}/staff/giris`}
-        fallbackRedirectUrl={`${basePath}/staff/yonlendir`}
+        signInUrl={`${basePath}${navigation.signInUrl}`}
+        fallbackRedirectUrl={returnUrl}
+        forceRedirectUrl={returnUrl}
       />
       <p className="max-w-md text-center text-sm leading-6 text-foreground/60">
         Hesap oluşturmak tek başına personel, kurucu veya deneme erişimi vermez. Bu erişimler ayrı olarak yetkilendirilir; kayıt ekranı herhangi bir rol ya da erişim tanımlamaz.
@@ -286,8 +320,9 @@ function SignUpPage() {
       <SignUp
         routing="path"
         path={`${basePath}/sign-up`}
-        signInUrl={`${basePath}/sign-in`}
+        signInUrl={getInviteAwareAuthUrl(`${basePath}/sign-in`)}
         fallbackRedirectUrl={getInviteAwarePanelRedirect(`${basePath}/b2b-agi/katil?welcome=1`)}
+        forceRedirectUrl={getInviteAwarePanelRedirect(`${basePath}/b2b-agi/katil?welcome=1`)}
       />
     </div>
   );
@@ -413,6 +448,30 @@ function PanelAwareHome() {
   return <CorporateHome />;
 }
 
+function AuthServiceLoading() {
+  const [timedOut, setTimedOut] = useState(false);
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setTimedOut(true), 12000);
+    return () => window.clearTimeout(timeout);
+  }, []);
+  return (
+    <main className="flex min-h-[100dvh] items-center justify-center bg-background px-5">
+      <section className="max-w-sm space-y-5 border border-border bg-card p-8 text-center">
+        <h1 className="text-2xl font-semibold">MMT Global — Giriş</h1>
+        <p role={timedOut ? 'alert' : 'status'} className="text-base leading-7">
+          {timedOut
+            ? 'Giriş servisi yüklenemedi. Bağlantınızı kontrol edip sayfayı yeniden açın.'
+            : 'Giriş servisi hazırlanıyor…'}
+        </p>
+        {timedOut && <button type="button" onClick={() => window.location.reload()}
+          className="w-full bg-primary px-5 py-3 font-semibold text-primary-foreground">
+          Yeniden yükle
+        </button>}
+      </section>
+    </main>
+  );
+}
+
 function ClerkIdentityQueryProvider({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn, userId } = useAuth();
   const identityKey = isSignedIn && userId ? userId : 'signed-out';
@@ -421,7 +480,7 @@ function ClerkIdentityQueryProvider({ children }: { children: ReactNode }) {
     [isLoaded, identityKey],
   );
 
-  if (!isLoaded || !client) return <RouteLoading />;
+  if (!isLoaded || !client) return <AuthServiceLoading />;
   return (
     <QueryClientProvider key={identityKey} client={client}>
       {children}

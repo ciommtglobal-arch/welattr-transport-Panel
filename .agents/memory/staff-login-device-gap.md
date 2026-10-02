@@ -14,3 +14,9 @@ For real-account panel navigation, obtain the published URL from deployment meta
 **Why:** A preview link was given during real-account panel navigation, followed by a reported password/email-verification failure. The root cause was not established, but isolated development and production accounts make that link misleading.
 
 **How to apply:** Use the published site's sign-in route for normal business use; reserve preview links for explicitly identified development testing. Do not claim that changing the link proves successful authentication.
+
+Keep browser-only simulated password submissions and programmatic test authentication separate from real email/password authentication in reports.
+
+**Why:** A simulated submission can confirm autofill handling and visible errors, and programmatic sign-in can confirm the destination, without exercising the user's actual password, additional verification, or mobile production cookies. The reported device-specific failure remains unverified by those checks.
+
+**How to apply:** State exactly which parts were checked, require publishing before claiming a live fix, and never call a simulated or programmatic sign-in proof that the affected real account can log in.
