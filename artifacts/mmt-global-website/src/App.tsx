@@ -55,7 +55,16 @@ const StaffB2BListings = lazy(() => import('@/pages/staff-b2b-listings'));
 const StaffB2BVerifications = lazy(() => import('@/pages/staff-b2b-verifications'));
 const StaffB2BReports = lazy(() => import('@/pages/staff-b2b-reports'));
 const DemoWallet = lazy(() => import('@/pages/demo-wallet'));
-const ConstructionStoreClosedPage = lazy(() => import('@/pages/construction-store-closed'));
+const ConstructionStorePage = lazy(() => import('@/pages/construction-store'));
+const ConstructionProductPage = lazy(() =>
+  import('@/pages/construction-shop').then((module) => ({ default: module.ConstructionProductPage })),
+);
+const ConstructionCartPage = lazy(() =>
+  import('@/pages/construction-shop').then((module) => ({ default: module.ConstructionCartPage })),
+);
+const ConstructionQuotePage = lazy(() =>
+  import('@/pages/construction-shop').then((module) => ({ default: module.ConstructionQuotePage })),
+);
 const StaffConstructionQuotes = lazy(() => import('@/pages/staff-construction-quotes'));
 const PaymentPage = lazy(() => import('@/pages/payment'));
 const MockPaymentPage = lazy(() =>
@@ -295,10 +304,10 @@ function Router() {
         <Route path="/limit/ticari" component={CommercialLimit} />
         <Route path="/limit/konut" component={HousingLimit} />
         <Route path="/limit/tasit" component={VehicleLimit} />
-        <Route path="/insaat-magaza" component={ConstructionStoreClosedPage} />
-        <Route path="/insaat-magaza/sepet" component={ConstructionStoreClosedPage} />
-        <Route path="/insaat-magaza/teklif" component={ConstructionStoreClosedPage} />
-        <Route path="/insaat-magaza/urun/:handle" component={ConstructionStoreClosedPage} />
+        <Route path="/insaat-magaza" component={ConstructionStorePage} />
+        <Route path="/insaat-magaza/sepet" component={ConstructionCartPage} />
+        <Route path="/insaat-magaza/teklif" component={ConstructionQuotePage} />
+        <Route path="/insaat-magaza/urun/:handle" component={ConstructionProductPage} />
         <Route path="/cuzdan-demo" component={DemoWallet} />
         <Route path="/b2b-agi" component={FreeB2BNetworkPage} />
         <Route path="/b2b-agi/katil" component={B2BJoinPage} />

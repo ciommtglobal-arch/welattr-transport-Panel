@@ -9,8 +9,8 @@ The confirmed independent marketplace brand is **Mezopotamya Build — by MMT Gl
 
 **How to apply:** Brand the storefront as Mezopotamya Build by MMT Global. Present Piyadan only as the manufacturer/brand of genuine listed products when product information and media are authorized. Label MMT Global as the independent seller or marketplace operator, and reserve distributor language until written authorization is provided.
 
-The construction-products storefront is paused until the user explicitly decides to reopen it. Do not mistake cancellation of the store-launch task for an automatic runtime shutdown.
+The user explicitly asked to reactivate the construction-products store after previously pausing it. Reopening catalog, cart, and project quote access does not authorize live payment collection or invented product data.
 
-**Why:** The user cancelled the launch effort, then pointed out that product pages and commerce actions were still operational. Preserving prior records is important, but new public product, cart, checkout, and quote activity should not continue.
+**Why:** The latest user instruction reverses the storefront pause, but real merchant, payment, and product readiness must still be established separately.
 
-**How to apply:** Keep public pages and direct API transactions closed together; retain existing records and staff-only review access. Do not silently reopen commerce while working on unrelated construction or MMT Connect features. Changes in the preview do not close a previously published version until it is published again.
+**How to apply:** Keep catalog, cart, and quote pages consistent with their API routes. Preserve existing records and staff-only review authorization. Keep merchant verification requirements for checkout; use only real approved catalog data. Preview changes do not update the published store until republished.

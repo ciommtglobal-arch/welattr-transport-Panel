@@ -53,7 +53,7 @@ const copy: Record<Locale, Copy> = {
       { title: "Uluslararası Ticaret ve B2B", text: "Üretici, alıcı ve iş ortakları için dijital B2B ağı mevcuttur. Her ilan ve bağlantı kendi inceleme sürecine tabidir.", status: "Dijital araç", ready: true, href: "/b2b-agi", link: "B2B ağını görüntüle" },
       { title: "Finansman Danışmanlığı", text: "İşletmeler için seçenek ve yönlendirme çalışması; doğrulanmış bir danışmanlık hizmeti olarak sunulmamaktadır.", status: "Hazırlık", ready: false },
       { title: "Sağlık Turizmi", text: "Sınır ötesi sağlık hizmetleri için olası uzmanlık ve iş birliği zemini; hizmet faaliyeti doğrulanmamıştır.", status: "Hazırlık", ready: false },
-      { title: "İnşaat ve Gelişim", text: "Mezopotamya Build inşaat ürünleri mağazası şu anda kapalıdır. Ürün, sepet ve teklif işlemleri alınmıyor.", status: "Mağaza kapalı", ready: false },
+      { title: "İnşaat ve Gelişim", text: "Mezopotamya Build ürün kataloğu, sepet ve proje teklifi araçları açıktır. Ürünler Shopify'da yayımlandıkça görünür; çevrimiçi ödeme satıcı doğrulaması bekliyor.", status: "Katalog ve teklif", ready: true, href: "/insaat-magaza", link: "İnşaat mağazasını görüntüle" },
       { title: "Medya ve Tanıtım", text: "Kurumsal içerik ve medya araçları mevcuttur; onaylanmış bir duyuru veya yayınlanabilir pilot kaydı bulunmuyor.", status: "Dijital araç", ready: true, href: "/staff/yonlendir", link: "Çalışma alanı girişi" },
     ],
     regions: [
@@ -95,7 +95,7 @@ const copy: Record<Locale, Copy> = {
       { title: "International Trade and B2B", text: "A digital B2B network for producers, buyers and partners is available. Listings and connections are subject to their own review.", status: "Digital tools", ready: true, href: "/b2b-agi", link: "View B2B network" },
       { title: "Finance Advisory", text: "Options and referral work for businesses; this is not presented as a verified advisory service.", status: "In preparation", ready: false },
       { title: "Health Tourism", text: "A potential basis for expertise and cross-border healthcare partnerships; service operations are not verified.", status: "In preparation", ready: false },
-      { title: "Construction and Development", text: "The Mezopotamya Build construction products store is currently closed. Products, carts, and quote requests are unavailable.", status: "Store closed", ready: false },
+      { title: "Construction and Development", text: "Mezopotamya Build catalog, cart, and project quote tools are open. Products appear when published in Shopify; online payment awaits merchant verification.", status: "Catalog and quotes", ready: true, href: "/insaat-magaza", link: "View construction store" },
       { title: "Media and Promotion", text: "Corporate content and media tools are available; there is no approved announcement or publishable pilot record.", status: "Digital tools", ready: true, href: "/staff/yonlendir", link: "Enter workspace" },
     ],
     regions: [
@@ -137,7 +137,7 @@ const copy: Record<Locale, Copy> = {
       { title: "التجارة الدولية وB2B", text: "تتوفر شبكة رقمية للمنتجين والمشترين والشركاء. وتخضع الإعلانات والاتصالات للمراجعة.", status: "أدوات رقمية", ready: true, href: "/b2b-agi", link: "عرض شبكة B2B" },
       { title: "استشارات التمويل", text: "عمل على الخيارات والإحالات للشركات؛ ولا يُعرض كخدمة استشارية مؤكدة.", status: "قيد الإعداد", ready: false },
       { title: "السياحة الصحية", text: "إطار محتمل للخبرات والشراكات الصحية العابرة للحدود؛ لم يتم تأكيد تشغيل الخدمات.", status: "قيد الإعداد", ready: false },
-      { title: "الإنشاء والتطوير", text: "متجر منتجات البناء Mezopotamya Build مغلق حاليًا. المنتجات والسلة وطلبات عروض الأسعار غير متاحة.", status: "المتجر مغلق", ready: false },
+      { title: "الإنشاء والتطوير", text: "كتالوج Mezopotamya Build والسلة وطلبات عروض أسعار المشاريع متاحة. تظهر المنتجات عند نشرها في Shopify؛ الدفع الإلكتروني ينتظر التحقق من التاجر.", status: "الكتالوج وعروض الأسعار", ready: true, href: "/insaat-magaza", link: "عرض متجر مواد البناء" },
       { title: "الإعلام والترويج", text: "تتوفر أدوات للمحتوى المؤسسي والإعلام؛ ولا توجد إعلانات معتمدة أو سجلات تجارب قابلة للنشر.", status: "أدوات رقمية", ready: true, href: "/staff/yonlendir", link: "دخول مساحة العمل" },
     ],
     regions: [
@@ -179,7 +179,7 @@ const copy: Record<Locale, Copy> = {
       { title: "Международная торговля и B2B", text: "Доступна цифровая B2B-сеть для производителей, покупателей и партнёров. Объявления и контакты проходят отдельную проверку.", status: "Цифровые инструменты", ready: true, href: "/b2b-agi", link: "Открыть B2B-сеть" },
       { title: "Финансовый консалтинг", text: "Подготовка вариантов и направлений для бизнеса; это не заявляется как подтверждённая консультационная услуга.", status: "Подготовка", ready: false },
       { title: "Медицинский туризм", text: "Возможная основа для экспертизы и международного сотрудничества в здравоохранении; работа услуг не подтверждена.", status: "Подготовка", ready: false },
-      { title: "Строительство и развитие", text: "Магазин строительных товаров Mezopotamya Build сейчас закрыт. Товары, корзина и запросы предложений недоступны.", status: "Магазин закрыт", ready: false },
+      { title: "Строительство и развитие", text: "Каталог Mezopotamya Build, корзина и запросы расчёта открыты. Товары появляются после публикации в Shopify; онлайн-оплата ожидает проверки продавца.", status: "Каталог и расчёт", ready: true, href: "/insaat-magaza", link: "Открыть магазин стройматериалов" },
       { title: "Медиа и продвижение", text: "Доступны инструменты корпоративного контента и медиа; утверждённых объявлений и готовых к публикации пилотных записей нет.", status: "Цифровые инструменты", ready: true, href: "/staff/yonlendir", link: "Войти в рабочее пространство" },
     ],
     regions: [

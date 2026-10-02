@@ -32,43 +32,74 @@ vi.mock("../lib/shopifyStorefrontClient", () => ({
   checkoutConstructionCart: vi.fn(),
   CartValidationError: class extends Error {},
 }));
-import { checkoutConstructionCart } from "../lib/shopifyStorefrontClient";
+import {
+  getConstructionCatalog, getConstructionProduct, getConstructionCart,
+  createConstructionCart, addConstructionCartLine, updateConstructionCartLine,
+  removeConstructionCartLine, checkoutConstructionCart,
+} from "../lib/shopifyStorefrontClient";
 import router from "./storefront";
 const app = express();
 app.use(express.json());
 app.use("/api", router);
-describe("paused construction products store", () => {
+describe("reopened construction products store", () => {
   beforeEach(() => {
-    vi.mocked(checkoutConstructionCart).mockReset();
+    vi.resetAllMocks();
+    vi.mocked(getConstructionCatalog).mockResolvedValue({
+      connected: true, fetchedAt: new Date().toISOString(),
+      shopName: "Store", products: [], collections: [],
+      pageInfo: { hasNextPage: false, endCursor: null },
+    });
+    vi.mocked(getConstructionProduct).mockResolvedValue(null);
+    vi.mocked(getConstructionCart).mockResolvedValue(null);
+    vi.mocked(checkoutConstructionCart).mockRejectedValue(new Error("Merchant not verified"));
     quoteInsert.values = {};
   });
-  it("blocks public product and cart reads", async () => {
-    const responses = await Promise.all([
-      request(app).get("/api/storefront/construction/catalog"),
-      request(app).get("/api/storefront/construction/products/example"),
-      request(app).get("/api/storefront/construction/cart/gid%3A%2F%2Fshopify%2FCart%2F123"),
-    ]);
-    for (const response of responses) {
-      expect(response.status).toBe(503);
-      expect(response.body).toEqual({ error: "Construction products store is closed" });
-      expect(response.headers["cache-control"]).toBe("no-store");
-    }
+  it("opens public catalog, product and cart reads without inventing products", async () => {
+    const catalog = await request(app).get("/api/storefront/construction/catalog");
+    const product = await request(app).get("/api/storefront/construction/products/example");
+    const cart = await request(app).get("/api/storefront/construction/cart/gid%3A%2F%2Fshopify%2FCart%2F123");
+    expect(catalog.status).toBe(200);
+    expect(catalog.body.products).toEqual([]);
+    expect(product.status).toBe(404);
+    expect(cart.status).toBe(404);
+    expect(getConstructionProduct).toHaveBeenCalledWith("example");
+    expect(getConstructionCart).toHaveBeenCalledWith("gid://shopify/Cart/123");
   });
-  it("blocks all new cart, checkout, and quote actions without changing records", async () => {
+  it("allows validated cart creation and line edits to reach Shopify", async () => {
     const cart = "/api/storefront/construction/cart/gid%3A%2F%2Fshopify%2FCart%2F123";
-    const responses = await Promise.all([
-      request(app).post("/api/storefront/construction/cart"),
-      request(app).post(`${cart}/lines`),
-      request(app).patch(`${cart}/lines`),
-      request(app).delete(`${cart}/lines`),
-      request(app).post(`${cart}/checkout`),
-      request(app).post("/api/storefront/construction/quotes"),
-    ]);
-    for (const response of responses) {
-      expect(response.status).toBe(503);
-      expect(response.body).toEqual({ error: "Construction products store is closed" });
-    }
-    expect(checkoutConstructionCart).not.toHaveBeenCalled();
+    const variantId = "gid://shopify/ProductVariant/123";
+    const lineId = "gid://shopify/CartLine/123";
+    expect((await request(app).post("/api/storefront/construction/cart").send({ variantId, quantity: 2 })).status).toBe(201);
+    expect((await request(app).post(`${cart}/lines`).send({ variantId, quantity: 2 })).status).toBe(200);
+    expect((await request(app).patch(`${cart}/lines`).send({ lineId, quantity: 3 })).status).toBe(200);
+    expect((await request(app).delete(`${cart}/lines`).send({ lineId })).status).toBe(200);
+    expect(createConstructionCart).toHaveBeenCalledWith(variantId, 2);
+    expect(addConstructionCartLine).toHaveBeenCalledWith("gid://shopify/Cart/123", variantId, 2);
+    expect(updateConstructionCartLine).toHaveBeenCalledWith("gid://shopify/Cart/123", lineId, 3);
+    expect(removeConstructionCartLine).toHaveBeenCalledWith("gid://shopify/Cart/123", lineId);
+  });
+  it("retains the merchant verification checkout gate", async () => {
+    const response = await request(app).post("/api/storefront/construction/cart/gid%3A%2F%2Fshopify%2FCart%2F123/checkout");
+    expect(response.status).toBe(503);
+    expect(response.body.checkoutUrl).toBeUndefined();
+    expect(checkoutConstructionCart).toHaveBeenCalledWith("gid://shopify/Cart/123");
+  });
+  it("accepts project quotes and returns only a receipt, not contact details", async () => {
+    const response = await request(app).post("/api/storefront/construction/quotes").send({
+      quantity: 2, dimensions: " 1200 x 600 mm ", deliveryLocation: " Test location ",
+      contactName: " Test customer ", contactEmail: " TEST@example.com ", contactPhone: "+900000000000",
+    });
+    expect(response.status).toBe(201);
+    expect(response.body.reference).toMatch(/^INS-\d{4}-[A-F0-9]{12}$/);
+    expect(response.body.status).toBe("new");
+    expect(response.body.contactEmail).toBeUndefined();
+    expect(quoteInsert.values).toMatchObject({
+      dimensions: "1200 x 600 mm", contactEmail: "test@example.com",
+    });
+  });
+  it("rejects invalid quote details without saving a record", async () => {
+    const response = await request(app).post("/api/storefront/construction/quotes").send({});
+    expect(response.status).toBe(400);
     expect(quoteInsert.values).toEqual({});
   });
 });
