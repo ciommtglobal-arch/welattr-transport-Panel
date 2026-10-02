@@ -1,0 +1,71 @@
+from flask import Flask, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
+from decimal import Decimal
+from functools import wraps
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mmt_connect.db'
+db = SQLAlchemy(app)
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    telegram_id = db.Column(db.String(50), unique=True, nullable=False)
+    username = db.Column(db.String(100))
+    role = db.Column(db.String(20), nullable=False) # 'admin' (CİO) veya 'cashier'
+    branch = db.Column(db.String(50))
+
+class Transaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    cashier_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    # Kuruş hassasiyeti için Numeric (10 hane, 2 ondalık) kullanıldı
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
+    currency = db.Column(db.String(10), default='EUR')
+    status = db.Column(db.String(20), default='PENDING') # PENDING, COMPLETED
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    cashier = db.relationship('User', backref=db.backref('transactions', lazy=True))
+
+# Yetki ve Kapsam Kontrol Dekoratörü
+def role_required(required_role):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            tg_id = request.headers.get('X-Telegram-ID')
+            user = User.query.filter_by(telegram_id=tg_id).first()
+            
+            if not user or (required_role == 'admin' and user.role != 'admin'):
+                return jsonify({"error": "Yetkisiz erişim!"}), 403
+                
+            request.current_user = user # Kullanıcı nesnesini rotaya taşıyoruz
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+# Kasiyer Rotaları (Sadece kendi işlemlerini görür, ana kasayı göremez)
+@app.route('/api/cashier/my-sales', methods=['GET'])
+@role_required('cashier')
+def get_my_sales():
+    user = request.current_user
+    # Kasiyer yalnızca kendi oluşturduğu işlemleri listeleyebilir
+    txs = Transaction.query.filter_by(cashier_id=user.id).all()
+    
+    result = [{
+        "id": tx.id,
+        "amount": float(tx.amount),
+        "currency": tx.currency,
+        "status": tx.status,
+        "date": tx.created_at
+    } for tx in txs]
+    
+    return jsonify({"success": True, "sales": result})
+
+# Yönetici / CİO Rotaları (Tüm şubeleri ve toplam ciroyu denetler)
+@app.route('/api/admin/treasury-summary', methods=['GET'])
+@role_required('admin')
+def treasury_summary():
+    total_revenue = db.session.query(db.func.sum(Transaction.amount)).scalar() or Decimal('0.00')
+    return jsonify({
+        "success": True, 
+        "total_treasury_balance": float(total_revenue),
+        "currency": "EUR"
+    })
