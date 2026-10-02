@@ -142,6 +142,7 @@ import type {
   StaffTrialTaskInput,
   StaffTrialTaskPage,
   StaffTrialTaskUpdate,
+  SystemHealthStatus,
   TamiHostedPaymentInput,
   TamiHostedPaymentSession,
   TamiPaymentStatus,
@@ -4306,6 +4307,84 @@ export const useCreateLogisticsCommunication = <TError = ErrorType<ErrorResponse
       return useMutation(getCreateLogisticsCommunicationMutationOptions(options));
     }
 
+export const getSystemHealthCheckUrl = () => {
+
+
+
+
+  return `/api/health`
+}
+
+/**
+ * Checks API and database connectivity, not business launch readiness.
+ * @summary MMT Global system health check
+ */
+export const systemHealthCheck = async ( options?: Parameters<typeof customFetch>[1]): Promise<SystemHealthStatus> => {
+
+  return customFetch<SystemHealthStatus>(getSystemHealthCheckUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSystemHealthCheckQueryKey = () => {
+    return [
+    `/api/health`
+    ] as const;
+    }
+
+
+export const getSystemHealthCheckQueryOptions = <TData = Awaited<ReturnType<typeof systemHealthCheck>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof systemHealthCheck>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSystemHealthCheckQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof systemHealthCheck>>> = ({ signal }) => systemHealthCheck({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof systemHealthCheck>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type SystemHealthCheckQueryResult = NonNullable<Awaited<ReturnType<typeof systemHealthCheck>>>
+export type SystemHealthCheckQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary MMT Global system health check
+ */
+
+export function useSystemHealthCheck<TData = Awaited<ReturnType<typeof systemHealthCheck>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof systemHealthCheck>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getSystemHealthCheckQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getHealthCheckUrl = () => {
 
 
@@ -4315,7 +4394,7 @@ export const getHealthCheckUrl = () => {
 }
 
 /**
- * Returns server health status
+ * Checks API and database connectivity.
  * @summary Health check
  */
 export const healthCheck = async ( options?: Parameters<typeof customFetch>[1]): Promise<HealthStatus> => {
@@ -4340,7 +4419,7 @@ export const getHealthCheckQueryKey = () => {
     }
 
 
-export const getHealthCheckQueryOptions = <TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getHealthCheckQueryOptions = <TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -4359,14 +4438,14 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type HealthCheckQueryResult = NonNullable<Awaited<ReturnType<typeof healthCheck>>>
-export type HealthCheckQueryError = ErrorType<unknown>
+export type HealthCheckQueryError = ErrorType<ErrorResponse>
 
 
 /**
  * @summary Health check
  */
 
-export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>(
+export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<ErrorResponse>>(
   options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {

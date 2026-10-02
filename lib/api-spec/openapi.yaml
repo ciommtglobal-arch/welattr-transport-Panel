@@ -1470,12 +1470,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+  /health:
+    get:
+      operationId: systemHealthCheck
+      tags: [health]
+      summary: MMT Global system health check
+      description: Checks API and database connectivity, not business launch readiness.
+      responses:
+        "200":
+          description: API and database are reachable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemHealthStatus"
+        "503":
+          description: Database readiness check failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
+      description: Checks API and database connectivity.
       responses:
         "200":
           description: Healthy
@@ -1483,6 +1502,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+        "503":
+          description: Database readiness check failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /staff/profiles:
     get:
       operationId: getStaffProfiles
@@ -3499,6 +3524,16 @@ components:
       properties:
         error:
           type: string
+    SystemHealthStatus:
+      type: object
+      required: [status, code]
+      properties:
+        status:
+          type: string
+          enum: [healthy]
+        code:
+          type: integer
+          enum: [200]
     HealthStatus:
       type: object
       properties:

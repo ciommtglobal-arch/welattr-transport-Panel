@@ -274,6 +274,25 @@ export interface ErrorEnvelope {
   error: string;
 }
 
+export type SystemHealthStatusStatus = typeof SystemHealthStatusStatus[keyof typeof SystemHealthStatusStatus];
+
+
+export const SystemHealthStatusStatus = {
+  healthy: 'healthy',
+} as const;
+
+export type SystemHealthStatusCode = typeof SystemHealthStatusCode[keyof typeof SystemHealthStatusCode];
+
+
+export const SystemHealthStatusCode = {
+  NUMBER_200: 200,
+} as const;
+
+export interface SystemHealthStatus {
+  status: SystemHealthStatusStatus;
+  code: SystemHealthStatusCode;
+}
+
 export interface HealthStatus {
   status: string;
 }

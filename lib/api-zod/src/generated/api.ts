@@ -1858,7 +1858,17 @@ export const CreateLogisticsCommunicationResponse = zod.object({
 
 
 /**
- * Returns server health status
+ * Checks API and database connectivity, not business launch readiness.
+ * @summary MMT Global system health check
+ */
+export const SystemHealthCheckResponse = zod.object({
+  "status": zod.enum(['healthy']),
+  "code": zod.literal(200)
+})
+
+
+/**
+ * Checks API and database connectivity.
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
