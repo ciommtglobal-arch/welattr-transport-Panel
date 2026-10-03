@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import {
   getGetCompanyInstructionsQueryKey,
+  getGetCompanyRecordStatusQueryKey,
   useCreateCompanyInstruction,
   useGetCompanyInstructions,
 } from "@workspace/api-client-react";
@@ -36,18 +37,20 @@ export function CompanyInstructions({
   resolving,
   accessError = false,
   onRetryAccess,
+  companyScope,
 }: {
   canView: boolean;
   resolving: boolean;
   accessError?: boolean;
   onRetryAccess?: () => void;
+  companyScope: string;
 }) {
   const queryClient = useQueryClient();
   const [offset, setOffset] = useState(0);
   const params = { limit: PAGE_SIZE, offset };
   const query = useGetCompanyInstructions(params, {
     query: {
-      queryKey: getGetCompanyInstructionsQueryKey(params),
+      queryKey: [...getGetCompanyInstructionsQueryKey(params), companyScope],
       enabled: canView,
       refetchOnMount: "always",
       refetchOnWindowFocus: true,
@@ -59,6 +62,8 @@ export function CompanyInstructions({
   const [islem, setIslem] = useState(DEFAULT_OP);
   const [formError, setFormError] = useState("");
   const [success, setSuccess] = useState("");
+  const [refreshError, setRefreshError] = useState(false);
+  const submitting = useRef(false);
   const pending = create.isPending;
 
   const data = query.data;
@@ -67,8 +72,9 @@ export function CompanyInstructions({
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (pending) return;
+    if (pending || submitting.current) return;
     setSuccess("");
+    setRefreshError(false);
     const k = kurum.trim();
     const c = icerik.trim();
     const o = islem.trim();
@@ -85,6 +91,7 @@ export function CompanyInstructions({
       return;
     }
     setFormError("");
+    submitting.current = true;
     try {
       const res = await create.mutateAsync({
         data: { kurum_adi: k, icerik: c, islem_turu: o },
@@ -94,12 +101,18 @@ export function CompanyInstructions({
       setIslem(DEFAULT_OP);
       setSuccess(res.mesaj || "Talimat kurum kaydına eklendi.");
       setOffset(0);
-      await queryClient.invalidateQueries({
-        queryKey: getGetCompanyInstructionsQueryKey(),
-      });
-      await query.refetch();
+      try {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: getGetCompanyInstructionsQueryKey() }, { throwOnError: true }),
+          queryClient.invalidateQueries({ queryKey: getGetCompanyRecordStatusQueryKey() }, { throwOnError: true }),
+        ]);
+      } catch {
+        setRefreshError(true);
+      }
     } catch (e) {
       setFormError(errMessage(e, "Talimat kaydedilemedi. Girdiğiniz metin korundu."));
+    } finally {
+      submitting.current = false;
     }
   }
 
@@ -210,6 +223,7 @@ export function CompanyInstructions({
             >
               <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-primary" />
               {success}
+              {refreshError ? " Talimat kaydedildi; yalnızca liste yenilenemedi. Aynı talimatı tekrar girmeyin, listeyi yeniden yükleyin." : ""}
             </p>
           ) : null}
 

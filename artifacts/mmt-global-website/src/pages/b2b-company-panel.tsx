@@ -26,6 +26,7 @@ import {
   Users,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { CompanyFundRecords } from "@/components/company-fund-records";
 import { CompanyInstructions } from "@/components/company-instructions";
 import {
   acceptB2BCompanyInvitation,
@@ -354,7 +355,18 @@ function CompanyPanelContent({
           />
         </div>
 
+        <CompanyFundRecords
+          key={`funds:${userId}:${profile.id}`}
+          companyScope={`${userId}:${profile.id}:${currentMember?.role ?? "unresolved"}`}
+          accessError={membersQuery.isError}
+          onRetryAccess={() => void membersQuery.refetch()}
+          canView={instructionsCanView}
+          resolving={instructionsResolving}
+        />
+
         <CompanyInstructions
+          key={`instructions:${userId}:${profile.id}`}
+          companyScope={`${userId}:${profile.id}:${currentMember?.role ?? "unresolved"}`}
           accessError={membersQuery.isError}
           onRetryAccess={() => void membersQuery.refetch()}
           canView={instructionsCanView}

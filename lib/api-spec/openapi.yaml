@@ -31,6 +31,66 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /celik-kubbe/fon-islem:
+    post:
+      operationId: createCompanyFundRecord
+      tags: [b2b-businesses]
+      description: Owner-only internal record, never a loan approval or money transfer. UUID request key makes retries idempotent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CompanyFundInput" }
+      responses:
+        "201":
+          description: Saved or original matching record returned on retry
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompanyFundResult" }
+        "400": { description: "Invalid amount, currency, fields or request key" }
+        "401": { description: Sign-in required }
+        "403": { description: Active company owner required }
+        "409": { description: Request key already used for different input }
+        "503": { description: Database unavailable; retry with the same request key }
+  /celik-kubbe/talimat-ekle:
+    post:
+      operationId: createCompanyInstructionAlias
+      tags: [b2b-businesses]
+      description: Alias for the existing owner-only internal instruction creation; caller-supplied yetkili rejected.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CompanyInstructionInput" }
+      responses:
+        "201":
+          description: Saved in the same instruction table
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompanyInstructionResult" }
+        "400": { description: Invalid or protected input }
+        "401": { description: Sign-in required }
+        "403": { description: Active company owner required }
+  /celik-kubbe/durum:
+    get:
+      operationId: getCompanyRecordStatus
+      tags: [b2b-businesses]
+      description: Private company-scoped counts and independently paginated internal record lists.
+      parameters:
+        - { in: query, name: fon_limit, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - { in: query, name: fon_offset, schema: { type: integer, minimum: 0, maximum: 1000000, default: 0 } }
+        - { in: query, name: talimat_limit, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - { in: query, name: talimat_offset, schema: { type: integer, minimum: 0, maximum: 1000000, default: 0 } }
+      responses:
+        "200":
+          description: Only authenticated company data, no financial guarantee
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompanyRecordStatus" }
+        "400": { description: Invalid pagination or extra company selector }
+        "401": { description: Sign-in required }
+        "403": { description: Active owner/admin/manager required }
+        "503": { description: Database unavailable }
   /talimat-ekle:
     post:
       operationId: createCompanyInstruction
@@ -6468,6 +6528,62 @@ components:
             $ref: "#/components/schemas/WorkflowApproval"
         total:
           type: integer
+    CompanyFundInput:
+      type: object
+      additionalProperties: false
+      required: [islem_turu, miktar, para_birimi, kurum, istek_anahtari]
+      properties:
+        islem_turu: { type: string, minLength: 2, maxLength: 100 }
+        miktar:
+          type: string
+          maxLength: 15
+          pattern: '^(0|[1-9][0-9]{0,11})(\.[0-9]{1,2})?$'
+          description: Positive exact decimal, at most 999999999999.99; zero rejected. String prevents binary floating-point precision loss.
+        para_birimi: { type: string, enum: [TRY, EUR, USD] }
+        kurum: { type: string, minLength: 2, maxLength: 200 }
+        aciklama: { type: string, maxLength: 8000, default: "" }
+        istek_anahtari: { type: string, format: uuid, description: Keep the same UUID when retrying the same draft }
+    CompanyFundRecord:
+      type: object
+      required: [id, islem_turu, miktar, para_birimi, kurum, aciklama, imza, ekosistem, kayit_durumu, zaman, olusturan]
+      properties:
+        id: { type: integer }
+        islem_turu: { type: string }
+        miktar: { type: string, description: Exact decimal with two fraction digits }
+        para_birimi: { type: string, enum: [TRY, EUR, USD] }
+        kurum: { type: string }
+        aciklama: { type: string }
+        imza: { type: string, description: Attribution label, not a digital signature }
+        ekosistem: { type: string, description: Classification label, not financial assurance }
+        kayit_durumu: { type: string, enum: [firma_ici_kayit] }
+        zaman: { type: string, format: date-time }
+        olusturan: { type: string }
+    CompanyFundResult:
+      type: object
+      required: [durum, mesaj, veri]
+      properties:
+        durum: { type: string, enum: [basarili] }
+        mesaj: { type: string }
+        veri: { $ref: "#/components/schemas/CompanyFundRecord" }
+    CompanyRecordStatus:
+      type: object
+      required: [ekosistem, temsilci, toplam_fon_islem, toplam_talimat, fon_havuzu, talimatlar, canCreate, fon_limit, fon_offset, talimat_limit, talimat_offset]
+      properties:
+        ekosistem: { type: string }
+        temsilci: { type: string }
+        toplam_fon_islem: { type: integer }
+        toplam_talimat: { type: integer }
+        fon_havuzu:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyFundRecord" }
+        talimatlar:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyInstruction" }
+        canCreate: { type: boolean }
+        fon_limit: { type: integer }
+        fon_offset: { type: integer }
+        talimat_limit: { type: integer }
+        talimat_offset: { type: integer }
     CompanyInstructionInput:
       type: object
       additionalProperties: false

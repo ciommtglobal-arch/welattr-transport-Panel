@@ -54,9 +54,12 @@ import type {
   B2BRequestInput,
   B2BRequestPage,
   B2BRequestStatusUpdate,
+  CompanyFundInput,
+  CompanyFundResult,
   CompanyInstructionInput,
   CompanyInstructionPage,
   CompanyInstructionResult,
+  CompanyRecordStatus,
   ConstructionCart,
   ConstructionCartLineInput,
   ConstructionCartLineRemove,
@@ -78,6 +81,7 @@ import type {
   GetB2BRequestReviewQueueParams,
   GetB2BRequestsParams,
   GetCompanyInstructionsParams,
+  GetCompanyRecordStatusParams,
   GetConstructionCatalogParams,
   GetKasaRequestsParams,
   GetKasaSummaryParams,
@@ -200,6 +204,241 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getCreateCompanyFundRecordUrl = () => {
+
+
+
+
+  return `/api/celik-kubbe/fon-islem`
+}
+
+/**
+ * Owner-only internal record, never a loan approval or money transfer. UUID request key makes retries idempotent.
+ */
+export const createCompanyFundRecord = async (companyFundInput: CompanyFundInput, options?: Parameters<typeof customFetch>[1]): Promise<CompanyFundResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<CompanyFundResult>(getCreateCompanyFundRecordUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(companyFundInput)
+  }
+);}
+
+
+
+
+
+export const getCreateCompanyFundRecordMutationKey = () => ['createCompanyFundRecord'] as const;
+
+export const getCreateCompanyFundRecordMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCompanyFundRecord>>, TError,CreateCompanyFundRecordMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCompanyFundRecord>>, TError,CreateCompanyFundRecordMutationVariables, TContext> => {
+
+const mutationKey = getCreateCompanyFundRecordMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCompanyFundRecord>>, CreateCompanyFundRecordMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createCompanyFundRecord(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCompanyFundRecordMutationResult = NonNullable<Awaited<ReturnType<typeof createCompanyFundRecord>>>
+    export type CreateCompanyFundRecordMutationBody = BodyType<CompanyFundInput>
+    export type CreateCompanyFundRecordMutationError = ErrorType<void>
+    export type CreateCompanyFundRecordMutationVariables = {data: BodyType<CompanyFundInput>}
+
+    export const useCreateCompanyFundRecord = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCompanyFundRecord>>, TError,CreateCompanyFundRecordMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createCompanyFundRecord>>,
+        TError,
+        CreateCompanyFundRecordMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateCompanyFundRecordMutationOptions(options));
+    }
+
+export const getCreateCompanyInstructionAliasUrl = () => {
+
+
+
+
+  return `/api/celik-kubbe/talimat-ekle`
+}
+
+/**
+ * Alias for the existing owner-only internal instruction creation; caller-supplied yetkili rejected.
+ */
+export const createCompanyInstructionAlias = async (companyInstructionInput: CompanyInstructionInput, options?: Parameters<typeof customFetch>[1]): Promise<CompanyInstructionResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<CompanyInstructionResult>(getCreateCompanyInstructionAliasUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(companyInstructionInput)
+  }
+);}
+
+
+
+
+
+export const getCreateCompanyInstructionAliasMutationKey = () => ['createCompanyInstructionAlias'] as const;
+
+export const getCreateCompanyInstructionAliasMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCompanyInstructionAlias>>, TError,CreateCompanyInstructionAliasMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCompanyInstructionAlias>>, TError,CreateCompanyInstructionAliasMutationVariables, TContext> => {
+
+const mutationKey = getCreateCompanyInstructionAliasMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCompanyInstructionAlias>>, CreateCompanyInstructionAliasMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createCompanyInstructionAlias(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCompanyInstructionAliasMutationResult = NonNullable<Awaited<ReturnType<typeof createCompanyInstructionAlias>>>
+    export type CreateCompanyInstructionAliasMutationBody = BodyType<CompanyInstructionInput>
+    export type CreateCompanyInstructionAliasMutationError = ErrorType<void>
+    export type CreateCompanyInstructionAliasMutationVariables = {data: BodyType<CompanyInstructionInput>}
+
+    export const useCreateCompanyInstructionAlias = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCompanyInstructionAlias>>, TError,CreateCompanyInstructionAliasMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createCompanyInstructionAlias>>,
+        TError,
+        CreateCompanyInstructionAliasMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateCompanyInstructionAliasMutationOptions(options));
+    }
+
+export const getGetCompanyRecordStatusUrl = (params?: GetCompanyRecordStatusParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/celik-kubbe/durum?${stringifiedParams}` : `/api/celik-kubbe/durum`
+}
+
+/**
+ * Private company-scoped counts and independently paginated internal record lists.
+ */
+export const getCompanyRecordStatus = async (params?: GetCompanyRecordStatusParams, options?: Parameters<typeof customFetch>[1]): Promise<CompanyRecordStatus> => {
+
+  return customFetch<CompanyRecordStatus>(getGetCompanyRecordStatusUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCompanyRecordStatusQueryKey = (params?: GetCompanyRecordStatusParams,) => {
+    return [
+    `/api/celik-kubbe/durum`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetCompanyRecordStatusQueryOptions = <TData = Awaited<ReturnType<typeof getCompanyRecordStatus>>, TError = ErrorType<void>>(params?: GetCompanyRecordStatusParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCompanyRecordStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCompanyRecordStatusQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCompanyRecordStatus>>> = ({ signal }) => getCompanyRecordStatus(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCompanyRecordStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCompanyRecordStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getCompanyRecordStatus>>>
+export type GetCompanyRecordStatusQueryError = ErrorType<void>
+
+
+
+export function useGetCompanyRecordStatus<TData = Awaited<ReturnType<typeof getCompanyRecordStatus>>, TError = ErrorType<void>>(
+ params?: GetCompanyRecordStatusParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCompanyRecordStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCompanyRecordStatusQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getCreateCompanyInstructionUrl = () => {
 

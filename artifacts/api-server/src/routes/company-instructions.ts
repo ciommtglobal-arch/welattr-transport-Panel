@@ -6,7 +6,7 @@ import { requireMyCompany } from "../lib/companyAuth";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
-router.use(["/talimat-ekle", "/talimatlari-listele"], (_req, res, next) => {
+router.use(["/talimat-ekle", "/talimatlari-listele", "/celik-kubbe/talimat-ekle"], (_req, res, next) => {
   res.setHeader("Cache-Control", "private, no-store");
   next();
 });
@@ -18,7 +18,7 @@ const inputSchema = CreateCompanyInstructionBody.strict()
   }))
   .refine((data) => data.kurum_adi.length >= 2 && data.icerik.length >= 5 && data.islem_turu.length >= 2);
 
-function serialize(row: CompanyInstruction) {
+export function serializeCompanyInstruction(row: CompanyInstruction) {
   return {
     id: row.id,
     kurum: row.institution,
@@ -31,12 +31,12 @@ function serialize(row: CompanyInstruction) {
   };
 }
 
-router.post("/talimat-ekle", async (req, res) => {
+router.post(["/talimat-ekle", "/celik-kubbe/talimat-ekle"], async (req, res) => {
   const access = await requireMyCompany(req, res, ["owner"]);
   if (!access) return;
   const input = inputSchema.safeParse(req.body);
   if (!input.success) {
-    res.status(400).json({ error: "Kurum adı (2–200), talimat (5–8000) ve işlem türünü (2–100 karakter) kontrol edin. Ek alanlar kabul edilmez." });
+    res.status(400).json({ error: "Kurum adı (2–200), talimat (5–8000) ve işlem türünü (2–100 karakter) kontrol edin. Yetkili, imza, firma ve zaman dahil ek alanlar kabul edilmez; oluşturan kişi oturumdan belirlenir." });
     return;
   }
   try {
@@ -52,7 +52,7 @@ router.post("/talimat-ekle", async (req, res) => {
     res.status(201).json({
       durum: "basarili",
       mesaj: "Talimat firma içi kayıt sistemine kaydedildi.",
-      veri: serialize(record),
+      veri: serializeCompanyInstruction(record),
     });
   } catch {
     // Never log instruction text or database parameters.
@@ -82,7 +82,7 @@ router.get("/talimatlari-listele", async (req, res) => {
     res.json({
       imza: "WelatTR",
       toplam_talimat: totals[0]?.total ?? 0,
-      liste: records.map(serialize),
+      liste: records.map(serializeCompanyInstruction),
       canCreate: access.member.role === "owner",
       limit,
       offset,

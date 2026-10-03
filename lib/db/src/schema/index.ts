@@ -15,3 +15,4 @@ export * from "./construction-quotes";
 export * from "./staff-trial";
 export * from "./kasa";
 export * from "./company-instructions";
+export * from "./company-fund-records";

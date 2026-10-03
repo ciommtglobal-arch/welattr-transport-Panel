@@ -2549,6 +2549,112 @@ export interface WorkflowApprovalPage {
   total: number;
 }
 
+export type CompanyFundInputParaBirimi = typeof CompanyFundInputParaBirimi[keyof typeof CompanyFundInputParaBirimi];
+
+
+export const CompanyFundInputParaBirimi = {
+  TRY: 'TRY',
+  EUR: 'EUR',
+  USD: 'USD',
+} as const;
+
+export interface CompanyFundInput {
+  /**
+     * @minLength 2
+     * @maxLength 100
+     */
+  islem_turu: string;
+  /**
+     * Positive exact decimal, at most 999999999999.99; zero rejected. String prevents binary floating-point precision loss.
+     * @maxLength 15
+     * @pattern ^(0|[1-9][0-9]{0,11})(\.[0-9]{1,2})?$
+     */
+  miktar: string;
+  para_birimi: CompanyFundInputParaBirimi;
+  /**
+     * @minLength 2
+     * @maxLength 200
+     */
+  kurum: string;
+  /** @maxLength 8000 */
+  aciklama?: string;
+  /** Keep the same UUID when retrying the same draft */
+  istek_anahtari: string;
+}
+
+export type CompanyFundRecordParaBirimi = typeof CompanyFundRecordParaBirimi[keyof typeof CompanyFundRecordParaBirimi];
+
+
+export const CompanyFundRecordParaBirimi = {
+  TRY: 'TRY',
+  EUR: 'EUR',
+  USD: 'USD',
+} as const;
+
+export type CompanyFundRecordKayitDurumu = typeof CompanyFundRecordKayitDurumu[keyof typeof CompanyFundRecordKayitDurumu];
+
+
+export const CompanyFundRecordKayitDurumu = {
+  firma_ici_kayit: 'firma_ici_kayit',
+} as const;
+
+export interface CompanyFundRecord {
+  id: number;
+  islem_turu: string;
+  /** Exact decimal with two fraction digits */
+  miktar: string;
+  para_birimi: CompanyFundRecordParaBirimi;
+  kurum: string;
+  aciklama: string;
+  /** Attribution label */
+  imza: string;
+  /** Classification label */
+  ekosistem: string;
+  kayit_durumu: CompanyFundRecordKayitDurumu;
+  zaman: string;
+  olusturan: string;
+}
+
+export type CompanyFundResultDurum = typeof CompanyFundResultDurum[keyof typeof CompanyFundResultDurum];
+
+
+export const CompanyFundResultDurum = {
+  basarili: 'basarili',
+} as const;
+
+export interface CompanyFundResult {
+  durum: CompanyFundResultDurum;
+  mesaj: string;
+  veri: CompanyFundRecord;
+}
+
+export interface CompanyInstruction {
+  id: number;
+  kurum: string;
+  icerik: string;
+  islem_turu: string;
+  /** Display label only */
+  imza: string;
+  /** Display label only */
+  ekosistem: string;
+  zaman: string;
+  olusturan: string;
+}
+
+export interface CompanyRecordStatus {
+  ekosistem: string;
+  temsilci: string;
+  toplam_fon_islem: number;
+  toplam_talimat: number;
+  fon_havuzu: CompanyFundRecord[];
+  talimatlar: CompanyInstruction[];
+  canCreate: boolean;
+  fon_limit: number;
+  fon_offset: number;
+  talimat_limit: number;
+  talimat_offset: number;
+}
+
 export interface CompanyInstructionInput {
   /**
      * @minLength 2
@@ -2565,19 +2671,6 @@ export interface CompanyInstructionInput {
      * @maxLength 100
      */
   islem_turu?: string;
-}
-
-export interface CompanyInstruction {
-  id: number;
-  kurum: string;
-  icerik: string;
-  islem_turu: string;
-  /** Display label only */
-  imza: string;
-  /** Display label only */
-  ekosistem: string;
-  zaman: string;
-  olusturan: string;
 }
 
 export type CompanyInstructionResultDurum = typeof CompanyInstructionResultDurum[keyof typeof CompanyInstructionResultDurum];
@@ -2611,6 +2704,29 @@ export interface WorkflowNotificationPage {
 export type TrialPageParameter = number;
 
 export type TrialPageSizeParameter = number;
+
+export type GetCompanyRecordStatusParams = {
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+fon_limit?: number;
+/**
+ * @minimum 0
+ * @maximum 1000000
+ */
+fon_offset?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+talimat_limit?: number;
+/**
+ * @minimum 0
+ * @maximum 1000000
+ */
+talimat_offset?: number;
+};
 
 export type GetCompanyInstructionsParams = {
 /**

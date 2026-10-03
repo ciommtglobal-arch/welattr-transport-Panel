@@ -9,6 +9,151 @@ import * as zod from 'zod';
 
 
 /**
+ * Owner-only internal record, never a loan approval or money transfer. UUID request key makes retries idempotent.
+ */
+export const createCompanyFundRecordBodyIslemTuruMin = 2;
+export const createCompanyFundRecordBodyIslemTuruMax = 100;
+
+export const createCompanyFundRecordBodyMiktarMax = 15;
+
+
+export const createCompanyFundRecordBodyMiktarRegExp = new RegExp('^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$');
+export const createCompanyFundRecordBodyKurumMin = 2;
+export const createCompanyFundRecordBodyKurumMax = 200;
+
+export const createCompanyFundRecordBodyAciklamaDefault = ``;
+export const createCompanyFundRecordBodyAciklamaMax = 8000;
+
+
+
+export const CreateCompanyFundRecordBody = zod.object({
+  "islem_turu": zod.string().min(createCompanyFundRecordBodyIslemTuruMin).max(createCompanyFundRecordBodyIslemTuruMax),
+  "miktar": zod.string().max(createCompanyFundRecordBodyMiktarMax).regex(createCompanyFundRecordBodyMiktarRegExp).describe('Positive exact decimal, at most 999999999999.99; zero rejected. String prevents binary floating-point precision loss.'),
+  "para_birimi": zod.enum(['TRY', 'EUR', 'USD']),
+  "kurum": zod.string().min(createCompanyFundRecordBodyKurumMin).max(createCompanyFundRecordBodyKurumMax),
+  "aciklama": zod.string().max(createCompanyFundRecordBodyAciklamaMax).default(createCompanyFundRecordBodyAciklamaDefault),
+  "istek_anahtari": zod.uuid().describe('Keep the same UUID when retrying the same draft')
+})
+
+export const CreateCompanyFundRecordResponse = zod.object({
+  "durum": zod.enum(['basarili']),
+  "mesaj": zod.string(),
+  "veri": zod.object({
+  "id": zod.int(),
+  "islem_turu": zod.string(),
+  "miktar": zod.string().describe('Exact decimal with two fraction digits'),
+  "para_birimi": zod.enum(['TRY', 'EUR', 'USD']),
+  "kurum": zod.string(),
+  "aciklama": zod.string(),
+  "imza": zod.string().describe('Attribution label'),
+  "ekosistem": zod.string().describe('Classification label'),
+  "kayit_durumu": zod.enum(['firma_ici_kayit']),
+  "zaman": zod.coerce.date(),
+  "olusturan": zod.string()
+})
+})
+
+
+/**
+ * Alias for the existing owner-only internal instruction creation; caller-supplied yetkili rejected.
+ */
+export const createCompanyInstructionAliasBodyKurumAdiMin = 2;
+export const createCompanyInstructionAliasBodyKurumAdiMax = 200;
+
+export const createCompanyInstructionAliasBodyIcerikMin = 5;
+export const createCompanyInstructionAliasBodyIcerikMax = 8000;
+
+export const createCompanyInstructionAliasBodyIslemTuruDefault = `Resmi Talimat`;
+export const createCompanyInstructionAliasBodyIslemTuruMin = 2;
+export const createCompanyInstructionAliasBodyIslemTuruMax = 100;
+
+
+
+export const CreateCompanyInstructionAliasBody = zod.object({
+  "kurum_adi": zod.string().min(createCompanyInstructionAliasBodyKurumAdiMin).max(createCompanyInstructionAliasBodyKurumAdiMax),
+  "icerik": zod.string().min(createCompanyInstructionAliasBodyIcerikMin).max(createCompanyInstructionAliasBodyIcerikMax),
+  "islem_turu": zod.string().min(createCompanyInstructionAliasBodyIslemTuruMin).max(createCompanyInstructionAliasBodyIslemTuruMax).default(createCompanyInstructionAliasBodyIslemTuruDefault)
+})
+
+export const CreateCompanyInstructionAliasResponse = zod.object({
+  "durum": zod.enum(['basarili']),
+  "mesaj": zod.string(),
+  "veri": zod.object({
+  "id": zod.int(),
+  "kurum": zod.string(),
+  "icerik": zod.string(),
+  "islem_turu": zod.string(),
+  "imza": zod.string().describe('Display label only'),
+  "ekosistem": zod.string().describe('Display label only'),
+  "zaman": zod.coerce.date(),
+  "olusturan": zod.string()
+})
+})
+
+
+/**
+ * Private company-scoped counts and independently paginated internal record lists.
+ */
+export const getCompanyRecordStatusQueryFonLimitDefault = 20;
+export const getCompanyRecordStatusQueryFonLimitMax = 100;
+
+export const getCompanyRecordStatusQueryFonOffsetDefault = 0;
+export const getCompanyRecordStatusQueryFonOffsetMin = 0;
+export const getCompanyRecordStatusQueryFonOffsetMax = 1000000;
+
+export const getCompanyRecordStatusQueryTalimatLimitDefault = 20;
+export const getCompanyRecordStatusQueryTalimatLimitMax = 100;
+
+export const getCompanyRecordStatusQueryTalimatOffsetDefault = 0;
+export const getCompanyRecordStatusQueryTalimatOffsetMin = 0;
+export const getCompanyRecordStatusQueryTalimatOffsetMax = 1000000;
+
+
+
+export const GetCompanyRecordStatusQueryParams = zod.object({
+  "fon_limit": zod.coerce.number().int().min(1).max(getCompanyRecordStatusQueryFonLimitMax).default(getCompanyRecordStatusQueryFonLimitDefault),
+  "fon_offset": zod.coerce.number().int().min(getCompanyRecordStatusQueryFonOffsetMin).max(getCompanyRecordStatusQueryFonOffsetMax).default(getCompanyRecordStatusQueryFonOffsetDefault),
+  "talimat_limit": zod.coerce.number().int().min(1).max(getCompanyRecordStatusQueryTalimatLimitMax).default(getCompanyRecordStatusQueryTalimatLimitDefault),
+  "talimat_offset": zod.coerce.number().int().min(getCompanyRecordStatusQueryTalimatOffsetMin).max(getCompanyRecordStatusQueryTalimatOffsetMax).default(getCompanyRecordStatusQueryTalimatOffsetDefault)
+})
+
+export const GetCompanyRecordStatusResponse = zod.object({
+  "ekosistem": zod.string(),
+  "temsilci": zod.string(),
+  "toplam_fon_islem": zod.int(),
+  "toplam_talimat": zod.int(),
+  "fon_havuzu": zod.array(zod.object({
+  "id": zod.int(),
+  "islem_turu": zod.string(),
+  "miktar": zod.string().describe('Exact decimal with two fraction digits'),
+  "para_birimi": zod.enum(['TRY', 'EUR', 'USD']),
+  "kurum": zod.string(),
+  "aciklama": zod.string(),
+  "imza": zod.string().describe('Attribution label'),
+  "ekosistem": zod.string().describe('Classification label'),
+  "kayit_durumu": zod.enum(['firma_ici_kayit']),
+  "zaman": zod.coerce.date(),
+  "olusturan": zod.string()
+})),
+  "talimatlar": zod.array(zod.object({
+  "id": zod.int(),
+  "kurum": zod.string(),
+  "icerik": zod.string(),
+  "islem_turu": zod.string(),
+  "imza": zod.string().describe('Display label only'),
+  "ekosistem": zod.string().describe('Display label only'),
+  "zaman": zod.coerce.date(),
+  "olusturan": zod.string()
+})),
+  "canCreate": zod.boolean(),
+  "fon_limit": zod.int(),
+  "fon_offset": zod.int(),
+  "talimat_limit": zod.int(),
+  "talimat_offset": zod.int()
+})
+
+
+/**
  * Owner-only internal record; not a digital signature or external dispatch.
  */
 export const createCompanyInstructionBodyKurumAdiMin = 2;
