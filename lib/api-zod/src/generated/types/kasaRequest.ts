@@ -18,4 +18,8 @@ export interface KasaRequest {
   status: KasaRequestStatus;
   note: string;
   createdAt: Date;
+  /** @nullable */
+  cancelledAt: Date | null;
+  /** @nullable */
+  cancelledBy: number | null;
 }

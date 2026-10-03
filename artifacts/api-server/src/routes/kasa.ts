@@ -19,6 +19,7 @@ import {
   GetKasaUsersResponse, GrantKasaUserBody, GrantKasaUserResponse, UpdateKasaUserBody, UpdateKasaUserParams, UpdateKasaUserResponse,
   GetKasaRequestsQueryParams, GetKasaRequestsResponse, CreateKasaRequestBody, CreateKasaRequestResponse,
   GetKasaRequestParams, GetKasaRequestResponse, GetKasaPublicRequestParams, GetKasaPublicRequestResponse,
+  CancelKasaRequestParams, CancelKasaRequestBody, CancelKasaRequestResponse,
   GetKasaSummaryQueryParams, ExportKasaSummaryQueryParams, GetKasaServiceInvoicesResponse,
   CreateKasaServiceInvoiceBody, CreateKasaServiceInvoiceResponse, CancelKasaServiceInvoiceParams,
   CancelKasaServiceInvoiceResponse,
@@ -384,12 +385,44 @@ router.get("/kasa/requests/:id", async (req, res): Promise<void> => {
   if (!row || !canReadKasaRequest(user, row.cashierId)) { fail(res, 404, "Talep bulunamadı."); return; }
   res.json(GetKasaRequestResponse.parse(row));
 });
+router.post("/kasa/requests/:id/cancel", async (req, res): Promise<void> => {
+  const user = await member(req, res); if (!user) return;
+  const p = CancelKasaRequestParams.safeParse(req.params);
+  const b = CancelKasaRequestBody.strict().safeParse(req.body);
+  if (!p.success || !b.success) { fail(res, 400, "Talebi iptal etmek için açık onay gerekiyor."); return; }
+  const result = await db.transaction(async tx => {
+    // Recheck the current grant under lock; concurrent revocation cannot slip through.
+    const [current] = await tx.select().from(users).where(eq(users.id, user.id)).for("share");
+    if (!current?.active) return { kind: "forbidden" as const };
+    const [row] = await tx.select().from(requests).where(eq(requests.id, p.data.id)).for("update");
+    if (!row || !canReadKasaRequest(current, row.cashierId)) return { kind: "missing" as const };
+    // Never use cancellation as a refund or to overwrite provider evidence.
+    if (row.status !== "PENDING" || row.providerReference !== null || row.verifiedAt !== null || row.completedAt !== null) {
+      return { kind: "conflict" as const };
+    }
+    const cancelledAt = new Date();
+    const [cancelled] = await tx.update(requests).set({
+      status: "CANCELLED", cancelledAt, cancelledBy: current.id,
+    }).where(and(eq(requests.id, row.id), eq(requests.status, "PENDING"))).returning();
+    if (!cancelled) return { kind: "conflict" as const };
+    await tx.insert(audits).values({
+      actorId: current.id, action: "request_cancel", entityId: row.id, createdAt: cancelledAt,
+    });
+    return { kind: "cancelled" as const, row: cancelled };
+  });
+  if (result.kind === "forbidden") { fail(res, 403, "Aktif kasa yetkiniz yok."); return; }
+  if (result.kind === "missing") { fail(res, 404, "Talep bulunamadı."); return; }
+  if (result.kind === "conflict") { fail(res, 409, "Yalnızca henüz tahsil edilmemiş bekleyen talepler iptal edilebilir. Sayfayı yenileyin."); return; }
+  res.json(CancelKasaRequestResponse.parse(result.row));
+});
 router.get("/kasa/public/:reference", async (req, res): Promise<void> => {
   const p = GetKasaPublicRequestParams.safeParse(req.params);
   if (!p.success || !/^[a-f0-9]{48}$/.test(p.data.reference)) { fail(res, 404, "Talep bulunamadı."); return; }
   const [row] = await db.select({ amount: requests.amount, currency: requests.currency, status: requests.status }).from(requests).where(eq(requests.reference, p.data.reference)).limit(1);
   if (!row) { fail(res, 404, "Talep bulunamadı."); return; }
-  res.json(GetKasaPublicRequestResponse.parse({ ...row, liveEnabled: false }));
+  res.json(GetKasaPublicRequestResponse.parse(
+    row.status === "CANCELLED" ? { status: "CANCELLED", liveEnabled: false } : { ...row, liveEnabled: false },
+  ));
 });
 router.get("/kasa/summary", async (req, res): Promise<void> => {
   if (!await member(req, res, true)) return;

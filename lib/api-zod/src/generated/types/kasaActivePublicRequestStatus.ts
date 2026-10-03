@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type KasaPublicRequestStatus = typeof KasaPublicRequestStatus[keyof typeof KasaPublicRequestStatus];
+export type KasaActivePublicRequestStatus = typeof KasaActivePublicRequestStatus[keyof typeof KasaActivePublicRequestStatus];
 
 
-export const KasaPublicRequestStatus = {
+export const KasaActivePublicRequestStatus = {
   PENDING: 'PENDING',
   COMPLETED: 'COMPLETED',
 } as const;

@@ -103,6 +103,7 @@ import type {
   KasaBranchUpdate,
   KasaPublicRequest,
   KasaRequest,
+  KasaRequestCancellationInput,
   KasaRequestInput,
   KasaSummary,
   KasaUser,
@@ -1634,6 +1635,81 @@ export function useGetKasaRequest<TData = Awaited<ReturnType<typeof getKasaReque
 
 
 
+
+export const getCancelKasaRequestUrl = (id: number,) => {
+
+
+
+
+  return `/api/kasa/requests/${id}/cancel`
+}
+
+export const cancelKasaRequest = async (id: number,
+    kasaRequestCancellationInput: KasaRequestCancellationInput, options?: Parameters<typeof customFetch>[1]): Promise<KasaRequest> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<KasaRequest>(getCancelKasaRequestUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(kasaRequestCancellationInput)
+  }
+);}
+
+
+
+
+
+export const getCancelKasaRequestMutationKey = () => ['cancelKasaRequest'] as const;
+
+export const getCancelKasaRequestMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelKasaRequest>>, TError,CancelKasaRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof cancelKasaRequest>>, TError,CancelKasaRequestMutationVariables, TContext> => {
+
+const mutationKey = getCancelKasaRequestMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cancelKasaRequest>>, CancelKasaRequestMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  cancelKasaRequest(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CancelKasaRequestMutationResult = NonNullable<Awaited<ReturnType<typeof cancelKasaRequest>>>
+    export type CancelKasaRequestMutationBody = BodyType<KasaRequestCancellationInput>
+    export type CancelKasaRequestMutationError = ErrorType<void>
+    export type CancelKasaRequestMutationVariables = {id: number;data: BodyType<KasaRequestCancellationInput>}
+
+    export const useCancelKasaRequest = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelKasaRequest>>, TError,CancelKasaRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof cancelKasaRequest>>,
+        TError,
+        CancelKasaRequestMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCancelKasaRequestMutationOptions(options));
+    }
 
 export const getGetKasaPublicRequestUrl = (reference: string,) => {
 

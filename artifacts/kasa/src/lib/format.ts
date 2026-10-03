@@ -30,4 +30,4 @@ export function validReportDate(value: string): boolean {
 export function dateTime(s: string): string {
   return new Date(s).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', dateStyle: 'medium', timeStyle: 'short' });
 }
-export const STATUS_LABEL = { PENDING: 'Bekliyor', COMPLETED: 'Tahsil edildi' } as const;
+export const STATUS_LABEL = { PENDING: 'Bekliyor', COMPLETED: 'Tahsil edildi', CANCELLED: 'İptal edildi' } as const;

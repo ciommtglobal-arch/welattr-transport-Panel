@@ -24,6 +24,11 @@ export default function PublicRequestPage() {
           <div className="mt-4">
             <ErrorBox message={errStatus(q.error) === 404 ? 'Bu referansla bir talep bulunamadı.' : errMsg(q.error)} onRetry={() => q.refetch()} />
           </div>
+        ) : r?.status === 'CANCELLED' ? (
+          <div className="mt-4" role="status" data-testid="public-cancelled">
+            <StatusBadge status="CANCELLED" />
+            <p className="mt-3 text-sm">Bu talep iptal edildi. Bu QR bağlantısı üzerinden ödeme yapılamaz.</p>
+          </div>
         ) : r ? (
           <>
             <div className="num mt-3 text-4xl font-semibold" data-testid="text-public-amount">{money(r.amount, r.currency)}</div>

@@ -184,6 +184,127 @@ describe.sequential("Standalone Kasa boundaries and persistence", () => {
       await db.update(branches).set({ name: `TEST_KASA_A_${suffix}` }).where(eq(branches.id, branchIds[0]!));
     }
   });
+  it("requires explicit confirmation, current membership, ownership and same-origin cancellation", async () => {
+    const path = `/api/kasa/requests/${requestId}/cancel`;
+    expect((await request(app).post(path).send({ confirmed: true })).status).toBe(401);
+    expect((await authenticated("post", path, 2).send({ confirmed: true })).status).toBe(404);
+    expect((await authenticated("post", path, 1).set("Origin", "https://malicious.invalid").send({ confirmed: true })).status).toBe(403);
+    for (const body of [{}, { confirmed: false }, { confirmed: "true" }, { confirmed: true, cashierId: adminId }, { confirmed: true, status: "CANCELLED" }]) {
+      expect((await authenticated("post", path, 1).send(body)).status).toBe(400);
+    }
+    expect((await authenticated("post", "/api/kasa/requests/0/cancel", 1).send({ confirmed: true })).status).toBe(400);
+    expect((await authenticated("post", "/api/kasa/requests/2147483647/cancel", 1).send({ confirmed: true })).status).toBe(404);
+    await db.update(users).set({ active: false }).where(eq(users.id, cashierId));
+    try {
+      expect((await authenticated("post", path, 1).send({ confirmed: true })).status).toBe(403);
+    } finally {
+      await db.update(users).set({ active: true }).where(eq(users.id, cashierId));
+    }
+    const [row] = await db.select().from(requests).where(eq(requests.id, requestId));
+    expect(row?.status).toBe("PENDING");
+    expect(await db.select().from(audits).where(and(eq(audits.entityId, requestId), eq(audits.action, "request_cancel")))).toHaveLength(0);
+  });
+  it("cancels the cashier's own pending request once without losing history or leaking QR data", async () => {
+    const [original] = await db.select().from(requests).where(eq(requests.id, requestId));
+    const before = await authenticated("get", `/api/kasa/summary?branchId=${branchIds[0]}`);
+    const response = await authenticated("post", `/api/kasa/requests/${requestId}/cancel`, 1).send({ confirmed: true });
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({ id: requestId, reference, amount: "12.30", note: "TEST private note", status: "CANCELLED", cancelledBy: cashierId });
+    expect(response.body.cancelledAt).toBeTruthy();
+    const [saved] = await db.select().from(requests).where(eq(requests.id, requestId));
+    expect(saved).toEqual({ ...original, status: "CANCELLED", cancelledBy: cashierId, cancelledAt: new Date(response.body.cancelledAt) });
+    const events = await db.select().from(audits).where(and(eq(audits.entityId, requestId), eq(audits.action, "request_cancel")));
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ actorId: cashierId, createdAt: saved?.cancelledAt });
+    for (const who of [0, 1]) {
+      expect((await authenticated("get", `/api/kasa/requests/${requestId}`, who)).body.status).toBe("CANCELLED");
+      expect((await authenticated("get", "/api/kasa/requests", who)).body.find((r: { id: number }) => r.id === requestId).status).toBe("CANCELLED");
+    }
+    const publicView = await request(app).get(`/api/kasa/public/${reference}`);
+    expect(publicView.status).toBe(200);
+    expect(publicView.body).toEqual({ status: "CANCELLED", liveEnabled: false });
+    expect(publicView.headers["cache-control"]).toBe("no-store");
+    const after = await authenticated("get", `/api/kasa/summary?branchId=${branchIds[0]}`);
+    const eurBefore = before.body.totals.find((t: { currency: string }) => t.currency === "EUR");
+    const eurAfter = after.body.totals.find((t: { currency: string }) => t.currency === "EUR");
+    expect(eurAfter).toEqual({ ...eurBefore, pendingAmount: "78.07", pendingCount: eurBefore.pendingCount - 1 });
+    expect((await authenticated("post", `/api/kasa/requests/${requestId}/cancel`, 1).send({ confirmed: true })).status).toBe(409);
+    expect(await db.select().from(audits).where(and(eq(audits.entityId, requestId), eq(audits.action, "request_cancel")))).toHaveLength(1);
+  });
+  it("allows an admin to cancel another cashier's request even at an inactive branch", async () => {
+    const [row] = await db.insert(requests).values({
+      reference: randomBytes(24).toString("hex"), cashierId: memberIds[2]!, branchId: branchIds[1]!,
+      amount: "7.25", currency: "TRY", note: "TEST retained admin cancellation",
+    }).returning();
+    await db.update(branches).set({ active: false }).where(eq(branches.id, branchIds[1]!));
+    try {
+      const response = await authenticated("post", `/api/kasa/requests/${row!.id}/cancel`).send({ confirmed: true });
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({ status: "CANCELLED", cashierId: memberIds[2], cancelledBy: adminId, amount: "7.25" });
+    } finally {
+      await db.update(branches).set({ active: true }).where(eq(branches.id, branchIds[1]!));
+    }
+  });
+  it("does not modify completed requests or pending records with collection evidence", async () => {
+    const evidence = [
+      { status: "COMPLETED" as const, providerReference: `TEST_COMPLETE_${suffix}`, verifiedAt: new Date(), completedAt: new Date() },
+      { providerReference: `TEST_PROVIDER_${suffix}` },
+      { verifiedAt: new Date() },
+      { completedAt: new Date() },
+    ];
+    for (const item of evidence) {
+      const [row] = await db.insert(requests).values({
+        reference: randomBytes(24).toString("hex"), cashierId, branchId: branchIds[0]!, amount: "2.00", currency: "USD", ...item,
+      }).returning();
+      for (const who of [0, 1]) expect((await authenticated("post", `/api/kasa/requests/${row!.id}/cancel`, who).send({ confirmed: true })).status).toBe(409);
+      const [saved] = await db.select().from(requests).where(eq(requests.id, row!.id));
+      expect(saved).toEqual(row);
+      expect(await db.select().from(audits).where(and(eq(audits.entityId, row!.id), eq(audits.action, "request_cancel")))).toHaveLength(0);
+    }
+  });
+  it("serializes simultaneous cancellations with one audit event and excludes them from filtered reports", async () => {
+    const [row] = await db.insert(requests).values({
+      reference: randomBytes(24).toString("hex"), cashierId, branchId: branchIds[0]!, amount: "19.99", currency: "TRY",
+      createdAt: new Date("2035-06-01T12:00:00Z"),
+    }).returning();
+    const results = await Promise.all([0, 1].map(who => authenticated("post", `/api/kasa/requests/${row!.id}/cancel`, who).send({ confirmed: true })));
+    expect(results.map(r => r.status).sort()).toEqual([200, 409]);
+    expect(await db.select().from(audits).where(and(eq(audits.entityId, row!.id), eq(audits.action, "request_cancel")))).toHaveLength(1);
+    const filters = `branchId=${branchIds[0]}&date=2035-06-01`;
+    const summary = await authenticated("get", `/api/kasa/summary?${filters}`);
+    expect(summary.body.totals.every((t: { revenue: string; pendingAmount: string; pendingCount: number; completedCount: number }) => t.revenue === "0.00" && t.pendingAmount === "0.00" && t.pendingCount === 0 && t.completedCount === 0)).toBe(true);
+    for (const format of ["csv", "html"]) {
+      const exported = await authenticated("get", `/api/kasa/summary/export?${filters}&format=${format}`);
+      expect(exported.status).toBe(200);
+      expect(exported.text).not.toContain("19.99");
+    }
+  });
+  it("preserves a concurrent verified completion instead of cancelling it", async () => {
+    const [row] = await db.insert(requests).values({
+      reference: randomBytes(24).toString("hex"), cashierId, branchId: branchIds[0]!, amount: "9.99", currency: "TRY",
+    }).returning();
+    let locked!: () => void, release!: () => void;
+    const acquired = new Promise<void>(resolve => { locked = resolve; });
+    const released = new Promise<void>(resolve => { release = resolve; });
+    const completion = db.transaction(async tx => {
+      await tx.select().from(requests).where(eq(requests.id, row!.id)).for("update");
+      locked();
+      await released;
+      await tx.update(requests).set({ status: "COMPLETED", providerReference: `TEST_RACE_${suffix}`, verifiedAt: new Date(), completedAt: new Date() }).where(eq(requests.id, row!.id));
+    });
+    await acquired;
+    const cancellation = authenticated("post", `/api/kasa/requests/${row!.id}/cancel`, 1).send({ confirmed: true }).then(response => response);
+    release();
+    await completion;
+    expect((await cancellation).status).toBe(409);
+    const [saved] = await db.select().from(requests).where(eq(requests.id, row!.id));
+    expect(saved).toMatchObject({ status: "COMPLETED", cancelledAt: null, cancelledBy: null });
+  });
+  it("requires cancellation evidence at the database boundary", async () => {
+    await expect(db.insert(requests).values({
+      reference: randomBytes(24).toString("hex"), cashierId, branchId: branchIds[0]!, amount: "1.00", currency: "TRY", status: "CANCELLED",
+    })).rejects.toThrow();
+  });
   it("supports branch edit/deactivation, preserves history and blocks new requests", async () => {
     const edit = await authenticated("patch", `/api/kasa/branches/${branchIds[0]}`).send({ name: `TEST_KASA_EDIT_${suffix}`, active: false });
     expect(edit.status).toBe(200);

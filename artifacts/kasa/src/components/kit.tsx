@@ -28,16 +28,17 @@ export function Logo({ light = false, to = '/' }: { light?: boolean; to?: string
   );
 }
 
-export function StatusBadge({ status }: { status: 'PENDING' | 'COMPLETED' }) {
+export function StatusBadge({ status }: { status: 'PENDING' | 'COMPLETED' | 'CANCELLED' }) {
   const paid = status === 'COMPLETED';
+  const cancelled = status === 'CANCELLED';
   return (
     <span
       data-testid={`status-${status.toLowerCase()}`}
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${
-        paid ? 'bg-paid-soft text-paid' : 'bg-pending-soft text-pending'
+        cancelled ? 'bg-muted text-muted-foreground' : paid ? 'bg-paid-soft text-paid' : 'bg-pending-soft text-pending'
       }`}
     >
-      <span className={`h-1.5 w-1.5 rounded-full ${paid ? 'bg-paid' : 'bg-pending'}`} />
+      <span className={`h-1.5 w-1.5 rounded-full ${cancelled ? 'bg-muted-foreground' : paid ? 'bg-paid' : 'bg-pending'}`} />
       {STATUS_LABEL[status]}
     </span>
   );

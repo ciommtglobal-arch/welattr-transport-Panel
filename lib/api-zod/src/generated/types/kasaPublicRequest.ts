@@ -5,12 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { KasaPublicRequestCurrency } from './kasaPublicRequestCurrency';
-import type { KasaPublicRequestStatus } from './kasaPublicRequestStatus';
+import type { KasaActivePublicRequest } from './kasaActivePublicRequest';
+import type { KasaCancelledPublicRequest } from './kasaCancelledPublicRequest';
 
-export interface KasaPublicRequest {
-  amount: string;
-  currency: KasaPublicRequestCurrency;
-  status: KasaPublicRequestStatus;
-  liveEnabled: boolean;
-}
+export type KasaPublicRequest = KasaActivePublicRequest | KasaCancelledPublicRequest;

@@ -311,6 +311,27 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/KasaRequest" }
         "404": { description: Not found or not owned }
+  /kasa/requests/{id}/cancel:
+    post:
+      operationId: cancelKasaRequest
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: integer, minimum: 1 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/KasaRequestCancellationInput" }
+      responses:
+        "200":
+          description: Pending request cancelled; original history and amount preserved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/KasaRequest" }
+        "400": { description: Explicit confirmation required }
+        "401": { description: Sign-in required }
+        "403": { description: Inactive membership or invalid origin }
+        "404": { description: Not found or not owned }
+        "409": { description: Request no longer pending or has collection evidence }
   /kasa/public/{reference}:
     get:
       operationId: getKasaPublicRequest
@@ -3707,9 +3728,15 @@ components:
         currency: { type: string, enum: [TRY, EUR, USD] }
         branchId: { type: integer, minimum: 1 }
         note: { type: string, maxLength: 500 }
+    KasaRequestCancellationInput:
+      type: object
+      additionalProperties: false
+      required: [confirmed]
+      properties:
+        confirmed: { type: boolean, enum: [true] }
     KasaRequest:
       type: object
-      required: [id, reference, amount, currency, branchId, cashierId, status, note, createdAt]
+      required: [id, reference, amount, currency, branchId, cashierId, status, note, createdAt, cancelledAt, cancelledBy]
       properties:
         id: { type: integer }
         reference: { type: string }
@@ -3717,11 +3744,25 @@ components:
         currency: { type: string, enum: [TRY, EUR, USD] }
         branchId: { type: integer }
         cashierId: { type: integer }
-        status: { type: string, enum: [PENDING, COMPLETED] }
+        status: { type: string, enum: [PENDING, COMPLETED, CANCELLED] }
         note: { type: string }
         createdAt: { type: string, format: date-time }
+        cancelledAt: { type: [string, "null"], format: date-time }
+        cancelledBy: { type: [integer, "null"] }
     KasaPublicRequest:
+      oneOf:
+        - { $ref: "#/components/schemas/KasaActivePublicRequest" }
+        - { $ref: "#/components/schemas/KasaCancelledPublicRequest" }
+    KasaCancelledPublicRequest:
       type: object
+      additionalProperties: false
+      required: [status, liveEnabled]
+      properties:
+        status: { type: string, enum: [CANCELLED] }
+        liveEnabled: { type: boolean, enum: [false] }
+    KasaActivePublicRequest:
+      type: object
+      additionalProperties: false
       required: [amount, currency, status, liveEnabled]
       properties:
         amount: { type: string }

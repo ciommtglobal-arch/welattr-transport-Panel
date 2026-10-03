@@ -440,9 +440,11 @@ export const GetKasaRequestsResponseItem = zod.object({
   "currency": zod.enum(['TRY', 'EUR', 'USD']),
   "branchId": zod.int(),
   "cashierId": zod.int(),
-  "status": zod.enum(['PENDING', 'COMPLETED']),
+  "status": zod.enum(['PENDING', 'COMPLETED', 'CANCELLED']),
   "note": zod.string(),
-  "createdAt": zod.coerce.date()
+  "createdAt": zod.coerce.date(),
+  "cancelledAt": zod.coerce.date().nullable(),
+  "cancelledBy": zod.int().nullable()
 })
 export const GetKasaRequestsResponse = zod.array(GetKasaRequestsResponseItem)
 
@@ -467,9 +469,11 @@ export const CreateKasaRequestResponse = zod.object({
   "currency": zod.enum(['TRY', 'EUR', 'USD']),
   "branchId": zod.int(),
   "cashierId": zod.int(),
-  "status": zod.enum(['PENDING', 'COMPLETED']),
+  "status": zod.enum(['PENDING', 'COMPLETED', 'CANCELLED']),
   "note": zod.string(),
-  "createdAt": zod.coerce.date()
+  "createdAt": zod.coerce.date(),
+  "cancelledAt": zod.coerce.date().nullable(),
+  "cancelledBy": zod.int().nullable()
 })
 
 
@@ -487,9 +491,37 @@ export const GetKasaRequestResponse = zod.object({
   "currency": zod.enum(['TRY', 'EUR', 'USD']),
   "branchId": zod.int(),
   "cashierId": zod.int(),
-  "status": zod.enum(['PENDING', 'COMPLETED']),
+  "status": zod.enum(['PENDING', 'COMPLETED', 'CANCELLED']),
   "note": zod.string(),
-  "createdAt": zod.coerce.date()
+  "createdAt": zod.coerce.date(),
+  "cancelledAt": zod.coerce.date().nullable(),
+  "cancelledBy": zod.int().nullable()
+})
+
+
+
+
+
+export const CancelKasaRequestParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const CancelKasaRequestBody = zod.object({
+  "confirmed": zod.literal(true)
+})
+
+export const CancelKasaRequestResponse = zod.object({
+  "id": zod.int(),
+  "reference": zod.string(),
+  "amount": zod.string(),
+  "currency": zod.enum(['TRY', 'EUR', 'USD']),
+  "branchId": zod.int(),
+  "cashierId": zod.int(),
+  "status": zod.enum(['PENDING', 'COMPLETED', 'CANCELLED']),
+  "note": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "cancelledAt": zod.coerce.date().nullable(),
+  "cancelledBy": zod.int().nullable()
 })
 
 
@@ -502,12 +534,15 @@ export const GetKasaPublicRequestParams = zod.object({
   "reference": zod.coerce.string().min(getKasaPublicRequestPathReferenceMin).max(getKasaPublicRequestPathReferenceMax)
 })
 
-export const GetKasaPublicRequestResponse = zod.object({
+export const GetKasaPublicRequestResponse = zod.union([zod.object({
   "amount": zod.string(),
   "currency": zod.enum(['TRY', 'EUR', 'USD']),
   "status": zod.enum(['PENDING', 'COMPLETED']),
   "liveEnabled": zod.boolean()
-})
+}),zod.object({
+  "status": zod.enum(['CANCELLED']),
+  "liveEnabled": zod.literal(false)
+})])
 
 
 

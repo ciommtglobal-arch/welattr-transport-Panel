@@ -34,19 +34,22 @@ export const kasaRequestsTable = pgTable("kasa_requests", {
   branchId: integer("branch_id").notNull().references(() => kasaBranchesTable.id),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
   currency: text("currency").$type<"TRY" | "EUR" | "USD">().notNull(),
-  status: text("status").$type<"PENDING" | "COMPLETED">().notNull().default("PENDING"),
+  status: text("status").$type<"PENDING" | "COMPLETED" | "CANCELLED">().notNull().default("PENDING"),
   note: text("note").notNull().default(""),
   providerReference: text("provider_reference"),
   verifiedAt: timestamp("verified_at", { withTimezone: true }),
   completedAt: timestamp("completed_at", { withTimezone: true }),
+  cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+  cancelledBy: integer("cancelled_by").references(() => kasaUsersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index("kasa_request_cashier").on(t.cashierId),
   index("kasa_request_branch_date").on(t.branchId, t.createdAt),
   check("kasa_amount_positive", sql`${t.amount} > 0`),
   check("kasa_currency_valid", sql`${t.currency} in ('TRY','EUR','USD')`),
-  check("kasa_status_valid", sql`${t.status} in ('PENDING','COMPLETED')`),
+  check("kasa_status_valid", sql`${t.status} in ('PENDING','COMPLETED','CANCELLED')`),
   check("kasa_completed_requires_evidence", sql`${t.status} <> 'COMPLETED' or (length(trim(${t.providerReference})) > 0 and ${t.providerReference} is not null and ${t.verifiedAt} is not null and ${t.completedAt} is not null)`),
+  check("kasa_cancelled_requires_evidence", sql`(${t.status} = 'CANCELLED' and ${t.cancelledAt} is not null and ${t.cancelledBy} is not null and ${t.providerReference} is null and ${t.verifiedAt} is null and ${t.completedAt} is null) or (${t.status} <> 'CANCELLED' and ${t.cancelledAt} is null and ${t.cancelledBy} is null)`),
 ]);
 
 export const kasaAuditTable = pgTable("kasa_audit", {

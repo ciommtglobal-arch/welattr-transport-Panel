@@ -12,4 +12,5 @@ export type KasaRequestStatus = typeof KasaRequestStatus[keyof typeof KasaReques
 export const KasaRequestStatus = {
   PENDING: 'PENDING',
   COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
 } as const;

@@ -108,6 +108,10 @@ export interface KasaRequestInput {
   note?: string;
 }
 
+export interface KasaRequestCancellationInput {
+  confirmed: true;
+}
+
 export type KasaRequestCurrency = typeof KasaRequestCurrency[keyof typeof KasaRequestCurrency];
 
 
@@ -123,6 +127,7 @@ export type KasaRequestStatus = typeof KasaRequestStatus[keyof typeof KasaReques
 export const KasaRequestStatus = {
   PENDING: 'PENDING',
   COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
 } as const;
 
 export interface KasaRequest {
@@ -135,31 +140,49 @@ export interface KasaRequest {
   status: KasaRequestStatus;
   note: string;
   createdAt: string;
+  /** @nullable */
+  cancelledAt: string | null;
+  /** @nullable */
+  cancelledBy: number | null;
 }
 
-export type KasaPublicRequestCurrency = typeof KasaPublicRequestCurrency[keyof typeof KasaPublicRequestCurrency];
+export type KasaActivePublicRequestCurrency = typeof KasaActivePublicRequestCurrency[keyof typeof KasaActivePublicRequestCurrency];
 
 
-export const KasaPublicRequestCurrency = {
+export const KasaActivePublicRequestCurrency = {
   TRY: 'TRY',
   EUR: 'EUR',
   USD: 'USD',
 } as const;
 
-export type KasaPublicRequestStatus = typeof KasaPublicRequestStatus[keyof typeof KasaPublicRequestStatus];
+export type KasaActivePublicRequestStatus = typeof KasaActivePublicRequestStatus[keyof typeof KasaActivePublicRequestStatus];
 
 
-export const KasaPublicRequestStatus = {
+export const KasaActivePublicRequestStatus = {
   PENDING: 'PENDING',
   COMPLETED: 'COMPLETED',
 } as const;
 
-export interface KasaPublicRequest {
+export interface KasaActivePublicRequest {
   amount: string;
-  currency: KasaPublicRequestCurrency;
-  status: KasaPublicRequestStatus;
+  currency: KasaActivePublicRequestCurrency;
+  status: KasaActivePublicRequestStatus;
   liveEnabled: boolean;
 }
+
+export type KasaCancelledPublicRequestStatus = typeof KasaCancelledPublicRequestStatus[keyof typeof KasaCancelledPublicRequestStatus];
+
+
+export const KasaCancelledPublicRequestStatus = {
+  CANCELLED: 'CANCELLED',
+} as const;
+
+export interface KasaCancelledPublicRequest {
+  status: KasaCancelledPublicRequestStatus;
+  liveEnabled: false;
+}
+
+export type KasaPublicRequest = KasaActivePublicRequest | KasaCancelledPublicRequest;
 
 export type KasaCurrencyTotalCurrency = typeof KasaCurrencyTotalCurrency[keyof typeof KasaCurrencyTotalCurrency];
 
