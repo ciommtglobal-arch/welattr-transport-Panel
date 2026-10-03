@@ -334,6 +334,7 @@ function Router() {
       <Suspense fallback={<RouteLoading />}>
       <Switch>
         <Route path="/" component={PanelAwareHome} />
+        <Route path="/ecosystem" component={PanelAwareHome} />
         <Route path="/limit" component={LimitChooser} />
         <Route path="/limit/bireysel" component={IndividualLimit} />
         <Route path="/limit/ticari" component={CommercialLimit} />
@@ -438,7 +439,8 @@ function App() {
 
 function PageLanguageSelector() {
   const [location] = useLocation();
-  return location === '/' && !isStaffDomain ? null : <LanguageSelector />;
+  const isCorporateHome = ['/', '/ecosystem'].includes(normalizeRoutePath(location));
+  return isCorporateHome && !isStaffDomain ? null : <LanguageSelector />;
 }
 
 function PanelAwareHome() {

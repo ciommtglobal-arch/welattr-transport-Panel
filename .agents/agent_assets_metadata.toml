@@ -140,3 +140,17 @@ mtime_ms = 1790231276454
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/f122ac7c-3b21-43dd-ae81-e9dac083c6da/73f8e00e-becf-4b73-b80a-92969f3f3479"
 storage_version_token = "1790231291249045"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "iBJKo70mvPuE7ysA6awoB"
+uri = "file://attached_assets/generated_audio/davet-kontrolu-aciklama.mp3"
+type = "audio"
+title = "Sesli açıklama — Davet kontrolü"
+description = "Son açıklamanın Türkçe, yapay zekâ ile oluşturulmuş seslendirmesi."
+logical_id = "edd906ce-8755-4a47-b19f-4b9e022064a6"
+content_hash = "sha256:18f257d3e9dba28e8f02df33a84cbcbbde4a58fd8c35da05812cd7b943a243ec"
+size = 744847
+mtime_ms = 1790970426542
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/edd906ce-8755-4a47-b19f-4b9e022064a6/579c41b8-f5d6-414c-9174-48a29a5b1915"
+storage_version_token = "1790970439181988"
+content_type = "audio/mpeg"
