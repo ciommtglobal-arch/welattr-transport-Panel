@@ -8,6 +8,79 @@
 import * as zod from 'zod';
 
 
+/**
+ * Owner-only internal record; not a digital signature or external dispatch.
+ */
+export const createCompanyInstructionBodyKurumAdiMin = 2;
+export const createCompanyInstructionBodyKurumAdiMax = 200;
+
+export const createCompanyInstructionBodyIcerikMin = 5;
+export const createCompanyInstructionBodyIcerikMax = 8000;
+
+export const createCompanyInstructionBodyIslemTuruDefault = `Resmi Talimat`;
+export const createCompanyInstructionBodyIslemTuruMin = 2;
+export const createCompanyInstructionBodyIslemTuruMax = 100;
+
+
+
+export const CreateCompanyInstructionBody = zod.object({
+  "kurum_adi": zod.string().min(createCompanyInstructionBodyKurumAdiMin).max(createCompanyInstructionBodyKurumAdiMax),
+  "icerik": zod.string().min(createCompanyInstructionBodyIcerikMin).max(createCompanyInstructionBodyIcerikMax),
+  "islem_turu": zod.string().min(createCompanyInstructionBodyIslemTuruMin).max(createCompanyInstructionBodyIslemTuruMax).default(createCompanyInstructionBodyIslemTuruDefault)
+})
+
+export const CreateCompanyInstructionResponse = zod.object({
+  "durum": zod.enum(['basarili']),
+  "mesaj": zod.string(),
+  "veri": zod.object({
+  "id": zod.int(),
+  "kurum": zod.string(),
+  "icerik": zod.string(),
+  "islem_turu": zod.string(),
+  "imza": zod.string().describe('Display label only'),
+  "ekosistem": zod.string().describe('Display label only'),
+  "zaman": zod.coerce.date(),
+  "olusturan": zod.string()
+})
+})
+
+
+/**
+ * Active owner/admin/manager may read only their own company records.
+ */
+export const getCompanyInstructionsQueryLimitDefault = 20;
+export const getCompanyInstructionsQueryLimitMax = 100;
+
+export const getCompanyInstructionsQueryOffsetDefault = 0;
+export const getCompanyInstructionsQueryOffsetMin = 0;
+export const getCompanyInstructionsQueryOffsetMax = 1000000;
+
+
+
+export const GetCompanyInstructionsQueryParams = zod.object({
+  "limit": zod.coerce.number().int().min(1).max(getCompanyInstructionsQueryLimitMax).default(getCompanyInstructionsQueryLimitDefault),
+  "offset": zod.coerce.number().int().min(getCompanyInstructionsQueryOffsetMin).max(getCompanyInstructionsQueryOffsetMax).default(getCompanyInstructionsQueryOffsetDefault)
+})
+
+export const GetCompanyInstructionsResponse = zod.object({
+  "imza": zod.string(),
+  "toplam_talimat": zod.int(),
+  "liste": zod.array(zod.object({
+  "id": zod.int(),
+  "kurum": zod.string(),
+  "icerik": zod.string(),
+  "islem_turu": zod.string(),
+  "imza": zod.string().describe('Display label only'),
+  "ekosistem": zod.string().describe('Display label only'),
+  "zaman": zod.coerce.date(),
+  "olusturan": zod.string()
+})),
+  "canCreate": zod.boolean(),
+  "limit": zod.int(),
+  "offset": zod.int()
+})
+
+
 export const GetKasaMeResponse = zod.object({
   "user": zod.union([zod.object({
   "id": zod.int(),

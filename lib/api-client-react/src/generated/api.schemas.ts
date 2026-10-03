@@ -2549,6 +2549,59 @@ export interface WorkflowApprovalPage {
   total: number;
 }
 
+export interface CompanyInstructionInput {
+  /**
+     * @minLength 2
+     * @maxLength 200
+     */
+  kurum_adi: string;
+  /**
+     * @minLength 5
+     * @maxLength 8000
+     */
+  icerik: string;
+  /**
+     * @minLength 2
+     * @maxLength 100
+     */
+  islem_turu?: string;
+}
+
+export interface CompanyInstruction {
+  id: number;
+  kurum: string;
+  icerik: string;
+  islem_turu: string;
+  /** Display label only */
+  imza: string;
+  /** Display label only */
+  ekosistem: string;
+  zaman: string;
+  olusturan: string;
+}
+
+export type CompanyInstructionResultDurum = typeof CompanyInstructionResultDurum[keyof typeof CompanyInstructionResultDurum];
+
+
+export const CompanyInstructionResultDurum = {
+  basarili: 'basarili',
+} as const;
+
+export interface CompanyInstructionResult {
+  durum: CompanyInstructionResultDurum;
+  mesaj: string;
+  veri: CompanyInstruction;
+}
+
+export interface CompanyInstructionPage {
+  imza: string;
+  toplam_talimat: number;
+  liste: CompanyInstruction[];
+  canCreate: boolean;
+  limit: number;
+  offset: number;
+}
+
 export interface WorkflowNotificationPage {
   items: WorkflowNotification[];
   total: number;
@@ -2558,6 +2611,19 @@ export interface WorkflowNotificationPage {
 export type TrialPageParameter = number;
 
 export type TrialPageSizeParameter = number;
+
+export type GetCompanyInstructionsParams = {
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: number;
+/**
+ * @minimum 0
+ * @maximum 1000000
+ */
+offset?: number;
+};
 
 export type GetKasaRequestsParams = {
 /**

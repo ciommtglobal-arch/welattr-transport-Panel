@@ -31,6 +31,46 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /talimat-ekle:
+    post:
+      operationId: createCompanyInstruction
+      tags: [b2b-businesses]
+      description: Owner-only internal record; not a digital signature or external dispatch.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CompanyInstructionInput" }
+      responses:
+        "201":
+          description: Saved within the authenticated company
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompanyInstructionResult" }
+        "400": { description: Invalid input }
+        "401": { description: Sign-in required }
+        "403": { description: Company owner required }
+  /talimatlari-listele:
+    get:
+      operationId: getCompanyInstructions
+      tags: [b2b-businesses]
+      description: Active owner/admin/manager may read only their own company records.
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - in: query
+          name: offset
+          schema: { type: integer, minimum: 0, maximum: 1000000, default: 0 }
+      responses:
+        "200":
+          description: Company-scoped instruction page
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompanyInstructionPage" }
+        "400": { description: Invalid pagination }
+        "401": { description: Sign-in required }
+        "403": { description: Company management access required }
   /kasa/me:
     get:
       operationId: getKasaMe
@@ -6428,6 +6468,45 @@ components:
             $ref: "#/components/schemas/WorkflowApproval"
         total:
           type: integer
+    CompanyInstructionInput:
+      type: object
+      additionalProperties: false
+      required: [kurum_adi, icerik]
+      properties:
+        kurum_adi: { type: string, minLength: 2, maxLength: 200 }
+        icerik: { type: string, minLength: 5, maxLength: 8000 }
+        islem_turu: { type: string, minLength: 2, maxLength: 100, default: "Resmi Talimat" }
+    CompanyInstruction:
+      type: object
+      required: [id, kurum, icerik, islem_turu, imza, ekosistem, zaman, olusturan]
+      properties:
+        id: { type: integer }
+        kurum: { type: string }
+        icerik: { type: string }
+        islem_turu: { type: string }
+        imza: { type: string, description: Display label only, not a digital signature }
+        ekosistem: { type: string, description: Display label only, not a security certification }
+        zaman: { type: string, format: date-time }
+        olusturan: { type: string }
+    CompanyInstructionResult:
+      type: object
+      required: [durum, mesaj, veri]
+      properties:
+        durum: { type: string, enum: [basarili] }
+        mesaj: { type: string }
+        veri: { $ref: "#/components/schemas/CompanyInstruction" }
+    CompanyInstructionPage:
+      type: object
+      required: [imza, toplam_talimat, liste, canCreate, limit, offset]
+      properties:
+        imza: { type: string }
+        toplam_talimat: { type: integer }
+        liste:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyInstruction" }
+        canCreate: { type: boolean }
+        limit: { type: integer }
+        offset: { type: integer }
     WorkflowNotificationPage:
       type: object
       required: [items, total, unreadCount]

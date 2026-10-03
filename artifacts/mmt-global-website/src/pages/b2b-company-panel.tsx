@@ -26,6 +26,7 @@ import {
   Users,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { CompanyInstructions } from "@/components/company-instructions";
 import {
   acceptB2BCompanyInvitation,
   addB2BCompanyTaskReport,
@@ -186,6 +187,14 @@ function CompanyPanelContent({
   const canManageTasks = canManageCompany;
   const canReviewApprovals = canManageCompany;
   const canDecideApprovals = currentRole === "owner";
+  const instructionsResolving =
+    membersQuery.isLoading || (!membersQuery.isError && !membersQuery.data);
+  const instructionsCanView =
+    Boolean(membersQuery.data) &&
+    currentMember?.status === "active" &&
+    (currentMember.role === "owner" ||
+      currentMember.role === "admin" ||
+      currentMember.role === "manager");
   const [inviteResult, setInviteResult] = useState("");
   const [error, setError] = useState("");
   const [isAccepting, setIsAccepting] = useState(false);
@@ -344,6 +353,13 @@ function CompanyPanelContent({
             }
           />
         </div>
+
+        <CompanyInstructions
+          accessError={membersQuery.isError}
+          onRetryAccess={() => void membersQuery.refetch()}
+          canView={instructionsCanView}
+          resolving={instructionsResolving}
+        />
 
         <WorkflowSection
           approvals={approvalsQuery.data?.items ?? []}

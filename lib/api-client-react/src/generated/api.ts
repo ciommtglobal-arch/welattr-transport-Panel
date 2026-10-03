@@ -54,6 +54,9 @@ import type {
   B2BRequestInput,
   B2BRequestPage,
   B2BRequestStatusUpdate,
+  CompanyInstructionInput,
+  CompanyInstructionPage,
+  CompanyInstructionResult,
   ConstructionCart,
   ConstructionCartLineInput,
   ConstructionCartLineRemove,
@@ -74,6 +77,7 @@ import type {
   GetB2BReportReviewQueueParams,
   GetB2BRequestReviewQueueParams,
   GetB2BRequestsParams,
+  GetCompanyInstructionsParams,
   GetConstructionCatalogParams,
   GetKasaRequestsParams,
   GetKasaSummaryParams,
@@ -196,6 +200,164 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getCreateCompanyInstructionUrl = () => {
+
+
+
+
+  return `/api/talimat-ekle`
+}
+
+/**
+ * Owner-only internal record; not a digital signature or external dispatch.
+ */
+export const createCompanyInstruction = async (companyInstructionInput: CompanyInstructionInput, options?: Parameters<typeof customFetch>[1]): Promise<CompanyInstructionResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<CompanyInstructionResult>(getCreateCompanyInstructionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(companyInstructionInput)
+  }
+);}
+
+
+
+
+
+export const getCreateCompanyInstructionMutationKey = () => ['createCompanyInstruction'] as const;
+
+export const getCreateCompanyInstructionMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCompanyInstruction>>, TError,CreateCompanyInstructionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCompanyInstruction>>, TError,CreateCompanyInstructionMutationVariables, TContext> => {
+
+const mutationKey = getCreateCompanyInstructionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCompanyInstruction>>, CreateCompanyInstructionMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createCompanyInstruction(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCompanyInstructionMutationResult = NonNullable<Awaited<ReturnType<typeof createCompanyInstruction>>>
+    export type CreateCompanyInstructionMutationBody = BodyType<CompanyInstructionInput>
+    export type CreateCompanyInstructionMutationError = ErrorType<void>
+    export type CreateCompanyInstructionMutationVariables = {data: BodyType<CompanyInstructionInput>}
+
+    export const useCreateCompanyInstruction = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCompanyInstruction>>, TError,CreateCompanyInstructionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createCompanyInstruction>>,
+        TError,
+        CreateCompanyInstructionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateCompanyInstructionMutationOptions(options));
+    }
+
+export const getGetCompanyInstructionsUrl = (params?: GetCompanyInstructionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/talimatlari-listele?${stringifiedParams}` : `/api/talimatlari-listele`
+}
+
+/**
+ * Active owner/admin/manager may read only their own company records.
+ */
+export const getCompanyInstructions = async (params?: GetCompanyInstructionsParams, options?: Parameters<typeof customFetch>[1]): Promise<CompanyInstructionPage> => {
+
+  return customFetch<CompanyInstructionPage>(getGetCompanyInstructionsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCompanyInstructionsQueryKey = (params?: GetCompanyInstructionsParams,) => {
+    return [
+    `/api/talimatlari-listele`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetCompanyInstructionsQueryOptions = <TData = Awaited<ReturnType<typeof getCompanyInstructions>>, TError = ErrorType<void>>(params?: GetCompanyInstructionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCompanyInstructions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCompanyInstructionsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCompanyInstructions>>> = ({ signal }) => getCompanyInstructions(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCompanyInstructions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCompanyInstructionsQueryResult = NonNullable<Awaited<ReturnType<typeof getCompanyInstructions>>>
+export type GetCompanyInstructionsQueryError = ErrorType<void>
+
+
+
+export function useGetCompanyInstructions<TData = Awaited<ReturnType<typeof getCompanyInstructions>>, TError = ErrorType<void>>(
+ params?: GetCompanyInstructionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCompanyInstructions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCompanyInstructionsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetKasaMeUrl = () => {
 

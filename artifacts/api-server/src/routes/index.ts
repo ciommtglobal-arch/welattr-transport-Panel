@@ -18,6 +18,7 @@ import staffRewardsRouter from "./staff-rewards";
 import paymentsRouter from "./payments";
 import staffTrialRouter from "./staff-trial";
 import kasaRouter from "./kasa";
+import companyInstructionsRouter from "./company-instructions";
 
 const router: IRouter = Router();
 router.use(kasaRouter);
@@ -40,6 +41,7 @@ if (process.env.NODE_ENV !== "production") {
   router.use(staffTrialRouter);
 }
 router.use(b2bCompanyManagementRouter);
+router.use(companyInstructionsRouter);
 router.use(workflowRouter);
 router.use(staffRewardsRouter);
 export default router;
