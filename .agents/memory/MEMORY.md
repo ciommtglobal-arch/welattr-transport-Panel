@@ -26,3 +26,4 @@
 - [Orphaned preview listeners](orphaned-preview-listeners.md) — A failed managed workflow can coexist with an older process still holding its port after runner recovery.
 - [Staff login device gap](staff-login-device-gap.md) — Controlled submissions reached Clerk, but the reported device-specific stall was not reproduced; do not claim real-account login is verified.
 - [Clerk test subjects](clerk-test-subjects.md) — Test helper subject overrides may be ignored; bind temporary dev fixtures to the actual unique test account, not the requested ID.
+- [Artifact validation temporary files](artifact-validation-temp-files.md) — Successful manifest validation can consume its temporary input; recreate it before another edit.
