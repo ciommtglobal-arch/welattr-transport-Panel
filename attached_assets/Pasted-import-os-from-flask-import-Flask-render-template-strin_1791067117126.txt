@@ -1,0 +1,232 @@
+import os
+from flask import Flask, render_template_string, request, jsonify
+
+app = Flask(__name__)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'mmt_kesin_banka_guvenlik_anahtari')
+
+# ==========================================================
+# MMT GLOBAL & TRANS POWER - KATI BANKA HESAP TANIMLAMA
+# ==========================================================
+KURUMSAL_KIMLIK = {
+    "unvan": "MMT Lojistik Oto Kiralama Nak. Pet. Ürün. San. ve Tic. Ltd. Şti.",
+    "marka": "MMT Global / Trans Power",
+    "vkn": "6220914563",
+    "resmi_merkez": "Cizre / Mersin / Gaziantep"
+}
+
+# Kesin Kurum ve Kur Sınırları (Doğrulanmış Banka Tanımları)
+KESIN_KURUMLAR = {
+    "golden_global": {
+        "ad": "Golden Global Bankası Kurumsal Hat",
+        "desteklenen_para": ["TRY", "USD", "EUR"]
+    },
+    "tami": {
+        "ad": "Tami Sanal POS (1M Limit & 41 Gün Valör)",
+        "desteklenen_para": ["TRY"]
+    }
+}
+
+# Kesin Hukuki ve Finansal İşlem Havuzu (Eksiksiz Alan Doğrulamalı)
+KAYIT_HAVUZU = {
+    "MMT-GOLDEN-01": {
+        "tutar": 2750.50,
+        "para_birimi": "USD",
+        "kurum": "golden_global",
+        "risk_durumu": "Temiz / Onaylı",
+        "blokeli_mi": False
+    },
+    "MMT-TAMI-01": {
+        "tutar": 48575.00,
+        "para_birimi": "TRY",
+        "kurum": "tami",
+        "risk_durumu": "Temiz / Onaylı",
+        "blokeli_mi": False
+    },
+    "MMT-INCELEME-01": {
+        "tutar": 15000.00,
+        "para_birimi": "TRY",
+        "kurum": "golden_global",
+        "risk_durumu": "İncelemede",
+        "blokeli_mi": False
+    },
+    "MMT-BLOKE-01": {
+        "tutar": 50000.00,
+        "para_birimi": "TRY",
+        "kurum": "tami",
+        "risk_durumu": "Blokeli / İcra Riski",
+        "blokeli_mi": True
+    }
+}
+
+@app.route('/')
+def banka_tanimlama_panel():
+    return render_template_string("""
+        <!DOCTYPE html>
+        <html lang="tr">
+        <head>
+            <meta charset="UTF-8">
+            <title>MMT Kasa | Kesin Banka Hesap Tanımlama</title>
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0b0f19; color: #f8fafc; padding: 40px 20px; }
+                .container { max-width: 750px; margin: auto; background: #1e293b; padding: 40px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-top: 5px solid #3b82f6; }
+                h2 { color: #60a5fa; font-size: 24px; margin-bottom: 10px; }
+                .subtitle { color: #60a5fa; font-size: 14px; font-weight: bold; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+                p { font-size: 15px; color: #cbd5e1; margin-bottom: 25px; line-height: 1.6; }
+                .form-group { margin-bottom: 25px; }
+                label { display: block; margin-bottom: 8px; color: #94a3b8; font-size: 14px; font-weight: 600; }
+                input, select { width: 100%; padding: 14px; background: #0f172a; border: 2px solid #334155; color: white; border-radius: 8px; font-size: 15px; box-sizing: border-box; }
+                input:focus, select:focus { border-color: #60a5fa; outline: none; }
+                button { background: #2563eb; color: white; border: none; padding: 16px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: background 0.2s; }
+                button:hover { background: #1d4ed8; }
+                .status-box { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #4ade80; font-size: 13px; color: #94a3b8; line-height: 1.6; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>MMT Kasa - Kesin Banka Hesap Tanımlama</h2>
+                <div class="subtitle">ÜRET, TANIT, SAT: SINIR TANIMAYAN GÜÇ</div>
+                <div class="status-box">
+                    <strong>Onaylı Hatlar:</strong> Golden Global Bankası & Tami<br>
+                    <strong>Çelik Kubbe Kalkanı:</strong> Katı Kurum, Kur ve Bloke Denetimi Aktif<br>
+                    <strong>Yasal VKN:</strong> 6220914563
+                </div>
+                <p>İşlem referansını ve ilgili banka hattını seçin. Sistem kurum eşleşmesini, para birimi desteğini ve bloke/inceleme durumunu katı bir şekilde denetlesin.</p>
+                
+                <form action="/validate-account" method="POST">
+                    <div class="form-group">
+                        <label for="ref">İşlem / Fatura Referans Kodu:</label>
+                        <input type="text" id="ref" name="ref" placeholder="Örn: MMT-GOLDEN-01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="banka">Banka / Kurum Seçin:</label>
+                        <select id="banka" name="banka">
+                            <option value="golden_global">Golden Global Bankası (TRY, USD, EUR)</option>
+                            <option value="tami">Tami Sanal POS (Yalnızca TRY)</option>
+                        </select>
+                    </div>
+                    <button type="submit">Banka Hesap ve Kurum Doğrulamasını Çalıştır</button>
+                </form>
+            </div>
+        </body>
+        </html>
+    """)
+
+@app.route('/validate-account', methods=['POST'])
+def validate_account():
+    ref = request.form.get('ref', '').strip()
+    secilen_banka = request.form.get('banka', '').strip()
+    
+    # 1. Tanımsız Kurum Kontrolü (400 Hatası)
+    if secilen_banka not in KESIN_KURUMLAR:
+        return render_template_string("""
+            <body style="background:#0b0f19; color:white; font-family:sans-serif; padding:60px 20px; text-align:center;">
+                <h3 style="color:#ef4444; font-size:24px;">Hata: Tanımsız Banka/Kurum!</h3>
+                <p style="font-size:16px; color:#cbd5e1; margin:20px 0;">Sistemde yetkilendirilmemiş bir kurum seçildi.</p>
+                <a href="/" style="color:#60a5fa; text-decoration:none; font-size:16px; font-weight:bold;">&larr; Geri Dön</a>
+            </body>
+        """), 400
+
+    islem = KAYIT_HAVUZU.get(ref)
+    
+    # 2. Tanımsız Referans Kontrolü (400 Hatası)
+    if not islem:
+        return render_template_string("""
+            <body style="background:#0b0f19; color:white; font-family:sans-serif; padding:60px 20px; text-align:center;">
+                <h3 style="color:#ef4444; font-size:24px;">Hata: Geçersiz Referans Kodu!</h3>
+                <p style="font-size:16px; color:#cbd5e1; margin:20px 0;">Sistemde bu koda ait finansal kayıt bulunamadı.</p>
+                <a href="/" style="color:#60a5fa; text-decoration:none; font-size:16px; font-weight:bold;">&larr; Geri Dön</a>
+            </body>
+        """), 400
+
+    # 3. KATI KURUM EŞLEŞME KONTROLÜ (Tami kaydı Golden Global ile seçilemez!)
+    kayit_kurumu = islem.get('kurum')
+    if kayit_kurumu != secilen_banka:
+        return render_template_string(f"""
+            <body style="background:#0b0f19; color:white; font-family:sans-serif; padding:60px 20px; text-align:center;">
+                <h3 style="color:#ef4444; font-size:24px;">Kurum Eşleşme Uyumsuzluğu!</h3>
+                <p style="font-size:16px; color:#cbd5e1; margin:20px 0;">Bu kayıt ({ref}) <b>{KESIN_KURUMLAR[kayit_kurumu]['ad']}</b> sistemine aittir; seçilen <b>{KESIN_KURUMLAR[secilen_banka]['ad']}</b> ile eşleştirilemez.</p>
+                <a href="/" style="color:#60a5fa; text-decoration:none; font-size:16px; font-weight:bold;">&larr; Geri Dön</a>
+            </body>
+        """), 400
+
+    # 4. KATI BLOKE VE İCRA KONTROLÜ
+    if islem.get('blokeli_mi', False) or "Blokeli" in islem.get('risk_durumu', ''):
+        return render_template_string(f"""
+            <body style="background:#0b0f19; color:white; font-family:sans-serif; padding:60px 20px; text-align:center;">
+                <h3 style="color:#ef4444; font-size:24px;">ÇELİK KUBBE: BLOKE / İCRA ENGELİ!</h3>
+                <p style="font-size:16px; color:#cbd5e1; margin:20px 0;">Referans: {ref} — İşlem blokeli havuzdadır, kesinlikle onaylanmaz.</p>
+                <a href="/" style="color:#60a5fa; text-decoration:none; font-size:16px; font-weight:bold;">&larr; Geri Dön</a>
+            </body>
+        """), 403
+
+    # 5. KATI İNCELEME DURUMU KONTROLÜ (İncelemedeki kayıtlar onaysız geçemez!)
+    if islem.get('risk_durumu') == "İncelemede":
+        return render_template_string(f"""
+            <body style="background:#0b0f19; color:white; font-family:sans-serif; padding:60px 20px; text-align:center;">
+                <h3 style="color:#f59e0b; font-size:24px;">İşlem İncelemede – Hukuki Onay Bekleniyor!</h3>
+                <p style="font-size:16px; color:#cbd5e1; margin:20px 0;">Referans: {ref} hukuki inceleme aşamasındadır. Kesin onay verilmeden işlem ilerletilemez.</p>
+                <a href="/" style="color:#60a5fa; text-decoration:none; font-size:16px; font-weight:bold;">&larr; Geri Dön</a>
+            </body>
+        """), 403
+
+    # 6. KATI PARA BİRİMİ VE EKSİK BİLGİ KONTROLÜ
+    para_birimi = islem.get('para_birimi')
+    if not para_birimi:
+        return render_template_string("""
+            <body style="background:#0b0f19; color:white; font-family:sans-serif; padding:60px 20px; text-align:center;">
+                <h3 style="color:#ef4444; font-size:24px;">Eksik Bilgi Hatası!</h3>
+                <p style="font-size:16px; color:#cbd5e1; margin:20px 0;">Finansal kayıtta para birimi eksiktir; varsayılan kabul edilmez ve reddedilir.</p>
+                <a href="/" style="color:#60a5fa; text-decoration:none; font-size:16px; font-weight:bold;">&larr; Geri Dön</a>
+            </body>
+        """), 400
+
+    desteklenen_kurlar = KESIN_KURUMLAR[secilen_banka]["desteklenen_para"]
+    if para_birimi not in desteklenen_kurlar:
+        return render_template_string(f"""
+            <body style="background:#0b0f19; color:white; font-family:sans-serif; padding:60px 20px; text-align:center;">
+                <h3 style="color:#ef4444; font-size:24px;">Para Birimi Uyumsuzluğu!</h3>
+                <p style="font-size:16px; color:#cbd5e1; margin:20px 0;">Seçilen kurum bu işlem için {para_birimi} birimini desteklemiyor.</p>
+                <a href="/" style="color:#60a5fa; text-decoration:none; font-size:16px; font-weight:bold;">&larr; Geri Dön</a>
+            </body>
+        """), 400
+
+    banka_adi = KESIN_KURUMLAR[secilen_banka]["ad"]
+
+    return render_template_string(f"""
+        <!DOCTYPE html>
+        <html lang="tr">
+        <head>
+            <meta charset="UTF-8">
+            <title>Banka Hesap Doğrulaması Başarılı</title>
+            <style>
+                body {{ font-family: sans-serif; background-color: #0b0f19; color: #f8fafc; padding: 50px 20px; }}
+                .container {{ max-width: 650px; margin: auto; background: #1e293b; padding: 40px; border-radius: 14px; border-top: 5px solid #4ade80; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }}
+                h2 {{ color: #4ade80; font-size: 26px; margin-bottom: 15px; }}
+                p {{ font-size: 16px; color: #cbd5e1; margin-bottom: 25px; }}
+                ul {{ line-height: 2.2; list-style: none; padding: 0; font-size: 16px; }}
+                li {{ border-bottom: 1px solid #334155; padding: 8px 0; display: flex; justify-content: space-between; }}
+                .label {{ color: #94a3b8; }}
+                .value {{ font-weight: bold; color: #f8fafc; }}
+                .btn {{ display: block; background: #2563eb; color: white; text-align: center; padding: 16px; text-decoration: none; border-radius: 8px; margin-top: 30px; font-size: 16px; font-weight: bold; }}
+                .btn:hover {{ background: #1d4ed8; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>Banka Hesap Tanımlama Başarıyla Onaylandı</h2>
+                <p>Kurum eşleşmesi, para birimi uyumu, inceleme ve blokaj denetimleri eksiksiz tamamlandı:</p>
+                <ul>
+                    <li><span class="label">Şirket / VKN:</span> <span class="value">MMT Lojistik (6220914563)</span></li>
+                    <li><span class="label">Doğrulanan Kurum:</span> <span class="value">{banka_adi}</span></li>
+                    <li><span class="label">Referans Kodu:</span> <span class="value">{ref}</span></li>
+                    <li><span class="label">İşlem Tutarı:</span> <span class="value" style="color:#4ade80;">{islem['tutar']} {para_birimi}</span></li>
+                    <li><span class="label">Güvenlik Durumu:</span> <span class="value" style="color:#4ade80;">Temiz / Tam Uyumlu</span></li>
+                </ul>
+                <a href="/" class="btn">Ana Panele Dön</a>
+            </div>
+        </body>
+        </html>
+    """)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
