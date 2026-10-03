@@ -12,4 +12,5 @@ export type PaymentMode = typeof PaymentMode[keyof typeof PaymentMode];
 export const PaymentMode = {
   mock: 'mock',
   tami: 'tami',
+  tami_sandbox: 'tami_sandbox',
 } as const;

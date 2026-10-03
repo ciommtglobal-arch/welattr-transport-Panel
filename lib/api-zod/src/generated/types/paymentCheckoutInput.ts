@@ -5,20 +5,28 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { PaymentCheckoutInputCurrency } from './paymentCheckoutInputCurrency';
 
 export interface PaymentCheckoutInput {
   /**
-     * @minLength 1
+     * @minLength 24
      * @maxLength 80
      */
   invoiceReference: string;
-  /** @pattern ^\d{1,9}(\.\d{1,2})?$ */
-  amount: string;
-  currency: PaymentCheckoutInputCurrency;
   /**
-     * @minLength 1
-     * @maxLength 240
+     * @minLength 2
+     * @maxLength 160
      */
-  description: string;
+  fullName: string;
+  /** @maxLength 254 */
+  email: string;
+  /**
+     * @minLength 10
+     * @maxLength 20
+     */
+  phone: string;
+  /**
+     * @minLength 16
+     * @maxLength 100
+     */
+  idempotencyKey: string;
 }

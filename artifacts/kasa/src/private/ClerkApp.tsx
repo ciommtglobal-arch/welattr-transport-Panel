@@ -14,6 +14,7 @@ import RequestDetailPage from '@/pages/request-detail';
 import BranchesPage from '@/pages/branches';
 import UsersPage from '@/pages/users';
 import ReportsPage from '@/pages/reports';
+import ServiceInvoicesPage from '@/pages/service-invoices';
 
 const clerkPubKey = publishableKeyFromHost(window.location.hostname, import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
@@ -150,6 +151,7 @@ export default function ClerkApp() {
         <Route path="/branches"><Gate admin><BranchesPage /></Gate></Route>
         <Route path="/users"><Gate admin><UsersPage /></Gate></Route>
         <Route path="/reports"><Gate admin><ReportsPage /></Gate></Route>
+        <Route path="/service-invoices"><Gate ownerOnly><ServiceInvoicesPage /></Gate></Route>
         <Route component={NotFound} />
       </Switch>
     </ClerkProvider>

@@ -235,7 +235,82 @@ export const GetKasaMeResponse = zod.object({
   "active": zod.boolean()
 }),zod.null()]),
   "canSetup": zod.boolean(),
+  "canManageInvoices": zod.boolean(),
   "liveEnabled": zod.boolean()
+})
+
+
+/**
+ * @summary Hizmet faturalarını listeler; yalnızca uygulama sahibi erişebilir
+ */
+export const GetKasaServiceInvoicesResponseItem = zod.object({
+  "id": zod.int(),
+  "reference": zod.string(),
+  "amount": zod.string(),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']),
+  "description": zod.string(),
+  "status": zod.enum(['issued', 'paid', 'partially_refunded', 'refunded', 'cancelled']),
+  "refundedAmount": zod.string(),
+  "paymentReference": zod.string().nullable(),
+  "paymentStatus": zod.union([zod.literal('pending'),zod.literal('success'),zod.literal('failed'),zod.literal('cancelled'),zod.literal(null)]).nullable(),
+  "issuedAt": zod.coerce.date(),
+  "paidAt": zod.coerce.date().nullable()
+})
+export const GetKasaServiceInvoicesResponse = zod.array(GetKasaServiceInvoicesResponseItem)
+
+
+/**
+ * @summary Yeni hizmet faturası düzenler
+ */
+export const createKasaServiceInvoiceBodyAmountRegExp = new RegExp('^(0|[1-9]\\d{0,8})(\\.\\d{1,2})?$');
+export const createKasaServiceInvoiceBodyDescriptionMin = 2;
+export const createKasaServiceInvoiceBodyDescriptionMax = 240;
+
+
+
+export const CreateKasaServiceInvoiceBody = zod.object({
+  "amount": zod.string().regex(createKasaServiceInvoiceBodyAmountRegExp),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']),
+  "description": zod.string().min(createKasaServiceInvoiceBodyDescriptionMin).max(createKasaServiceInvoiceBodyDescriptionMax)
+})
+
+export const CreateKasaServiceInvoiceResponse = zod.object({
+  "id": zod.int(),
+  "reference": zod.string(),
+  "amount": zod.string(),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']),
+  "description": zod.string(),
+  "status": zod.enum(['issued', 'paid', 'partially_refunded', 'refunded', 'cancelled']),
+  "refundedAmount": zod.string(),
+  "paymentReference": zod.string().nullable(),
+  "paymentStatus": zod.union([zod.literal('pending'),zod.literal('success'),zod.literal('failed'),zod.literal('cancelled'),zod.literal(null)]).nullable(),
+  "issuedAt": zod.coerce.date(),
+  "paidAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Ödenmemiş faturayı geçmişi silmeden iptal eder
+ */
+
+
+
+export const CancelKasaServiceInvoiceParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const CancelKasaServiceInvoiceResponse = zod.object({
+  "id": zod.int(),
+  "reference": zod.string(),
+  "amount": zod.string(),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']),
+  "description": zod.string(),
+  "status": zod.enum(['issued', 'paid', 'partially_refunded', 'refunded', 'cancelled']),
+  "refundedAmount": zod.string(),
+  "paymentReference": zod.string().nullable(),
+  "paymentStatus": zod.union([zod.literal('pending'),zod.literal('success'),zod.literal('failed'),zod.literal('cancelled'),zod.literal(null)]).nullable(),
+  "issuedAt": zod.coerce.date(),
+  "paidAt": zod.coerce.date().nullable()
 })
 
 
@@ -834,45 +909,6 @@ export const UpdateStaffTrialCandidateEvaluationResponse = zod.object({
 
 
 /**
- * Canlı tahsilat kapalıdır; ortam ayarından bağımsız olarak gerçek ödeme
- * almadan test ödeme sayfası üretir. Kart numarası ve güvenlik kodu bu API'ye
- * gönderilmez. Canlıya geçiş ayrıca onaylanmalıdır.
- * @summary Kart bilgilerini MMT sistemine almadan ödeme oturumu oluşturur
- */
-export const createTamiHostedPaymentSessionBodyAmountMax = 10000000;
-
-export const createTamiHostedPaymentSessionBodyFullNameMin = 2;
-export const createTamiHostedPaymentSessionBodyFullNameMax = 160;
-
-export const createTamiHostedPaymentSessionBodyEmailMax = 254;
-
-export const createTamiHostedPaymentSessionBodyPhoneMin = 10;
-export const createTamiHostedPaymentSessionBodyPhoneMax = 20;
-
-export const createTamiHostedPaymentSessionBodyDescriptionMin = 2;
-export const createTamiHostedPaymentSessionBodyDescriptionMax = 160;
-
-
-
-export const CreateTamiHostedPaymentSessionBody = zod.object({
-  "amount": zod.number().min(1).max(createTamiHostedPaymentSessionBodyAmountMax).describe('Seçilen para birimindeki ödeme tutarı.'),
-  "currency": zod.enum(['TRY', 'USD', 'EUR']),
-  "fullName": zod.string().min(createTamiHostedPaymentSessionBodyFullNameMin).max(createTamiHostedPaymentSessionBodyFullNameMax),
-  "email": zod.email().max(createTamiHostedPaymentSessionBodyEmailMax),
-  "phone": zod.string().min(createTamiHostedPaymentSessionBodyPhoneMin).max(createTamiHostedPaymentSessionBodyPhoneMax).describe('Masterpass doğrulaması için 905xxxxxxxxx formatına dönüştürülebilen telefon.'),
-  "description": zod.string().min(createTamiHostedPaymentSessionBodyDescriptionMin).max(createTamiHostedPaymentSessionBodyDescriptionMax)
-})
-
-export const CreateTamiHostedPaymentSessionResponse = zod.object({
-  "orderId": zod.string(),
-  "paymentUrl": zod.url(),
-  "status": zod.enum(['pending', 'success', 'failed']),
-  "currency": zod.enum(['TRY', 'USD', 'EUR']),
-  "mode": zod.enum(['mock', 'tami'])
-})
-
-
-/**
  * @summary Ödeme durumunu sorgular
  */
 export const getTamiPaymentStatusPathOrderIdMin = 2;
@@ -886,12 +922,127 @@ export const GetTamiPaymentStatusParams = zod.object({
 
 export const GetTamiPaymentStatusResponse = zod.object({
   "orderId": zod.string(),
+  "invoiceReference": zod.string(),
   "amount": zod.number(),
   "currency": zod.enum(['TRY', 'USD', 'EUR']),
-  "status": zod.enum(['pending', 'success', 'failed']),
+  "status": zod.enum(['pending', 'success', 'failed', 'cancelled']),
+  "mode": zod.enum(['mock', 'tami', 'tami_sandbox']),
   "providerPaymentStatus": zod.string().nullish(),
   "providerOrderStatus": zod.string().nullish(),
   "errorMessage": zod.string().nullish()
+})
+
+
+/**
+ * @summary İmzalı sağlayıcı yanıtıyla ödeme ve iade kayıtlarını mutabık kılar
+ */
+export const reconcileTamiPaymentPathOrderIdMin = 2;
+export const reconcileTamiPaymentPathOrderIdMax = 36;
+
+
+
+export const ReconcileTamiPaymentParams = zod.object({
+  "orderId": zod.coerce.string().min(reconcileTamiPaymentPathOrderIdMin).max(reconcileTamiPaymentPathOrderIdMax)
+})
+
+export const ReconcileTamiPaymentResponse = zod.object({
+  "orderId": zod.string(),
+  "invoiceReference": zod.string(),
+  "amount": zod.number(),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']),
+  "status": zod.enum(['pending', 'success', 'failed', 'cancelled']),
+  "mode": zod.enum(['mock', 'tami', 'tami_sandbox']),
+  "providerPaymentStatus": zod.string().nullish(),
+  "providerOrderStatus": zod.string().nullish(),
+  "errorMessage": zod.string().nullish()
+})
+
+
+/**
+ * İmzası doğrulanamayan yanıt pending kalır. Bekleyen iade varken yeni
+ * sağlayıcı isteği gönderilmez; önce mutabakat yapılmalıdır.
+ * @summary Sahibin onaylı hizmet ödemesi için iade başlatır
+ */
+export const createTamiPaymentRefundPathOrderIdMin = 2;
+export const createTamiPaymentRefundPathOrderIdMax = 36;
+
+
+
+export const CreateTamiPaymentRefundParams = zod.object({
+  "orderId": zod.coerce.string().min(createTamiPaymentRefundPathOrderIdMin).max(createTamiPaymentRefundPathOrderIdMax)
+})
+
+export const createTamiPaymentRefundBodyAmountRegExp = new RegExp('^[1-9]\\d{0,8}(\\.\\d{1,2})?$');
+export const createTamiPaymentRefundBodyReasonMin = 2;
+export const createTamiPaymentRefundBodyReasonMax = 150;
+
+export const createTamiPaymentRefundBodyIdempotencyKeyMin = 16;
+export const createTamiPaymentRefundBodyIdempotencyKeyMax = 100;
+
+
+
+export const CreateTamiPaymentRefundBody = zod.object({
+  "amount": zod.string().regex(createTamiPaymentRefundBodyAmountRegExp),
+  "reason": zod.string().min(createTamiPaymentRefundBodyReasonMin).max(createTamiPaymentRefundBodyReasonMax),
+  "idempotencyKey": zod.string().min(createTamiPaymentRefundBodyIdempotencyKeyMin).max(createTamiPaymentRefundBodyIdempotencyKeyMax)
+})
+
+export const CreateTamiPaymentRefundResponse = zod.object({
+  "id": zod.int(),
+  "orderId": zod.string(),
+  "amount": zod.string(),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']),
+  "status": zod.enum(['pending', 'success', 'failed']),
+  "providerReference": zod.string().nullable(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Sahibin ödeme iade geçmişini getirir
+ */
+export const getTamiPaymentRefundsPathOrderIdMin = 2;
+export const getTamiPaymentRefundsPathOrderIdMax = 36;
+
+
+
+export const GetTamiPaymentRefundsParams = zod.object({
+  "orderId": zod.coerce.string().min(getTamiPaymentRefundsPathOrderIdMin).max(getTamiPaymentRefundsPathOrderIdMax)
+})
+
+export const GetTamiPaymentRefundsResponseItem = zod.object({
+  "id": zod.int(),
+  "orderId": zod.string(),
+  "amount": zod.string(),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']),
+  "status": zod.enum(['pending', 'success', 'failed']),
+  "providerReference": zod.string().nullable(),
+  "createdAt": zod.coerce.date()
+})
+export const GetTamiPaymentRefundsResponse = zod.array(GetTamiPaymentRefundsResponseItem)
+
+
+/**
+ * @summary Fatura referansıyla ödeme bilgilerini getirir
+ */
+export const getPublicServiceInvoicePathReferenceMin = 24;
+export const getPublicServiceInvoicePathReferenceMax = 80;
+
+
+
+export const GetPublicServiceInvoiceParams = zod.object({
+  "reference": zod.coerce.string().min(getPublicServiceInvoicePathReferenceMin).max(getPublicServiceInvoicePathReferenceMax)
+})
+
+export const GetPublicServiceInvoiceResponse = zod.object({
+  "reference": zod.string(),
+  "amount": zod.string(),
+  "currency": zod.enum(['TRY', 'USD', 'EUR']),
+  "description": zod.string(),
+  "status": zod.enum(['issued', 'paid', 'partially_refunded', 'refunded', 'cancelled']),
+  "canPay": zod.boolean(),
+  "paymentReference": zod.string().nullable(),
+  "paymentStatus": zod.union([zod.literal('pending'),zod.literal('success'),zod.literal('failed'),zod.literal('cancelled'),zod.literal(null)]).nullable()
 })
 
 
@@ -908,14 +1059,16 @@ export const SetMockPaymentResultParams = zod.object({
 })
 
 export const SetMockPaymentResultBody = zod.object({
-  "status": zod.enum(['success', 'failed'])
+  "status": zod.enum(['success', 'failed', 'cancelled'])
 })
 
 export const SetMockPaymentResultResponse = zod.object({
   "orderId": zod.string(),
+  "invoiceReference": zod.string(),
   "amount": zod.number(),
   "currency": zod.enum(['TRY', 'USD', 'EUR']),
-  "status": zod.enum(['pending', 'success', 'failed']),
+  "status": zod.enum(['pending', 'success', 'failed', 'cancelled']),
+  "mode": zod.enum(['mock', 'tami', 'tami_sandbox']),
   "providerPaymentStatus": zod.string().nullish(),
   "providerOrderStatus": zod.string().nullish(),
   "errorMessage": zod.string().nullish()
@@ -928,34 +1081,57 @@ export const SetMockPaymentResultResponse = zod.object({
 export const GetPaymentReadinessResponse = zod.object({
   "bankAccountVerified": zod.boolean(),
   "providerApproved": zod.boolean(),
+  "productionCredentialsVerified": zod.boolean(),
+  "sandboxEnabled": zod.boolean(),
+  "threeDSecureVerified": zod.boolean(),
+  "testingEvidenceVerified": zod.boolean(),
+  "writtenAuthorizationConfigured": zod.boolean(),
   "liveEnabled": zod.boolean(),
+  "testEnabled": zod.boolean(),
   "cardDataCollected": zod.boolean()
 })
 
 
 /**
- * Accepts invoice details only. Card data must never be submitted to or stored
- * by this API. Until company bank and licensed provider approvals are verified,
- * the server rejects every checkout request.
+ * Accepts an issued invoice reference and payer contact details only. The
+ * server reads the amount, currency, and description from the persistent
+ * invoice. Card data must never be submitted to or stored by this API.
+ * Live checkout stays disabled until company and provider approvals,
+ * provider-confirmed 3DS, successful tests, verified production
+ * credentials, and written authorization are independently configured.
+ * Tami sandbox checkout is separately enabled only for non-production
+ * environments with sandbox credentials and the explicit sandbox flag.
  * @summary Starts a hosted payment checkout when compliance approval is complete
  */
+export const createPaymentCheckoutBodyInvoiceReferenceMin = 24;
 export const createPaymentCheckoutBodyInvoiceReferenceMax = 80;
 
-export const createPaymentCheckoutBodyAmountRegExp = new RegExp('^\\d{1,9}(\\.\\d{1,2})?$');
-export const createPaymentCheckoutBodyDescriptionMax = 240;
+export const createPaymentCheckoutBodyFullNameMin = 2;
+export const createPaymentCheckoutBodyFullNameMax = 160;
+
+export const createPaymentCheckoutBodyEmailMax = 254;
+
+export const createPaymentCheckoutBodyPhoneMin = 10;
+export const createPaymentCheckoutBodyPhoneMax = 20;
+
+export const createPaymentCheckoutBodyIdempotencyKeyMin = 16;
+export const createPaymentCheckoutBodyIdempotencyKeyMax = 100;
 
 
 
 export const CreatePaymentCheckoutBody = zod.object({
-  "invoiceReference": zod.string().min(1).max(createPaymentCheckoutBodyInvoiceReferenceMax),
-  "amount": zod.string().regex(createPaymentCheckoutBodyAmountRegExp),
-  "currency": zod.enum(['TRY', 'EUR', 'USD']),
-  "description": zod.string().min(1).max(createPaymentCheckoutBodyDescriptionMax)
+  "invoiceReference": zod.string().min(createPaymentCheckoutBodyInvoiceReferenceMin).max(createPaymentCheckoutBodyInvoiceReferenceMax),
+  "fullName": zod.string().min(createPaymentCheckoutBodyFullNameMin).max(createPaymentCheckoutBodyFullNameMax),
+  "email": zod.email().max(createPaymentCheckoutBodyEmailMax),
+  "phone": zod.string().min(createPaymentCheckoutBodyPhoneMin).max(createPaymentCheckoutBodyPhoneMax),
+  "idempotencyKey": zod.string().min(createPaymentCheckoutBodyIdempotencyKeyMin).max(createPaymentCheckoutBodyIdempotencyKeyMax)
 })
 
 export const CreatePaymentCheckoutResponse = zod.object({
   "checkoutUrl": zod.url().describe('Hosted URL returned by the licensed provider; never a card form hosted by MMT'),
-  "paymentReference": zod.string()
+  "paymentReference": zod.string(),
+  "status": zod.enum(['pending', 'success', 'failed', 'cancelled']),
+  "mode": zod.enum(['mock', 'tami', 'tami_sandbox'])
 })
 
 

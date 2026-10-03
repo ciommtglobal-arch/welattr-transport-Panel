@@ -6,13 +6,16 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { PaymentCurrency } from './paymentCurrency';
+import type { PaymentMode } from './paymentMode';
 import type { TamiPaymentStatusValue } from './tamiPaymentStatusValue';
 
 export interface TamiPaymentStatus {
   orderId: string;
+  invoiceReference: string;
   amount: number;
   currency: PaymentCurrency;
   status: TamiPaymentStatusValue;
+  mode: PaymentMode;
   /** @nullable */
   providerPaymentStatus?: string | null;
   /** @nullable */

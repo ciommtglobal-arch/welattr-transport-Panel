@@ -9,6 +9,12 @@
 export interface PaymentReadiness {
   bankAccountVerified: boolean;
   providerApproved: boolean;
+  productionCredentialsVerified: boolean;
+  sandboxEnabled: boolean;
+  threeDSecureVerified: boolean;
+  testingEvidenceVerified: boolean;
+  writtenAuthorizationConfigured: boolean;
   liveEnabled: boolean;
+  testEnabled: boolean;
   cardDataCollected: boolean;
 }

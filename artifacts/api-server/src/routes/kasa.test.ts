@@ -49,7 +49,12 @@ describe.sequential("Standalone Kasa boundaries and persistence", () => {
   });
   it("never grants access to the first arbitrary logged-in account", async () => {
     const response = await request(app).get("/api/kasa/me").set("test-verified-identity", `TEST_UNKNOWN_${suffix}`);
-    expect(response.body).toEqual({ user: null, canSetup: false, liveEnabled: false });
+    expect(response.body).toEqual({
+      user: null,
+      canSetup: false,
+      canManageInvoices: false,
+      liveEnabled: false,
+    });
     expect((await authenticated("post", "/api/kasa/setup", 1)).status).toBe(403);
   });
   it("denies cashier reports, user/branch administration and cross-origin writes", async () => {

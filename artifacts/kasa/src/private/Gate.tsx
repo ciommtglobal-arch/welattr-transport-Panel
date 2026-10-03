@@ -9,11 +9,12 @@ import {
   useSetupKasaOwner,
   type KasaUser,
 } from '@workspace/api-client-react';
-import { BarChart3, Building2, LayoutDashboard, ListChecks, LogOut, PlusCircle, ShieldAlert, Users } from 'lucide-react';
+import { BarChart3, Building2, FileText, LayoutDashboard, ListChecks, LogOut, PlusCircle, ShieldAlert, Users } from 'lucide-react';
 import { ErrorBox, Logo, Skeleton, btn, btnSecondary } from '@/components/kit';
 import { errMsg } from '@/lib/format';
 
-const MeCtx = createContext<KasaUser | null>(null);
+type KasaViewer = KasaUser & { canManageInvoices: boolean };
+const MeCtx = createContext<KasaViewer | null>(null);
 export const useMe = () => {
   const u = useContext(MeCtx);
   if (!u) throw new Error('useMe outside gate');
@@ -27,12 +28,13 @@ const NAV = [
   { href: '/branches', label: 'Şubeler', icon: Building2, admin: true },
   { href: '/users', label: 'Kullanıcılar', icon: Users, admin: true },
   { href: '/reports', label: 'Raporlar', icon: BarChart3, admin: true },
+  { href: '/service-invoices', label: 'Hizmet faturaları', icon: FileText, owner: true },
 ];
 
-function Shell({ user, children }: { user?: KasaUser; children: ReactNode }) {
+function Shell({ user, canManageInvoices = false, children }: { user?: KasaUser; canManageInvoices?: boolean; children: ReactNode }) {
   const [loc] = useLocation();
   const { signOut } = useClerk();
-  const items = NAV.filter((n) => user && (!n.admin || user.role === 'admin'));
+  const items = NAV.filter((n) => user && (!n.admin || user.role === 'admin') && (!('owner' in n) || canManageInvoices));
   const active = (h: string) => (h === '/requests' ? loc === h || /^\/requests\/\d+/.test(loc) : loc === h);
   return (
     <div className="min-h-[100dvh] md:flex">
@@ -114,7 +116,7 @@ function AccessView() {
   );
 }
 
-function Inner({ admin, children }: { admin?: boolean; children: ReactNode }) {
+function Inner({ admin, ownerOnly, children }: { admin?: boolean; ownerOnly?: boolean; children: ReactNode }) {
   const me = useGetKasaMe({ query: { queryKey: getGetKasaMeQueryKey(), staleTime: 15000 } });
   if (me.isLoading)
     return (
@@ -126,23 +128,26 @@ function Inner({ admin, children }: { admin?: boolean; children: ReactNode }) {
     return <Shell><ErrorBox message={errMsg(me.error)} onRetry={() => me.refetch()} /></Shell>;
   const user = me.data?.user;
   if (!user || !user.active) return <AccessView />;
+  const canManageInvoices = me.data?.canManageInvoices ?? false;
   if (admin && user.role !== 'admin')
     return (
       <Shell user={user}>
         <ErrorBox message="Bu sayfa yalnızca yöneticilere açıktır." />
       </Shell>
     );
+  if (ownerOnly && !canManageInvoices)
+    return <Shell user={user}><ErrorBox message="Bu sayfa yalnızca uygulama sahibine açıktır." /></Shell>;
   return (
-    <MeCtx.Provider value={user}>
-      <Shell user={user}>{children}</Shell>
+    <MeCtx.Provider value={{ ...user, canManageInvoices }}>
+      <Shell user={user} canManageInvoices={canManageInvoices}>{children}</Shell>
     </MeCtx.Provider>
   );
 }
 
-export function Gate({ admin, children }: { admin?: boolean; children: ReactNode }) {
+export function Gate({ admin, ownerOnly, children }: { admin?: boolean; ownerOnly?: boolean; children: ReactNode }) {
   return (
     <>
-      <Show when="signed-in"><Inner admin={admin}>{children}</Inner></Show>
+      <Show when="signed-in"><Inner admin={admin} ownerOnly={ownerOnly}>{children}</Inner></Show>
       <Show when="signed-out"><Redirect to="/sign-in" /></Show>
     </>
   );

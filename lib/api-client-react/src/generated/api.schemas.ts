@@ -25,6 +25,7 @@ export interface KasaUser {
 export interface KasaAccess {
   user: KasaUser | null;
   canSetup: boolean;
+  canManageInvoices: boolean;
   liveEnabled: boolean;
 }
 
@@ -333,34 +334,6 @@ export const PaymentCurrency = {
   EUR: 'EUR',
 } as const;
 
-export interface TamiHostedPaymentInput {
-  /**
-     * Seçilen para birimindeki ödeme tutarı.
-     * @minimum 1
-     * @maximum 10000000
-     */
-  amount: number;
-  currency: PaymentCurrency;
-  /**
-     * @minLength 2
-     * @maxLength 160
-     */
-  fullName: string;
-  /** @maxLength 254 */
-  email: string;
-  /**
-     * Masterpass doğrulaması için 905xxxxxxxxx formatına dönüştürülebilen telefon.
-     * @minLength 10
-     * @maxLength 20
-     */
-  phone: string;
-  /**
-     * @minLength 2
-     * @maxLength 160
-     */
-  description: string;
-}
-
 export type TamiPaymentStatusValue = typeof TamiPaymentStatusValue[keyof typeof TamiPaymentStatusValue];
 
 
@@ -368,6 +341,7 @@ export const TamiPaymentStatusValue = {
   pending: 'pending',
   success: 'success',
   failed: 'failed',
+  cancelled: 'cancelled',
 } as const;
 
 export type PaymentMode = typeof PaymentMode[keyof typeof PaymentMode];
@@ -376,21 +350,16 @@ export type PaymentMode = typeof PaymentMode[keyof typeof PaymentMode];
 export const PaymentMode = {
   mock: 'mock',
   tami: 'tami',
+  tami_sandbox: 'tami_sandbox',
 } as const;
-
-export interface TamiHostedPaymentSession {
-  orderId: string;
-  paymentUrl: string;
-  status: TamiPaymentStatusValue;
-  currency: PaymentCurrency;
-  mode: PaymentMode;
-}
 
 export interface TamiPaymentStatus {
   orderId: string;
+  invoiceReference: string;
   amount: number;
   currency: PaymentCurrency;
   status: TamiPaymentStatusValue;
+  mode: PaymentMode;
   /** @nullable */
   providerPaymentStatus?: string | null;
   /** @nullable */
@@ -402,39 +371,160 @@ export interface TamiPaymentStatus {
 export interface PaymentReadiness {
   bankAccountVerified: boolean;
   providerApproved: boolean;
+  productionCredentialsVerified: boolean;
+  sandboxEnabled: boolean;
+  threeDSecureVerified: boolean;
+  testingEvidenceVerified: boolean;
+  writtenAuthorizationConfigured: boolean;
   liveEnabled: boolean;
+  testEnabled: boolean;
   cardDataCollected: boolean;
 }
 
-export type PaymentCheckoutInputCurrency = typeof PaymentCheckoutInputCurrency[keyof typeof PaymentCheckoutInputCurrency];
-
-
-export const PaymentCheckoutInputCurrency = {
-  TRY: 'TRY',
-  EUR: 'EUR',
-  USD: 'USD',
-} as const;
-
 export interface PaymentCheckoutInput {
   /**
-     * @minLength 1
+     * @minLength 24
      * @maxLength 80
      */
   invoiceReference: string;
-  /** @pattern ^\d{1,9}(\.\d{1,2})?$ */
-  amount: string;
-  currency: PaymentCheckoutInputCurrency;
   /**
-     * @minLength 1
-     * @maxLength 240
+     * @minLength 2
+     * @maxLength 160
      */
-  description: string;
+  fullName: string;
+  /** @maxLength 254 */
+  email: string;
+  /**
+     * @minLength 10
+     * @maxLength 20
+     */
+  phone: string;
+  /**
+     * @minLength 16
+     * @maxLength 100
+     */
+  idempotencyKey: string;
 }
 
 export interface PaymentCheckoutSession {
   /** Hosted URL returned by the licensed provider; never a card form hosted by MMT */
   checkoutUrl: string;
   paymentReference: string;
+  status: TamiPaymentStatusValue;
+  mode: PaymentMode;
+}
+
+export type ServiceInvoiceStatus = typeof ServiceInvoiceStatus[keyof typeof ServiceInvoiceStatus];
+
+
+export const ServiceInvoiceStatus = {
+  issued: 'issued',
+  paid: 'paid',
+  partially_refunded: 'partially_refunded',
+  refunded: 'refunded',
+  cancelled: 'cancelled',
+} as const;
+
+export interface ServiceInvoiceInput {
+  /** @pattern ^(0|[1-9]\d{0,8})(\.\d{1,2})?$ */
+  amount: string;
+  currency: PaymentCurrency;
+  /**
+     * @minLength 2
+     * @maxLength 240
+     */
+  description: string;
+}
+
+/**
+ * @nullable
+ */
+export type ServiceInvoicePaymentStatus = typeof ServiceInvoicePaymentStatus[keyof typeof ServiceInvoicePaymentStatus] | null;
+
+
+export const ServiceInvoicePaymentStatus = {
+  pending: 'pending',
+  success: 'success',
+  failed: 'failed',
+  cancelled: 'cancelled',
+} as const;
+
+export interface ServiceInvoice {
+  id: number;
+  reference: string;
+  amount: string;
+  currency: PaymentCurrency;
+  description: string;
+  status: ServiceInvoiceStatus;
+  refundedAmount: string;
+  /** @nullable */
+  paymentReference: string | null;
+  /** @nullable */
+  paymentStatus: ServiceInvoicePaymentStatus;
+  issuedAt: string;
+  /** @nullable */
+  paidAt: string | null;
+}
+
+/**
+ * @nullable
+ */
+export type ServiceInvoicePaymentViewPaymentStatus = typeof ServiceInvoicePaymentViewPaymentStatus[keyof typeof ServiceInvoicePaymentViewPaymentStatus] | null;
+
+
+export const ServiceInvoicePaymentViewPaymentStatus = {
+  pending: 'pending',
+  success: 'success',
+  failed: 'failed',
+  cancelled: 'cancelled',
+} as const;
+
+export interface ServiceInvoicePaymentView {
+  reference: string;
+  amount: string;
+  currency: PaymentCurrency;
+  description: string;
+  status: ServiceInvoiceStatus;
+  canPay: boolean;
+  /** @nullable */
+  paymentReference: string | null;
+  /** @nullable */
+  paymentStatus: ServiceInvoicePaymentViewPaymentStatus;
+}
+
+export interface PaymentRefundInput {
+  /** @pattern ^[1-9]\d{0,8}(\.\d{1,2})?$ */
+  amount: string;
+  /**
+     * @minLength 2
+     * @maxLength 150
+     */
+  reason: string;
+  /**
+     * @minLength 16
+     * @maxLength 100
+     */
+  idempotencyKey: string;
+}
+
+export type PaymentRefundStatus = typeof PaymentRefundStatus[keyof typeof PaymentRefundStatus];
+
+
+export const PaymentRefundStatus = {
+  pending: 'pending',
+  success: 'success',
+  failed: 'failed',
+} as const;
+
+export interface PaymentRefund {
+  id: number;
+  orderId: string;
+  amount: string;
+  currency: PaymentCurrency;
+  status: PaymentRefundStatus;
+  /** @nullable */
+  providerReference: string | null;
+  createdAt: string;
 }
 
 export type MockPaymentResultInputStatus = typeof MockPaymentResultInputStatus[keyof typeof MockPaymentResultInputStatus];
@@ -443,6 +533,7 @@ export type MockPaymentResultInputStatus = typeof MockPaymentResultInputStatus[k
 export const MockPaymentResultInputStatus = {
   success: 'success',
   failed: 'failed',
+  cancelled: 'cancelled',
 } as const;
 
 export interface MockPaymentResultInput {

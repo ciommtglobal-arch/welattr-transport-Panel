@@ -10,5 +10,6 @@ import type { KasaUser } from './kasaUser';
 export interface KasaAccess {
   user: KasaUser | null;
   canSetup: boolean;
+  canManageInvoices: boolean;
   liveEnabled: boolean;
 }

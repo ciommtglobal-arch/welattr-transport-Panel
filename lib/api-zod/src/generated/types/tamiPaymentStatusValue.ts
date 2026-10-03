@@ -13,4 +13,5 @@ export const TamiPaymentStatusValue = {
   pending: 'pending',
   success: 'success',
   failed: 'failed',
+  cancelled: 'cancelled',
 } as const;

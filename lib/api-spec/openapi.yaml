@@ -15,7 +15,7 @@ tags:
   - name: Storage
     description: Özel başvuru belgeleri için güvenli depolama işlemleri
   - name: payments
-    description: Şimdilik yalnızca test ödeme akışı; canlı sağlayıcı kodu devre dışı
+    description: MMT hizmet faturaları için sağlayıcı ödemesi; Shopify kapsam dışıdır
   - name: b2b-listings
     description: Moderated free B2B listing operations
   - name: b2b-businesses
@@ -141,6 +141,53 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/KasaAccess" }
         "401": { description: Login required }
+  /kasa/service-invoices:
+    get:
+      operationId: getKasaServiceInvoices
+      summary: Hizmet faturalarını listeler; yalnızca uygulama sahibi erişebilir
+      responses:
+        "200":
+          description: Kalıcı hizmet faturaları
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ServiceInvoice" }
+        "401": { description: Sign-in required }
+        "403": { description: App owner required }
+    post:
+      operationId: createKasaServiceInvoice
+      summary: Yeni hizmet faturası düzenler
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ServiceInvoiceInput" }
+      responses:
+        "201":
+          description: Issued service invoice
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceInvoice" }
+        "400": { description: Invalid invoice data }
+        "401": { description: Sign-in required }
+        "403": { description: App owner required }
+  /kasa/service-invoices/{id}/cancel:
+    post:
+      operationId: cancelKasaServiceInvoice
+      summary: Ödenmemiş faturayı geçmişi silmeden iptal eder
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: integer, minimum: 1 } }
+      responses:
+        "200":
+          description: Cancelled service invoice
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceInvoice" }
+        "401": { description: Sign-in required }
+        "403": { description: App owner required }
+        "404": { description: Invoice not found }
+        "409": { description: Paid or payment-in-progress invoice cannot be cancelled }
   /kasa/setup:
     post:
       operationId: setupKasaOwner
@@ -516,46 +563,6 @@ paths:
         "401": { description: Authentication required }
         "403": { description: Founder allowlist required }
         "404": { description: Trial candidate not found }
-  /payments/tami/hosted-session:
-    post:
-      operationId: createTamiHostedPaymentSession
-      tags: [payments]
-      summary: Kart bilgilerini MMT sistemine almadan ödeme oturumu oluşturur
-      description: |
-        Canlı tahsilat kapalıdır; ortam ayarından bağımsız olarak gerçek ödeme
-        almadan test ödeme sayfası üretir. Kart numarası ve güvenlik kodu bu API'ye
-        gönderilmez. Canlıya geçiş ayrıca onaylanmalıdır.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TamiHostedPaymentInput"
-      responses:
-        "201":
-          description: Hosted ödeme oturumu oluşturuldu.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TamiHostedPaymentSession"
-        "400":
-          description: Geçersiz ödeme isteği.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "503":
-          description: Canlı ödeme entegrasyonu yapılandırılmamış.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "502":
-          description: Canlı ödeme sağlayıcısı yanıt vermedi veya hatalı yanıt verdi.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
   /payments/tami/{orderId}:
     get:
       operationId: getTamiPaymentStatus
@@ -594,6 +601,95 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /payments/tami/{orderId}/reconcile:
+    post:
+      operationId: reconcileTamiPayment
+      tags: [payments]
+      summary: İmzalı sağlayıcı yanıtıyla ödeme ve iade kayıtlarını mutabık kılar
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema: { type: string, minLength: 2, maxLength: 36 }
+      responses:
+        "200":
+          description: Verified provider state
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TamiPaymentStatus" }
+        "401": { description: Sign-in required }
+        "403": { description: App owner required }
+        "404": { description: Payment session not found }
+        "502": { description: Provider response could not be verified }
+        "503": { description: Provider reconciliation is not configured }
+  /payments/tami/{orderId}/refunds:
+    post:
+      operationId: createTamiPaymentRefund
+      tags: [payments]
+      summary: Sahibin onaylı hizmet ödemesi için iade başlatır
+      description: |
+        İmzası doğrulanamayan yanıt pending kalır. Bekleyen iade varken yeni
+        sağlayıcı isteği gönderilmez; önce mutabakat yapılmalıdır.
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema: { type: string, minLength: 2, maxLength: 36 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PaymentRefundInput" }
+      responses:
+        "201":
+          description: Refund state recorded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaymentRefund" }
+        "400": { description: Invalid or excessive refund amount }
+        "401": { description: Sign-in required }
+        "403": { description: App owner required }
+        "404": { description: Payment session not found }
+        "409": { description: "Refund key conflict, pending refund, or payment not refundable" }
+        "502": { description: Ambiguous provider result; reconcile before retrying }
+        "503": { description: Provider refund is not configured }
+    get:
+      operationId: getTamiPaymentRefunds
+      tags: [payments]
+      summary: Sahibin ödeme iade geçmişini getirir
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema: { type: string, minLength: 2, maxLength: 36 }
+      responses:
+        "200":
+          description: Refund records
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PaymentRefund" }
+        "401": { description: Sign-in required }
+        "403": { description: App owner required }
+        "404": { description: Payment session not found }
+  /payments/invoices/{reference}:
+    get:
+      operationId: getPublicServiceInvoice
+      tags: [payments]
+      summary: Fatura referansıyla ödeme bilgilerini getirir
+      parameters:
+        - in: path
+          name: reference
+          required: true
+          schema: { type: string, minLength: 24, maxLength: 80 }
+      responses:
+        "200":
+          description: Amount and currency read from the issued invoice
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceInvoicePaymentView" }
+        "404": { description: Invoice not found }
   /payments/mock/{orderId}/result:
     post:
       operationId: setMockPaymentResult
@@ -656,9 +752,14 @@ paths:
       tags: [payments]
       summary: Starts a hosted payment checkout when compliance approval is complete
       description: |
-        Accepts invoice details only. Card data must never be submitted to or stored
-        by this API. Until company bank and licensed provider approvals are verified,
-        the server rejects every checkout request.
+        Accepts an issued invoice reference and payer contact details only. The
+        server reads the amount, currency, and description from the persistent
+        invoice. Card data must never be submitted to or stored by this API.
+        Live checkout stays disabled until company and provider approvals,
+        provider-confirmed 3DS, successful tests, verified production
+        credentials, and written authorization are independently configured.
+        Tami sandbox checkout is separately enabled only for non-production
+        environments with sandbox credentials and the explicit sandbox flag.
       requestBody:
         required: true
         content:
@@ -3530,10 +3631,11 @@ components:
         active: { type: boolean }
     KasaAccess:
       type: object
-      required: [user, canSetup, liveEnabled]
+      required: [user, canSetup, canManageInvoices, liveEnabled]
       properties:
         user: { oneOf: [{ $ref: "#/components/schemas/KasaUser" }, { type: "null" }] }
         canSetup: { type: boolean }
+        canManageInvoices: { type: boolean }
         liveEnabled: { type: boolean }
     KasaBranch:
       type: object
@@ -3749,18 +3851,81 @@ components:
         page: { type: integer }
         pageSize: { type: integer }
         hasMore: { type: boolean }
-    TamiHostedPaymentInput:
+    TamiPaymentStatus:
       type: object
-      additionalProperties: false
-      required: [amount, currency, fullName, email, phone, description]
+      required: [orderId, invoiceReference, amount, currency, status, mode]
       properties:
+        orderId:
+          type: string
+        invoiceReference:
+          type: string
         amount:
           type: number
-          minimum: 1
-          maximum: 10000000
-          description: Seçilen para birimindeki ödeme tutarı.
         currency:
           $ref: "#/components/schemas/PaymentCurrency"
+        status:
+          $ref: "#/components/schemas/TamiPaymentStatusValue"
+        mode:
+          $ref: "#/components/schemas/PaymentMode"
+        providerPaymentStatus:
+          type: [string, "null"]
+        providerOrderStatus:
+          type: [string, "null"]
+        errorMessage:
+          type: [string, "null"]
+    TamiPaymentStatusValue:
+      type: string
+      enum: [pending, success, failed, cancelled]
+    PaymentCurrency:
+      type: string
+      enum: [TRY, USD, EUR]
+    PaymentMode:
+      type: string
+      enum: [mock, tami, tami_sandbox]
+    PaymentReadiness:
+      type: object
+      additionalProperties: false
+      required:
+        - bankAccountVerified
+        - providerApproved
+        - productionCredentialsVerified
+        - sandboxEnabled
+        - threeDSecureVerified
+        - testingEvidenceVerified
+        - writtenAuthorizationConfigured
+        - liveEnabled
+        - testEnabled
+        - cardDataCollected
+      properties:
+        bankAccountVerified:
+          type: boolean
+        providerApproved:
+          type: boolean
+        productionCredentialsVerified:
+          type: boolean
+        sandboxEnabled:
+          type: boolean
+        threeDSecureVerified:
+          type: boolean
+        testingEvidenceVerified:
+          type: boolean
+        writtenAuthorizationConfigured:
+          type: boolean
+        liveEnabled:
+          type: boolean
+        testEnabled:
+          type: boolean
+        cardDataCollected:
+          type: boolean
+    PaymentCheckoutInput:
+      type: object
+      additionalProperties: false
+      required: [invoiceReference, fullName, email, phone, idempotencyKey]
+      properties:
+        invoiceReference:
+          type: string
+          minLength: 24
+          maxLength: 80
         fullName:
           type: string
           minLength: 2
@@ -3773,93 +3938,14 @@ components:
           type: string
           minLength: 10
           maxLength: 20
-          description: Masterpass doğrulaması için 905xxxxxxxxx formatına dönüştürülebilen telefon.
-        description:
+        idempotencyKey:
           type: string
-          minLength: 2
-          maxLength: 160
-    TamiHostedPaymentSession:
-      type: object
-      required: [orderId, paymentUrl, status, currency, mode]
-      properties:
-        orderId:
-          type: string
-        paymentUrl:
-          type: string
-          format: uri
-        status:
-          $ref: "#/components/schemas/TamiPaymentStatusValue"
-        currency:
-          $ref: "#/components/schemas/PaymentCurrency"
-        mode:
-          $ref: "#/components/schemas/PaymentMode"
-    TamiPaymentStatus:
-      type: object
-      required: [orderId, amount, currency, status]
-      properties:
-        orderId:
-          type: string
-        amount:
-          type: number
-        currency:
-          $ref: "#/components/schemas/PaymentCurrency"
-        status:
-          $ref: "#/components/schemas/TamiPaymentStatusValue"
-        providerPaymentStatus:
-          type: [string, "null"]
-        providerOrderStatus:
-          type: [string, "null"]
-        errorMessage:
-          type: [string, "null"]
-    TamiPaymentStatusValue:
-      type: string
-      enum: [pending, success, failed]
-    PaymentCurrency:
-      type: string
-      enum: [TRY, USD, EUR]
-    PaymentMode:
-      type: string
-      enum: [mock, tami]
-    PaymentReadiness:
-      type: object
-      additionalProperties: false
-      required:
-        - bankAccountVerified
-        - providerApproved
-        - liveEnabled
-        - cardDataCollected
-      properties:
-        bankAccountVerified:
-          type: boolean
-        providerApproved:
-          type: boolean
-        liveEnabled:
-          type: boolean
-        cardDataCollected:
-          type: boolean
-    PaymentCheckoutInput:
-      type: object
-      additionalProperties: false
-      required: [invoiceReference, amount, currency, description]
-      properties:
-        invoiceReference:
-          type: string
-          minLength: 1
-          maxLength: 80
-        amount:
-          type: string
-          pattern: '^\d{1,9}(\.\d{1,2})?$'
-        currency:
-          type: string
-          enum: [TRY, EUR, USD]
-        description:
-          type: string
-          minLength: 1
-          maxLength: 240
+          minLength: 16
+          maxLength: 100
     PaymentCheckoutSession:
       type: object
       additionalProperties: false
-      required: [checkoutUrl, paymentReference]
+      required: [checkoutUrl, paymentReference, status, mode]
       properties:
         checkoutUrl:
           type: string
@@ -3867,6 +3953,84 @@ components:
           description: Hosted URL returned by the licensed provider; never a card form hosted by MMT
         paymentReference:
           type: string
+        status:
+          $ref: "#/components/schemas/TamiPaymentStatusValue"
+        mode:
+          $ref: "#/components/schemas/PaymentMode"
+    ServiceInvoiceStatus:
+      type: string
+      enum: [issued, paid, partially_refunded, refunded, cancelled]
+    ServiceInvoiceInput:
+      type: object
+      additionalProperties: false
+      required: [amount, currency, description]
+      properties:
+        amount:
+          type: string
+          pattern: '^(0|[1-9]\d{0,8})(\.\d{1,2})?$'
+        currency:
+          $ref: "#/components/schemas/PaymentCurrency"
+        description:
+          type: string
+          minLength: 2
+          maxLength: 240
+    ServiceInvoice:
+      type: object
+      additionalProperties: false
+      required: [id, reference, amount, currency, description, status, refundedAmount, paymentReference, paymentStatus, issuedAt, paidAt]
+      properties:
+        id: { type: integer }
+        reference: { type: string }
+        amount: { type: string }
+        currency: { $ref: "#/components/schemas/PaymentCurrency" }
+        description: { type: string }
+        status: { $ref: "#/components/schemas/ServiceInvoiceStatus" }
+        refundedAmount: { type: string }
+        paymentReference: { type: [string, "null"] }
+        paymentStatus: { type: [string, "null"], enum: [pending, success, failed, cancelled, null] }
+        issuedAt: { type: string, format: date-time }
+        paidAt: { type: [string, "null"], format: date-time }
+    ServiceInvoicePaymentView:
+      type: object
+      additionalProperties: false
+      required: [reference, amount, currency, description, status, canPay, paymentReference, paymentStatus]
+      properties:
+        reference: { type: string }
+        amount: { type: string }
+        currency: { $ref: "#/components/schemas/PaymentCurrency" }
+        description: { type: string }
+        status: { $ref: "#/components/schemas/ServiceInvoiceStatus" }
+        canPay: { type: boolean }
+        paymentReference: { type: [string, "null"] }
+        paymentStatus: { type: [string, "null"], enum: [pending, success, failed, cancelled, null] }
+    PaymentRefundInput:
+      type: object
+      additionalProperties: false
+      required: [amount, reason, idempotencyKey]
+      properties:
+        amount:
+          type: string
+          pattern: '^[1-9]\d{0,8}(\.\d{1,2})?$'
+        reason:
+          type: string
+          minLength: 2
+          maxLength: 150
+        idempotencyKey:
+          type: string
+          minLength: 16
+          maxLength: 100
+    PaymentRefund:
+      type: object
+      additionalProperties: false
+      required: [id, orderId, amount, currency, status, providerReference, createdAt]
+      properties:
+        id: { type: integer }
+        orderId: { type: string }
+        amount: { type: string }
+        currency: { $ref: "#/components/schemas/PaymentCurrency" }
+        status: { type: string, enum: [pending, success, failed] }
+        providerReference: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
     MockPaymentResultInput:
       type: object
       additionalProperties: false
@@ -3874,7 +4038,7 @@ components:
       properties:
         status:
           type: string
-          enum: [success, failed]
+          enum: [success, failed, cancelled]
     ErrorEnvelope:
       type: object
       required: [error]

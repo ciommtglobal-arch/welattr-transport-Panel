@@ -12,4 +12,5 @@ export type MockPaymentResultInputStatus = typeof MockPaymentResultInputStatus[k
 export const MockPaymentResultInputStatus = {
   success: 'success',
   failed: 'failed',
+  cancelled: 'cancelled',
 } as const;

@@ -14,3 +14,9 @@ The current Tami merchant account supports TRY only. Foreign-currency amounts ar
 **Why:** Tami technical support confirmed that the current account has no multi-currency support.
 
 **How to apply:** Keep USD/EUR available only in mock/test mode until a provider with genuine multi-currency settlement is approved.
+
+Payment integration scope is MMT service invoices only; do not change the construction store's Shopify checkout. Tami sandbox must be explicitly enabled outside production, and live collection must run only in production after all approval, 3D Secure, test-evidence, callback, and verified-credential gates pass.
+
+**Why:** Service billing and physical-product commerce use separate providers and legal/payment controls. A development misconfiguration must not create a real charge.
+
+**How to apply:** Keep the invoice payment routes separate from Shopify, verify test and production modes independently, and leave live collection disabled until written company/provider authorization is recorded.

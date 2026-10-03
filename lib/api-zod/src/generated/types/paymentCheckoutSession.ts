@@ -5,9 +5,13 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { PaymentMode } from './paymentMode';
+import type { TamiPaymentStatusValue } from './tamiPaymentStatusValue';
 
 export interface PaymentCheckoutSession {
   /** Hosted URL returned by the licensed provider; never a card form hosted by MMT */
   checkoutUrl: string;
   paymentReference: string;
+  status: TamiPaymentStatusValue;
+  mode: PaymentMode;
 }

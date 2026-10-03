@@ -66,6 +66,7 @@ function App() {
           <Route path="/branches" component={PrivateTree} />
           <Route path="/users" component={PrivateTree} />
           <Route path="/reports" component={PrivateTree} />
+          <Route path="/service-invoices" component={PrivateTree} />
           <Route component={NotFound} />
         </Switch>
       </WouterRouter>

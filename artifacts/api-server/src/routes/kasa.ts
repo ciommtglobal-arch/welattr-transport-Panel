@@ -1,15 +1,27 @@
 import { randomBytes } from "node:crypto";
 import { clerkClient, getAuth } from "@clerk/express";
-import { and, desc, eq, sql, type SQL } from "drizzle-orm";
+import { and, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
 import { Router, type Request, type Response, type IRouter } from "express";
-import { db, kasaBranchesTable as branches, kasaUsersTable as users, kasaRequestsTable as requests, kasaAuditTable as audits, type KasaMember } from "@workspace/db";
+import {
+  db,
+  kasaBranchesTable as branches,
+  kasaUsersTable as users,
+  kasaRequestsTable as requests,
+  kasaAuditTable as audits,
+  paymentAuditEventsTable,
+  paymentSessionsTable,
+  serviceInvoicesTable,
+  type KasaMember,
+} from "@workspace/db";
 import {
   GetKasaMeResponse, SetupKasaOwnerResponse, GetKasaBranchesResponse, CreateKasaBranchBody, CreateKasaBranchResponse,
   UpdateKasaBranchBody, UpdateKasaBranchParams, UpdateKasaBranchResponse,
   GetKasaUsersResponse, GrantKasaUserBody, GrantKasaUserResponse, UpdateKasaUserBody, UpdateKasaUserParams, UpdateKasaUserResponse,
   GetKasaRequestsQueryParams, GetKasaRequestsResponse, CreateKasaRequestBody, CreateKasaRequestResponse,
   GetKasaRequestParams, GetKasaRequestResponse, GetKasaPublicRequestParams, GetKasaPublicRequestResponse,
-  GetKasaSummaryQueryParams, GetKasaSummaryResponse,
+  GetKasaSummaryQueryParams, GetKasaSummaryResponse, GetKasaServiceInvoicesResponse,
+  CreateKasaServiceInvoiceBody, CreateKasaServiceInvoiceResponse, CancelKasaServiceInvoiceParams,
+  CancelKasaServiceInvoiceResponse,
 } from "@workspace/api-zod";
 import { canReadKasaRequest, kasaUserView, ownerIdentity, normalizeKasaAmount, validKasaDate, KASA_CURRENCIES, KASA_TIMEZONE } from "../lib/kasa";
 import { getClerkProxyHost } from "../middlewares/clerkProxyMiddleware";
@@ -53,8 +65,171 @@ router.get("/kasa/me", async (req, res): Promise<void> => {
   const [user] = await db.select().from(users).where(eq(users.clerkUserId, id)).limit(1);
   const [owner] = await db.select({ id: users.id }).from(users).where(eq(users.owner, true)).limit(1);
   res.json(GetKasaMeResponse.parse({
-    user: user ? kasaUserView(user) : null, canSetup: !owner && id === ownerIdentity(), liveEnabled: false,
+    user: user ? kasaUserView(user) : null,
+    canSetup: !owner && id === ownerIdentity(),
+    canManageInvoices: Boolean(user?.active && user.owner),
+    liveEnabled: false,
   }));
+});
+
+async function invoiceOwner(req: Request, res: Response): Promise<KasaMember | null> {
+  const user = await member(req, res);
+  if (!user) return null;
+  if (!user.owner) {
+    fail(res, 403, "Hizmet faturalarına yalnızca uygulama sahibi erişebilir.");
+    return null;
+  }
+  return user;
+}
+
+router.get("/kasa/service-invoices", async (req, res): Promise<void> => {
+  if (!await invoiceOwner(req, res)) return;
+  const rows = await db.select().from(serviceInvoicesTable).orderBy(desc(serviceInvoicesTable.issuedAt));
+  const sessions = rows.length
+    ? await db
+        .select({
+          orderId: paymentSessionsTable.orderId,
+          invoiceReference: paymentSessionsTable.invoiceReference,
+          status: paymentSessionsTable.status,
+          createdAt: paymentSessionsTable.createdAt,
+        })
+        .from(paymentSessionsTable)
+        .where(inArray(paymentSessionsTable.invoiceReference, rows.map((row) => row.reference)))
+        .orderBy(desc(paymentSessionsTable.createdAt))
+    : [];
+  const latestPaymentByInvoice = new Map<
+    string,
+    { orderId: string; status: "pending" | "success" | "failed" | "cancelled" }
+  >();
+  for (const session of sessions) {
+    const reference = session.invoiceReference;
+    if (!reference || latestPaymentByInvoice.has(reference)) continue;
+    latestPaymentByInvoice.set(reference, session);
+  }
+  res.json(
+    GetKasaServiceInvoicesResponse.parse(
+      rows.map((invoice) => ({
+        ...invoice,
+        paymentReference: latestPaymentByInvoice.get(invoice.reference)?.orderId ?? null,
+        paymentStatus: latestPaymentByInvoice.get(invoice.reference)?.status ?? null,
+      })),
+    ),
+  );
+});
+
+router.post("/kasa/service-invoices", async (req, res): Promise<void> => {
+  const user = await invoiceOwner(req, res);
+  if (!user) return;
+  const body = CreateKasaServiceInvoiceBody.strict().safeParse(req.body);
+  const amountPattern = /^(0|[1-9]\d{0,8})(\.\d{1,2})?$/;
+  if (!body.success || !amountPattern.test(body.data.amount) || !body.data.description.trim()) {
+    fail(res, 400, "Fatura tutarı, para birimi veya açıklaması geçersiz.");
+    return;
+  }
+  const [whole, fraction = ""] = body.data.amount.split(".");
+  const cents = BigInt(whole!) * 100n + BigInt(fraction.padEnd(2, "0"));
+  if (cents <= 0n) {
+    fail(res, 400, "Fatura tutarı sıfırdan büyük olmalıdır.");
+    return;
+  }
+  const amount = `${whole}.${fraction.padEnd(2, "0")}`;
+  const result = await db.transaction(async (tx) => {
+    const [invoice] = await tx
+      .insert(serviceInvoicesTable)
+      .values({
+        reference: `MMT-${randomBytes(16).toString("hex").toUpperCase()}`,
+        amount,
+        currency: body.data.currency,
+        description: body.data.description.trim(),
+        issuedByKasaUserId: user.id,
+      })
+      .returning();
+    await tx.insert(paymentAuditEventsTable).values({
+      eventKey: `invoice:issued:${invoice!.id}`,
+      eventType: "invoice_issued",
+      provider: "internal",
+      invoiceReference: invoice!.reference,
+      amount: invoice!.amount,
+      currency: invoice!.currency,
+      actorKasaUserId: user.id,
+    });
+    return invoice!;
+  });
+  res.status(201).json(
+    CreateKasaServiceInvoiceResponse.parse({
+      ...result,
+      paymentReference: null,
+      paymentStatus: null,
+    }),
+  );
+});
+
+router.post("/kasa/service-invoices/:id/cancel", async (req, res): Promise<void> => {
+  const user = await invoiceOwner(req, res);
+  if (!user) return;
+  const params = CancelKasaServiceInvoiceParams.safeParse(req.params);
+  if (!params.success) {
+    fail(res, 400, "Fatura numarası geçersiz.");
+    return;
+  }
+  const result = await db.transaction(async (tx) => {
+    const [invoice] = await tx
+      .select()
+      .from(serviceInvoicesTable)
+      .where(eq(serviceInvoicesTable.id, params.data.id))
+      .for("update")
+      .limit(1);
+    if (!invoice) return { kind: "missing" as const };
+    if (invoice.status === "cancelled") return { kind: "cancelled" as const, invoice };
+    if (invoice.status !== "issued") return { kind: "conflict" as const };
+    const [pending] = await tx
+      .select({ orderId: paymentSessionsTable.orderId })
+      .from(paymentSessionsTable)
+      .where(
+        and(
+          eq(paymentSessionsTable.invoiceReference, invoice.reference),
+          eq(paymentSessionsTable.status, "pending"),
+        ),
+      )
+      .limit(1);
+    if (pending) return { kind: "conflict" as const };
+    const [cancelled] = await tx
+      .update(serviceInvoicesTable)
+      .set({ status: "cancelled", cancelledAt: new Date() })
+      .where(eq(serviceInvoicesTable.id, invoice.id))
+      .returning();
+    await tx.insert(paymentAuditEventsTable).values({
+      eventKey: `invoice:cancelled:${invoice.id}`,
+      eventType: "invoice_cancelled",
+      provider: "internal",
+      invoiceReference: invoice.reference,
+      amount: invoice.amount,
+      currency: invoice.currency,
+      actorKasaUserId: user.id,
+    });
+    return { kind: "cancelled" as const, invoice: cancelled! };
+  });
+  if (result.kind === "missing") {
+    fail(res, 404, "Fatura bulunamadı.");
+    return;
+  }
+  if (result.kind === "conflict") {
+    fail(res, 409, "Ödenmiş veya ödeme işlemi devam eden fatura iptal edilemez.");
+    return;
+  }
+  const sessions = await db
+    .select({ orderId: paymentSessionsTable.orderId, status: paymentSessionsTable.status })
+    .from(paymentSessionsTable)
+    .where(eq(paymentSessionsTable.invoiceReference, result.invoice.reference))
+    .orderBy(desc(paymentSessionsTable.createdAt));
+  const latestPayment = sessions[0] ?? null;
+  res.json(
+    CancelKasaServiceInvoiceResponse.parse({
+      ...result.invoice,
+      paymentReference: latestPayment?.orderId ?? null,
+      paymentStatus: latestPayment?.status ?? null,
+    }),
+  );
 });
 
 router.post("/kasa/setup", async (req, res): Promise<void> => {

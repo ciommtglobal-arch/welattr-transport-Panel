@@ -140,7 +140,12 @@ import type {
   PaymentCheckoutInput,
   PaymentCheckoutSession,
   PaymentReadiness,
+  PaymentRefund,
+  PaymentRefundInput,
   PublicLogisticsMedia,
+  ServiceInvoice,
+  ServiceInvoiceInput,
+  ServiceInvoicePaymentView,
   StaffB2BCompanyTaskReportPage,
   StaffProfile,
   StaffRewardPlan,
@@ -164,8 +169,6 @@ import type {
   StaffTrialTaskPage,
   StaffTrialTaskUpdate,
   SystemHealthStatus,
-  TamiHostedPaymentInput,
-  TamiHostedPaymentSession,
   TamiPaymentStatus,
   UploadUrlRequest,
   UploadUrlResponse,
@@ -668,6 +671,237 @@ export function useGetKasaMe<TData = Awaited<ReturnType<typeof getKasaMe>>, TErr
 
 
 
+
+export const getGetKasaServiceInvoicesUrl = () => {
+
+
+
+
+  return `/api/kasa/service-invoices`
+}
+
+/**
+ * @summary Hizmet faturalarını listeler; yalnızca uygulama sahibi erişebilir
+ */
+export const getKasaServiceInvoices = async ( options?: Parameters<typeof customFetch>[1]): Promise<ServiceInvoice[]> => {
+
+  return customFetch<ServiceInvoice[]>(getGetKasaServiceInvoicesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetKasaServiceInvoicesQueryKey = () => {
+    return [
+    `/api/kasa/service-invoices`
+    ] as const;
+    }
+
+
+export const getGetKasaServiceInvoicesQueryOptions = <TData = Awaited<ReturnType<typeof getKasaServiceInvoices>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaServiceInvoices>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetKasaServiceInvoicesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getKasaServiceInvoices>>> = ({ signal }) => getKasaServiceInvoices({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getKasaServiceInvoices>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetKasaServiceInvoicesQueryResult = NonNullable<Awaited<ReturnType<typeof getKasaServiceInvoices>>>
+export type GetKasaServiceInvoicesQueryError = ErrorType<void>
+
+
+/**
+ * @summary Hizmet faturalarını listeler; yalnızca uygulama sahibi erişebilir
+ */
+
+export function useGetKasaServiceInvoices<TData = Awaited<ReturnType<typeof getKasaServiceInvoices>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKasaServiceInvoices>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetKasaServiceInvoicesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateKasaServiceInvoiceUrl = () => {
+
+
+
+
+  return `/api/kasa/service-invoices`
+}
+
+/**
+ * @summary Yeni hizmet faturası düzenler
+ */
+export const createKasaServiceInvoice = async (serviceInvoiceInput: ServiceInvoiceInput, options?: Parameters<typeof customFetch>[1]): Promise<ServiceInvoice> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<ServiceInvoice>(getCreateKasaServiceInvoiceUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(serviceInvoiceInput)
+  }
+);}
+
+
+
+
+
+export const getCreateKasaServiceInvoiceMutationKey = () => ['createKasaServiceInvoice'] as const;
+
+export const getCreateKasaServiceInvoiceMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKasaServiceInvoice>>, TError,CreateKasaServiceInvoiceMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createKasaServiceInvoice>>, TError,CreateKasaServiceInvoiceMutationVariables, TContext> => {
+
+const mutationKey = getCreateKasaServiceInvoiceMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createKasaServiceInvoice>>, CreateKasaServiceInvoiceMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createKasaServiceInvoice(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateKasaServiceInvoiceMutationResult = NonNullable<Awaited<ReturnType<typeof createKasaServiceInvoice>>>
+    export type CreateKasaServiceInvoiceMutationBody = BodyType<ServiceInvoiceInput>
+    export type CreateKasaServiceInvoiceMutationError = ErrorType<void>
+    export type CreateKasaServiceInvoiceMutationVariables = {data: BodyType<ServiceInvoiceInput>}
+
+    /**
+ * @summary Yeni hizmet faturası düzenler
+ */
+export const useCreateKasaServiceInvoice = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKasaServiceInvoice>>, TError,CreateKasaServiceInvoiceMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createKasaServiceInvoice>>,
+        TError,
+        CreateKasaServiceInvoiceMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateKasaServiceInvoiceMutationOptions(options));
+    }
+
+export const getCancelKasaServiceInvoiceUrl = (id: number,) => {
+
+
+
+
+  return `/api/kasa/service-invoices/${id}/cancel`
+}
+
+/**
+ * @summary Ödenmemiş faturayı geçmişi silmeden iptal eder
+ */
+export const cancelKasaServiceInvoice = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<ServiceInvoice> => {
+
+  return customFetch<ServiceInvoice>(getCancelKasaServiceInvoiceUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCancelKasaServiceInvoiceMutationKey = () => ['cancelKasaServiceInvoice'] as const;
+
+export const getCancelKasaServiceInvoiceMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelKasaServiceInvoice>>, TError,CancelKasaServiceInvoiceMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof cancelKasaServiceInvoice>>, TError,CancelKasaServiceInvoiceMutationVariables, TContext> => {
+
+const mutationKey = getCancelKasaServiceInvoiceMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cancelKasaServiceInvoice>>, CancelKasaServiceInvoiceMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  cancelKasaServiceInvoice(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CancelKasaServiceInvoiceMutationResult = NonNullable<Awaited<ReturnType<typeof cancelKasaServiceInvoice>>>
+
+    export type CancelKasaServiceInvoiceMutationError = ErrorType<void>
+    export type CancelKasaServiceInvoiceMutationVariables = {id: number}
+
+    /**
+ * @summary Ödenmemiş faturayı geçmişi silmeden iptal eder
+ */
+export const useCancelKasaServiceInvoice = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelKasaServiceInvoice>>, TError,CancelKasaServiceInvoiceMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof cancelKasaServiceInvoice>>,
+        TError,
+        CancelKasaServiceInvoiceMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCancelKasaServiceInvoiceMutationOptions(options));
+    }
 
 export const getSetupKasaOwnerUrl = () => {
 
@@ -2469,89 +2703,6 @@ export const useUpdateStaffTrialCandidateEvaluation = <TError = ErrorType<void>,
       return useMutation(getUpdateStaffTrialCandidateEvaluationMutationOptions(options));
     }
 
-export const getCreateTamiHostedPaymentSessionUrl = () => {
-
-
-
-
-  return `/api/payments/tami/hosted-session`
-}
-
-/**
- * Canlı tahsilat kapalıdır; ortam ayarından bağımsız olarak gerçek ödeme
- * almadan test ödeme sayfası üretir. Kart numarası ve güvenlik kodu bu API'ye
- * gönderilmez. Canlıya geçiş ayrıca onaylanmalıdır.
- * @summary Kart bilgilerini MMT sistemine almadan ödeme oturumu oluşturur
- */
-export const createTamiHostedPaymentSession = async (tamiHostedPaymentInput: TamiHostedPaymentInput, options?: Parameters<typeof customFetch>[1]): Promise<TamiHostedPaymentSession> => {
-
-    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
-    if (!h) return {};
-    if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Array.isArray(h)) return Object.fromEntries(h);
-    return h;
-  };
-return customFetch<TamiHostedPaymentSession>(getCreateTamiHostedPaymentSessionUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(tamiHostedPaymentInput)
-  }
-);}
-
-
-
-
-
-export const getCreateTamiHostedPaymentSessionMutationKey = () => ['createTamiHostedPaymentSession'] as const;
-
-export const getCreateTamiHostedPaymentSessionMutationOptions = <TError = ErrorType<ErrorResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTamiHostedPaymentSession>>, TError,CreateTamiHostedPaymentSessionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createTamiHostedPaymentSession>>, TError,CreateTamiHostedPaymentSessionMutationVariables, TContext> => {
-
-const mutationKey = getCreateTamiHostedPaymentSessionMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTamiHostedPaymentSession>>, CreateTamiHostedPaymentSessionMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  createTamiHostedPaymentSession(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateTamiHostedPaymentSessionMutationResult = NonNullable<Awaited<ReturnType<typeof createTamiHostedPaymentSession>>>
-    export type CreateTamiHostedPaymentSessionMutationBody = BodyType<TamiHostedPaymentInput>
-    export type CreateTamiHostedPaymentSessionMutationError = ErrorType<ErrorResponse>
-    export type CreateTamiHostedPaymentSessionMutationVariables = {data: BodyType<TamiHostedPaymentInput>}
-
-    /**
- * @summary Kart bilgilerini MMT sistemine almadan ödeme oturumu oluşturur
- */
-export const useCreateTamiHostedPaymentSession = <TError = ErrorType<ErrorResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTamiHostedPaymentSession>>, TError,CreateTamiHostedPaymentSessionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof createTamiHostedPaymentSession>>,
-        TError,
-        CreateTamiHostedPaymentSessionMutationVariables,
-        TContext
-      > => {
-      return useMutation(getCreateTamiHostedPaymentSessionMutationOptions(options));
-    }
-
 export const getGetTamiPaymentStatusUrl = (orderId: string,) => {
 
 
@@ -2617,6 +2768,317 @@ export function useGetTamiPaymentStatus<TData = Awaited<ReturnType<typeof getTam
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetTamiPaymentStatusQueryOptions(orderId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getReconcileTamiPaymentUrl = (orderId: string,) => {
+
+
+
+
+  return `/api/payments/tami/${orderId}/reconcile`
+}
+
+/**
+ * @summary İmzalı sağlayıcı yanıtıyla ödeme ve iade kayıtlarını mutabık kılar
+ */
+export const reconcileTamiPayment = async (orderId: string, options?: Parameters<typeof customFetch>[1]): Promise<TamiPaymentStatus> => {
+
+  return customFetch<TamiPaymentStatus>(getReconcileTamiPaymentUrl(orderId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getReconcileTamiPaymentMutationKey = () => ['reconcileTamiPayment'] as const;
+
+export const getReconcileTamiPaymentMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reconcileTamiPayment>>, TError,ReconcileTamiPaymentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reconcileTamiPayment>>, TError,ReconcileTamiPaymentMutationVariables, TContext> => {
+
+const mutationKey = getReconcileTamiPaymentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reconcileTamiPayment>>, ReconcileTamiPaymentMutationVariables> = (props) => {
+          const {orderId} = props ?? {};
+
+          return  reconcileTamiPayment(orderId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReconcileTamiPaymentMutationResult = NonNullable<Awaited<ReturnType<typeof reconcileTamiPayment>>>
+
+    export type ReconcileTamiPaymentMutationError = ErrorType<void>
+    export type ReconcileTamiPaymentMutationVariables = {orderId: string}
+
+    /**
+ * @summary İmzalı sağlayıcı yanıtıyla ödeme ve iade kayıtlarını mutabık kılar
+ */
+export const useReconcileTamiPayment = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reconcileTamiPayment>>, TError,ReconcileTamiPaymentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reconcileTamiPayment>>,
+        TError,
+        ReconcileTamiPaymentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReconcileTamiPaymentMutationOptions(options));
+    }
+
+export const getCreateTamiPaymentRefundUrl = (orderId: string,) => {
+
+
+
+
+  return `/api/payments/tami/${orderId}/refunds`
+}
+
+/**
+ * İmzası doğrulanamayan yanıt pending kalır. Bekleyen iade varken yeni
+ * sağlayıcı isteği gönderilmez; önce mutabakat yapılmalıdır.
+ * @summary Sahibin onaylı hizmet ödemesi için iade başlatır
+ */
+export const createTamiPaymentRefund = async (orderId: string,
+    paymentRefundInput: PaymentRefundInput, options?: Parameters<typeof customFetch>[1]): Promise<PaymentRefund> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<PaymentRefund>(getCreateTamiPaymentRefundUrl(orderId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(paymentRefundInput)
+  }
+);}
+
+
+
+
+
+export const getCreateTamiPaymentRefundMutationKey = () => ['createTamiPaymentRefund'] as const;
+
+export const getCreateTamiPaymentRefundMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTamiPaymentRefund>>, TError,CreateTamiPaymentRefundMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createTamiPaymentRefund>>, TError,CreateTamiPaymentRefundMutationVariables, TContext> => {
+
+const mutationKey = getCreateTamiPaymentRefundMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTamiPaymentRefund>>, CreateTamiPaymentRefundMutationVariables> = (props) => {
+          const {orderId,data} = props ?? {};
+
+          return  createTamiPaymentRefund(orderId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateTamiPaymentRefundMutationResult = NonNullable<Awaited<ReturnType<typeof createTamiPaymentRefund>>>
+    export type CreateTamiPaymentRefundMutationBody = BodyType<PaymentRefundInput>
+    export type CreateTamiPaymentRefundMutationError = ErrorType<void>
+    export type CreateTamiPaymentRefundMutationVariables = {orderId: string;data: BodyType<PaymentRefundInput>}
+
+    /**
+ * @summary Sahibin onaylı hizmet ödemesi için iade başlatır
+ */
+export const useCreateTamiPaymentRefund = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTamiPaymentRefund>>, TError,CreateTamiPaymentRefundMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createTamiPaymentRefund>>,
+        TError,
+        CreateTamiPaymentRefundMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateTamiPaymentRefundMutationOptions(options));
+    }
+
+export const getGetTamiPaymentRefundsUrl = (orderId: string,) => {
+
+
+
+
+  return `/api/payments/tami/${orderId}/refunds`
+}
+
+/**
+ * @summary Sahibin ödeme iade geçmişini getirir
+ */
+export const getTamiPaymentRefunds = async (orderId: string, options?: Parameters<typeof customFetch>[1]): Promise<PaymentRefund[]> => {
+
+  return customFetch<PaymentRefund[]>(getGetTamiPaymentRefundsUrl(orderId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTamiPaymentRefundsQueryKey = (orderId: string,) => {
+    return [
+    `/api/payments/tami/${orderId}/refunds`
+    ] as const;
+    }
+
+
+export const getGetTamiPaymentRefundsQueryOptions = <TData = Awaited<ReturnType<typeof getTamiPaymentRefunds>>, TError = ErrorType<void>>(orderId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTamiPaymentRefunds>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTamiPaymentRefundsQueryKey(orderId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTamiPaymentRefunds>>> = ({ signal }) => getTamiPaymentRefunds(orderId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderId !== null && orderId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTamiPaymentRefunds>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTamiPaymentRefundsQueryResult = NonNullable<Awaited<ReturnType<typeof getTamiPaymentRefunds>>>
+export type GetTamiPaymentRefundsQueryError = ErrorType<void>
+
+
+/**
+ * @summary Sahibin ödeme iade geçmişini getirir
+ */
+
+export function useGetTamiPaymentRefunds<TData = Awaited<ReturnType<typeof getTamiPaymentRefunds>>, TError = ErrorType<void>>(
+ orderId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTamiPaymentRefunds>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTamiPaymentRefundsQueryOptions(orderId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetPublicServiceInvoiceUrl = (reference: string,) => {
+
+
+
+
+  return `/api/payments/invoices/${reference}`
+}
+
+/**
+ * @summary Fatura referansıyla ödeme bilgilerini getirir
+ */
+export const getPublicServiceInvoice = async (reference: string, options?: Parameters<typeof customFetch>[1]): Promise<ServiceInvoicePaymentView> => {
+
+  return customFetch<ServiceInvoicePaymentView>(getGetPublicServiceInvoiceUrl(reference),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicServiceInvoiceQueryKey = (reference: string,) => {
+    return [
+    `/api/payments/invoices/${reference}`
+    ] as const;
+    }
+
+
+export const getGetPublicServiceInvoiceQueryOptions = <TData = Awaited<ReturnType<typeof getPublicServiceInvoice>>, TError = ErrorType<void>>(reference: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicServiceInvoice>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicServiceInvoiceQueryKey(reference);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicServiceInvoice>>> = ({ signal }) => getPublicServiceInvoice(reference, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: reference !== null && reference !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicServiceInvoice>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicServiceInvoiceQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicServiceInvoice>>>
+export type GetPublicServiceInvoiceQueryError = ErrorType<void>
+
+
+/**
+ * @summary Fatura referansıyla ödeme bilgilerini getirir
+ */
+
+export function useGetPublicServiceInvoice<TData = Awaited<ReturnType<typeof getPublicServiceInvoice>>, TError = ErrorType<void>>(
+ reference: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicServiceInvoice>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicServiceInvoiceQueryOptions(reference,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -2796,9 +3258,14 @@ export const getCreatePaymentCheckoutUrl = () => {
 }
 
 /**
- * Accepts invoice details only. Card data must never be submitted to or stored
- * by this API. Until company bank and licensed provider approvals are verified,
- * the server rejects every checkout request.
+ * Accepts an issued invoice reference and payer contact details only. The
+ * server reads the amount, currency, and description from the persistent
+ * invoice. Card data must never be submitted to or stored by this API.
+ * Live checkout stays disabled until company and provider approvals,
+ * provider-confirmed 3DS, successful tests, verified production
+ * credentials, and written authorization are independently configured.
+ * Tami sandbox checkout is separately enabled only for non-production
+ * environments with sandbox credentials and the explicit sandbox flag.
  * @summary Starts a hosted payment checkout when compliance approval is complete
  */
 export const createPaymentCheckout = async (paymentCheckoutInput: PaymentCheckoutInput, options?: Parameters<typeof customFetch>[1]): Promise<PaymentCheckoutSession> => {
