@@ -154,3 +154,87 @@ mtime_ms = 1790970426542
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/edd906ce-8755-4a47-b19f-4b9e022064a6/579c41b8-f5d6-414c-9174-48a29a5b1915"
 storage_version_token = "1790970439181988"
 content_type = "audio/mpeg"
+
+[[outputs]]
+id = "Nn4q78Z4rQoRz6r5HVbge"
+uri = "file://deliverables/payment-preparation/banka-teyit-talebi.docx"
+type = "word_document"
+title = "Banka teyit talebi — düzenlenebilir Word"
+description = "Şirket hesabı, TRY/EUR/USD ve IBAN/SWIFT teyidi için imzasız talep taslağı. Eksik alanlar doldurulmalıdır."
+logical_id = "a83652fe-e8c1-49b6-8733-046e3cd0ad6e"
+content_hash = "sha256:4fa5b13f8213990b3fb512ece7d5aeca77715067b5bb4f4fee9b6b4fdc281bd7"
+size = 38757
+mtime_ms = 1791053727727
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/a83652fe-e8c1-49b6-8733-046e3cd0ad6e/fddfb88b-8fbb-42b9-8ee7-f26d85280907"
+storage_version_token = "1791053766444459"
+content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+[[outputs]]
+id = "kDm3p1TPvwWBLlhrrvi8p"
+uri = "file://deliverables/payment-preparation/banka-teyit-talebi.pdf"
+type = "pdf"
+title = "Banka teyit talebi — PDF"
+description = "Bir sayfalık imzasız inceleme kopyası; banka hesabının doğrulandığını göstermez."
+logical_id = "26d23038-a729-4b61-9956-ed04b4eff826"
+content_hash = "sha256:2d5ac531a2d2268266774d9bdd1026a5a179de4cc2aa92f3c959a15b0bc2055d"
+size = 46680
+mtime_ms = 1791053727735
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/26d23038-a729-4b61-9956-ed04b4eff826/57b2fbc7-fdb4-4b71-9843-83de730b8241"
+storage_version_token = "1791053767792813"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "xoHluumRhIseed_BQ0Nst"
+uri = "file://deliverables/payment-preparation/pos-kabul-teklif-talebi.docx"
+type = "word_document"
+title = "POS kabul ve teklif talebi — düzenlenebilir Word"
+description = "3D Secure, kart/para birimi, komisyon, valör, iade, KYC ve mobil imza kabulü için talep taslağı."
+logical_id = "1955a30f-6008-4a6e-8c9f-12559bf9e069"
+content_hash = "sha256:ba1585e51a517cfe9c7206b48be3c701bd0be68f88a733435c506740f06bec97"
+size = 39735
+mtime_ms = 1791053727771
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/1955a30f-6008-4a6e-8c9f-12559bf9e069/a4751191-0832-4354-8746-70e9a215dfa5"
+storage_version_token = "1791053769070559"
+content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+[[outputs]]
+id = "IGEe9MqE8wmlSCAu6W4pS"
+uri = "file://deliverables/payment-preparation/pos-kabul-teklif-talebi.pdf"
+type = "pdf"
+title = "POS kabul ve teklif talebi — PDF"
+description = "İki sayfalık imzasız inceleme kopyası; sağlayıcı kabulü veya sözleşme değildir."
+logical_id = "785fc197-9c4c-41ef-94a1-b5fd8fc391ff"
+content_hash = "sha256:c5bce6a242236a45d2e95ba42fe9de05f68972b322e507ca16afaa818a79e3f4"
+size = 49517
+mtime_ms = 1791053727783
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/785fc197-9c4c-41ef-94a1-b5fd8fc391ff/6689f90e-c53c-4d80-8f6f-0a3327d1a021"
+storage_version_token = "1791053770357911"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "qtgA5n0uZc4l3WbKhrnnP"
+uri = "file://deliverables/payment-preparation/mmt-mobil-imza-hazirlik.pdf"
+type = "pdf"
+title = "Mobil imza hazırlık ve kontrol rehberi — PDF"
+description = "Beş sayfa: mevcut durum, güvenli imza sırası, KYC belgeleri, yazılı teklif kıyaslama şablonu ve resmî kaynaklar."
+logical_id = "c8c59763-72ed-4563-8f04-974087e266f2"
+content_hash = "sha256:8055dd6f0f28c95a7f4d9ded6842b2e99de987a69b9089bba647a798d2c2d386"
+size = 58934
+mtime_ms = 1791053727699
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/c8c59763-72ed-4563-8f04-974087e266f2/faaf23ca-d306-4bc7-bc42-e81d5be5596e"
+storage_version_token = "1791053771677513"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "m4mPQGL_r0MYKu_t3Lvtq"
+uri = "file://deliverables/payment-preparation/mmt-mobil-imza-hazirlik.docx"
+type = "word_document"
+title = "Mobil imza hazırlık rehberi — düzenlenebilir Word"
+description = "Kontrol listelerinin düzenlenebilir sürümü. İmzalanmış veya kurumca onaylanmış belge değildir."
+logical_id = "c54550f3-4ea3-443b-80c2-b91d92660eeb"
+content_hash = "sha256:84113c5f8c18bdc534094fa9ee617525d72f4af1e5d4cf3d212bc38b8a52937b"
+size = 42039
+mtime_ms = 1791053727659
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/c54550f3-4ea3-443b-80c2-b91d92660eeb/b5fd2893-bc6c-4c26-97f2-41638050c008"
+storage_version_token = "1791053772973789"
+content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"

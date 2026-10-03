@@ -1,0 +1,66 @@
+import os
+from flask import Flask, redirect, render_template_string, request, session, jsonify
+from clerk_backend_api import Clerk
+
+app = Flask(__name__)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'mmt_guvenli_anahtar')
+
+# Clerk API İstemcisi Başlatılıyor
+clerk_client = Clerk(bearer_auth=os.environ.get("CLERK_SECRET_KEY"))
+
+# MMT Global Çelik Kubbe & Finansal Entegrasyon Durum Kontrolü
+@app.route('/')
+def dashboard():
+    session_token = session.get('__session')
+    
+    # Geniş Ölçüde Sistem Durum Raporu
+    system_status = {
+        "ekosistem": "MMT Global / MMT Connect",
+        "yonetici": "CİO",
+        "guvenlik_katmani": "Aktif (Clerk + Google OAuth)",
+        "finansal_pos_durumu": "Onay ve Teyit Belgeleri Bekliyor",
+        "altyapi": "Python / Flask / Replit"
+    }
+    
+    return render_template_string("""
+        <!DOCTYPE html>
+        <html lang="tr">
+        <head>
+            <meta charset="UTF-8">
+            <title>MMT Connect | Yönetim Paneli</title>
+            <style>
+                body { font-family: Arial, sans-serif; background-color: #0f172a; color: #f8fafc; padding: 40px; }
+                .card { background: #1e293b; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); max-width: 600px; margin: auto; }
+                h2 { color: #38bdf8; }
+                ul { line-height: 1.8; }
+                .btn { display: inline-block; background: #0284c7; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px; }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h2>MMT Global - CİO Yönetim Paneli</h2>
+                <p>Ekosistem altyapısı geniş ölçüde taranıyor ve güvenle çalışıyor.</p>
+                <ul>
+                    <li><strong>Ekosistem:</strong> {{ status.ekosistem }}</li>
+                    <li><strong>Yönetici Temsili:</strong> {{ status.yonetici }}</li>
+                    <li><strong>Güvenlik:</strong> {{ status.guvenlik_katmani }}</li>
+                    <li><strong>POS / Finans:</strong> {{ status.finansal_pos_durumu }}</li>
+                    <li><strong>Altyapı:</strong> {{ status.altyapi }}</li>
+                </ul>
+                <a href="/api/status" class="btn">Sistem JSON Raporunu Gör</a>
+            </div>
+        </body>
+        </html>
+    """, status=system_status)
+
+@app.route('/api/status')
+def api_status():
+    return jsonify({
+        "status": "success",
+        "code": 200,
+        "message": "MMT Connect altyapısı tam kapasite çalışıyor.",
+        "cio_control": True
+    })
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)

@@ -571,9 +571,9 @@ export default function InvoicePaymentPage() {
             MMT Global / Kurumsal tahsilat
           </p>
           <h1 className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight md:text-7xl">
-            Fatura ödemenizi
+            Çevrimiçi tahsilat
             <span className="block font-serif font-normal italic text-primary">
-              güvenle başlatın.
+              henüz açık değil.
             </span>
           </h1>
           <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-secondary-foreground/70">
@@ -676,11 +676,14 @@ export default function InvoicePaymentPage() {
               ) : (
                 <CreditCard className="h-5 w-5" />
               )}
-              Güvenli ödemeye geç
+              {canStartCheckout
+                ? "Güvenli ödemeye geç"
+                : "Çevrimiçi tahsilat kapalı"}
             </button>
             <p className="text-center text-xs leading-relaxed text-foreground/50">
-              Ödeme şu anda kapalıdır. Onay tamamlandığında bu adım sizi
-              sağlayıcının güvenli 3D Secure ödeme sayfasına yönlendirecektir.
+              Banka hesabı ve sağlayıcının yazılı kabulü doğrulanmadan tahsilat
+              başlatılamaz. 3D Secure ve kart kabul koşulları sağlayıcı
+              onaylandıktan sonra bildirilecektir.
             </p>
           </form>
 
@@ -696,7 +699,10 @@ export default function InvoicePaymentPage() {
                   Tahsilat, şirket hesabı ve sağlayıcı onayları doğrulanmadan
                   başlatılmaz.
                 </li>
-                <li>Ödeme sağlayıcısının 3D Secure ekranı kullanılacaktır.</li>
+                <li>
+                  3D Secure yöntemi, lisanslı sağlayıcının yazılı koşulları
+                  doğrulandıktan sonra kesinleştirilecektir.
+                </li>
               </ul>
             </div>
 
