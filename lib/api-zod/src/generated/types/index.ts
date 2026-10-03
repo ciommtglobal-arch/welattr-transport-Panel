@@ -89,6 +89,8 @@ export * from './constructionQuoteStatus';
 export * from './constructionQuoteStatusUpdate';
 export * from './errorEnvelope';
 export * from './errorResponse';
+export * from './exportKasaSummaryFormat';
+export * from './exportKasaSummaryParams';
 export * from './getB2BBusinessProfileReviewQueueParams';
 export * from './getB2BCompanyTaskReportsParams';
 export * from './getB2BListingReviewQueueParams';

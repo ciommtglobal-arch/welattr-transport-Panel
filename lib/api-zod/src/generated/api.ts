@@ -534,6 +534,23 @@ export const GetKasaSummaryResponse = zod.object({
 
 
 /**
+ * Active Kasa administrators only. Fresh server-calculated summary, never a fiscal Z report or cash balance. Decimal amounts remain strings; currencies are not combined. Downloads are not stored publicly.
+ */
+export const exportKasaSummaryQueryBranchIdMax = 2147483647;
+
+export const exportKasaSummaryQueryDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+
+
+export const ExportKasaSummaryQueryParams = zod.object({
+  "branchId": zod.coerce.number().int().min(1).max(exportKasaSummaryQueryBranchIdMax).optional(),
+  "date": zod.coerce.string().regex(exportKasaSummaryQueryDateRegExp).optional().describe('Europe\/Istanbul day. Completed revenue uses completedAt; pending requests use createdAt. Omit for all days.'),
+  "format": zod.enum(['csv', 'html'])
+})
+
+export const ExportKasaSummaryResponse = zod.unknown()
+
+
+/**
  * @summary Founder lists trial grants with verified email for identification
  */
 export const getStaffTrialCandidatesQueryPageDefault = 1;

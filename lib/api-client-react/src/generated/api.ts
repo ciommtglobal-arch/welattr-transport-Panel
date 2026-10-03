@@ -73,6 +73,7 @@ import type {
   ConstructionQuoteStatusUpdate,
   ErrorEnvelope,
   ErrorResponse,
+  ExportKasaSummaryParams,
   GetB2BBusinessProfileReviewQueueParams,
   GetB2BCompanyTaskReportsParams,
   GetB2BListingReviewQueueParams,
@@ -1771,6 +1772,87 @@ export function useGetKasaSummary<TData = Awaited<ReturnType<typeof getKasaSumma
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetKasaSummaryQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getExportKasaSummaryUrl = (params: ExportKasaSummaryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/kasa/summary/export?${stringifiedParams}` : `/api/kasa/summary/export`
+}
+
+/**
+ * Active Kasa administrators only. Fresh server-calculated summary, never a fiscal Z report or cash balance. Decimal amounts remain strings; currencies are not combined. Downloads are not stored publicly.
+ */
+export const exportKasaSummary = async (params: ExportKasaSummaryParams, options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getExportKasaSummaryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getExportKasaSummaryQueryKey = (params?: ExportKasaSummaryParams,) => {
+    return [
+    `/api/kasa/summary/export`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getExportKasaSummaryQueryOptions = <TData = Awaited<ReturnType<typeof exportKasaSummary>>, TError = ErrorType<void>>(params: ExportKasaSummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportKasaSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getExportKasaSummaryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof exportKasaSummary>>> = ({ signal }) => exportKasaSummary(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof exportKasaSummary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ExportKasaSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof exportKasaSummary>>>
+export type ExportKasaSummaryQueryError = ErrorType<void>
+
+
+
+export function useExportKasaSummary<TData = Awaited<ReturnType<typeof exportKasaSummary>>, TError = ErrorType<void>>(
+ params: ExportKasaSummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportKasaSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getExportKasaSummaryQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

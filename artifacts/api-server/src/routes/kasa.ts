@@ -19,11 +19,13 @@ import {
   GetKasaUsersResponse, GrantKasaUserBody, GrantKasaUserResponse, UpdateKasaUserBody, UpdateKasaUserParams, UpdateKasaUserResponse,
   GetKasaRequestsQueryParams, GetKasaRequestsResponse, CreateKasaRequestBody, CreateKasaRequestResponse,
   GetKasaRequestParams, GetKasaRequestResponse, GetKasaPublicRequestParams, GetKasaPublicRequestResponse,
-  GetKasaSummaryQueryParams, GetKasaSummaryResponse, GetKasaServiceInvoicesResponse,
+  GetKasaSummaryQueryParams, ExportKasaSummaryQueryParams, GetKasaServiceInvoicesResponse,
   CreateKasaServiceInvoiceBody, CreateKasaServiceInvoiceResponse, CancelKasaServiceInvoiceParams,
   CancelKasaServiceInvoiceResponse,
 } from "@workspace/api-zod";
-import { canReadKasaRequest, kasaUserView, ownerIdentity, normalizeKasaAmount, validKasaDate, KASA_CURRENCIES, KASA_TIMEZONE } from "../lib/kasa";
+import { canReadKasaRequest, kasaUserView, ownerIdentity, normalizeKasaAmount, validKasaDate, KASA_TIMEZONE } from "../lib/kasa";
+import { kasaSummary } from "../lib/kasaSummary";
+import { reportCsv, reportHtml, reportFilename } from "../lib/kasaReportExport";
 import { getClerkProxyHost } from "../middlewares/clerkProxyMiddleware";
 import { logger } from "../lib/logger";
 
@@ -393,19 +395,24 @@ router.get("/kasa/summary", async (req, res): Promise<void> => {
   if (!await member(req, res, true)) return;
   const q = GetKasaSummaryQueryParams.strict().safeParse(req.query);
   if (!q.success || !validKasaDate(q.data.date)) { fail(res, 400, "Tarih veya şube filtresi geçersiz."); return; }
-  const evidence = sql`${requests.status} = 'COMPLETED' and ${requests.verifiedAt} is not null and ${requests.providerReference} is not null and ${requests.completedAt} is not null`;
-  const conditions: SQL[] = [];
-  if (q.data.branchId) conditions.push(eq(requests.branchId, q.data.branchId));
-  if (q.data.date) conditions.push(sql`(case when ${requests.status} = 'COMPLETED' then ${requests.completedAt} else ${requests.createdAt} end at time zone ${KASA_TIMEZONE})::date = ${q.data.date}::date`);
-  const rows = await db.select({
-    currency: requests.currency,
-    revenue: sql<string>`coalesce(sum(${requests.amount}) filter (where ${evidence}), 0)::numeric(20,2)::text`,
-    pendingAmount: sql<string>`coalesce(sum(${requests.amount}) filter (where ${requests.status} = 'PENDING'), 0)::numeric(20,2)::text`,
-    pendingCount: sql<number>`count(*) filter (where ${requests.status} = 'PENDING')::int`,
-    completedCount: sql<number>`count(*) filter (where ${evidence})::int`,
-  }).from(requests).where(and(...conditions)).groupBy(requests.currency);
-  const totals = KASA_CURRENCIES.map(currency => rows.find(r => r.currency === currency) ?? { currency, revenue: "0.00", pendingAmount: "0.00", pendingCount: 0, completedCount: 0 });
-  res.json(GetKasaSummaryResponse.parse({ totals, timezone: KASA_TIMEZONE, fiscalReport: false, liveEnabled: false }));
+  res.json(await kasaSummary(q.data));
+});
+router.get("/kasa/summary/export", async (req, res): Promise<void> => {
+  if (!await member(req, res, true)) return;
+  const q = ExportKasaSummaryQueryParams.strict().safeParse(req.query);
+  if (!q.success || !validKasaDate(q.data.date)) { fail(res, 400, "Tarih, şube veya dosya biçimi geçersiz."); return; }
+  const { branchId, date, format } = q.data;
+  let branchName = "Tüm şubeler";
+  if (branchId) {
+    const [branch] = await db.select({ name: branches.name }).from(branches).where(eq(branches.id, branchId)).limit(1);
+    if (!branch) { fail(res, 404, "Şube bulunamadı."); return; }
+    branchName = branch.name;
+  }
+  const snapshot = { summary: await kasaSummary({ branchId, date }), branchId, branchName, date, generatedAt: new Date().toISOString() };
+  res.setHeader("Content-Type", format === "csv" ? "text/csv; charset=utf-8" : "text/html; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${reportFilename(format, branchId, date, snapshot.generatedAt)}"`);
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.send(format === "csv" ? reportCsv(snapshot) : reportHtml(snapshot));
 });
 
 // Do not expose SQL, validation internals or account-provider errors to browsers.

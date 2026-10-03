@@ -2854,6 +2854,28 @@ branchId?: number;
 date?: string;
 };
 
+export type ExportKasaSummaryParams = {
+/**
+ * @minimum 1
+ * @maximum 2147483647
+ */
+branchId?: number;
+/**
+ * Europe/Istanbul day. Completed revenue uses completedAt; pending requests use createdAt. Omit for all days.
+ * @pattern ^\d{4}-\d{2}-\d{2}$
+ */
+date?: string;
+format: ExportKasaSummaryFormat;
+};
+
+export type ExportKasaSummaryFormat = typeof ExportKasaSummaryFormat[keyof typeof ExportKasaSummaryFormat];
+
+
+export const ExportKasaSummaryFormat = {
+  csv: 'csv',
+  html: 'html',
+} as const;
+
 export type GetStaffTrialCandidatesParams = {
 /**
  * @minimum 1
