@@ -1,4 +1,5 @@
 import { FormEvent, useRef, useState } from "react";
+import { CompanyFundAmendmentForm } from "./company-fund-amendment-form";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -82,6 +83,7 @@ export function CompanyFundRecords({
       enabled: canView,
       refetchOnMount: "always",
       refetchOnWindowFocus: true,
+      refetchInterval: 30_000,
     },
   });
   const create = useCreateCompanyFundRecord();
@@ -97,6 +99,7 @@ export function CompanyFundRecords({
   const lock = useRef(false);
   const keyRef = useRef<{ sig: string; key: string } | null>(null);
   const pending = create.isPending;
+  const [amending, setAmending] = useState<{ id: number; kind: "duzeltme" | "iptal" } | null>(null);
 
   const data = query.data;
   const list = data?.fon_havuzu ?? [];
@@ -205,7 +208,9 @@ export function CompanyFundRecords({
       <p className="mt-3 max-w-3xl border border-border/70 bg-background p-4 text-xs leading-6 text-foreground/65">
         Bu alan yalnızca şirket içi kayıttır. Gerçek bir kredi tahsisi, ödeme
         veya transfer, teminat, dijital imza, resmi mühür ya da onay anlamına
-        gelmez. Kayıtlar değiştirilemez; düzenleme ve silme yoktur. WelatTR ve
+        gelmez. Özgün kayıtlar değiştirilemez ve silinmez. Yalnızca aktif firma
+        sahibi gerekçeli düzeltme veya iptal kaydı ekleyebilir. Güncel durumu
+        yalnızca iç kayıt durumudur; finansal bakiye veya kredi onayı değildir. WelatTR ve
         Çelik Kubbe yalnızca atıf etiketleridir.
       </p>
 
@@ -301,7 +306,7 @@ export function CompanyFundRecords({
             </form>
           ) : data ? (
             <p className="text-xs text-foreground/55">
-              Bu hesap kayıtları yalnızca görüntüleyebilir; yeni kayıt ekleme yetkisi aktif firma sahibine aittir.
+              Bu hesap kayıtları yalnızca görüntüleyebilir; ekleme, düzeltme ve iptal yetkisi aktif firma sahibine aittir.
             </p>
           ) : null}
 
@@ -361,7 +366,10 @@ export function CompanyFundRecords({
                   {list.map((item) => (
                     <li key={item.id} className="border border-border/70 bg-background p-5">
                       <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em]">
-                        <span className="text-primary">{item.islem_turu}</span>
+                        <span className="text-primary">#{item.id} · {item.islem_turu}</span>
+                        <span className="border border-border/70 px-2 py-1">
+                          {item.guncel_durum === "iptal" ? "İptal edilmiş iç kayıt" : item.guncel_durum === "yerine_gecmis" ? "Yerine yeni kayıt geçmiş" : "Güncel iç kayıt"}
+                        </span>
                         <span className="border border-border/70 px-2 py-1 text-foreground/65">Firma içi kayıt</span>
                         <span className="border border-border/70 px-2 py-1 text-foreground/65">WelatTR</span>
                         <span className="border border-border/70 px-2 py-1 text-foreground/65">Çelik Kubbe</span>
@@ -379,6 +387,39 @@ export function CompanyFundRecords({
                       <p className="mt-1 break-all font-mono text-[10px] text-foreground/40">
                         {item.imza} · {item.ekosistem}
                       </p>
+                      {item.duzeltmeler.map((edge) => (
+                        <div key={edge.id} className="mt-3 border-l-2 border-primary/50 pl-3 text-xs leading-6">
+                          <p className="font-semibold">
+                            {edge.tur === "iptal" ? `İptal: kayıt #${edge.onceki_kayit_id}` : `Düzeltme: kayıt #${edge.onceki_kayit_id} → yeni kayıt #${edge.yeni_kayit_id}`}
+                          </p>
+                          <p className="whitespace-pre-wrap break-words">Gerekçe: {edge.gerekce}</p>
+                          <p>{formatTime(edge.zaman)} · Ekleyen: {edge.olusturan}</p>
+                          <p className="text-foreground/55">Özgün kayıt korunur; banka işlemi veya para hareketi değildir.</p>
+                        </div>
+                      ))}
+                      {data?.canCreate && item.guncel_durum === "guncel" ? (
+                        amending?.id === item.id ? (
+                          <CompanyFundAmendmentForm
+                            key={`${companyScope}:${item.id}:${amending.kind}`}
+                            record={item}
+                            kind={amending.kind}
+                            onCancel={() => setAmending(null)}
+                            onSaved={async () => {
+                              setAmending(null);
+                              setSuccess("Gerekçeli düzeltme/iptal firma içi kayda eklendi. Özgün kayıt korunuyor; banka işlemi veya para hareketi yapılmadı.");
+                              setRefreshError(false);
+                              try {
+                                await queryClient.invalidateQueries({ queryKey: getGetCompanyRecordStatusQueryKey() }, { throwOnError: true });
+                              } catch { setRefreshError(true); }
+                            }}
+                          />
+                        ) : (
+                          <div className="mt-4 flex flex-wrap gap-3">
+                            <button type="button" onClick={() => { setSuccess(""); setAmending({ id: item.id, kind: "duzeltme" }); }} className="border border-border px-3 py-2 text-xs">Düzeltme ekle</button>
+                            <button type="button" onClick={() => { setSuccess(""); setAmending({ id: item.id, kind: "iptal" }); }} className="border border-border px-3 py-2 text-xs">Gerekçeli iptal ekle</button>
+                          </div>
+                        )
+                      ) : null}
                     </li>
                   ))}
                 </ul>

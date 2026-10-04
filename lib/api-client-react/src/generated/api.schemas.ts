@@ -2696,6 +2696,77 @@ export interface CompanyFundInput {
   istek_anahtari: string;
 }
 
+export type CompanyFundAmendmentInputTur = typeof CompanyFundAmendmentInputTur[keyof typeof CompanyFundAmendmentInputTur];
+
+
+export const CompanyFundAmendmentInputTur = {
+  duzeltme: 'duzeltme',
+  iptal: 'iptal',
+} as const;
+
+export type CompanyFundReplacementInputParaBirimi = typeof CompanyFundReplacementInputParaBirimi[keyof typeof CompanyFundReplacementInputParaBirimi];
+
+
+export const CompanyFundReplacementInputParaBirimi = {
+  TRY: 'TRY',
+  EUR: 'EUR',
+  USD: 'USD',
+} as const;
+
+export interface CompanyFundReplacementInput {
+  /**
+     * @minLength 2
+     * @maxLength 100
+     */
+  islem_turu: string;
+  /**
+     * @maxLength 15
+     * @pattern ^(0|[1-9][0-9]{0,11})(\.[0-9]{1,2})?$
+     */
+  miktar: string;
+  para_birimi: CompanyFundReplacementInputParaBirimi;
+  /**
+     * @minLength 2
+     * @maxLength 200
+     */
+  kurum: string;
+  /** @maxLength 8000 */
+  aciklama?: string;
+}
+
+/**
+ * Correction requires yeni_kayit; cancellation forbids it. No caller attribution/company/date accepted.
+ */
+export interface CompanyFundAmendmentInput {
+  tur: CompanyFundAmendmentInputTur;
+  /**
+     * @minLength 5
+     * @maxLength 2000
+     */
+  gerekce: string;
+  istek_anahtari: string;
+  yeni_kayit?: CompanyFundReplacementInput;
+}
+
+export type CompanyFundAmendmentTur = typeof CompanyFundAmendmentTur[keyof typeof CompanyFundAmendmentTur];
+
+
+export const CompanyFundAmendmentTur = {
+  duzeltme: 'duzeltme',
+  iptal: 'iptal',
+} as const;
+
+export interface CompanyFundAmendment {
+  id: number;
+  onceki_kayit_id: number;
+  /** @nullable */
+  yeni_kayit_id: number | null;
+  tur: CompanyFundAmendmentTur;
+  gerekce: string;
+  zaman: string;
+  olusturan: string;
+}
+
 export type CompanyFundRecordParaBirimi = typeof CompanyFundRecordParaBirimi[keyof typeof CompanyFundRecordParaBirimi];
 
 
@@ -2710,6 +2781,15 @@ export type CompanyFundRecordKayitDurumu = typeof CompanyFundRecordKayitDurumu[k
 
 export const CompanyFundRecordKayitDurumu = {
   firma_ici_kayit: 'firma_ici_kayit',
+} as const;
+
+export type CompanyFundRecordGuncelDurum = typeof CompanyFundRecordGuncelDurum[keyof typeof CompanyFundRecordGuncelDurum];
+
+
+export const CompanyFundRecordGuncelDurum = {
+  guncel: 'guncel',
+  yerine_gecmis: 'yerine_gecmis',
+  iptal: 'iptal',
 } as const;
 
 export interface CompanyFundRecord {
@@ -2727,6 +2807,8 @@ export interface CompanyFundRecord {
   kayit_durumu: CompanyFundRecordKayitDurumu;
   zaman: string;
   olusturan: string;
+  guncel_durum: CompanyFundRecordGuncelDurum;
+  duzeltmeler: CompanyFundAmendment[];
 }
 
 export type CompanyFundResultDurum = typeof CompanyFundResultDurum[keyof typeof CompanyFundResultDurum];

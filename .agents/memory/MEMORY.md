@@ -28,7 +28,7 @@
 - [Staff login device gap](staff-login-device-gap.md) — Controlled submissions reached Clerk, but the reported device-specific stall was not reproduced; do not claim real-account login is verified.
 - [Clerk test subjects](clerk-test-subjects.md) — Test helper subject overrides may be ignored; bind temporary dev fixtures to the actual unique test account, not the requested ID.
 - [Artifact validation temporary files](artifact-validation-temp-files.md) — Successful manifest validation can consume its temporary input; recreate it before another edit.
-- [Instruction attribution labels](instruction-attribution-labels.md) — WelatTR/Çelik Kubbe labels do not establish identity, digital signature, certification or external authority.
+- [Internal record boundaries](instruction-attribution-labels.md) — WelatTR/Çelik Kubbe are labels; fund corrections are internal records, not bank or Kasa QR actions.
 - [Test environment attribution](test-environment-attribution.md) — A browser worker's NODE_ENV does not identify the managed API or its database; verify development before seeding.
 - [Live panel identification](live-panel-identification.md) — Confirm the intended screen and published site before diagnosing a frozen or old-looking panel.
 - [Project model preference](project-model-preference.md) — The user prefers Gemini for MMT Global work; do not claim model selection without confirmation.

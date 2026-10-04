@@ -52,6 +52,30 @@ paths:
         "403": { description: Active company owner required }
         "409": { description: Request key already used for different input }
         "503": { description: Database unavailable; retry with the same request key }
+  /celik-kubbe/fon-islem/{id}/duzeltmeler:
+    post:
+      operationId: createCompanyFundAmendment
+      tags: [b2b-businesses]
+      description: Active firm owner appends a reasoned correction or cancellation. Originals never change. No bank, loan or Kasa QR action.
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: integer, minimum: 1, maximum: 2147483647 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CompanyFundAmendmentInput" }
+      responses:
+        "201":
+          description: Amendment saved or matching retry returned
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompanyFundAmendment" }
+        "400": { description: Invalid input or protected fields }
+        "401": { description: Sign-in required }
+        "403": { description: Active firm owner required }
+        "404": { description: Record not found in this company }
+        "409": { description: Record already superseded/cancelled or request key reused }
+        "503": { description: Storage unavailable; retry same draft/key }
   /celik-kubbe/talimat-ekle:
     post:
       operationId: createCompanyInstructionAlias
@@ -6773,9 +6797,41 @@ components:
         kurum: { type: string, minLength: 2, maxLength: 200 }
         aciklama: { type: string, maxLength: 8000, default: "" }
         istek_anahtari: { type: string, format: uuid, description: Keep the same UUID when retrying the same draft }
+    CompanyFundAmendmentInput:
+      type: object
+      additionalProperties: false
+      required: [tur, gerekce, istek_anahtari]
+      properties:
+        tur: { type: string, enum: [duzeltme, iptal] }
+        gerekce: { type: string, minLength: 5, maxLength: 2000 }
+        istek_anahtari: { type: string, format: uuid }
+        yeni_kayit:
+          $ref: "#/components/schemas/CompanyFundReplacementInput"
+      description: Correction requires yeni_kayit; cancellation forbids it. No caller attribution/company/date accepted.
+    CompanyFundReplacementInput:
+      type: object
+      additionalProperties: false
+      required: [islem_turu, miktar, para_birimi, kurum]
+      properties:
+        islem_turu: { type: string, minLength: 2, maxLength: 100 }
+        miktar: { type: string, maxLength: 15, pattern: '^(0|[1-9][0-9]{0,11})(\.[0-9]{1,2})?$' }
+        para_birimi: { type: string, enum: [TRY, EUR, USD] }
+        kurum: { type: string, minLength: 2, maxLength: 200 }
+        aciklama: { type: string, maxLength: 8000, default: "" }
+    CompanyFundAmendment:
+      type: object
+      required: [id, onceki_kayit_id, yeni_kayit_id, tur, gerekce, zaman, olusturan]
+      properties:
+        id: { type: integer }
+        onceki_kayit_id: { type: integer }
+        yeni_kayit_id: { type: [integer, "null"] }
+        tur: { type: string, enum: [duzeltme, iptal] }
+        gerekce: { type: string }
+        zaman: { type: string, format: date-time }
+        olusturan: { type: string }
     CompanyFundRecord:
       type: object
-      required: [id, islem_turu, miktar, para_birimi, kurum, aciklama, imza, ekosistem, kayit_durumu, zaman, olusturan]
+      required: [id, islem_turu, miktar, para_birimi, kurum, aciklama, imza, ekosistem, kayit_durumu, zaman, olusturan, guncel_durum, duzeltmeler]
       properties:
         id: { type: integer }
         islem_turu: { type: string }
@@ -6788,6 +6844,10 @@ components:
         kayit_durumu: { type: string, enum: [firma_ici_kayit] }
         zaman: { type: string, format: date-time }
         olusturan: { type: string }
+        guncel_durum: { type: string, enum: [guncel, yerine_gecmis, iptal] }
+        duzeltmeler:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyFundAmendment" }
     CompanyFundResult:
       type: object
       required: [durum, mesaj, veri]

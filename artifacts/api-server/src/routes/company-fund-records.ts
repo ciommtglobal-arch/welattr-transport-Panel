@@ -1,7 +1,8 @@
 import { Router, type IRouter } from "express";
-import { and, count, desc, eq } from "drizzle-orm";
-import { db, companyFundRecordsTable as funds, companyInstructionsTable as instructions, type CompanyFundRecord } from "@workspace/db";
-import { CreateCompanyFundRecordBody, GetCompanyRecordStatusQueryParams } from "@workspace/api-zod";
+import { randomUUID } from "node:crypto";
+import { and, count, desc, eq, inArray, or } from "drizzle-orm";
+import { db, companyFundRecordsTable as funds, companyFundAmendmentsTable as amendments, companyInstructionsTable as instructions, type CompanyFundRecord, type CompanyFundAmendment } from "@workspace/db";
+import { CreateCompanyFundRecordBody, GetCompanyRecordStatusQueryParams, CreateCompanyFundAmendmentBody, CreateCompanyFundAmendmentParams, CreateCompanyFundAmendmentResponse, GetCompanyRecordStatusResponse, CreateCompanyFundRecordResponse } from "@workspace/api-zod";
 import { requireMyCompany } from "../lib/companyAuth";
 import { logger } from "../lib/logger";
 import { serializeCompanyInstruction } from "./company-instructions";
@@ -30,18 +31,32 @@ const inputSchema = CreateCompanyFundRecordBody.strict().transform((data) => ({
   istek_anahtari: data.istek_anahtari.toLowerCase(),
 })).refine((data) => data.kurum.length >= 2 && data.islem_turu.length >= 2);
 
-function serialize(row: CompanyFundRecord) {
+export function serializeAmendment(row: CompanyFundAmendment) {
+  return {
+    id: row.id, onceki_kayit_id: row.originalRecordId, yeni_kayit_id: row.replacementRecordId,
+    tur: row.kind, gerekce: row.reason, zaman: row.createdAt.toISOString(), olusturan: row.authorName,
+  };
+}
+
+function serialize(row: CompanyFundRecord, history: CompanyFundAmendment[] = []) {
+  const edges = history.filter((edge) => edge.originalRecordId === row.id || edge.replacementRecordId === row.id);
+  const outgoing = edges.find((edge) => edge.originalRecordId === row.id);
   return {
     id: row.id, kurum: row.institution, islem_turu: row.operationType,
     miktar: row.amount, para_birimi: row.currency, aciklama: row.description,
     zaman: row.createdAt.toISOString(), olusturan: row.authorName,
     imza: "WelatTR", ekosistem: "Çelik Kubbe", kayit_durumu: "firma_ici_kayit",
+    guncel_durum: outgoing ? (outgoing.kind === "iptal" ? "iptal" : "yerine_gecmis") : "guncel",
+    duzeltmeler: edges.map(serializeAmendment),
   };
 }
 
-router.post("/celik-kubbe/fon-islem", async (req, res) => {
+router.post("/celik-kubbe/fon-islem", async (req, res): Promise<void> => {
   const access = await requireMyCompany(req, res, ["owner"]);
   if (!access) return;
+  if (access.profile.ownerClerkUserId !== access.userId) {
+    res.status(403).json({ error: "Yalnızca firmanın sahibi kayıt ekleyebilir." }); return;
+  }
   const input = inputSchema.safeParse(req.body);
   const amount = input.success ? normalizeFundAmount(input.data.miktar) : null;
   if (!input.success || amount === null) {
@@ -67,17 +82,117 @@ router.post("/celik-kubbe/fon-islem", async (req, res) => {
       res.status(409).json({ error: "Bu istek anahtarı başka bir kayıt için kullanılmış. Yeni veya değiştirilmiş kayıt için yeni istek anahtarı kullanın." });
       return;
     }
-    res.status(201).json({
+    const history = await db.select().from(amendments).where(and(
+      eq(amendments.businessProfileId, access.profile.id),
+      or(eq(amendments.originalRecordId, record.id), eq(amendments.replacementRecordId, record.id)),
+    ));
+    res.status(201).json(CreateCompanyFundRecordResponse.parse({
       durum: "basarili", mesaj: "Fon/kredi firma içi kaydı saklandı. Para transferi, kredi tahsisi veya resmi onay yapılmadı.",
-      veri: serialize(record),
-    });
+      veri: serialize(record, history),
+    }));
   } catch {
     logger.error("Firma içi fon kaydı veritabanına yazılamadı.");
     res.status(503).json({ error: "Kayıt sonucu doğrulanamadı. Listeyi kontrol edin; tekrar denemede aynı taslak ve istek anahtarını kullanın." });
   }
 });
 
-router.get("/celik-kubbe/durum", async (req, res) => {
+const amendmentInput = CreateCompanyFundAmendmentBody.strict().superRefine((data, ctx) => {
+  if (data.gerekce.trim().length < 5) ctx.addIssue({ code: "custom", message: "Gerekçe gereklidir." });
+  if (data.tur === "duzeltme") {
+    const replacement = data.yeni_kayit;
+    if (!replacement || replacement.kurum.trim().length < 2 ||
+      replacement.islem_turu.trim().length < 2 || normalizeFundAmount(replacement.miktar) === null) {
+      ctx.addIssue({ code: "custom", message: "Yeni kayıt ve kesin ondalıklı pozitif tutar gereklidir." });
+    }
+  } else if (data.yeni_kayit !== undefined) {
+    ctx.addIssue({ code: "custom", message: "İptalde yeni kayıt gönderilemez." });
+  }
+});
+
+class AmendmentConflict extends Error {}
+class FundNotFound extends Error {}
+
+router.post("/celik-kubbe/fon-islem/:id/duzeltmeler", async (req, res): Promise<void> => {
+  const access = await requireMyCompany(req, res, ["owner"]);
+  if (!access) return;
+  if (access.profile.ownerClerkUserId !== access.userId) {
+    res.status(403).json({ error: "Yalnızca firmanın sahibi düzeltme veya iptal ekleyebilir." }); return;
+  }
+  const params = CreateCompanyFundAmendmentParams.strict().safeParse(req.params);
+  const input = amendmentInput.safeParse(req.body);
+  const replacementKeys = ["kurum", "islem_turu", "miktar", "para_birimi", "aciklama"];
+  const rawReplacement = req.body?.yeni_kayit;
+  if (!params.success || !input.success || Object.keys(req.query).length ||
+    (rawReplacement && Object.keys(rawReplacement).some((key) => !replacementKeys.includes(key)))) {
+    res.status(400).json({ error: "Geçerli kayıt kimliği, gerekçe ve UUID gereklidir. Düzeltmede yeni kurum, işlem türü, pozitif ondalıklı metin tutar ve TRY/EUR/USD zorunludur. Firma, yazar, zaman ve yetki alanları kabul edilmez." }); return;
+  }
+  const data = input.data;
+  const replacement = data.yeni_kayit;
+  const newValues = replacement ? {
+    institution: replacement.kurum.trim(), operationType: replacement.islem_turu.trim(),
+    amount: normalizeFundAmount(replacement.miktar)!, currency: replacement.para_birimi,
+    description: replacement.aciklama.trim(),
+  } : null;
+  try {
+    const result = await db.transaction(async (tx) => {
+      // Lock the scoped original: competing corrections cannot branch history.
+      const [original] = await tx.select().from(funds).where(and(
+        eq(funds.businessProfileId, access.profile.id), eq(funds.id, params.data.id),
+      )).limit(1).for("update");
+      if (!original) throw new FundNotFound();
+      const [replay] = await tx.select().from(amendments).where(and(
+        eq(amendments.businessProfileId, access.profile.id),
+        eq(amendments.requestKey, data.istek_anahtari.toLowerCase()),
+      )).limit(1);
+      if (replay) {
+        let matches = replay.originalRecordId === original.id && replay.authorMemberId === access.member.id &&
+          replay.kind === data.tur && replay.reason === data.gerekce.trim();
+        if (newValues) {
+          const [saved] = await tx.select().from(funds).where(and(
+            eq(funds.businessProfileId, access.profile.id), eq(funds.id, replay.replacementRecordId!),
+          )).limit(1);
+          matches = matches && !!saved && Object.entries(newValues).every(([key, value]) => saved[key as keyof CompanyFundRecord] === value);
+        }
+        if (!matches) throw new AmendmentConflict();
+        return replay;
+      }
+      const [existing] = await tx.select().from(amendments).where(and(
+        eq(amendments.businessProfileId, access.profile.id), eq(amendments.originalRecordId, original.id),
+      )).limit(1);
+      if (existing) throw new AmendmentConflict();
+      let replacementId: number | null = null;
+      if (newValues) {
+        const [created] = await tx.insert(funds).values({
+          ...newValues, businessProfileId: access.profile.id,
+          authorMemberId: access.member.id, authorName: access.member.fullName,
+          requestKey: randomUUID(),
+        }).returning();
+        replacementId = created!.id;
+      }
+      const [edge] = await tx.insert(amendments).values({
+        businessProfileId: access.profile.id, originalRecordId: original.id,
+        replacementRecordId: replacementId, kind: data.tur, reason: data.gerekce.trim(),
+        requestKey: data.istek_anahtari.toLowerCase(),
+        authorMemberId: access.member.id, authorName: access.member.fullName,
+      }).returning();
+      return edge!;
+    });
+    res.status(201).json(CreateCompanyFundAmendmentResponse.parse(serializeAmendment(result)));
+  } catch (error) {
+    // Postgres unique violations also protect distinct-record, same-key races.
+    const dbError = error as { code?: string; cause?: { code?: string } };
+    if (error instanceof FundNotFound) {
+      res.status(404).json({ error: "Bu firmada kayıt bulunamadı." });
+    } else if (error instanceof AmendmentConflict || dbError.code === "23505" || dbError.cause?.code === "23505") {
+      res.status(409).json({ error: "Kayıt zaten düzeltilmiş/iptal edilmiş veya istek anahtarı başka içerikle kullanılmış. Güncel kaydı kontrol edin." });
+    } else {
+      logger.error("Firma içi fon düzeltmesi saklanamadı.");
+      res.status(503).json({ error: "Sonuç doğrulanamadı. Listeyi kontrol edin; aynı taslak ve istek anahtarıyla tekrar deneyin." });
+    }
+  }
+});
+
+router.get("/celik-kubbe/durum", async (req, res): Promise<void> => {
   const access = await requireMyCompany(req, res, ["owner", "admin", "manager"]);
   if (!access) return;
   const query = GetCompanyRecordStatusQueryParams.strict().safeParse(req.query);
@@ -97,13 +212,18 @@ router.get("/celik-kubbe/durum", async (req, res) => {
       db.select({ total: count() }).from(funds).where(fundScope),
       db.select({ total: count() }).from(instructions).where(instructionScope),
     ]);
-    res.json({
+    const ids = fundRows.map((row) => row.id);
+    const history = ids.length ? await db.select().from(amendments).where(and(
+      eq(amendments.businessProfileId, access.profile.id),
+      or(inArray(amendments.originalRecordId, ids), inArray(amendments.replacementRecordId, ids)),
+    )) : [];
+    res.json(GetCompanyRecordStatusResponse.parse({
       ekosistem: "Çelik Kubbe", temsilci: "WelatTR",
       toplam_fon_islem: fundCount[0]?.total ?? 0,
       toplam_talimat: instructionCount[0]?.total ?? 0,
-      fon_havuzu: fundRows.map(serialize), talimatlar: instructionRows.map(serializeCompanyInstruction),
-      canCreate: access.member.role === "owner", ...page,
-    });
+      fon_havuzu: fundRows.map((row) => serialize(row, history)), talimatlar: instructionRows.map(serializeCompanyInstruction),
+      canCreate: access.member.role === "owner" && access.profile.ownerClerkUserId === access.userId, ...page,
+    }));
   } catch {
     logger.error("Firma içi kayıt durumu okunamadı.");
     res.status(503).json({ error: "Kayıtlar yüklenemedi. Tekrar deneyin." });

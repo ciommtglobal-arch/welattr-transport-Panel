@@ -32,7 +32,6 @@ export async function requireCompanyAccess(
       and(
         eq(b2bCompanyMembersTable.businessProfileId, businessProfileId),
         eq(b2bCompanyMembersTable.clerkUserId, userId),
-        eq(b2bCompanyMembersTable.status, "active"),
       ),
     )
     .limit(1);
@@ -62,6 +61,13 @@ export async function requireCompanyAccess(
   }
 
   if (!member) {
+    res.status(403).json({ error: "Bu firma için aktif yetkiniz bulunmuyor." });
+    return null;
+  }
+
+  // Existing revoked/invited memberships must never be silently reactivated,
+  // including the firm's owner. Lazy owner creation is only for no membership.
+  if (member.status !== "active") {
     res.status(403).json({ error: "Bu firma için aktif yetkiniz bulunmuyor." });
     return null;
   }

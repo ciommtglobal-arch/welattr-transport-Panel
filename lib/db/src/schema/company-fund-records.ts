@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, serial, integer, text, numeric, uuid, timestamp, index, uniqueIndex, check } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, text, numeric, uuid, timestamp, index, uniqueIndex, check, foreignKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { b2bBusinessProfilesTable } from "./b2b-business-profiles";
@@ -22,6 +22,7 @@ export const companyFundRecordsTable = pgTable("company_fund_records", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   uniqueIndex("company_fund_records_request_idx").on(table.businessProfileId, table.requestKey),
+  uniqueIndex("company_fund_records_company_id_idx").on(table.businessProfileId, table.id),
   index("company_fund_records_profile_created_idx").on(table.businessProfileId, table.createdAt, table.id),
   check("company_fund_records_positive_amount", sql`${table.amount} > 0 AND ${table.amount} <= 999999999999.99`),
   check("company_fund_records_currency", sql`${table.currency} IN ('TRY', 'EUR', 'USD')`),
@@ -29,3 +30,35 @@ export const companyFundRecordsTable = pgTable("company_fund_records", {
 export const insertCompanyFundRecordSchema = createInsertSchema(companyFundRecordsTable).omit({ id: true, createdAt: true });
 export type InsertCompanyFundRecord = z.infer<typeof insertCompanyFundRecordSchema>;
 export type CompanyFundRecord = typeof companyFundRecordsTable.$inferSelect;
+
+// Append-only audit edge. A record can have only one successor (or cancellation).
+// Composite foreign keys prevent a cross-company correction, even at DB level.
+export const companyFundAmendmentsTable = pgTable("company_fund_amendments", {
+  id: serial("id").primaryKey(),
+  businessProfileId: integer("business_profile_id").notNull()
+    .references(() => b2bBusinessProfilesTable.id, { onDelete: "restrict" }),
+  originalRecordId: integer("original_record_id").notNull(),
+  replacementRecordId: integer("replacement_record_id"),
+  kind: text("kind").notNull(),
+  reason: text("reason").notNull(),
+  requestKey: uuid("request_key").notNull(),
+  authorMemberId: integer("author_member_id").notNull()
+    .references(() => b2bCompanyMembersTable.id, { onDelete: "restrict" }),
+  authorName: text("author_name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("company_fund_amendments_request_idx").on(table.businessProfileId, table.requestKey),
+  uniqueIndex("company_fund_amendments_original_idx").on(table.originalRecordId),
+  uniqueIndex("company_fund_amendments_replacement_idx").on(table.replacementRecordId),
+  index("company_fund_amendments_company_idx").on(table.businessProfileId),
+  foreignKey({ columns: [table.businessProfileId, table.originalRecordId],
+    foreignColumns: [companyFundRecordsTable.businessProfileId, companyFundRecordsTable.id],
+    name: "company_fund_amendments_original_fk" }).onDelete("restrict"),
+  foreignKey({ columns: [table.businessProfileId, table.replacementRecordId],
+    foreignColumns: [companyFundRecordsTable.businessProfileId, companyFundRecordsTable.id],
+    name: "company_fund_amendments_replacement_fk" }).onDelete("restrict"),
+  check("company_fund_amendments_kind", sql`(${table.kind} = 'duzeltme' AND ${table.replacementRecordId} IS NOT NULL AND ${table.replacementRecordId} > ${table.originalRecordId}) OR (${table.kind} = 'iptal' AND ${table.replacementRecordId} IS NULL)`),
+  check("company_fund_amendments_reason", sql`length(trim(${table.reason})) BETWEEN 5 AND 2000`),
+]);
+export const insertCompanyFundAmendmentSchema = createInsertSchema(companyFundAmendmentsTable).omit({ id: true, createdAt: true });
+export type CompanyFundAmendment = typeof companyFundAmendmentsTable.$inferSelect;

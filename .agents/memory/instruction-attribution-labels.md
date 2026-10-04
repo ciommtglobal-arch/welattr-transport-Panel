@@ -8,3 +8,9 @@ Treat WelatTR and Çelik Kubbe as attribution/classification labels, not verifie
 **Why:** The supplied example called a string field an “imza” and claimed security assurance, but supplied no cryptographic signature, certificate, institutional authorization, or verification mechanism. Its integration was limited to an internal company record.
 
 **How to apply:** Keep user-facing descriptions explicit about internal records. Do not turn these labels into official approval, verified signatory status, or external dispatch authority when extending the module.
+
+Fon/kredi kayıt düzeltmesi veya iptali yalnızca MMT Connect firma içi kayıt işlemidir; Kasa QR iptali veya banka işlemi değildir.
+
+**Why:** Kullanıcı bu sınırı açıkça belirtti. “Fon/kredi” ve “iptal” ifadeleri gerçek kredi tahsisi, bakiye veya para hareketi olarak yorumlanmamalı.
+
+**How to apply:** Düzeltme ve arşiv özelliklerini eklerken özgün kayıt/yazar/tarihi koruyun; bu işlemleri ödeme, banka veya Kasa iptal akışına bağlamayın.

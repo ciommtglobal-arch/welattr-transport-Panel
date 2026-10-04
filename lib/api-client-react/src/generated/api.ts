@@ -54,6 +54,8 @@ import type {
   B2BRequestInput,
   B2BRequestPage,
   B2BRequestStatusUpdate,
+  CompanyFundAmendment,
+  CompanyFundAmendmentInput,
   CompanyFundInput,
   CompanyFundResult,
   CompanyInstructionInput,
@@ -285,6 +287,84 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getCreateCompanyFundRecordMutationOptions(options));
+    }
+
+export const getCreateCompanyFundAmendmentUrl = (id: number,) => {
+
+
+
+
+  return `/api/celik-kubbe/fon-islem/${id}/duzeltmeler`
+}
+
+/**
+ * Active firm owner appends a reasoned correction or cancellation. Originals never change. No bank, loan or Kasa QR action.
+ */
+export const createCompanyFundAmendment = async (id: number,
+    companyFundAmendmentInput: CompanyFundAmendmentInput, options?: Parameters<typeof customFetch>[1]): Promise<CompanyFundAmendment> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<CompanyFundAmendment>(getCreateCompanyFundAmendmentUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(companyFundAmendmentInput)
+  }
+);}
+
+
+
+
+
+export const getCreateCompanyFundAmendmentMutationKey = () => ['createCompanyFundAmendment'] as const;
+
+export const getCreateCompanyFundAmendmentMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCompanyFundAmendment>>, TError,CreateCompanyFundAmendmentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCompanyFundAmendment>>, TError,CreateCompanyFundAmendmentMutationVariables, TContext> => {
+
+const mutationKey = getCreateCompanyFundAmendmentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCompanyFundAmendment>>, CreateCompanyFundAmendmentMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  createCompanyFundAmendment(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCompanyFundAmendmentMutationResult = NonNullable<Awaited<ReturnType<typeof createCompanyFundAmendment>>>
+    export type CreateCompanyFundAmendmentMutationBody = BodyType<CompanyFundAmendmentInput>
+    export type CreateCompanyFundAmendmentMutationError = ErrorType<void>
+    export type CreateCompanyFundAmendmentMutationVariables = {id: number;data: BodyType<CompanyFundAmendmentInput>}
+
+    export const useCreateCompanyFundAmendment = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCompanyFundAmendment>>, TError,CreateCompanyFundAmendmentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createCompanyFundAmendment>>,
+        TError,
+        CreateCompanyFundAmendmentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateCompanyFundAmendmentMutationOptions(options));
     }
 
 export const getCreateCompanyInstructionAliasUrl = () => {

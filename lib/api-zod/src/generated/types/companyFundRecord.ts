@@ -5,6 +5,8 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { CompanyFundAmendment } from './companyFundAmendment';
+import type { CompanyFundRecordGuncelDurum } from './companyFundRecordGuncelDurum';
 import type { CompanyFundRecordKayitDurumu } from './companyFundRecordKayitDurumu';
 import type { CompanyFundRecordParaBirimi } from './companyFundRecordParaBirimi';
 
@@ -23,4 +25,6 @@ export interface CompanyFundRecord {
   kayit_durumu: CompanyFundRecordKayitDurumu;
   zaman: Date;
   olusturan: string;
+  guncel_durum: CompanyFundRecordGuncelDurum;
+  duzeltmeler: CompanyFundAmendment[];
 }

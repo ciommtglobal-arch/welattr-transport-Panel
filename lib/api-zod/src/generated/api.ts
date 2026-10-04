@@ -49,8 +49,71 @@ export const CreateCompanyFundRecordResponse = zod.object({
   "ekosistem": zod.string().describe('Classification label'),
   "kayit_durumu": zod.enum(['firma_ici_kayit']),
   "zaman": zod.coerce.date(),
+  "olusturan": zod.string(),
+  "guncel_durum": zod.enum(['guncel', 'yerine_gecmis', 'iptal']),
+  "duzeltmeler": zod.array(zod.object({
+  "id": zod.int(),
+  "onceki_kayit_id": zod.int(),
+  "yeni_kayit_id": zod.int().nullable(),
+  "tur": zod.enum(['duzeltme', 'iptal']),
+  "gerekce": zod.string(),
+  "zaman": zod.coerce.date(),
   "olusturan": zod.string()
+}))
 })
+})
+
+
+/**
+ * Active firm owner appends a reasoned correction or cancellation. Originals never change. No bank, loan or Kasa QR action.
+ */
+export const createCompanyFundAmendmentPathIdMax = 2147483647;
+
+
+
+export const CreateCompanyFundAmendmentParams = zod.object({
+  "id": zod.coerce.number().int().min(1).max(createCompanyFundAmendmentPathIdMax)
+})
+
+export const createCompanyFundAmendmentBodyGerekceMin = 5;
+export const createCompanyFundAmendmentBodyGerekceMax = 2000;
+
+export const createCompanyFundAmendmentBodyYeniKayitIslemTuruMin = 2;
+export const createCompanyFundAmendmentBodyYeniKayitIslemTuruMax = 100;
+
+export const createCompanyFundAmendmentBodyYeniKayitMiktarMax = 15;
+
+
+export const createCompanyFundAmendmentBodyYeniKayitMiktarRegExp = new RegExp('^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$');
+export const createCompanyFundAmendmentBodyYeniKayitKurumMin = 2;
+export const createCompanyFundAmendmentBodyYeniKayitKurumMax = 200;
+
+export const createCompanyFundAmendmentBodyYeniKayitAciklamaDefault = ``;
+export const createCompanyFundAmendmentBodyYeniKayitAciklamaMax = 8000;
+
+
+
+export const CreateCompanyFundAmendmentBody = zod.object({
+  "tur": zod.enum(['duzeltme', 'iptal']),
+  "gerekce": zod.string().min(createCompanyFundAmendmentBodyGerekceMin).max(createCompanyFundAmendmentBodyGerekceMax),
+  "istek_anahtari": zod.uuid(),
+  "yeni_kayit": zod.object({
+  "islem_turu": zod.string().min(createCompanyFundAmendmentBodyYeniKayitIslemTuruMin).max(createCompanyFundAmendmentBodyYeniKayitIslemTuruMax),
+  "miktar": zod.string().max(createCompanyFundAmendmentBodyYeniKayitMiktarMax).regex(createCompanyFundAmendmentBodyYeniKayitMiktarRegExp),
+  "para_birimi": zod.enum(['TRY', 'EUR', 'USD']),
+  "kurum": zod.string().min(createCompanyFundAmendmentBodyYeniKayitKurumMin).max(createCompanyFundAmendmentBodyYeniKayitKurumMax),
+  "aciklama": zod.string().max(createCompanyFundAmendmentBodyYeniKayitAciklamaMax).default(createCompanyFundAmendmentBodyYeniKayitAciklamaDefault)
+}).optional()
+}).describe('Correction requires yeni_kayit; cancellation forbids it. No caller attribution\/company\/date accepted.')
+
+export const CreateCompanyFundAmendmentResponse = zod.object({
+  "id": zod.int(),
+  "onceki_kayit_id": zod.int(),
+  "yeni_kayit_id": zod.int().nullable(),
+  "tur": zod.enum(['duzeltme', 'iptal']),
+  "gerekce": zod.string(),
+  "zaman": zod.coerce.date(),
+  "olusturan": zod.string()
 })
 
 
@@ -133,7 +196,17 @@ export const GetCompanyRecordStatusResponse = zod.object({
   "ekosistem": zod.string().describe('Classification label'),
   "kayit_durumu": zod.enum(['firma_ici_kayit']),
   "zaman": zod.coerce.date(),
+  "olusturan": zod.string(),
+  "guncel_durum": zod.enum(['guncel', 'yerine_gecmis', 'iptal']),
+  "duzeltmeler": zod.array(zod.object({
+  "id": zod.int(),
+  "onceki_kayit_id": zod.int(),
+  "yeni_kayit_id": zod.int().nullable(),
+  "tur": zod.enum(['duzeltme', 'iptal']),
+  "gerekce": zod.string(),
+  "zaman": zod.coerce.date(),
   "olusturan": zod.string()
+}))
 })),
   "talimatlar": zod.array(zod.object({
   "id": zod.int(),
