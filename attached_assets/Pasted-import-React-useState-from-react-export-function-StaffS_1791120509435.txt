@@ -1,0 +1,66 @@
+import React, { useState } from 'react';
+
+export function StaffSignInForm() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Canlı test doğrulama mantığı
+    if (
+      (username === 'mehmet' && password === 'istanbul2026') || 
+      (username === 'abdurrahman' && password === 'gaziantep2026')
+    ) {
+      // Başarılı giriş sonrası yönlendirme
+      window.location.href = '/dashboard';
+    } else {
+      setError('Geçersiz kullanıcı adı veya şifre.');
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto bg-slate-900 p-8 rounded-xl shadow-2xl text-slate-100">
+      <h2 className="text-2xl font-bold text-orange-500 mb-6">MMT Connect — Harekat Masası</h2>
+      
+      {error && (
+        <div className="bg-red-500/20 border border-red-500 text-red-300 p-3 rounded-lg mb-4 text-sm">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleLogin} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-1">Kullanıcı Adı</label>
+          <input 
+            type="text" 
+            value={username} 
+            onChange={(e) => setUsername(e.target.value)} 
+            placeholder="mehmet veya abdurrahman"
+            className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 text-white"
+            required 
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-1">Şifre</label>
+          <input 
+            type="password" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            placeholder="••••••••"
+            className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 text-white"
+            required 
+          />
+        </div>
+
+        <button 
+          type="submit" 
+          className="w-full py-3 bg-orange-500 hover:bg-orange-600 font-semibold rounded-lg transition text-white shadow-lg cursor-pointer"
+        >
+          Güvenli Giriş Yap
+        </button>
+      </form>
+    </div>
+  );
+}
