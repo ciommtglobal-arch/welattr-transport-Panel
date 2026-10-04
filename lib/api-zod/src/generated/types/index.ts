@@ -96,6 +96,7 @@ export * from './constructionQuoteStatus';
 export * from './constructionQuoteStatusUpdate';
 export * from './errorEnvelope';
 export * from './errorResponse';
+export type { ExportCompanyRecordsParams as ExportCompanyRecordsQuery } from './exportCompanyRecordsParams';
 export * from './exportKasaSummaryFormat';
 export * from './exportKasaSummaryParams';
 export * from './getB2BBusinessProfileReviewQueueParams';

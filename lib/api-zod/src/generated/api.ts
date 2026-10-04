@@ -9,6 +9,26 @@ import * as zod from 'zod';
 
 
 /**
+ * Aktif owner/admin/manager için yalnızca oturumun firması. Tarihler Europe/Istanbul günleridir, iki sınır dahil en fazla 92 gün. En fazla 10000 kayıt ve 20 MiB; aşımda eksik dosya yerine 413. Tutarlar tam ondalık metindir, para birimleri birleştirilmez. Banka belgesi, mühür, kredi onayı veya finansal güvence değildir.
+ * @summary Özel şirket içi CSV arşivi
+ */
+export const ExportCompanyRecordsParams = zod.object({
+  "kind": zod.enum(['funds', 'instructions'])
+})
+
+export const exportCompanyRecordsQueryStartRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const exportCompanyRecordsQueryEndRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+
+
+export const ExportCompanyRecordsQueryParams = zod.object({
+  "start": zod.coerce.string().regex(exportCompanyRecordsQueryStartRegExp),
+  "end": zod.coerce.string().regex(exportCompanyRecordsQueryEndRegExp)
+})
+
+export const ExportCompanyRecordsResponse = zod.unknown()
+
+
+/**
  * Owner-only internal record, never a loan approval or money transfer. UUID request key makes retries idempotent.
  */
 export const createCompanyFundRecordBodyIslemTuruMin = 2;

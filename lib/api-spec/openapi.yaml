@@ -31,6 +31,52 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /company-records/{kind}/export:
+    get:
+      operationId: exportCompanyRecords
+      summary: Özel şirket içi CSV arşivi
+      description: >
+        Aktif owner/admin/manager için yalnızca oturumun firması. Tarihler
+        Europe/Istanbul günleridir, iki sınır dahil en fazla 92 gün.
+        En fazla 10000 kayıt ve 20 MiB; aşımda eksik dosya yerine 413.
+        Tutarlar tam ondalık metindir, para birimleri birleştirilmez.
+        Banka belgesi, mühür, kredi onayı veya finansal güvence değildir.
+      parameters:
+        - in: path
+          name: kind
+          required: true
+          schema: { type: string, enum: [funds, instructions] }
+        - in: query
+          name: start
+          required: true
+          schema: { type: string, pattern: '^\d{4}-\d{2}-\d{2}$' }
+        - in: query
+          name: end
+          required: true
+          schema: { type: string, pattern: '^\d{4}-\d{2}-\d{2}$' }
+      responses:
+        "200":
+          description: UTF-8 BOM, noktalı virgülle ayrılan CSV. Private, no-store; yalnızca özgün kayıt tarihine göre filtrelenir.
+          headers:
+            Cache-Control:
+              schema: { type: string }
+            Content-Disposition:
+              schema: { type: string }
+          content:
+            text/csv:
+              schema: { type: string, format: binary }
+        "400":
+          description: Geçersiz veya 92 günü aşan tarih aralığı ya da ek parametre
+        "401":
+          description: Oturum gerekli
+        "403":
+          description: Aktif owner/admin/manager yetkisi gerekli
+        "404":
+          description: Bağlı firma bulunamadı
+        "413":
+          description: Kayıt veya dosya boyutu sınırı aşıldı; tarih aralığını daraltın
+        "503":
+          description: Dışa aktarım tamamlanamadı; dosya gönderilmedi
   /celik-kubbe/fon-islem:
     post:
       operationId: createCompanyFundRecord

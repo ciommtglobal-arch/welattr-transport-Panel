@@ -1,4 +1,5 @@
 import { FormEvent, useRef, useState } from "react";
+import { CompanyRecordExport } from "./company-record-export";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -159,6 +160,7 @@ export function CompanyInstructions({
         </p>
       ) : (
         <div className="mt-6 space-y-6">
+          <CompanyRecordExport key={companyScope} kind="instructions" />
           {data?.canCreate ? (
             <form
               onSubmit={handleSubmit}

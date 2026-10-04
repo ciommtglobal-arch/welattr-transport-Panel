@@ -75,6 +75,7 @@ import type {
   ConstructionQuoteStatusUpdate,
   ErrorEnvelope,
   ErrorResponse,
+  ExportCompanyRecordsParams,
   ExportKasaSummaryParams,
   GetB2BBusinessProfileReviewQueueParams,
   GetB2BCompanyTaskReportsParams,
@@ -211,6 +212,96 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getExportCompanyRecordsUrl = (kind: 'funds' | 'instructions',
+    params: ExportCompanyRecordsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/company-records/${kind}/export?${stringifiedParams}` : `/api/company-records/${kind}/export`
+}
+
+/**
+ * Aktif owner/admin/manager için yalnızca oturumun firması. Tarihler Europe/Istanbul günleridir, iki sınır dahil en fazla 92 gün. En fazla 10000 kayıt ve 20 MiB; aşımda eksik dosya yerine 413. Tutarlar tam ondalık metindir, para birimleri birleştirilmez. Banka belgesi, mühür, kredi onayı veya finansal güvence değildir.
+ * @summary Özel şirket içi CSV arşivi
+ */
+export const exportCompanyRecords = async (kind: 'funds' | 'instructions',
+    params: ExportCompanyRecordsParams, options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getExportCompanyRecordsUrl(kind,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getExportCompanyRecordsQueryKey = (kind: 'funds' | 'instructions',
+    params?: ExportCompanyRecordsParams,) => {
+    return [
+    `/api/company-records/${kind}/export`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getExportCompanyRecordsQueryOptions = <TData = Awaited<ReturnType<typeof exportCompanyRecords>>, TError = ErrorType<void>>(kind: 'funds' | 'instructions',
+    params: ExportCompanyRecordsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportCompanyRecords>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getExportCompanyRecordsQueryKey(kind,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof exportCompanyRecords>>> = ({ signal }) => exportCompanyRecords(kind,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: kind !== null && kind !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof exportCompanyRecords>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ExportCompanyRecordsQueryResult = NonNullable<Awaited<ReturnType<typeof exportCompanyRecords>>>
+export type ExportCompanyRecordsQueryError = ErrorType<void>
+
+
+/**
+ * @summary Özel şirket içi CSV arşivi
+ */
+
+export function useExportCompanyRecords<TData = Awaited<ReturnType<typeof exportCompanyRecords>>, TError = ErrorType<void>>(
+ kind: 'funds' | 'instructions',
+    params: ExportCompanyRecordsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportCompanyRecords>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getExportCompanyRecordsQueryOptions(kind,params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getCreateCompanyFundRecordUrl = () => {
 

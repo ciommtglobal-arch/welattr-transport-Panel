@@ -25,3 +25,24 @@ read-only access, member refusal, cross-company isolation, concurrent retry
 deduplication, exact decimal storage, retained originals, paginated history,
 cancellation and database foreign-key/unique constraints. Clerk itself is mocked
 only at the user identity boundary; the application has no test-auth bypass.
+
+## Private CSV archive verification
+
+For export tests, use a fresh marker and execute `company-export-fixtures.sql`
+through the same development SQL callback after `company-fund-fixtures.sql`,
+binding that marker as `$1`. It adds synthetic rows spanning three server pages,
+three currencies, inclusive Turkish-midnight boundaries, formula-like text,
+and a cancellation dated outside the original-record range.
+
+Run:
+```sh
+TEST_FUND_FIXTURE_TOKEN=<uuid> pnpm --filter @workspace/api-server exec vitest run src/routes/company-record-exports.integration.test.ts
+pnpm --filter @workspace/api-server exec vitest run src/lib/companyRecordCsv.test.ts src/routes/company-record-exports.test.ts
+```
+
+The integration suite uses real company authorization and repeatable-read
+PostgreSQL queries; only the signed-in identity boundary is mocked. The fast
+tests cover formula escaping, UTF-8 BOM, date validation, row/byte limits,
+late-page failure, and private error responses. These tests never create a
+runtime sign-in bypass. Clean up instructions as well as amendments and funds
+before deleting the exact marker's members and profiles.

@@ -1,4 +1,5 @@
 import { FormEvent, useRef, useState } from "react";
+import { CompanyRecordExport } from "./company-record-export";
 import { CompanyFundAmendmentForm } from "./company-fund-amendment-form";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -233,6 +234,7 @@ export function CompanyFundRecords({
         </p>
       ) : (
         <div className="mt-6 space-y-6">
+          <CompanyRecordExport key={companyScope} kind="funds" />
           {data?.canCreate ? (
             <form
               onSubmit={handleSubmit}
