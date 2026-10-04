@@ -1,0 +1,130 @@
+from flask import Flask, request, jsonify, session, redirect, url_for, render_template_string, abort
+from datetime import datetime
+
+app = Flask(__name__)
+app.secret_key = "WELATTR_CLEAN_PRODUCTION_KEY_2026"
+
+AUDIT_LOGS = []
+
+USERS = {
+    "mehmet": {
+        "name": "Mehmet Alioğlu",
+        "pass": "istanbul2026",
+        "role": "Master Approval (Son Mühür)",
+        "location": "İstanbul"
+    },
+    "abdurrahman": {
+        "name": "Abdurrahman Parlar",
+        "pass": "gaziantep2026",
+        "role": "Teknik Operasyon & Lojistik Lideri",
+        "location": "Gaziantep"
+    }
+}
+
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>WelatTR - MMT Connect Operasyon Portalı</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+        .container { max-width: 650px; margin: 30px auto; background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        h2 { color: #f97316; margin-top: 0; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #334155; border: 1px solid #475569; color: white; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #f97316; border: none; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #ea580c; }
+        .badge { background: #0284c7; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .logout { background: #ef4444; margin-top: 20px; }
+        ul { padding-left: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>MMT Connect — Operasyon Portalı</h2>
+        {% if 'user' not in session %}
+            <p>Sistem Erişimi İçin Giriş Yapın:</p>
+            <form method="POST" action="/login">
+                <input type="text" name="username" placeholder="Kullanıcı Adı (mehmet / abdurrahman)" required>
+                <input type="password" name="password" placeholder="Şifre" required>
+                <button type="submit">Giriş Yap</button>
+            </form>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 15px;">
+                * Yetkili Test Bilgileri:<br>
+                - İstanbul Master: <b>mehmet</b> / <b>istanbul2026</b><br>
+                - Gaziantep Lider: <b>abdurrahman</b> / <b>gaziantep2026</b>
+            </p>
+        {% else %}
+            <p>Aktif Kullanıcı: <b>{{ user_data.name }}</b></p>
+            <p>Rol / Konum: <span class="badge">{{ user_data.location }} | {{ user_data.role }}</span></p>
+            <hr style="border-color: #334155; margin: 20px 0;">
+            
+            <h3>Operasyon ve Karar Paneli</h3>
+            {% if user_data.role.startswith('Master') %}
+                <div style="background: #065f46; padding: 15px; border-radius: 8px;">
+                    <h4>İstanbul Master Onay (Son Mühür)</h4>
+                    <form method="POST" action="/master-action">
+                        <button type="submit" style="background: #10b981;">Nihai Ticaret Onayını Ver</button>
+                    </form>
+                </div>
+            {% else %}
+                <div style="background: #1e3a8a; padding: 15px; border-radius: 8px;">
+                    <h4>Gaziantep Teknik Lojistik Alanı</h4>
+                    <p>Sevkiyat ve teknik hazırlıklar yürütülüyor.</p>
+                </div>
+            {% endif %}
+
+            <h4 style="margin-top:25px;">Sistem Denetim Logları</h4>
+            <ul>
+                {% for log in logs %}
+                    <li style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">[{{ log.time }}] <b>{{ log.user }}</b>: {{ log.action }}</li>
+                {% endfor %}
+            </ul>
+
+            <form method="POST" action="/logout">
+                <button type="submit" class="logout">Çıkış Yap</button>
+            </form>
+        {% endif %}
+    </div>
+</body>
+</html>
+"""
+
+@app.route('/')
+def index():
+    user_key = session.get('user')
+    user_data = USERS.get(user_key) if user_key else None
+    return render_template_string(HTML_TEMPLATE, user_data=user_data, logs=AUDIT_LOGS)
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    if username in USERS and USERS[username]['pass'] == password:
+        session['user'] = username
+        AUDIT_LOGS.insert(0, {"time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "user": USERS[username]['name'], "action": "Sisteme giriş yapıldı."})
+    return redirect(url_for('index'))
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    user_key = session.get('user')
+    if user_key:
+        AUDIT_LOGS.insert(0, {"time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "user": USERS[user_key]['name'], "action": "Oturum kapatıldı."})
+    session.pop('user', None)
+    return redirect(url_for('index'))
+
+@app.route('/master-action', methods=['POST'])
+def master_action():
+    user_key = session.get('user')
+    if user_key != 'mehmet':
+        abort(403, description="Yetkisiz işlem! Bu onay yalnızca İstanbul Master yetkisiyle verilebilir.")
+    
+    AUDIT_LOGS.insert(0, {
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 
+        "user": "Mehmet Alioğlu (İstanbul Master)", 
+        "action": "SON MÜHÜR VURULDU - Operasyon onaylandı."
+    })
+    return redirect(url_for('index'))
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
