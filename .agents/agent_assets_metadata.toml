@@ -238,3 +238,17 @@ mtime_ms = 1791053727659
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/c54550f3-4ea3-443b-80c2-b91d92660eeb/b5fd2893-bc6c-4c26-97f2-41638050c008"
 storage_version_token = "1791053772973789"
 content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+[[outputs]]
+id = "vpmdJ1rdcjOQIJGWGYsdq"
+uri = "file://outputs/mmt-global-bolgesel-lojistik-taslak.txt"
+type = "text"
+title = "İsim kullanılmadan düzenlenmiş metin"
+description = "Kişi adı kaldırıldı; Kurucu ifadesi ve diğer tüm maddeler korundu. Yalnızca metin düzenlendi."
+logical_id = "346f6813-2694-44a3-8d07-448c3a775c56"
+content_hash = "sha256:af480b84c1d71e5137f97cc001cc72593e8e6e113f3ebd4127e1a56c990e6ac3"
+size = 2690
+mtime_ms = 1791242952350
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/346f6813-2694-44a3-8d07-448c3a775c56/e6f16cf3-c334-42d5-83d0-b2b233b6262f"
+storage_version_token = "1791242971048965"
+content_type = "text/plain"
