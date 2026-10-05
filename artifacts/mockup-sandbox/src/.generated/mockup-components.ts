@@ -8,5 +8,6 @@ export const modules: ModuleMap = {
   "./components/mockups/mmt-corporate/CurrentHome.tsx": () => import("../components/mockups/mmt-corporate/CurrentHome.tsx"),
   "./components/mockups/mmt-corporate/ExpertOverview.tsx": () => import("../components/mockups/mmt-corporate/ExpertOverview.tsx"),
   "./components/mockups/mmt-corporate/FounderOverview.tsx": () => import("../components/mockups/mmt-corporate/FounderOverview.tsx"),
-  "./components/mockups/mmt-corporate/MobileReview.tsx": () => import("../components/mockups/mmt-corporate/MobileReview.tsx")
+  "./components/mockups/mmt-corporate/MobileReview.tsx": () => import("../components/mockups/mmt-corporate/MobileReview.tsx"),
+  "./components/mockups/mmt-regional/RegionalLogisticsDraft.tsx": () => import("../components/mockups/mmt-regional/RegionalLogisticsDraft.tsx")
 };
