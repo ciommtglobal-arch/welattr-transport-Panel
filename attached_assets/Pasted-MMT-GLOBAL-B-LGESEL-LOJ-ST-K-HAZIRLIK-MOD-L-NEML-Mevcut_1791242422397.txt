@@ -1,0 +1,136 @@
+MMT GLOBAL – BÖLGESEL LOJİSTİK HAZIRLIK MODÜLÜ
+
+ÖNEMLİ:
+Mevcut sistemi, kullanıcı hesaplarını, personel kayıtlarını, rolleri, yetkileri, veritabanını ve çalışan özellikleri SİLME veya DEĞİŞTİRME.
+
+Bu çalışma yalnızca TASLAK/HAZIRLIK olarak oluşturulsun.
+Kurucu Mehmet Alioğlu açıkça onay vermeden hiçbir içerik canlı yayına alınmasın.
+
+YAYIN AKIŞI:
+TASLAK → KURUCU ONAYI → YAYIN
+
+1. TÜRKİYE / MERSİN – ANA LOJİSTİK OPERASYON MERKEZİ
+
+Öncelikli modüller:
+- Firma Kaydı
+- Firma Davet Et
+- İş Ortaklığı Başvurusu
+- Yük Veren Firma Kaydı
+- Taşıyıcı / Nakliyeci Kaydı
+- Araç / Tır Kaydı
+- Personel Başvurusu
+- Teklif Talebi
+- Sözleşme Takibi
+- Operasyon Takibi
+
+Öncelikli hatlar:
+Mersin
+Irak
+Gaziantep
+İpekyolu
+Türkiye geneli
+
+2. UKRAYNA – BÖLGESEL HAZIRLIK
+
+Başlık:
+MMT Global Ukraine – Hazırlık Aşaması
+
+Alanlar:
+- Lojistik iş ortakları
+- İthalat / ihracat firmaları
+- Bayi / acente başvuruları
+- Distribütör başvuruları
+- Taşıyıcı ağı
+- Türkiye–Ukrayna ticaret bağlantıları
+
+Durum:
+YAYINDA DEĞİL / KURUCU ONAYI BEKLİYOR
+
+3. DUBAİ / BAE – BÖLGESEL HAZIRLIK
+
+Başlık:
+MMT Global Dubai – Hazırlık Aşaması
+
+Alanlar:
+- Lojistik
+- Dış ticaret
+- Firma iş ortaklıkları
+- Bayi / distribütör başvuruları
+- Körfez bölgesi bağlantıları
+- Kurumsal iş geliştirme
+
+Durum:
+YAYINDA DEĞİL / KURUCU ONAYI BEKLİYOR
+
+4. FİRMA / BAYİ YÖNETİM AKIŞI
+
+Firma Kaydı
+→ Doğrulama
+→ Bölge Seçimi
+→ Faaliyet Alanı
+→ Yönetici İncelemesi
+→ Kurucu Onayı
+→ Sözleşme
+→ Aktif İş Ortağı
+
+Kurucu onayı olmadan:
+- Bayilik verme
+- Bölge yetkisi verme
+- Münhasırlık verme
+- Firma yayınlama
+- Personel unvanını resmileştirme
+YAPILMASIN.
+
+5. YÖNETİM PANELİ
+
+Yeni bölüm:
+"Bölgesel Operasyonlar"
+
+Kartlar:
+🇹🇷 Mersin / Türkiye
+🇺🇦 Ukrayna
+🇦🇪 Dubai / BAE
+
+Her kartta:
+Firma sayısı
+Başvurular
+İş ortakları
+Teklifler
+Operasyonlar
+Personel
+Onay bekleyenler
+
+gösterilsin.
+
+6. KURUCU KONTROLÜ
+
+Sadece Kurucu hesabında:
+ONAYLA
+REDDET
+DÜZENLE
+TASLAKTA TUT
+YAYINA AL
+
+butonları bulunsun.
+
+Kurucu onayı olmadan otomatik yayın yapılmasın.
+
+7. TASARIM
+
+Mevcut MMT Global kurumsal tasarımını koru.
+Lojistik ana odak olsun.
+Finans, sağlık ve medya bölümlerini silme ancak şu aşamada ikincil göster.
+
+TR / EN / AR / KU / RU / UA dil altyapısını koru.
+
+ÖNCE SADECE ÖNİZLEME OLUŞTUR.
+CANLI DEPLOYMENT YAPMA.
+
+İşlem tamamlandığında bana:
+1. Değiştirilen dosyaları
+2. Eklenen modülleri
+3. Veritabanı değişikliklerini
+4. Önizleme bağlantısını
+5. Canlıya alınmamış olduğunu
+
+raporla ve Kurucu onayını bekle.
