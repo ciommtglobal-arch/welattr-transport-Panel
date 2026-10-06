@@ -252,3 +252,17 @@ mtime_ms = 1791242952350
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/346f6813-2694-44a3-8d07-448c3a775c56/e6f16cf3-c334-42d5-83d0-b2b233b6262f"
 storage_version_token = "1791242971048965"
 content_type = "text/plain"
+
+[[outputs]]
+id = "ov-Mo4e3Y5RyHo5H6JHpo"
+uri = "file://outputs/mmt-global-yayin-oncesi-kontrol.txt"
+type = "text"
+title = "MMT Global — Yayın Öncesi Kontrol Raporu"
+description = "Geçen testler, modül durumları, değişen dosyalar ve yayın öncesi kalan eksikler. Yalnızca geliştirme/önizleme; yayın yapılmadı."
+logical_id = "870b0245-82a6-416f-be36-ed8c281548db"
+content_hash = "sha256:c3e859e9cad7055f33fca7f88cd62071a1525bc6247adbdcd12443bc9aeffde0"
+size = 10832
+mtime_ms = 1791248048402
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/870b0245-82a6-416f-be36-ed8c281548db/295dc84d-acfa-4054-ac97-2d8ccadcf4df"
+storage_version_token = "1791248151898441"
+content_type = "text/plain"

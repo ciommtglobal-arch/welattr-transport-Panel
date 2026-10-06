@@ -5,8 +5,9 @@ import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import CorporateFleetSection from "@/components/corporate-fleet-section";
 import { useI18n, type Locale } from "@/lib/i18n";
+import { getLocaleCopy, type CoreLocale } from "@/lib/locale-copy";
 
-const staffLabels: Record<Locale, { login: string; media: string }> = {
+const staffLabels: Record<CoreLocale, { login: string; media: string }> = {
   tr: { login: "Personel Girişi", media: "Medya Merkezi" },
   en: { login: "Staff Sign In", media: "Media Center" },
   ar: { login: "دخول الموظفين", media: "المركز الإعلامي" },
@@ -31,7 +32,7 @@ const OFFICIAL_SOCIAL_CHANNELS = [
   },
 ] as const;
 
-const homeCopy: Record<Locale, {
+const homeCopy: Record<CoreLocale, {
   navApproach: string;
   navEcosystem: string;
   navDepartments: string;
@@ -133,8 +134,8 @@ const homeCopy: Record<Locale, {
 
 export default function Home() {
   const { locale } = useI18n();
-  const copy = homeCopy[locale];
-  const staff = staffLabels[locale];
+  const copy = getLocaleCopy(homeCopy, locale);
+  const staff = getLocaleCopy(staffLabels, locale);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 

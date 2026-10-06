@@ -14,8 +14,8 @@ import {
   Truck,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { getLocaleCopy, type CoreLocale } from "@/lib/locale-copy";
 
-type Locale = "tr" | "en" | "ar" | "ru";
 type DepartmentSlug = "finans" | "medya" | "lojistik" | "b2b";
 
 type DepartmentCopy = {
@@ -49,7 +49,7 @@ type Copy = {
   departmentItems: Record<DepartmentSlug, DepartmentCopy>;
 };
 
-const copy: Record<Locale, Copy> = {
+const copy: Record<CoreLocale, Copy> = {
   tr: {
     home: "Ana sayfa",
     departmentsLabel: "Birimler",
@@ -531,7 +531,7 @@ function DepartmentCard({
 
 export default function DepartmentsOverviewPage() {
   const { locale } = useI18n();
-  const labels = copy[locale as Locale] ?? copy.tr;
+  const labels = getLocaleCopy(copy, locale);
   usePageMeta(
     `${labels.departmentsLabel} | MMT Global`,
     labels.overviewDescription,
@@ -599,7 +599,7 @@ export default function DepartmentsOverviewPage() {
 
 export function DepartmentPage() {
   const { locale } = useI18n();
-  const labels = copy[locale as Locale] ?? copy.tr;
+  const labels = getLocaleCopy(copy, locale);
   const params = useParams<{ slug?: string }>();
   const slug = params.slug as DepartmentSlug;
   const item = labels.departmentItems[slug];

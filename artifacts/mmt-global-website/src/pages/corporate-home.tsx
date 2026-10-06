@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { ArrowRight, ArrowUpRight, Globe2, Megaphone, Menu, X } from "lucide-react";
 import { useI18n, type Locale } from "@/lib/i18n";
+import { getLocaleCopy, type CoreLocale } from "@/lib/locale-copy";
 import "@/styles/mmt-corporate.css";
 
 type Copy = {
@@ -30,7 +31,7 @@ type Copy = {
   menuClose: string;
 };
 
-const copy: Record<Locale, Copy> = {
+const copy: Record<CoreLocale, Copy> = {
   tr: {
     brand: "MMT GLOBAL / KURUMSAL YAPI",
     nav: ["Kurumsal", "Faaliyet alanları", "Uluslararası ağ", "İş ortaklığı", "İletişim"],
@@ -209,7 +210,7 @@ function SectionIntro({ kicker, title, description }: { kicker: string; title: s
 
 export default function CorporateHomePage() {
   const { locale, setLocale } = useI18n();
-  const text = copy[locale];
+  const text = getLocaleCopy(copy, locale);
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -227,7 +228,7 @@ export default function CorporateHomePage() {
             <label className="mmt-language-control">
               <span className="mmt-sr-only">{text.languages}</span>
               <select aria-label={text.languages} data-testid="select-corporate-language" value={locale} onChange={(event) => setLocale(event.target.value as Locale)}>
-                <option value="tr">TR</option><option value="en">EN</option><option value="ar">AR</option><option value="ru">RU</option>
+                <option value="tr">TR</option><option value="en">EN</option><option value="ar">AR</option><option value="ku">KU</option><option value="ru">RU</option><option value="uk">UA</option>
               </select>
             </label>
             <button className="mmt-menu-button" data-testid="button-corporate-menu" type="button" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? text.menuClose : text.menuOpen} aria-expanded={menuOpen}>
@@ -262,8 +263,8 @@ export default function CorporateHomePage() {
             </article>)}
           </div>
           <div className="mmt-more-links">
-            <Link href="/birimler" data-testid="link-corporate-departments">{locale === "tr" ? "Tüm birimleri görüntüle" : locale === "en" ? "View all departments" : locale === "ar" ? "عرض جميع الأقسام" : "Все направления"}<ArrowRight size={14} /></Link>
-            <Link href="/b2b-agi/katil" data-testid="link-corporate-business-join">{locale === "tr" ? "İşletme olarak katıl" : locale === "en" ? "Join as a business" : locale === "ar" ? "انضم كشركة" : "Присоединиться как компания"}<ArrowRight size={14} /></Link>
+            <Link href="/birimler" data-testid="link-corporate-departments">{locale === "ku" ? "Hemû beşan bibîne" : locale === "uk" ? "Переглянути всі підрозділи" : locale === "tr" ? "Tüm birimleri görüntüle" : locale === "en" ? "View all departments" : locale === "ar" ? "عرض جميع الأقسام" : "Все направления"}<ArrowRight size={14} /></Link>
+            <Link href="/b2b-agi/katil" data-testid="link-corporate-business-join">{locale === "ku" ? "Wek karsazî beşdar bibe" : locale === "uk" ? "Приєднатися як компанія" : locale === "tr" ? "İşletme olarak katıl" : locale === "en" ? "Join as a business" : locale === "ar" ? "انضم كشركة" : "Присоединиться как компания"}<ArrowRight size={14} /></Link>
           </div>
         </section>
         <section id="uluslararasi-ag" className="mmt-shell mmt-section">

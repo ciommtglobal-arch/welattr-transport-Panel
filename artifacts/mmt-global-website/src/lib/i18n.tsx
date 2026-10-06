@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-
-export type Locale = "tr" | "en" | "ar" | "ru";
+import { getLocaleCopy, normalizeLocale, type CoreLocale, type Locale } from "./locale-copy";
+export type { Locale } from "./locale-copy";
 
 const localeStorageKey = "mmt-global-locale";
 
-const translations: Record<Locale, Record<string, string>> = {
+const translations: Record<CoreLocale, Record<string, string>> = {
   tr: {
     language: "Dil",
     home: "Ana sayfa",
@@ -442,7 +442,7 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 function getInitialLocale(): Locale {
   if (typeof window === "undefined") return "tr";
   const stored = window.localStorage.getItem(localeStorageKey);
-  return stored === "en" || stored === "ar" || stored === "ru" ? stored : "tr";
+  return normalizeLocale(stored);
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
@@ -455,11 +455,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, [locale]);
 
   const value = useMemo<I18nContextValue>(
-    () => ({
-      locale,
-      setLocale: setLocaleState,
-      t: (key, fallback) => translations[locale][key] ?? fallback ?? key,
-    }),
+    () => {
+      const copy = getLocaleCopy(translations, locale);
+      return {
+        locale,
+        setLocale: setLocaleState,
+        t: (key: string, fallback?: string) => copy[key] ?? fallback ?? key,
+      };
+    },
     [locale],
   );
 
@@ -486,7 +489,9 @@ export function LanguageSelector() {
         <option value="tr">TR</option>
         <option value="en">EN</option>
         <option value="ar">AR</option>
+        <option value="ku">KU</option>
         <option value="ru">RU</option>
+        <option value="uk">UA</option>
       </select>
     </label>
   );

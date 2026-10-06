@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { ArrowLeft, FileText, ShoppingBag } from "lucide-react";
 import { useGetConstructionCart, getGetConstructionCartQueryKey } from "@workspace/api-client-react";
 import { useI18n, type Locale } from "@/lib/i18n";
+import { getLocaleCopy, type CoreLocale } from "@/lib/locale-copy";
 
 const CART_KEY = "mezopotamya-build-cart-id";
 
@@ -52,7 +53,7 @@ export function formatMoney(amount: string | null | undefined, currency: string 
   const n = Number(amount);
   if (!Number.isFinite(n) || !currency) return `${amount}${currency ? ` ${currency}` : ""}`;
   try {
-    return new Intl.NumberFormat(locale === "tr" ? "tr-TR" : locale === "ar" ? "ar" : locale === "ru" ? "ru-RU" : "en-US", { style: "currency", currency }).format(n);
+    return new Intl.NumberFormat(locale === "tr" ? "tr-TR" : locale === "ar" ? "ar" : locale === "ru" ? "ru-RU" : locale === "uk" ? "uk-UA" : locale === "ku" ? "ku" : "en-US", { style: "currency", currency }).format(n);
   } catch {
     return `${amount} ${currency}`;
   }
@@ -62,7 +63,7 @@ type Copy = {
   back: string; store: string; cart: string; quote: string; by: string;
   disclaimer: string;
 };
-const shell: Record<Locale, Copy> = {
+const shell: Record<CoreLocale, Copy> = {
   tr: { back: "MMT Global'e dön", store: "Mağaza", cart: "Sepet", quote: "Teklif iste", by: "by MMT Global", disclaimer: "Mezopotamya Build, MMT Global tarafından işletilen bağımsız bir satıcıdır. Yetkili distribütörlük iddiasında bulunmaz." },
   en: { back: "Back to MMT Global", store: "Store", cart: "Cart", quote: "Request quote", by: "by MMT Global", disclaimer: "Mezopotamya Build is an independent seller operated by MMT Global. It makes no authorized distributor claim." },
   ar: { back: "العودة إلى MMT Global", store: "المتجر", cart: "السلة", quote: "طلب عرض سعر", by: "من MMT Global", disclaimer: "Mezopotamya Build بائع مستقل تديره MMT Global، ولا يدّعي أنه موزع معتمد." },
@@ -71,7 +72,7 @@ const shell: Record<Locale, Copy> = {
 
 export function StoreShell({ children }: { children: ReactNode }) {
   const { locale } = useI18n();
-  const c = shell[locale];
+  const c = getLocaleCopy(shell, locale);
   const { query } = useConstructionCart();
   const count = query.data?.lines.reduce((s, l) => s + l.quantity, 0) ?? 0;
   return (

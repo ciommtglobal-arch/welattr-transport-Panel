@@ -17,6 +17,7 @@ import {
 } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
 import { useI18n, type Locale } from "@/lib/i18n";
+import { getLocaleCopy, type CoreLocale } from "@/lib/locale-copy";
 import { StoreShell, encodeCartId, errorStatus, formatMoney, useConstructionCart } from "@/lib/construction-shop";
 
 const T = {
@@ -68,7 +69,7 @@ const T = {
     send: "Отправить запрос", sending: "Отправка", required: "Заполните обязательные поля.", badEmail: "Введите корректный адрес.", badPhone: "Телефон — не менее 5 символов.", sendErr: "Не удалось отправить запрос. Повторите.",
     okT: "Заявка принята", okD: "Сохраните номер заявки. Команда свяжется с вами по нему.", ref: "Номер", another: "Новая заявка",
   },
-} satisfies Record<Locale, Record<string, string>>;
+} satisfies Record<CoreLocale, Record<string, string>>;
 
 const btn = "inline-flex min-h-11 items-center justify-center gap-2 px-6 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
 const input = "w-full min-h-11 bg-background border border-border/60 px-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary";
@@ -99,7 +100,7 @@ function useCartWriter() {
 
 export function ConstructionProductPage() {
   const { locale } = useI18n();
-  const c = T[locale];
+  const c = getLocaleCopy(T, locale);
   const { handle = "" } = useParams<{ handle: string }>();
   const decoded = decodeURIComponent(handle);
   const product = useGetConstructionProduct(encodeURIComponent(decoded), { query: { queryKey: getGetConstructionProductQueryKey(encodeURIComponent(decoded)), retry: false, enabled: Boolean(decoded) } });
@@ -205,7 +206,7 @@ function safeCheckoutUrl(result: unknown): string | null {
 
 export function ConstructionCartPage() {
   const { locale } = useI18n();
-  const c = T[locale];
+  const c = getLocaleCopy(T, locale);
   const qc = useQueryClient();
   const { cartId, encoded, query } = useConstructionCart();
   const update = useUpdateConstructionCartLine();
@@ -282,7 +283,7 @@ export function ConstructionCartPage() {
 
 export function ConstructionQuotePage() {
   const { locale } = useI18n();
-  const c = T[locale];
+  const c = getLocaleCopy(T, locale);
   const search = useSearch();
   const sp = useMemo(() => new URLSearchParams(search), [search]);
   const [product, setProduct] = useState(() => sp.get("productId") ? { productId: sp.get("productId")!, variantId: sp.get("variantId") ?? undefined, title: sp.get("title") ?? "", variant: sp.get("variant") ?? "" } : null);

@@ -1,7 +1,8 @@
 import { Link } from 'wouter';
 import { useI18n, type Locale } from '@/lib/i18n';
+import { getLocaleCopy, type CoreLocale } from '@/lib/locale-copy';
 
-const content: Record<Locale, { title: string; description: string; home: string }> = {
+const content: Record<CoreLocale, { title: string; description: string; home: string }> = {
   tr: {
     title: 'İnşaat ürünleri mağazası kapalı',
     description: 'Mezopotamya Build ürün, sepet ve teklif işlemleri şu anda kullanıma kapalıdır. Mevcut kayıtlar korunmaktadır.',
@@ -26,7 +27,7 @@ const content: Record<Locale, { title: string; description: string; home: string
 
 export default function ConstructionStoreClosedPage() {
   const { locale } = useI18n();
-  const text = content[locale];
+  const text = getLocaleCopy(content, locale);
 
   return (
     <main className="flex min-h-[100dvh] items-center justify-center bg-[#101923] px-6 py-16 text-white">

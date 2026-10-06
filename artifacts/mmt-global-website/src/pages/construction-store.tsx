@@ -9,9 +9,10 @@ import {
 } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
 import { useI18n, type Locale } from "@/lib/i18n";
+import { getLocaleCopy, type CoreLocale } from "@/lib/locale-copy";
 import { StoreShell, formatMoney } from "@/lib/construction-shop";
 
-const t: Record<Locale, Record<string, string>> = {
+const t: Record<CoreLocale, Record<string, string>> = {
   tr: { title: "İnşaat malzemeleri", desc: "Shopify kataloğundan yayınlanan gerçek ürünler. Proje miktarları için teklif isteyin.", search: "Ürün, marka veya kategori ara", collections: "Koleksiyonlar", category: "Kategori", all: "Tümü", count: "{n} ürün yüklendi", more: "Daha fazla yükle", loading: "Yükleniyor", errT: "Katalog şu anda kullanılamıyor", errD: "Shopify mağaza bağlantısı okunamadı. Ürün gösterilmiyor; tekrar deneyin veya teklif isteyin.", retry: "Tekrar dene", emptyT: "Yayınlanmış ürün yok", emptyD: "Mağaza bağlı ancak henüz yayınlanmış ürün bulunmuyor.", noMatch: "Filtrelerle eşleşen ürün yok.", quote: "Teklif iste", quoteOnly: "Teklif ile", price: "Fiyat teklif ile", independent: "Bağımsız satıcı · yetkili distribütör değildir" },
   en: { title: "Construction materials", desc: "Real products published from the Shopify catalog. Request a quote for project volumes.", search: "Search products, brands or categories", collections: "Collections", category: "Category", all: "All", count: "{n} products loaded", more: "Load more", loading: "Loading", errT: "Catalog is unavailable", errD: "The Shopify store connection could not be read. No products are shown; retry or request a quote.", retry: "Retry", emptyT: "No published products", emptyD: "The store is connected but has no published products yet.", noMatch: "No products match these filters.", quote: "Request quote", quoteOnly: "Quote only", price: "Price on quote", independent: "Independent seller · not an authorized distributor" },
   ar: { title: "مواد البناء", desc: "منتجات حقيقية منشورة من كتالوج Shopify. اطلب عرض سعر لكميات المشاريع.", search: "ابحث عن منتج أو علامة أو فئة", collections: "المجموعات", category: "الفئة", all: "الكل", count: "تم تحميل {n} منتج", more: "تحميل المزيد", loading: "جار التحميل", errT: "الكتالوج غير متاح", errD: "تعذرت قراءة اتصال متجر Shopify. لا تُعرض أي منتجات؛ أعد المحاولة أو اطلب عرض سعر.", retry: "إعادة المحاولة", emptyT: "لا توجد منتجات منشورة", emptyD: "المتجر متصل لكن لا توجد منتجات منشورة بعد.", noMatch: "لا توجد منتجات مطابقة.", quote: "طلب عرض سعر", quoteOnly: "بعرض سعر فقط", price: "السعر عند الطلب", independent: "بائع مستقل · ليس موزعاً معتمداً" },
@@ -20,7 +21,7 @@ const t: Record<Locale, Record<string, string>> = {
 
 export default function ConstructionStorePage() {
   const { locale } = useI18n();
-  const c = t[locale];
+  const c = getLocaleCopy(t, locale);
   const [after, setAfter] = useState<string | undefined>(undefined);
   const [products, setProducts] = useState<ConstructionCatalogProduct[]>([]);
   const [collections, setCollections] = useState<ConstructionCollection[]>([]);

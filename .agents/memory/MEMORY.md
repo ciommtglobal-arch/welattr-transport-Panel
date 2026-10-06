@@ -8,7 +8,7 @@
 - [Clerk public route isolation](clerk-public-route-isolation.md) — Keep public pages usable without Clerk; Replit dev previews may fail loading Clerk JS while auth routes still work.
 - [MMT Connect auth callbacks](mmt-connect-auth-callbacks.md) — Keep dedicated Clerk routes: sign-in returns to the panel, sign-up to profile onboarding, invites to acceptance.
 - [MMT Connect verification](mmt-connect-verification.md) — Use one-time business verification, then let verified firms publish their own free B2B listings.
-- [MMT Global language rollout](mmt-global-i18n.md) — Use TR/EN/AR/RU UI translations with Arabic RTL; translate user-generated content only as a separate feature.
+- [MMT Global language rollout](mmt-global-i18n.md) — Release checks require TR/EN/AR/KU/RU/UA across UI and login; Arabic RTL, user content translated separately.
 - [Authentic MMT Global launch](authentic-mmt-launch.md) — Use only real business contact/social identities; begin organic audience growth after accounts are complete.
 - [Clerk localization compatibility](clerk-localization-compatibility.md) — Match the localization package to the installed Clerk React shared types; runtime can work while TypeScript versions still conflict.
 - [Browser translation guard](browser-translation-guard.md) — MMT Global owns TR/EN/AR/RU translation; prevent mobile browser auto-translation from mixing languages.

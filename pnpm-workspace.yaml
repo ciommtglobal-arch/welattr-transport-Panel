@@ -79,6 +79,11 @@ overrides:
   js-yaml: 4.3.2
   qs: 6.16.0
   uuid: 11.1.1
+  # Compatible security patches; leave unpatched or major-only findings visible.
+  proxy-addr: 2.0.8
+  fast-copy: 4.1.0
+  markdown-it: 14.3.1
+  source-map-js: 1.2.2
   # replit uses linux-x64 only, we can exclude all other platforms
   "esbuild>@esbuild/darwin-arm64": "-"
   "esbuild>@esbuild/darwin-x64": "-"
@@ -163,6 +168,6 @@ overrides:
   "@esbuild-kit/esm-loader": "npm:tsx@^4.21.0"
   esbuild: "0.28.2"
   # Kept at the patched version above; do not add a second js-yaml override here.
-  fast-uri: "3.1.6"
-  brace-expansion: "5.0.9"
+  fast-uri: "3.1.8"
+  brace-expansion: "5.0.12"
   nanoid: "3.3.18"

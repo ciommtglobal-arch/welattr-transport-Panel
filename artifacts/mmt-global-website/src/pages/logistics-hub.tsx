@@ -46,7 +46,7 @@ export default function LogisticsHubPage() {
   return (
     <main className="min-h-[100dvh] bg-background text-foreground flex flex-col font-sans">
       <header className="border-b border-white/5 bg-background sticky top-0 z-50">
-        <div className="mx-auto flex max-w-[1200px] items-center justify-between px-5 py-4 md:px-8">
+        <div className="mx-auto flex max-w-[1200px] items-center justify-between px-5 py-4 pr-24 md:px-8 md:pr-28">
           <Link href="/" className="group flex items-center gap-3" data-testid="link-home">
             <span className="flex h-8 w-8 items-center justify-center rounded-br-xl rounded-tl-xl bg-primary text-lg font-bold text-primary-foreground transition-transform group-hover:scale-95">
               M

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState, type ComponentProps, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ClerkProvider, SignIn, SignUp, useAuth } from '@clerk/react';
-import { arSA, enUS, ruRU, trTR } from '@clerk/localizations';
+import { arSA, enUS, ruRU, trTR, ukUA } from '@clerk/localizations';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -128,6 +128,10 @@ const clerkLocalizations: Record<Locale, ClerkLocalization> = {
   en: enUS as unknown as ClerkLocalization,
   ar: arSA as unknown as ClerkLocalization,
   ru: ruRU as unknown as ClerkLocalization,
+  uk: ukUA as unknown as ClerkLocalization,
+  // Clerk has no bundled Kurmanji pack. Its own dialogs use English;
+  // MMT Global's surrounding pages use the Kurmanji UI pack.
+  ku: enUS as unknown as ClerkLocalization,
 };
 
 if (!clerkPubKey) {
@@ -398,6 +402,8 @@ function RouteLoading() {
     en: 'Loading…',
     ar: 'جارٍ التحميل…',
     ru: 'Загрузка…',
+    ku: 'Tê barkirin…',
+    uk: 'Завантаження…',
   };
   return (
     <main className="flex min-h-[50vh] items-center justify-center bg-background px-5 text-sm text-muted-foreground" role="status">

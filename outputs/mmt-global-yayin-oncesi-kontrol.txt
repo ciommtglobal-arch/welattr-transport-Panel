@@ -1,0 +1,212 @@
+MMT GLOBAL — YAYIN ÖNCESİ KONTROL RAPORU
+Tarih: 06.10.2026
+Ortam: Geliştirme / önizleme
+
+SONUÇ: HENÜZ YAYINA HAZIR DEĞİL
+Eksik ve doğrulanmamış bölümler bulunduğundan tüm sisteme yayın uygunluğu
+verilmedi. Kurucu onayı olmadan yayın işlemi yapılmayacaktır.
+
+CANLIYA ALINMADI.
+DEPLOY / PUBLISH işlemi başlatılmadı.
+Domain, Clerk sağlayıcı/anahtar ayarları, mevcut kullanıcılar ve personel
+rolleri değiştirilmedi. Veritabanına tarafımdan INSERT, UPDATE, DELETE,
+migrasyon veya şema değişikliği uygulanmadı.
+
+1. DOĞRULANAN TEKNİK KONTROLLER
+
+- Tüm çalışma alanının TypeScript denetimi geçti.
+- API, ana web sitesi, Kasa ve bileşen önizlemesinin derlemesi geçti.
+- 21 API test dosyasında 142 test geçti. Bunlar gerçek veriyi değiştirmeyen,
+  veritabanı çağrıları taklit edilen birim testleridir.
+- Ana web sunucusunun 5 testi geçti: derin bağlantılar, önbelleksiz HTML,
+  JavaScript dosyaları, API/eksik dosya ayrımı, HEAD ve geçersiz yapılandırma.
+- Şirket/personel giriş yönlendirmesi, alternatif giriş yöntemi bağlantısı,
+  davet tokeninin korunması ve yerel yönlendirme sınırı testleri geçti.
+- Dil bütünlük denetimi geçti: 10 mevcut kopya sözlüğü, 390 KU/UA metni,
+  değişken yer tutucuları ve bağlantı/kimlik alanlarının korunması.
+- Her iki Telegram bot dosyasının Python sözdizimi denetimi geçti.
+
+Veriyi korumak için gerçek veritabanına kayıt ekleyen Kasa testi ve
+entegrasyon testleri çalıştırılmadı. Bu testlerin çalıştırılmaması
+başarılı test olarak sayılmamıştır.
+
+2. TARAYICI VE MOBİL KONTROLLERİ
+
+Anonim ziyaretçi akışı, yalnızca geliştirme ortamında gerçek tarayıcıyla
+kontrol edildi. Hesap oluşturulmadı, gerçek giriş yapılmadı, davet gönderilmedi.
+
+- Ana sayfada TR / EN / AR / KU / RU / UA seçimi ve çevrilmiş başlıklar çalıştı.
+- Belge dil kodları tr / en / ar / ku / ru / uk olarak doğrulandı.
+  UA görünen etikettir; Ukraynacanın standart dil kodu uk kullanılır.
+  KU paketi Latin harfli Kurmancîdir.
+- Yalnızca Arapçada RTL etkinleşti.
+- UA ve KU seçimleri sayfa yenilemesinden sonra korundu.
+- 390 x 844 mobil görünümde menü ve dil seçimi erişilebilir bulundu.
+  Kontrol edilen sayfalarda belge düzeyinde yatay taşma görülmedi.
+- Lojistik ilan sorgusu HTTP 200 döndü ve mevcut bir ilan gösterildi.
+  Genel lojistik medya sorgusu HTTP 200 döndü; boş durum doğru gösterildi.
+- Firma katılımı bağlantısı şirket katılım sayfasını açtı.
+  Giriş formu ve “Diğer giriş yöntemleri / Şifremi unuttum” bağlantısı açıldı.
+  Alternatif giriş ekranında Google ve e-posta/şifre kontrolleri görüntülendi.
+- Bu ziyaretçi akışında JavaScript çalışma hatası veya başarısız ağ isteği
+  bildirilmedi. Clerk geliştirme anahtarı ve parola autocomplete uyarıları görüldü.
+- Mobil lojistik başlığında dil seçicinin ana sayfa bağlantısını örtmemesi
+  için ayrılan alan artırıldı.
+
+Bu sonuçlar, gerçek kullanıcı girişi veya oturumlu personel yetkilerinin
+uçtan uca doğrulandığı anlamına gelmez.
+
+3. BÖLGESEL TASLAK ÖNİZLEMESİ
+
+İzole önizleme yolu:
+/__mockup/preview/mmt-regional/RegionalLogisticsDraft
+
+Önizleme modülleri:
+Firma Kaydı, Firma Daveti, İş Ortaklığı, Yük Veren Firma,
+Taşıyıcı / Nakliyeci, Araç / Tır, Bayi / Distribütör,
+Personel, Teklif, Sözleşme, Operasyon Takibi.
+
+- Mersin / Türkiye ana lojistik merkezi olarak korunuyor.
+- Ukrayna ve Dubai / BAE yayımlanmamış hazırlık bölgeleri olarak kalıyor.
+- Mobil tarayıcıda geçici örnek firma taslağı oluşturuldu, Ukrayna hazırlık
+  bölgesi seçildi, kurucu incelemesine gönderildi ve açıkça etiketlenen
+  kurucu SİMÜLASYON görünümünde onaylandı.
+- Durum “ÖNİZLEMEDE ONAYLANDI” oldu. Gerçek kurucu onayı olmadığı uyarısı
+  görünür kaldı; “YAYINA AL · KAPALI” düğmesi devre dışıydı.
+- Yenilemede bu geçici kayıt kayboldu ve başlangıç örnekleri geri geldi.
+- Bu akışta /api/ isteği veya GET dışı istek oluşmadı.
+  Taslak verisi localStorage, sessionStorage veya IndexedDB'ye yazılmadı.
+
+Bu modüller React belleğinde çalışan taslaklardır. Kalıcı operasyon kaydı,
+gerçek şirket daveti veya sunucuda doğrulanmış kurucu onayı değildir.
+
+4. MODÜL BAZINDA DURUM
+
+MMT Lojistik / Mersin:
+  Genel lojistik sayfası, onaylı ilan okuma ve mevcut operasyon API'si mevcut.
+  Anonim erişim ve genel sayfa kontrolü geçti.
+  Oturumlu, uçtan uca gerçek operasyon testi tamamlanmadı.
+
+Firma kaydı / daveti:
+  Mevcut katılım ve giriş bağlantıları açıldı.
+  Davet ve şirket yönetimi kurallarının birim testleri geçti.
+  Gerçek firma hesabıyla kayıt/davet kabulü bu kontrolde yapılmadı.
+
+İş ortaklığı / bayi:
+  Yeni bölgesel başvuru adımları önizlemede var.
+  Bu yeni taslakların kalıcı onay/sözleşme bağlantısı tamamlanmış sayılmıyor.
+
+Yük veren firma / taşıyıcı:
+  Mevcut yük talebi ve taşıyıcı tabloları/API'leri var.
+  Boş yük/taşıyıcı başvuruları HTTP 400 ile reddedildi; kayıt oluşturulmadı.
+  Yeni ayrı Araç / Tır modülü bölgesel önizleme düzeyindedir.
+
+Personel / görev / yetki:
+  Mevcut personel ve şirket üyelik sistemi korundu.
+  Oturumsuz personel, lojistik operasyon ve şirket üye sorguları HTTP 401 döndü.
+  Yetkisiz teklif oluşturma ve onaylama istekleri HTTP 401 ile reddedildi.
+  Gerçek lider/pilot asistan daveti ve oturumlu rol matrisi henüz doğrulanmadı.
+
+Teklif / sözleşme / operasyon takibi:
+  Mevcut lojistik teklif ve sevkiyat veri modeli/API'leri mevcut.
+  Yeni bölgesel sözleşme ve ayrı araç taslakları kalıcı sisteme bağlı değil.
+  Gerçek kullanıcıyla teklif, sözleşme ve operasyonun uçtan uca akışı yapılmadı.
+
+Ukrayna / Dubai:
+  Hazırlık ve yayımlanmamış durumları önizlemede doğrulandı.
+  Gerçek bölgesel aktivasyon veya yayın yapılmadı.
+
+Kurucu onayı:
+  Bölgesel önizlemede inceleme/onay simülasyonu ve kapalı yayın düğmesi çalıştı.
+  Bu simülasyon, gerçek kimliğe bağlı sunucu onay kapısının yerine geçmez.
+  Mevcut şirket/personel yetkileri yeniden tanımlanmadı.
+
+TR / EN / AR / KU / RU / UA:
+  Genel sayfalardaki mevcut dil sözlükleri KU/UA desteğiyle genişletildi.
+  Genel sayfa dil seçimi ve mobil davranışları doğrulandı.
+  Personel/operasyon ekranlarındaki tüm sabit metinler altı dilde değildir.
+  Clerk Ukraynaca paketini kullanıyor; Kurmancî sağlayıcı diyalogları
+  henüz özel paketle çevrilmediğinden İngilizce görüntüleniyor.
+  Kullanıcıların kendi ilan/talep metinleri otomatik çevrilmedi.
+
+5. VERİTABANI
+
+- Yalnızca geliştirme veritabanında salt okunur şema sorguları çalıştırıldı.
+- Kod modelindeki 40 tablonun 517 beklenen alanı karşılaştırıldı.
+  Eksik beklenen tablo/alan bulunmadı.
+- service_invoices tablosu geliştirme ortamında mevcut.
+- Kişisel kayıtlar rapora alınmadı; veri yazma, silme veya şema değişikliği yok.
+- Üretim veritabanı ve üretim kullanıcı akışları bu rapor kapsamında
+  doğrulanmış kabul edilmiyor.
+
+6. GÜVENLİK
+
+- Bağımlılık taraması başlangıçta 1 kritik, 6 yüksek, 5 orta bulgu bildirdi.
+- Uyumlu yamalar uygulandı: proxy-addr 2.0.8, brace-expansion 5.0.12,
+  fast-uri 3.1.8, fast-copy 4.1.0, markdown-it 14.3.1, source-map-js 1.2.2.
+- Son tarama: 0 kritik, 1 yüksek, 1 orta bulgu.
+- Yüksek: braces 3.0.3, GHSA-vfj7-8cjw-p6xm.
+  Tarama ve paket kaydı kontrolünde yamalı sürüm bulunamadı.
+  Uygulamanın saldırgan denetimli glob kalıplarıyla erişilebilirliği
+  ayrıca değerlendirilmelidir; bu rapor bunu çözüldü olarak işaretlemiyor.
+- Orta: postcss-selector-parser 6.0.10, GHSA-rj75-hqrm-r3gf.
+  Tailwind typography geliştirme bağımlılığından geliyor.
+  Yama 7.1.6'da, ancak ana sürüm değişikliği gerektiriyor; körlemesine
+  uyumluluk değişikliği uygulanmadı. Normal güvenilir kaynak derlemesi
+  ile saldırganın verdiği CSS seçicilerini işlemek aynı risk değildir.
+- Statik güvenlik taraması eksiksiz sonuçlandı; bulgu bildirmedi.
+- Veri sızıntısı taraması bir düşük bulgu bildirdi: günlükte herkese açık
+  bot kullanıcı adı. Bu bir kullanıcı parolası, token veya kişisel giriş
+  kaydı olarak değerlendirilmedi.
+
+Ek çalışma uyarısı:
+  VIP botun önceki günlüklerinde getUpdates çakışmaları görüldü.
+  Yerelde tek bot süreci bulundu; başka ortamda çalışan kopyanın durumu
+  bu kontrolde doğrulanmadı. Canlı botun kesilmesini önlemek için bot
+  süreçleri veya ayarları değiştirilmedi.
+
+7. YAYIN ÖNCESİ KAPATILMASI GEREKEN NOKTALAR
+
+1) Yeni bölgesel taslakların kalıcı firma/araç/sözleşme takibi ve sunucuda
+   gerçek kurucu onay kapısı; mevcut veri ve yetkilere zarar vermeyen,
+   açıkça onaylanmış bir bağlantı/migrasyon planı gerekir.
+2) Personel, operasyon ve giriş ekranlarında tam altı dil kapsamı.
+3) Onaylı gerçek test hesaplarıyla firma daveti, lider/pilot asistan,
+   oturumlu görev/yetki ve operasyon akışlarının uçtan uca doğrulanması.
+4) Kalan güvenlik bağımlılık uyarılarının çözümü veya açık risk kararı.
+
+8. EKLENEN / DEĞİŞTİRİLEN DOSYALAR
+
+Eklenen:
+artifacts/mmt-global-website/src/lib/additional-locales.json
+artifacts/mmt-global-website/src/lib/locale-copy.ts
+artifacts/mmt-global-website/tests/locale-copy.test.ts
+outputs/mmt-global-yayin-oncesi-kontrol.txt
+
+Değiştirilen:
+pnpm-workspace.yaml
+pnpm-lock.yaml
+artifacts/mmt-global-website/src/App.tsx
+artifacts/mmt-global-website/src/lib/i18n.tsx
+artifacts/mmt-global-website/src/lib/construction-shop.tsx
+artifacts/mmt-global-website/src/components/corporate-fleet-section.tsx
+artifacts/mmt-global-website/src/pages/corporate-home.tsx
+artifacts/mmt-global-website/src/pages/home.tsx
+artifacts/mmt-global-website/src/pages/departments.tsx
+artifacts/mmt-global-website/src/pages/logistics-hub.tsx
+artifacts/mmt-global-website/src/pages/construction-shop.tsx
+artifacts/mmt-global-website/src/pages/construction-store.tsx
+artifacts/mmt-global-website/src/pages/construction-store-closed.tsx
+artifacts/mockup-sandbox/src/.generated/mockup-components.ts
+  (önizleme sunucusunun otomatik bileşen kayıt sırası; modül silinmedi)
+.agents/memory/mmt-global-i18n.md
+.agents/memory/MEMORY.md
+  (istenen altı dil kapsamının proje notu)
+
+Bu kontrolde yeni kalıcı iş modülü veya veritabanı tablosu eklenmedi.
+Dil desteği ve dil bütünlük testi eklendi; güvenlik bağımlılıkları yamalandı.
+
+SON ONAY DURUMU
+
+Tüm sistem için “YAYINA HAZIR — KURUCU ONAYI BEKLİYOR” onayı henüz verilmedi.
+CANLIYA ALINMADI. DEPLOY / PUBLISH YAPILMADI. DOMAIN DEĞİŞTİRİLMEDİ.

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowRight, CheckCircle2, Radar, Route, ShieldCheck, Truck } from "lucide-react";
 import { useI18n, type Locale } from "@/lib/i18n";
+import { getLocaleCopy, type CoreLocale } from "@/lib/locale-copy";
 
 type CorridorId = "europe" | "mersin" | "gulf";
 
@@ -35,7 +36,7 @@ type FleetCopy = {
   >;
 };
 
-const fleetCopy: Record<Locale, FleetCopy> = {
+const fleetCopy: Record<CoreLocale, FleetCopy> = {
   tr: {
     sectionTitle: "KURUMSAL FİLO",
     visionLabel: "Operasyon vizyonu",
@@ -278,7 +279,7 @@ const fleetCopy: Record<Locale, FleetCopy> = {
 
 export default function CorporateFleetSection({ onContact }: { onContact: () => void }) {
   const { locale } = useI18n();
-  const copy = fleetCopy[locale];
+  const copy = getLocaleCopy(fleetCopy, locale);
   const [activeCorridor, setActiveCorridor] = useState<CorridorId>("mersin");
   const corridor = copy.corridors[activeCorridor];
 
