@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import "./_group.css";
 
-type ModuleId = "firm" | "invite" | "partner" | "shipper" | "carrier" | "dealer" | "staff" | "offer" | "contract" | "operation";
+type ModuleId = "firm" | "invite" | "partner" | "shipper" | "carrier" | "vehicle" | "dealer" | "staff" | "offer" | "contract" | "operation";
 type RegionId = "mersin" | "iraq" | "gaziantep" | "ipekyolu" | "turkiye" | "ukraine" | "dubai";
 type RecordStatus = "draft" | "review" | "approved-preview" | "rejected";
 type DraftRecord = {
@@ -26,7 +26,8 @@ const modules: { id: ModuleId; label: string; icon: typeof Building2; hint: stri
   { id: "invite", label: "Firma Daveti", icon: UsersRound, hint: "E-posta daveti simülasyonu" },
   { id: "partner", label: "İş Ortaklığı", icon: Handshake, hint: "İş ortaklığı başvurusu" },
   { id: "shipper", label: "Yük Veren Firma", icon: PackageCheck, hint: "Yük ve çıkış bilgileri" },
-  { id: "carrier", label: "Taşıyıcı / Araç", icon: Truck, hint: "Taşıyıcı ve araç kaydı" },
+  { id: "carrier", label: "Taşıyıcı / Nakliyeci", icon: Truck, hint: "Taşıyıcı başvurusu ve araç bilgileri" },
+  { id: "vehicle", label: "Araç / Tır Kaydı", icon: Truck, hint: "Ayrı araç kaydı taslağı" },
   { id: "dealer", label: "Bayi / Distribütör", icon: Landmark, hint: "Bayi / distribütör başvurusu" },
   { id: "staff", label: "Personel", icon: UserRound, hint: "Personel başvurusu" },
   { id: "offer", label: "Teklif", icon: FileText, hint: "Teklif taslağı" },
@@ -45,6 +46,16 @@ const routes: { id: RegionId; label: string }[] = [
   { id: "ipekyolu", label: "İpekyolu" }, { id: "turkiye", label: "Türkiye geneli" },
   { id: "ukraine", label: "Türkiye–Ukrayna" }, { id: "dubai", label: "Körfez / Dubai" },
 ];
+
+const companyFlow = ["Firma Kaydı", "Doğrulama", "Bölge Seçimi", "Faaliyet Alanı", "Yönetici İncelemesi", "Kurucu Onayı", "Sözleşme", "Aktif İş Ortağı"];
+
+function CompanyFlowPreview() {
+  return <section className="rd-company-flow" aria-label="Firma ve bayi yönetim akışı taslağı">
+    <h3>Firma / Bayi Yönetim Akışı</h3>
+    <ol>{companyFlow.map((step, index) => <li key={step}><span>{index + 1}</span>{step}</li>)}</ol>
+    <p>Planlanan akışın önizlemesidir. Doğrulama, yönetici incelemesi, kurucu onayı ve sözleşme tamamlanmadan aktif ortaklık kurulmaz. Bu ekranda gerçek bayilik, bölge yetkisi, münhasırlık veya personel unvanı verilmez.</p>
+  </section>;
+}
 
 const moduleFields: Record<ModuleId, FieldSpec[]> = {
   firm: [
@@ -76,6 +87,16 @@ const moduleFields: Record<ModuleId, FieldSpec[]> = {
     { key: "capacity", label: "Taşıma kapasitesi" }, { key: "contact", label: "Kurumsal iletişim", required: true },
     { key: "notes", label: "Belge / inceleme notu", type: "textarea", full: true },
   ],
+  vehicle: [
+    { key: "reference", label: "Araç / tır kayıt referansı", required: true },
+    { key: "plate", label: "Örnek plaka / araç referansı", required: true },
+    { key: "vehicle", label: "Araç tipi", required: true, options: ["Çekici + dorse", "Tenteli tır", "Frigo", "Kamyon", "Panelvan", "Diğer"] },
+    { key: "company", label: "Taşıyıcı / nakliyeci firma", required: true },
+    { key: "capacity", label: "Taşıma kapasitesi", required: true },
+    { key: "route", label: "Planlanan güzergâh", required: true },
+    { key: "documentStatus", label: "Belge inceleme durumu", options: ["Belge bekleniyor", "Ön inceleme", "Bilgi tamamlanacak"] },
+    { key: "notes", label: "İnceleme notu", type: "textarea", full: true, help: "Araç kaydı gerçek filoya veya operasyonlara eklenmez." },
+  ],
   dealer: [
     { key: "company", label: "Başvuran firma", required: true }, { key: "type", label: "Başvuru türü", required: true, options: ["Bayi", "Distribütör", "Acente", "Kurumsal iş geliştirme"] },
     { key: "market", label: "Önerilen pazar / bölge", required: true }, { key: "products", label: "İlgili hizmet alanı", required: true },
@@ -106,6 +127,7 @@ const moduleFields: Record<ModuleId, FieldSpec[]> = {
 };
 
 const seed: DraftRecord[] = [
+  { id: "R-0242", module: "vehicle", region: "mersin", name: "Örnek Araç 13", status: "draft", updated: "Örnek kayıt", fields: { reference: "ARAC-013", plate: "ÖRNEK-013", vehicle: "Tenteli tır", company: "Örnek Taşıyıcı 03", capacity: "24 t", route: "Mersin — Irak", documentStatus: "Belge bekleniyor", notes: "Gerçek araç, plaka veya filo kaydı değildir." } },
   { id: "R-0241", module: "firm", region: "mersin", name: "Örnek Firma 01", status: "review", updated: "Bugün · 09:42", fields: { legalName: "Örnek Firma 01 Lojistik Ltd.", taxNo: "33•••••812", activity: "Lojistik", contact: "operasyon@ornekfirma01.test", verification: "Belge bekleniyor", notes: "Mersin çıkışlı kara yolu hatları için ön inceleme." } },
   { id: "R-0240", module: "partner", region: "ukraine", name: "Örnek Firma 02", status: "review", updated: "Dün · 16:18", fields: { company: "Örnek Firma 02", partnershipType: "Türkiye–Ukrayna ticaret bağlantısı", route: "Mersin — Odesa", region: "Ukrayna (hazırlık)", contact: "contact@ornekfirma02.test", notes: "Bölgesel hazırlık kaydı; yayın ve ortaklık kararı verilmedi." } },
   { id: "R-0239", module: "carrier", region: "iraq", name: "Örnek Taşıyıcı 03", status: "draft", updated: "Dün · 14:05", fields: { company: "Örnek Taşıyıcı 03", vehicle: "Tenteli tır", plate: "TR-33 · referans 03", route: "Mersin — Gaziantep — Irak", capacity: "24 t", contact: "filo@ornek03.test", notes: "Araç uygunluğu henüz doğrulanmadı." } },
@@ -150,7 +172,7 @@ export function RegionalLogisticsDraft() {
   const currentModule = activeModule === "overview" ? null : modules.find((item) => item.id === activeModule) ?? null;
 
   const countMetrics = (items: DraftRecord[]) => {
-    const applications = items.filter((item) => ["partner", "shipper", "carrier", "dealer", "staff"].includes(item.module));
+    const applications = items.filter((item) => ["partner", "shipper", "carrier", "vehicle", "dealer", "staff"].includes(item.module));
     return [
       { label: "Firma", value: items.filter((item) => item.module === "firm").length },
       { label: "Başvurular", value: applications.length },
@@ -342,6 +364,7 @@ export function RegionalLogisticsDraft() {
                       <div style={{ padding: "16px 18px" }}>
                         <div className="rd-flow"><div className="rd-flow-step current"><span>1</span>TASLAK</div><div className="rd-flow-line" /><div className="rd-flow-step"><span>2</span>KURUCU ONAYI</div><div className="rd-flow-line" /><div className="rd-flow-step"><span>3</span>YAYIN</div></div>
                         <div className="rd-flag"><strong>Yayın kapalı</strong><p>Yayına alma bu taslakta her durumda devre dışıdır. Gerçek kurucu onayı ve ayrıca yetkilendirilmiş uygulama gerekir.</p></div>
+                        <CompanyFlowPreview />
                         <div className="rd-founder-note">{previewRole === "founder" ? "Kurucu görünümü yalnızca bu ekranın kontrol simülasyonudur; gerçek hesap veya yetki değildir." : "İnceleme ve karar simülasyonu yalnızca “Kurucu · simülasyon” önizlemesinde görünür."}</div>
                       </div>
                     </section>
@@ -373,6 +396,7 @@ export function RegionalLogisticsDraft() {
                           <div className="rd-detail-top"><div><h3>{selectedRecord.name}</h3><p className="rd-detail-sub">{selectedRecord.id} · {moduleLabel(selectedRecord.module)} · {regionLabel(selectedRecord.region)}</p></div><span className={`rd-status ${selectedRecord.status === "review" ? "review" : selectedRecord.status === "approved-preview" ? "approved" : selectedRecord.status}`}>{statusLabel[selectedRecord.status]}</span></div>
                           <div className="rd-detail-grid">{moduleFields[selectedRecord.module].map((field) => <div key={field.key} className="rd-detail-field"><label>{field.label}</label><span>{selectedRecord.fields[field.key] || "—"}</span></div>)}</div>
                           <div className="rd-detail-note"><strong>Önizleme kaydı.</strong> Bu bilgiler örnek amaçlıdır; doğrulanmış firma, atanmış personel, sözleşme, teklif veya aktif operasyon anlamına gelmez.</div>
+                          {["firm", "partner", "dealer"].includes(selectedRecord.module) && <CompanyFlowPreview />}
                           <div className="rd-detail-actions">
                             {previewRole === "founder" && <button type="button" className="rd-button secondary" onClick={() => openEdit(selectedRecord)}><Pencil size={13} /> DÜZENLE</button>}
                             {selectedRecord.status === "draft" && <button type="button" className="rd-button orange" onClick={() => updateStatus(selectedRecord, "review")}><ArrowRight size={13} /> İncelemeye gönder</button>}

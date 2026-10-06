@@ -176,6 +176,12 @@
 .rd-modal-warning { display: flex; gap: 8px; align-items: flex-start; margin-top: 15px; padding: 10px; background: #f8f0e3; color: #846333; font-size: 9px; line-height: 1.5; }
 .rd-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 19px; padding-top: 14px; border-top: 1px solid #eee9e1; }
 .rd-footer-note { padding: 13px 16px; border: 1px solid var(--rd-line); margin-top: 18px; color: #868d8d; font-size: 9px; line-height: 1.65; background: rgba(255,253,248,.66); }
+.regional-draft .rd-company-flow { padding: 14px 0; border-bottom: 1px solid var(--rd-line); }
+.regional-draft .rd-company-flow h3 { margin: 0 0 10px; color: var(--rd-navy); font-size: 12px; }
+.regional-draft .rd-company-flow ol { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }
+.regional-draft .rd-company-flow li { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid var(--rd-line); color: var(--rd-navy); font-size: 10px; }
+.regional-draft .rd-company-flow li span { color: var(--rd-orange); font-weight: 700; }
+.regional-draft .rd-company-flow p { margin: 10px 0 0; color: #687582; font-size: 10px; line-height: 1.6; }
 @keyframes rd-toast-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 1000px) {
  .rd-shell { padding: 16px 20px 36px; }
