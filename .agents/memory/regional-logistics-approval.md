@@ -11,6 +11,8 @@ MMT GLOBAL is the main brand, with MMT LOJİSTİK as the primary operational foc
 
 Regional records, personnel duties, regions, and content must follow TASLAK → KURUCU ONAYI → YAYIN. No publication without explicit founder approval. The requested preparation must leave existing users, roles, permissions, database, domains, and the live system unchanged.
 
-**Why:** The user explicitly required founder-controlled publication and an isolated preview, with no deployment or changes to the existing system.
+The user's standing instruction for this project is: “Ben istemeden bişey yayınlama.” A successful test, completed preparation, or preview approval is not a request to publish.
+
+**Why:** The user explicitly required founder-controlled publication and an isolated preview, and repeated that nothing may be published unless they ask.
 
 **How to apply:** Keep previews isolated from production data and authentication. Label sample data and simulated decisions clearly; preview approval is not actual founder authorization. Wait for separately authorized implementation and publication.
