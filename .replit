@@ -78,15 +78,3 @@ ORPHAN_UPLOAD_CLEANUP_ENABLED = "false"
 
 [userenv.development]
 MMT_FOUNDER_REVIEWER_CLERK_USER_ID = "user_3JkMLrofYErCprsVsLHiIgoslrj"
-
-[[ports]]
-localPort = 8080
-externalPort = 80
-
-[[ports]]
-localPort = 8081
-externalPort = 8081
-
-[[ports]]
-localPort = 25030
-externalPort = 3000
