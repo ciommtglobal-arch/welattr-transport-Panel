@@ -1,0 +1,100 @@
+import { NexusMapping } from "./nexusShopify";
+
+export type ShopifyRawRequest = {
+  rawBody?: Buffer | string;
+};
+
+export function parseLogisticsShopifyOrder(
+  body: any,
+  mapping: NexusMapping,
+  topic: string,
+) {
+  if (!body || !body.id) {
+    throw new Error("Invalid order payload: missing order id.");
+  }
+
+  const orderId = String(body.id);
+  const orderName = body.name ? String(body.name) : `#${orderId}`;
+  const currency = body.currency ? String(body.currency) : "USD";
+  const financialStatus = body.financial_status ? String(body.financial_status) : "pending";
+  
+  // Şema sözleşmesi ile tam uyumlu boolean -> 0/1 dönüşümü
+  const cancelled = body.cancelled_at || topic === "orders/cancelled" ? 1 : 0;
+
+  // source_updated_at hassasiyeti: Eskinin yeniyi ezmesini önlemek için güvenli tarih kontrolü
+  const sourceUpdatedAt = body.updated_at ? new Date(body.updated_at) : new Date();
+  if (isNaN(sourceUpdatedAt.getTime())) {
+    throw new Error("Invalid order payload: invalid updated_at timestamp.");
+  }
+
+  const lineItems = body.line_items;
+  if (!Array.isArray(lineItems) || lineItems.length === 0) {
+    throw new Error("Invalid order payload: line_items must be a non-empty array.");
+  }
+
+  const rows = [];
+  const seenLineIds = new Set<string>();
+
+  for (const item of lineItems) {
+    const lineId = item.id ? String(item.id) : undefined;
+    if (!lineId || lineId === "undefined" || seenLineIds.has(lineId)) {
+      throw new Error("Invalid order payload: missing, undefined, or duplicate line item id.");
+    }
+    seenLineIds.add(lineId);
+
+    // variant_id null veya boş bırakılabilir; ancak string/null olarak güvenle ele alınır
+    const variantId = item.variant_id !== undefined && item.variant_id !== null && item.variant_id !== ""
+      ? String(item.variant_id)
+      : null;
+
+    const productTitle = item.title ? String(item.title) : "Unknown Product";
+    
+    // Negatif miktar ve geçersiz fiyat kontrolleri
+    const quantity = Number(item.quantity);
+    if (isNaN(quantity) || quantity < 0) {
+      throw new Error(`Invalid order payload: invalid quantity for line item ${lineId}.`);
+    }
+
+    const unitPrice = item.price !== undefined && item.price !== null ? String(item.price) : "0.00";
+    if (isNaN(Number(unitPrice)) || Number(unitPrice) < 0) {
+      throw new Error(`Invalid order payload: invalid unit price for line item ${lineId}.`);
+    }
+
+    // Mevcut sözleşmeyle tam uyumlu kind değerleri: reservation / financing_interest / standard
+    let kind = "standard";
+    if (variantId && mapping.reservations.includes(variantId)) {
+      kind = "reservation";
+    } else if (variantId && mapping.financing.includes(variantId)) {
+      kind = "financing_interest";
+    }
+
+    rows.push({
+      shopDomain: mapping.shopDomain,
+      orderId,
+      lineId,
+      orderName,
+      variantId,
+      kind,
+      productTitle,
+      quantity,
+      unitPrice,
+      currency,
+      financialStatus,
+      cancelled,
+      warning: variantId ? null : "Variant ID is missing/null",
+      sourceUpdatedAt,
+    });
+  }
+
+  return {
+    shopDomain: mapping.shopDomain,
+    orderId,
+    orderName,
+    currency,
+    financialStatus,
+    cancelled,
+    sourceUpdatedAt,
+    warning: "Processed successfully with strict validation",
+    rows,
+  };
+}
