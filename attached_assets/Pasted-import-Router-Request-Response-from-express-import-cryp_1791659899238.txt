@@ -1,0 +1,74 @@
+import { Router, Request, Response } from 'express';
+import crypto from 'crypto';
+
+const router = Router();
+
+// Shopify HMAC Doğrulama Yardımcısı (Güvenlik için opsiyonel ama önerilir)
+const verifyShopifyWebhook = (req: Request, hmacHeader: string): boolean => {
+  const secret = process.env.SHOPIFY_WEBHOOK_SECRET || '';
+  if (!secret) return true; // Gizli anahtar tanımlanmamışsa geçişe izin ver
+
+  const rawBody = (req as any).rawBody || JSON.stringify(req.body);
+  const hash = crypto
+    .createHmac('sha256', secret)
+    .update(rawBody, 'utf8')
+    .digest('base64');
+  
+  return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(hmacHeader));
+};
+
+router.post('/webhook/shopify/logistics', async (req: Request, res: Response) => {
+  try {
+    const hmacHeader = req.get('X-Shopify-Hmac-Sha256') || '';
+    
+    // Güvenlik kontrolü (Aktif etmek için Shopify Secret tanımlayabilirsiniz)
+    if (process.env.SHOPIFY_WEBHOOK_SECRET && !verifyShopifyWebhook(req, hmacHeader)) {
+      return res.status(401).json({ error: 'HMAC validation failed' });
+    }
+
+    const orderData = req.body;
+    const lineItems = orderData.line_items || [];
+
+    const validItems: any[] = [];
+    const skippedItems: any[] = [];
+
+    // Esnek Doğrulama Döngüsü: variant_id null olanları reddetmek yerine ayıkla ve logla
+    for (const item of lineItems) {
+      if (!item.variant_id) {
+        skippedItems.push({
+          title: item.title,
+          sku: item.sku,
+          reason: 'variant_id is null or missing'
+        });
+      } else {
+        validItems.push(item);
+      }
+    }
+
+    // Eğer hiç geçerli ürün kalmadıysa siparişi işleme
+    if (validItems.length === 0) {
+      return res.status(422).json({
+        success: false,
+        message: 'Order rejected: No valid line items with a variant_id found.',
+        skipped_items: skippedItems
+      });
+    }
+
+    // İşlem başarılı: Geçerli kalemlerle lojistik sürecini başlat
+    // TODO: Veritabanı kayıt işlemleri buraya eklenecek
+
+    return res.status(200).json({
+      success: true,
+      message: 'Shopify logistics webhook processed successfully.',
+      processed_count: validItems.length,
+      skipped_count: skippedItems.length,
+      skipped_items: skippedItems
+    });
+
+  } catch (error: any) {
+    console.error('Shopify Webhook Error:', error);
+    return res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
+export default router;
