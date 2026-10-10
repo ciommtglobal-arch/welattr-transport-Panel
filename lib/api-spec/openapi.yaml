@@ -31,6 +31,45 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /mmt/secure-sync:
+    post:
+      operationId: receiveShopifyLogisticsWebhook
+      summary: Signed Shopify logistics order snapshot; founder approval required
+      description: |
+        Uses the untouched req.rawBody with HMAC verification. Allows only
+        Samsun-Irak-Proje and Samsun-Gurcistan, supplied in corridor or the
+        corridor note_attribute. Stores all validated lines in the existing
+        Nexus tables. The corridor is retained in the existing warning field.
+        Each line requires a real, non-null variant_id supported by that schema;
+        incompatible custom/deleted-product lines reject the entire delivery.
+        Shop domain, topic and webhook identity are required. Unique event and
+        order/line keys, transactional upserts and source timestamps prevent
+        retries and old snapshots from corrupting records. Material changes
+        return records to pending founder approval; no publication or Shopify
+        registration is performed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NexusShopifyOrderInput"
+      responses:
+        "200":
+          description: Persisted, duplicate or stale snapshot acknowledged
+        "400":
+          description: Invalid payload, corridor, topic or webhook identity; nothing written
+        "401":
+          description: Missing or invalid HMAC
+        "403":
+          description: Unexpected Shopify shop
+        "409":
+          description: Different snapshots have the same source timestamp; no changes committed
+        "413":
+          description: Body exceeds one megabyte
+        "415":
+          description: Compressed body not supported
+        "503":
+          description: Configuration or storage unavailable; retry required
   /nexus/intakes:
     get:
       operationId: getNexusIntakes

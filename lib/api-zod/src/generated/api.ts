@@ -9,6 +9,25 @@ import * as zod from 'zod';
 
 
 /**
+ * Uses the untouched req.rawBody with HMAC verification. Allows only
+ * Samsun-Irak-Proje and Samsun-Gurcistan, supplied in corridor or the
+ * corridor note_attribute. Stores all validated lines in the existing
+ * Nexus tables. The corridor is retained in the existing warning field.
+ * Each line requires a real, non-null variant_id supported by that schema;
+ * incompatible custom/deleted-product lines reject the entire delivery.
+ * Shop domain, topic and webhook identity are required. Unique event and
+ * order/line keys, transactional upserts and source timestamps prevent
+ * retries and old snapshots from corrupting records. Material changes
+ * return records to pending founder approval; no publication or Shopify
+ * registration is performed.
+ * @summary Signed Shopify logistics order snapshot; founder approval required
+ */
+export const ReceiveShopifyLogisticsWebhookBody = zod.record(zod.string(), zod.unknown()).describe('Shopify order JSON; signature is verified against untouched raw bytes.')
+
+export const ReceiveShopifyLogisticsWebhookResponse = zod.unknown()
+
+
+/**
  * @summary Founder-only Nexus audit desk, latest 100 records
  */
 export const GetNexusIntakesResponseItem = zod.object({

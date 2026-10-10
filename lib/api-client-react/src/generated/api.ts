@@ -231,6 +231,97 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+export const getReceiveShopifyLogisticsWebhookUrl = () => {
+
+
+
+
+  return `/api/mmt/secure-sync`
+}
+
+/**
+ * Uses the untouched req.rawBody with HMAC verification. Allows only
+ * Samsun-Irak-Proje and Samsun-Gurcistan, supplied in corridor or the
+ * corridor note_attribute. Stores all validated lines in the existing
+ * Nexus tables. The corridor is retained in the existing warning field.
+ * Each line requires a real, non-null variant_id supported by that schema;
+ * incompatible custom/deleted-product lines reject the entire delivery.
+ * Shop domain, topic and webhook identity are required. Unique event and
+ * order/line keys, transactional upserts and source timestamps prevent
+ * retries and old snapshots from corrupting records. Material changes
+ * return records to pending founder approval; no publication or Shopify
+ * registration is performed.
+ * @summary Signed Shopify logistics order snapshot; founder approval required
+ */
+export const receiveShopifyLogisticsWebhook = async (nexusShopifyOrderInput: NexusShopifyOrderInput, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<void>(getReceiveShopifyLogisticsWebhookUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(nexusShopifyOrderInput)
+  }
+);}
+
+
+
+
+
+export const getReceiveShopifyLogisticsWebhookMutationKey = () => ['receiveShopifyLogisticsWebhook'] as const;
+
+export const getReceiveShopifyLogisticsWebhookMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveShopifyLogisticsWebhook>>, TError,ReceiveShopifyLogisticsWebhookMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof receiveShopifyLogisticsWebhook>>, TError,ReceiveShopifyLogisticsWebhookMutationVariables, TContext> => {
+
+const mutationKey = getReceiveShopifyLogisticsWebhookMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof receiveShopifyLogisticsWebhook>>, ReceiveShopifyLogisticsWebhookMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  receiveShopifyLogisticsWebhook(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReceiveShopifyLogisticsWebhookMutationResult = NonNullable<Awaited<ReturnType<typeof receiveShopifyLogisticsWebhook>>>
+    export type ReceiveShopifyLogisticsWebhookMutationBody = BodyType<NexusShopifyOrderInput>
+    export type ReceiveShopifyLogisticsWebhookMutationError = ErrorType<void>
+    export type ReceiveShopifyLogisticsWebhookMutationVariables = {data: BodyType<NexusShopifyOrderInput>}
+
+    /**
+ * @summary Signed Shopify logistics order snapshot; founder approval required
+ */
+export const useReceiveShopifyLogisticsWebhook = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveShopifyLogisticsWebhook>>, TError,ReceiveShopifyLogisticsWebhookMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof receiveShopifyLogisticsWebhook>>,
+        TError,
+        ReceiveShopifyLogisticsWebhookMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReceiveShopifyLogisticsWebhookMutationOptions(options));
+    }
+
 export const getGetNexusIntakesUrl = () => {
 
 

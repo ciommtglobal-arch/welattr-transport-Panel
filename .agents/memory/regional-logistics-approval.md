@@ -16,3 +16,9 @@ The user's standing instruction for this project is: “Ben istemeden bişey yay
 **Why:** The user explicitly required founder-controlled publication and an isolated preview, and repeated that nothing may be published unless they ask.
 
 **How to apply:** Keep previews isolated from production data and authentication. Label sample data and simulated decisions clearly; preview approval is not actual founder authorization. Wait for separately authorized implementation and publication.
+
+The user requested Shopify order-intake filters for `Samsun-Irak-Proje` and `Samsun-Gurcistan`, with requests awaiting founder approval. This technical integration request does not replace Mersin as the main operations center or authorize live corridor operations.
+
+**Why:** The user specified these intake filters while the separate Mersin priority and explicit publication hold remain in force.
+
+**How to apply:** Distinguish preparing a signed intake endpoint from registering external webhooks, activating operations, granting approval, or publishing. Those actions need separate authorization.

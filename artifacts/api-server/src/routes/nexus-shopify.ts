@@ -59,7 +59,7 @@ router.get("/nexus/intakes", async (req, res) => {
   if (!isLogisticsFounder(userId)) {
     res.status(403).json({ error: "Bu denetim masası yalnız kurucuya açıktır." }); return;
   }
-  const mapping = nexusMapping();
+  const mapping = nexusMapping(true);
   if (!mapping) { res.status(503).json({ error: "Nexus mağaza eşleştirmesi henüz yapılandırılmadı." }); return; }
   try {
     const rows = await db.select().from(intakes)

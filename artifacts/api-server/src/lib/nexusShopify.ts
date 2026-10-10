@@ -1,19 +1,19 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export type NexusMapping = { shopDomain: string; reservations: string[]; financing: string[] };
-export function nexusMapping(): NexusMapping | null {
+export function nexusMapping(allowUnmappedLines = false): NexusMapping | null {
   const shopDomain = process.env.SHOPIFY_NEXUS_SHOP_DOMAIN?.trim().toLowerCase() ?? "";
   const ids = (value?: string) => (value ?? "").split(",").map(x => x.trim()).filter(Boolean);
   const reservations = ids(process.env.SHOPIFY_NEXUS_RESERVATION_VARIANT_IDS);
   const financing = ids(process.env.SHOPIFY_NEXUS_FINANCING_VARIANT_IDS);
   const all = [...reservations, ...financing];
   if (!/^[a-z0-9][a-z0-9-]*\.myshopify\.com$/.test(shopDomain) ||
-      !reservations.length || !financing.length || all.some(x => !/^\d+$/.test(x)) ||
+      (!allowUnmappedLines && (!reservations.length || !financing.length)) || all.some(x => !/^\d+$/.test(x)) ||
       new Set(all).size !== all.length) return null;
   return { shopDomain, reservations, financing };
 }
 
-export function verifyShopifySignature(raw: Buffer, signature: string, secret: string): boolean {
+export function verifyShopifySignature(raw: Buffer | string, signature: string, secret: string): boolean {
   if (!secret || !/^[A-Za-z0-9+/]{43}=$/.test(signature)) return false;
   const actual = Buffer.from(signature, "base64");
   const expected = createHmac("sha256", secret).update(raw).digest();

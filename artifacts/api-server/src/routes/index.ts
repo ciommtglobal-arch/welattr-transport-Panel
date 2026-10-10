@@ -25,8 +25,10 @@ import companyFundRecordsRouter from "./company-fund-records";
 import companyRecordExportsRouter from "./company-record-exports";
 import whatsappLogisticsWebhookRouter from "./whatsapp-logistics-webhook";
 import nexusShopifyRouter from "./nexus-shopify";
+import shopifyLogisticsRouter from "./shopify-logistics";
 
 const router: IRouter = Router();
+router.use(shopifyLogisticsRouter);
 router.use(kasaRouter);
 router.use(healthRouter);
 router.use(limitApplicationsRouter);

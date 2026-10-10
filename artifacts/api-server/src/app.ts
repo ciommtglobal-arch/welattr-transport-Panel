@@ -6,6 +6,7 @@ import { publishableKeyFromHost } from "@clerk/shared/keys";
 import router from "./routes";
 import kasaRouter from "./routes/kasa";
 import { logger } from "./lib/logger";
+import { createShopifyLogisticsRawParser } from "./lib/nexusLogisticsShopify";
 import {
   CLERK_PROXY_PATH,
   clerkProxyMiddleware,
@@ -48,6 +49,7 @@ app.use(
   express.raw({ type: "application/json", limit: "256kb" }),
 );
 app.use("/api/webhook/shopify/nexus", express.raw({ type: "application/json", limit: "1mb" }));
+app.use("/api/mmt/secure-sync", createShopifyLogisticsRawParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
