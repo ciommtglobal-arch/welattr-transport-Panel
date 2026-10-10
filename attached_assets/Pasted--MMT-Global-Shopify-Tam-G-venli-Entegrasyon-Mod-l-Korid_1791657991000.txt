@@ -1,0 +1,91 @@
+/**
+ * MMT Global & Shopify Tam Güvenli Entegrasyon Modülü
+ * Koridor: Samsun - Karadeniz - Irak Boru & Proje Hattı
+ * Protokol: Çelik Kubbe & WelatTR
+ */
+
+const crypto = require('crypto');
+const express = require('express');
+const router = express.Router();
+
+/**
+ * 1. Adım: Shopify Webhook HMAC İmza Doğrulama (Çelik Kubbe Güvenliği)
+ */
+function verifyShopifyWebhook(req, res, next) {
+    const hmacHeader = req.get('X-Shopify-Hmac-Sha256');
+    const secret = process.env.SHOPIFY_WEBHOOK_SECRET; // Replit Secret Alanından Çekilir
+
+    if (!hmacHeader || !secret) {
+        console.warn('[Çelik Kubbe] Güvenlik uyarısı: Eksik imza veya gizli anahtar.');
+        return res.status(401).json({ 
+            status: 'error', 
+            message: 'Çelik Kubbe Protokolü: Yetkilendirme başarısız.' 
+        });
+    }
+
+    // Gelen verinin ham gövdesi üzerinden HMAC hesaplama
+    const rawBody = JSON.stringify(req.body);
+    const calculatedHmac = crypto
+        .createHmac('sha256', secret)
+        .update(rawBody, 'utf8')
+        .digest('base64');
+
+    if (calculatedHmac !== hmacHeader) {
+        console.error('[Çelik Kubbe] Yetkisiz imza tespiti!');
+        return res.status(403).json({ 
+            status: 'error', 
+            message: 'Çelik Kubbe Protokolü: Geçersiz imza, erişim reddedildi.' 
+        });
+    }
+
+    next();
+}
+
+/**
+ * 2. Adım: Güvenli Sevkiyat ve Rezervasyon Senkronizasyon Noktası
+ */
+router.post('/api/mmt/secure-sync', verifyShopifyWebhook, async (req, res) => {
+    try {
+        const { product_id, title, inventory_quantity, corridor, destination } = req.body;
+
+        // Samsun - Irak / Gürcistan Koridor Doğrulaması
+        const targetCorridor = corridor || 'Samsun-Irak-Proje';
+        if (targetCorridor !== 'Samsun-Irak-Proje' && targetCorridor !== 'Samsun-Gurcistan') {
+            return res.status(400).json({ 
+                status: 'error', 
+                message: 'Çelik Kubbe: Tanımlanamayan lojistik koridoru.' 
+            });
+        }
+
+        // İstek verisinin kurucu onay havuzuna aktarılması
+        const pendingLogisticsRecord = {
+            transactionId: `MMT-SECURE-${Date.now()}`,
+            timestamp: new Date().toISOString(),
+            itemTitle: title,
+            stockCount: inventory_quantity,
+            corridor: targetCorridor,
+            destination: destination || 'Irak / Şantiye Sahası',
+            approvalStatus: 'Kurucu Onayı Bekliyor',
+            authorizedBy: 'WelatTR (Onay Bekliyor)'
+        };
+
+        console.log(`[MMT Nexus] Yeni talep havuzda: ${title} | Durum: Kurucu Onayı Bekliyor`);
+
+        // Burada veritabanı kayıt işlemleri (MongoDB / PostgreSQL) gerçekleştirilir
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Talep Çelik Kubbe süzgecinden başarıyla geçirildi ve Kurucu Onay Kuyruğuna eklendi.',
+            data: pendingLogisticsRecord
+        });
+
+    } catch (error) {
+        console.error('Entegrasyon İşlem Hatası:', error.message);
+        return res.status(500).json({ 
+            status: 'error', 
+            message: 'Sunucu hatası: ' + error.message 
+        });
+    }
+});
+
+module.exports = router;
