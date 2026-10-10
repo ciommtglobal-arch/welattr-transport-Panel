@@ -1,0 +1,120 @@
+import { NexusMapping } from "./nexusShopify";
+
+export type ShopifyRawRequest = {
+  rawBody?: Buffer | string;
+};
+
+export function parseLogisticsShopifyOrder(
+  body: any,
+  mapping: NexusMapping,
+  topic: string,
+) {
+  if (!body || !body.id) {
+    throw new Error("Invalid order payload: missing order id.");
+  }
+
+  const orderId = String(body.id);
+  const orderName = body.name ? String(body.name) : `#${orderId}`;
+  
+  // Sahte varsayılanlar yerine eksik veride hata fırlatma ve sıkı doğrulama
+  if (!body.currency) {
+    throw new Error("Invalid order payload: missing currency.");
+  }
+  const currency = String(body.currency);
+
+  if (!body.financial_status) {
+    throw new Error("Invalid order payload: missing financial_status.");
+  }
+  const financialStatus = String(body.financial_status);
+  
+  const cancelled = body.cancelled_at || topic === "orders/cancelled" ? 1 : 0;
+
+  // Geçmiş verinin ezilmesini önlemek içinupdated_at zorunluluğu (bugünün tarihi atılmaz)
+  if (!body.updated_at) {
+    throw new Error("Invalid order payload: missing updated_at timestamp.");
+  }
+  const sourceUpdatedAt = new Date(body.updated_at);
+  if (isNaN(sourceUpdatedAt.getTime())) {
+    throw new Error("Invalid order payload: invalid updated_at timestamp.");
+  }
+
+  const lineItems = body.line_items;
+  // Boş güncelleme / tüm kalemleri kaldırılmış sipariş desteği için dizi kontrolü
+  if (!Array.isArray(lineItems)) {
+    throw new Error("Invalid order payload: line_items must be an array.");
+  }
+
+  const rows = [];
+  const seenLineIds = new Set<string>();
+
+  for (const item of lineItems) {
+    const lineId = item.id ? String(item.id) : undefined;
+    if (!lineId || lineId === "undefined" || seenLineIds.has(lineId)) {
+      throw new Error("Invalid order payload: missing, undefined, or duplicate line item id.");
+    }
+    seenLineIds.add(lineId);
+
+    // Tablo şeması ve variant_id uyumu
+    const variantId = item.variant_id !== undefined && item.variant_id !== null && item.variant_id !== ""
+      ? String(item.variant_id)
+      : null;
+
+    if (!item.title) {
+      throw new Error(`Invalid order payload: missing product title for line item ${lineId}.`);
+    }
+    const productTitle = String(item.title);
+    
+    // Kesirli, negatif ve Infinity miktar/fiyat kontrolleri
+    const quantity = Number(item.quantity);
+    if (!Number.isFinite(quantity) || quantity < 0) {
+      throw new Error(`Invalid order payload: invalid or infinite quantity for line item ${lineId}.`);
+    }
+
+    if (item.price === undefined || item.price === null) {
+      throw new Error(`Invalid order payload: missing price for line item ${lineId}.`);
+    }
+    const unitPrice = String(item.price);
+    const numericPrice = Number(unitPrice);
+    if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+      throw new Error(`Invalid order payload: invalid or infinite unit price for line item ${lineId}.`);
+    }
+
+    // Lojistik koridor ve sözleşme eşleme kontrolü (Samsun-Irak-Proje / Samsun-Gurcistan vb.)
+    let kind = "standard";
+    if (variantId && mapping.reservations.includes(variantId)) {
+      kind = "reservation";
+    } else if (variantId && mapping.financing.includes(variantId)) {
+      kind = "financing_interest";
+    }
+
+    rows.push({
+      shopDomain: mapping.shopDomain,
+      orderId,
+      lineId,
+      orderName,
+      variantId,
+      kind,
+      productTitle,
+      quantity,
+      unitPrice,
+      currency,
+      financialStatus,
+      cancelled,
+      warning: variantId ? null : "Variant ID is missing/null",
+      sourceUpdatedAt,
+      status: "PENDING_FOUNDER_APPROVAL" as const, // Şema sözleşmesi ile zorunlu statü
+    });
+  }
+
+  return {
+    shopDomain: mapping.shopDomain,
+    orderId,
+    orderName,
+    currency,
+    financialStatus,
+    cancelled,
+    sourceUpdatedAt,
+    warning: "Processed successfully with production strict validation",
+    rows,
+  };
+}
