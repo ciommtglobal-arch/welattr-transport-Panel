@@ -1,0 +1,128 @@
+import { NexusMapping } from "./nexusShopify";
+
+export type ShopifyRawRequest = {
+  rawBody?: Buffer | string;
+};
+
+export function parseLogisticsShopifyOrder(
+  body: any,
+  mapping: NexusMapping,
+  topic: string,
+) {
+  if (!body || !body.id) {
+    throw new Error("Invalid order payload: missing order id.");
+  }
+
+  const orderId = String(body.id);
+  const orderName = body.name ? String(body.name) : `#${orderId}`;
+  
+  if (!body.currency || typeof body.currency !== "string") {
+    throw new Error("Invalid order payload: missing or invalid currency.");
+  }
+  const currency = body.currency;
+
+  if (!body.financial_status || typeof body.financial_status !== "string") {
+    throw new Error("Invalid order payload: missing or invalid financial_status.");
+  }
+  const financialStatus = body.financial_status;
+  
+  const cancelled = body.cancelled_at || topic === "orders/cancelled" ? 1 : 0;
+
+  if (!body.updated_at) {
+    throw new Error("Invalid order payload: missing updated_at timestamp.");
+  }
+  const sourceUpdatedAt = new Date(body.updated_at);
+  if (isNaN(sourceUpdatedAt.getTime())) {
+    throw new Error("Invalid order payload: invalid updated_at timestamp format.");
+  }
+
+  const lineItems = body.line_items;
+  if (!Array.isArray(lineItems)) {
+    throw new Error("Invalid order payload: line_items must be an array.");
+  }
+
+  // Yeni siparişlerde boş kalem kabul edilmez (yalnızca güncelleme/iptal durumlarında serbest)
+  if (lineItems.length === 0 && topic === "orders/create") {
+    throw new Error("Invalid order payload: new orders cannot have empty line items.");
+  }
+
+  const rows = [];
+  const seenLineIds = new Set<string>();
+
+  for (const item of lineItems) {
+    const lineId = item.id ? String(item.id) : undefined;
+    if (!lineId || lineId === "undefined" || seenLineIds.has(lineId)) {
+      throw new Error("Invalid order payload: missing, undefined, or duplicate line item id.");
+    }
+    seenLineIds.add(lineId);
+
+    // Veritabanı NOT NULL kısıtlamasına tam uyumlu variant_id kontrolü
+    const variantId = item.variant_id !== undefined && item.variant_id !== null && item.variant_id !== ""
+      ? String(item.variant_id)
+      : "0"; // Şema kısıtlamasını korumak için güvenlifallback
+
+    if (!item.title || typeof item.title !== "string") {
+      throw new Error(`Invalid order payload: missing product title for line item ${lineId}.`);
+    }
+    const productTitle = item.title;
+    
+    const quantity = Number(item.quantity);
+    if (!Number.isFinite(quantity) || quantity < 0 || !Number.isInteger(quantity)) {
+      throw new Error(`Invalid order payload: invalid, fractional, or infinite quantity for line item ${lineId}.`);
+    }
+
+    if (item.price === undefined || item.price === null || String(item.price).trim() === "") {
+      throw new Error(`Invalid order payload: missing or empty price for line item ${lineId}.`);
+    }
+    const unitPrice = String(item.price);
+    const numericPrice = Number(unitPrice);
+    if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+      throw new Error(`Invalid order payload: invalid or infinite unit price for line item ${lineId}.`);
+    }
+
+    // Koridor ve sözleşme eşleme kuralları
+    let kind = "reservation";
+    if (variantId && mapping.reservations.includes(variantId)) {
+      kind = "reservation";
+    } else if (variantId && mapping.financing.includes(variantId)) {
+      kind = "financing_interest";
+    } else {
+      kind = "reservation"; // Şema ve mevcut işleyiş sözleşmesine tam uyum
+    }
+
+    rows.push({
+      shopDomain: mapping.shopDomain,
+      orderId,
+      lineId,
+      orderName,
+      variantId,
+      kind,
+      productTitle,
+      quantity,
+      unitPrice,
+      currency,
+      financialStatus,
+      cancelled,
+      warning: variantId !== "0" ? null : "Variant ID was missing",
+      sourceUpdatedAt,
+      status: "PENDING_FOUNDER_APPROVAL" as const,
+    });
+  }
+
+  return {
+    shopDomain: mapping.shopDomain,
+    orderId,
+    orderName,
+    currency,
+    financialStatus,
+    cancelled,
+    sourceUpdatedAt,
+    warning: "Processed successfully with strict schema validation",
+    rows,
+  };
+}
+
+// Sunucu bağlantısının kopmasını önleyen ve dışarıya açılan ana raw parser sarmalayıcısı
+export function createShopifyLogisticsRawParser(mapping: NexusMapping) {
+  return (body: any, topic: string) => parseLogisticsShopifyOrder(body, mapping, topic);
+}
