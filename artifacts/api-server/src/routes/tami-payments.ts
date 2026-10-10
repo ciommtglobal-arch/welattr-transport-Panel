@@ -155,10 +155,14 @@ async function verifyProviderPayment(payload: Record<string, unknown>, session: 
       .select({
         amount: serviceInvoicesTable.amount,
         refundedAmount: serviceInvoicesTable.refundedAmount,
+        currency: serviceInvoicesTable.currency,
       })
       .from(serviceInvoicesTable)
       .where(eq(serviceInvoicesTable.reference, session.invoiceReference))
       .limit(1);
+    if (!invoice || invoice.currency !== session.currency) {
+      throw new TamiGatewayError("Payment invoice was missing or its currency did not match.");
+    }
     if (invoice) {
       const total = amountToCents(invoice.amount);
       const refunded = amountToCents(invoice.refundedAmount);
@@ -298,6 +302,34 @@ async function currentPayment(req: Request, res: Response, orderId: string, deta
     });
     return null;
   }
+}
+
+// A callback body is only a lookup hint, never trusted payment evidence.
+// Keep this separate from authenticated provider notification contracts.
+export async function verifyPaymentCallback(
+  req: Request,
+  res: Response,
+  orderId: string,
+) {
+  const readiness = getPaymentReadiness();
+  if (!readiness.liveEnabled && !readiness.sandboxEnabled) {
+    res.status(503).json({ error: "Tami ödeme doğrulama ortamı etkin değil." });
+    return null;
+  }
+  const session = await findSession(orderId);
+  if (!session?.invoiceReference || !isTamiProvider(session.provider)) {
+    res.status(404).json({ error: "Tami hizmet faturası ödeme oturumu bulunamadı." });
+    return null;
+  }
+  if (
+    (session.provider === "tami" && !readiness.liveEnabled) ||
+    (session.provider === "tami_sandbox" && !readiness.sandboxEnabled)
+  ) {
+    res.status(503).json({ error: "Ödeme kaydıyla eşleşen Tami ortamı etkin değil." });
+    return null;
+  }
+  // Force a fresh signed query, including for previously settled payments.
+  return currentPayment(req, res, orderId, true);
 }
 
 async function settleRefund(

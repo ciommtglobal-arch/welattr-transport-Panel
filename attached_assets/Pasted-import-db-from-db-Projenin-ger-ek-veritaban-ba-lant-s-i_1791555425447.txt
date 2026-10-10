@@ -1,0 +1,77 @@
+import { db } from './db'; // Projenin gerçek veritabanı bağlantısı
+import { logisticsRequests } from './schema'; // Drizzle tablo şeması
+import { eq, and } from 'drizzle-orm';
+import { v4 as uuidv4 } from 'uuid';
+
+app.post('/api/webhook/logistics-inbound', async (req, res) => {
+    let transactionSession = null;
+    try {
+        // 1. Oturum ve Token Doğrulama (Yetkiyi dışarıdan almaz, oturumdan çözer)
+        const userAuth = req.user; // Sunucuda doğrulanan aktif oturum bilgisi
+        if (!userAuth || !userAuth.companyId || !userAuth.userId) {
+            return res.status(401).json({ success: false, message: 'Oturum doğrulaması başarısız.' });
+        }
+
+        const { customerName, origin, destination, cargoDetails, contactNumber, messageId } = req.body;
+
+        // 2. Zorunlu Alan ve Tip Kontrolü
+        if (!customerName || !origin || !destination || !contactNumber || !messageId) {
+            return res.status(400).json({ success: false, message: 'Eksik veya geçersiz alan.' });
+        }
+
+        // 3. PostgreSQL / Drizzle Transaction Başlatma ve Mükerrer Mesaj Kontrolü
+        // Drizzle ORM transaction bloğu içinde güvenli sorgu
+        const result = await db.transaction(async (tx) => {
+            // Aynı mesaj ID ile daha önce kayıt yapılmış mı? (Tekrar koruması)
+            const existingRequest = await tx
+                .select()
+                .from(logisticsRequests)
+                .where(eq(logisticsRequests.messageId, messageId))
+                .limit(1);
+
+            if (existingRequest.length > 0) {
+                return { status: 'DUPLICATE', id: existingRequest[0].id };
+            }
+
+            // 4. Yeni Benzersiz Kayıt Oluşturma (UUIDv4)
+            const newId = uuidv4();
+            const newRequestData = {
+                id: newId,
+                messageId,
+                companyId: userAuth.companyId, // Oturumdan gelen güvenli şirket ID
+                customerName,
+                origin,
+                destination,
+                cargoDetails,
+                contactNumber,
+                status: 'PENDING_BROKER_MATCH',
+                createdByUserId: userAuth.userId, // İşlemi yapan yetkili personel ID
+                createdAt: new Date()
+            };
+
+            await tx.insert(logisticsRequests).values(newRequestData);
+            return { status: 'CREATED', id: newId };
+        });
+
+        if (result.status === 'DUPLICATE') {
+            return res.status(200).json({ 
+                success: true, 
+                message: 'Bu talep daha önce sisteme işlenmiş (Mükerrer kayıt engellendi).' 
+            });
+        }
+
+        // 5. Başarılı Kalıcı Kayıt Yanıtı
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Talep MMT Connect veritabanına başarıyla kaydedildi.', 
+            dataId: result.id 
+        });
+
+    } catch (error) {
+        console.error('Veritabanı transaction hatası:', error.message);
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Sunucu hatası, işlem güvenle geri alındı.' 
+        });
+    }
+});

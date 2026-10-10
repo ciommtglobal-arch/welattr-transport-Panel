@@ -22,6 +22,7 @@ vi.mock("../lib/staffAuth", () => ({
 }));
 
 import staffRouter from "./staff-profiles";
+vi.mock("../lib/logisticsListingAuth", () => ({ findLogisticsGrant: async () => null }));
 
 const app = express();
 app.use(staffRouter);

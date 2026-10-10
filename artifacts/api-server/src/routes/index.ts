@@ -3,6 +3,8 @@ import healthRouter from "./health";
 import limitApplicationsRouter from "./limit-applications";
 import storageRouter from "./storage";
 import tamiPaymentsRouter from "./tami-payments";
+import logisticsListingWorkspaceRouter from "./logistics-listing-workspace";
+import paymentCallbackRouter from "./payment-callback";
 import b2bListingsRouter from "./b2b-listings";
 import b2bBusinessProfilesRouter from "./b2b-business-profiles";
 import b2bReportsRouter from "./b2b-reports";
@@ -21,6 +23,8 @@ import kasaRouter from "./kasa";
 import companyInstructionsRouter from "./company-instructions";
 import companyFundRecordsRouter from "./company-fund-records";
 import companyRecordExportsRouter from "./company-record-exports";
+import whatsappLogisticsWebhookRouter from "./whatsapp-logistics-webhook";
+import nexusShopifyRouter from "./nexus-shopify";
 
 const router: IRouter = Router();
 router.use(kasaRouter);
@@ -29,6 +33,8 @@ router.use(limitApplicationsRouter);
 router.use(storageRouter);
 router.use(paymentsRouter);
 router.use(tamiPaymentsRouter);
+router.use(logisticsListingWorkspaceRouter);
+router.use(paymentCallbackRouter);
 router.use(b2bListingsRouter);
 router.use(b2bBusinessProfilesRouter);
 router.use(b2bReportsRouter);
@@ -37,6 +43,8 @@ router.use(mediaRouter);
 router.use(storefrontRouter);
 router.use(publicLogisticsRouter);
 router.use(logisticsOperationsRouter);
+router.use(whatsappLogisticsWebhookRouter);
+router.use(nexusShopifyRouter);
 router.use(staffProfilesRouter);
 // Trial access is still awaiting explicit production approval; previews and development remain enabled.
 if (process.env.NODE_ENV !== "production") {

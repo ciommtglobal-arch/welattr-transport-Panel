@@ -31,6 +31,182 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /nexus/intakes:
+    get:
+      operationId: getNexusIntakes
+      summary: Founder-only Nexus audit desk, latest 100 records
+      responses:
+        "200":
+          description: Imported records; no automatic founder approval
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NexusIntake"
+        "401":
+          description: Sign-in required
+        "403":
+          description: Founder identity required
+        "503":
+          description: Mapping or database schema unavailable
+  /webhook/shopify/nexus:
+    post:
+      operationId: receiveNexusShopifyWebhook
+      summary: Signed Shopify order intake, never charges or approves
+      description: Requires configured shop, variant mapping and HMAC secret. Does not register Shopify webhooks. Returns 503 on persistence failure so Shopify can retry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NexusShopifyOrderInput"
+      responses:
+        "200":
+          description: Atomically persisted or duplicate notification
+        "400":
+          description: Invalid order, topic or event identity
+        "401":
+          description: Invalid HMAC signature
+        "403":
+          description: Wrong shop
+        "503":
+          description: Configuration or storage not ready
+  /logistics-listings/access:
+    get:
+      operationId: getLogisticsListingAccess
+      responses:
+        "200":
+          description: Independent logistics drafting capability, never a finance or staff role
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LogisticsListingAccess" }
+        "401": { description: Sign in required }
+        "403": { description: No logistics listing capability }
+        "503": { description: Workspace unavailable }
+  /logistics-listings/grants:
+    get:
+      operationId: getLogisticsListingGrants
+      responses:
+        "200":
+          description: Administrator-only permission list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/LogisticsListingGrant" }
+        "401": { description: Sign in required }
+        "403": { description: Administrator required }
+    post:
+      operationId: assignLogisticsListingGrant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LogisticsListingGrantInput" }
+      responses:
+        "200":
+          description: Exact verified Clerk account granted draft-only access; existing roles untouched
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LogisticsListingGrant" }
+        "400": { description: "Invalid email, missing or ambiguous account, or unverified email" }
+        "401": { description: Sign in required }
+        "403": { description: Administrator required }
+        "502": { description: Account identity could not be verified }
+  /logistics-listings/grants/{id}:
+    delete:
+      operationId: revokeLogisticsListingGrant
+      description: Deactivates only this capability; preserves account, roles and drafts.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "204": { description: "Capability revoked, existing data preserved" }
+        "401": { description: Sign in required }
+        "403": { description: Administrator required }
+        "404": { description: Grant not found }
+  /logistics-listings/drafts:
+    get:
+      operationId: getLogisticsListingDrafts
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+      responses:
+        "200":
+          description: Own drafts for a drafter; all drafts for administrators/founder
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LogisticsListingDraftPage" }
+        "401": { description: Sign in required }
+        "403": { description: Capability required }
+    post:
+      operationId: createLogisticsListingDraft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LogisticsListingDraftInput" }
+      responses:
+        "201":
+          description: Private unpublished draft saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LogisticsListingDraft" }
+        "400": { description: Invalid draft or unexpected fields }
+        "401": { description: Sign in required }
+        "403": { description: Active draft grant required }
+  /logistics-listings/drafts/{id}:
+    patch:
+      operationId: saveLogisticsListingDraft
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LogisticsListingDraftUpdate" }
+      responses:
+        "200":
+          description: Own draft saved with optimistic concurrency protection
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LogisticsListingDraft" }
+        "400": { description: Invalid draft }
+        "401": { description: Sign in required }
+        "403": { description: Active draft grant required }
+        "404": { description: Own draft not found }
+        "409": { description: Draft changed or already published }
+  /logistics-listings/drafts/{id}/publish:
+    post:
+      operationId: publishLogisticsListingDraft
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LogisticsListingPublicationInput" }
+      responses:
+        "200":
+          description: Founder published an approved logistics listing atomically; retries return the same listing
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LogisticsListingDraft" }
+        "400": { description: Publication fields incomplete }
+        "401": { description: Sign in required }
+        "403": { description: Allowlisted founder required }
+        "404": { description: Draft not found }
+        "409": { description: Draft changed since review }
   /company-records/{kind}/export:
     get:
       operationId: exportCompanyRecords
@@ -679,6 +855,34 @@ paths:
         "401": { description: Authentication required }
         "403": { description: Founder allowlist required }
         "404": { description: Trial candidate not found }
+  /payment/callback:
+    post:
+      operationId: checkPaymentCallback
+      tags: [payments]
+      summary: Untrusted callback hint checked against Tami's signed payment query
+      description: >
+        This is not an authenticated provider webhook or a PayTR/iyzico/Stripe
+        integration. merchant_oid identifies an existing Tami service-invoice
+        payment. Incoming status and total_amount are ignored, never payment
+        evidence. Only a signed Tami query with matching order, amount and
+        currency may change payment state. Mock payments are rejected. No
+        operation approval, Telegram message or queue dispatch is performed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PaymentCallbackHint" }
+      responses:
+        "200":
+          description: State verified by Tami; pending is not payment confirmation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaymentCallbackResult" }
+        "400": { description: Invalid callback hint or unexpected fields }
+        "404": { description: Existing Tami invoice payment not found }
+        "429": { description: Retry after five seconds; callback checks are bounded per process }
+        "502": { description: Signed provider response could not be verified; no payment confirmation }
+        "503": { description: Matching Tami environment is not enabled or unavailable }
   /payments/tami/{orderId}:
     get:
       operationId: getTamiPaymentStatus
@@ -1797,7 +2001,7 @@ paths:
     post:
       operationId: createLogisticsOffer
       tags: [logistics-operations]
-      summary: Yönetici onayına teklif gönderir
+      summary: Kurucu onayına teklif taslağı gönderir
       requestBody:
         required: true
         content:
@@ -1806,7 +2010,7 @@ paths:
               $ref: "#/components/schemas/LogisticsOfferInput"
       responses:
         "201":
-          description: Teklif oluşturuldu ve yönetici onayına alındı
+          description: Teklif oluşturuldu ve kurucu onayına alındı
           content:
             application/json:
               schema:
@@ -1833,7 +2037,13 @@ paths:
     post:
       operationId: approveLogisticsOffer
       tags: [logistics-operations]
-      summary: Teklifi yönetici olarak onaylar
+      summary: Teklifi yalnız allowlist kurucusu onaylar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogisticsOfferApprovalInput"
       parameters:
         - in: path
           name: id
@@ -1861,7 +2071,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Admin staff access required
+          description: Founder identity required; admin role alone is insufficient
           content:
             application/json:
               schema:
@@ -1871,6 +2081,13 @@ paths:
       operationId: markLogisticsOfferSent
       tags: [logistics-operations]
       summary: Onaylı teklifi müşteriye gönderildi olarak işaretler
+      description: Harici mesaj göndermez; kullanıcının doğruladığı manuel gönderim kaydını tutar.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogisticsOfferDispatchInput"
       parameters:
         - in: path
           name: id
@@ -1903,6 +2120,91 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /logistics/carriers/{id}/review:
+    post:
+      operationId: reviewLogisticsCarrier
+      tags: [logistics-operations]
+      summary: Bekleyen taşıyıcı başvurusunu yalnız kurucu değerlendirir
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogisticsCarrierReviewInput"
+      responses:
+        "200":
+          description: Değerlendirilen taşıyıcı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogisticsCarrierRecord"
+        "400": { description: Invalid input }
+        "401": { description: Sign-in required }
+        "403": { description: Founder required }
+        "404": { description: Carrier not found }
+        "409": { description: Carrier already reviewed }
+  /logistics/offers/{id}:
+    patch:
+      operationId: reviseLogisticsOffer
+      tags: [logistics-operations]
+      summary: Yalnız onay bekleyen teklif taslağını revize eder
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogisticsOfferRevisionInput"
+      responses:
+        "200":
+          description: Revize edilen taslak
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogisticsOfferRecord"
+        "400": { description: Invalid input }
+        "401": { description: Sign-in required }
+        "403": { description: Creator or founder required }
+        "404": { description: Offer not found }
+        "409": { description: Offer no longer editable }
+  /logistics/offers/{id}/decision:
+    post:
+      operationId: decideLogisticsOffer
+      tags: [logistics-operations]
+      summary: Kurucu teklif reddini veya müşterinin harici kabul kaydını işler
+      description: Müşteri kabul kaydı hukuki imza, sözleşme veya tahsilat değildir.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogisticsOfferDecisionInput"
+      responses:
+        "200":
+          description: Güncellenmiş teklif
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogisticsOfferRecord"
+        "400": { description: Invalid input }
+        "401": { description: Sign-in required }
+        "403": { description: Founder required }
+        "404": { description: Offer not found }
+        "409": { description: Invalid workflow transition }
   /logistics/communications:
     post:
       operationId: createLogisticsCommunication
@@ -2025,10 +2327,10 @@ paths:
                 properties:
                   role:
                     type: string
-                    enum: [founder, admin, operations, finance, reviewer]
+                    enum: [founder, admin, operations, finance, reviewer, logistics_listings]
                   workspace:
                     type: string
-                    enum: [/staff/yonetim-paneli, /staff/calisma-alani]
+                    enum: [/staff/yonetim-paneli, /staff/calisma-alani, /staff/lojistik-ilanlari]
         "401":
           description: Authentication required
           content:
@@ -3736,6 +4038,52 @@ components:
       name: pageSize
       schema: { type: integer, minimum: 1, maximum: 50, default: 25 }
   schemas:
+    NexusShopifyOrderInput:
+      type: object
+      additionalProperties: true
+      description: Shopify order JSON; signature is verified against untouched raw bytes.
+    NexusIntake:
+      type: object
+      required: [id, shopDomain, orderId, orderName, lineId, variantId, kind, productTitle, quantity, unitPrice, currency, financialStatus, cancelled, status, sourceUpdatedAt, createdAt]
+      properties:
+        id:
+          type: integer
+        shopDomain:
+          type: string
+        orderId:
+          type: string
+        orderName:
+          type: string
+        lineId:
+          type: string
+        variantId:
+          type: string
+        kind:
+          type: string
+          enum: [reservation, financing_interest]
+        productTitle:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          type: string
+        currency:
+          type: string
+        financialStatus:
+          type: string
+        cancelled:
+          type: integer
+        warning:
+          type: [string, "null"]
+        status:
+          type: string
+          enum: [PENDING_FOUNDER_APPROVAL, FOUNDER_APPROVED, FOUNDER_REJECTED]
+        sourceUpdatedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
     KasaUser:
       type: object
       required: [id, name, role, branchId, active]
@@ -3987,6 +4335,94 @@ components:
         page: { type: integer }
         pageSize: { type: integer }
         hasMore: { type: boolean }
+    LogisticsListingAccess:
+      type: object
+      required: [userId, canDraft, canManageGrants, canPublish]
+      properties:
+        userId: { type: string }
+        canDraft: { type: boolean }
+        canManageGrants: { type: boolean }
+        canPublish: { type: boolean }
+    LogisticsListingGrantInput:
+      type: object
+      additionalProperties: false
+      required: [email]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+    LogisticsListingGrant:
+      type: object
+      required: [id, clerkUserId, verifiedEmail, displayName, active, assignedBy, updatedAt]
+      properties:
+        id: { type: integer }
+        clerkUserId: { type: string }
+        verifiedEmail: { type: string }
+        displayName: { type: string }
+        active: { type: boolean }
+        assignedBy: { type: string }
+        updatedAt: { type: string }
+    LogisticsListingDraftInput:
+      type: object
+      additionalProperties: false
+      required: [title, fullName, organization, location, contact, description]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 140 }
+        fullName: { type: string, maxLength: 160 }
+        organization: { type: string, maxLength: 200 }
+        location: { type: string, maxLength: 160 }
+        contact: { type: string, maxLength: 180 }
+        description: { type: string, maxLength: 2000 }
+    LogisticsListingDraftUpdate:
+      allOf:
+        - $ref: "#/components/schemas/LogisticsListingDraftInput"
+        - type: object
+          required: [revision]
+          properties:
+            revision: { type: integer, minimum: 1 }
+    LogisticsListingPublicationInput:
+      type: object
+      additionalProperties: false
+      required: [revision]
+      properties:
+        revision: { type: integer, minimum: 1 }
+    LogisticsListingDraft:
+      allOf:
+        - $ref: "#/components/schemas/LogisticsListingDraftInput"
+        - type: object
+          required: [id, authorClerkUserId, revision, publishedListingId, publishedBy, publishedAt, createdAt, updatedAt]
+          properties:
+            id: { type: integer }
+            authorClerkUserId: { type: string }
+            revision: { type: integer }
+            publishedListingId: { type: [integer, "null"] }
+            publishedBy: { type: [string, "null"] }
+            publishedAt: { type: [string, "null"] }
+            createdAt: { type: string }
+            updatedAt: { type: string }
+    LogisticsListingDraftPage:
+      type: object
+      required: [items, hasMore, page]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/LogisticsListingDraft" }
+        hasMore: { type: boolean }
+        page: { type: integer }
+    PaymentCallbackHint:
+      type: object
+      additionalProperties: false
+      required: [merchant_oid]
+      properties:
+        merchant_oid: { type: string, minLength: 2, maxLength: 36, pattern: '^[A-Za-z0-9_-]+$' }
+        status: { type: string, maxLength: 32, description: Untrusted hint; ignored }
+        total_amount: { type: string, maxLength: 32, description: Untrusted hint; ignored }
+    PaymentCallbackResult:
+      type: object
+      required: [status, paymentReference, operationApproved, message]
+      properties:
+        status: { $ref: "#/components/schemas/TamiPaymentStatusValue" }
+        paymentReference: { type: string }
+        operationApproved: { type: boolean, enum: [false] }
+        message: { type: string }
     TamiPaymentStatus:
       type: object
       required: [orderId, invoiceReference, amount, currency, status, mode]
@@ -5500,8 +5936,12 @@ components:
     LogisticsRequestStatusUpdate:
       type: object
       additionalProperties: false
-      required: [status]
+      required: [status, expectedUpdatedAt]
       properties:
+        expectedUpdatedAt:
+          type: string
+          format: date-time
+          description: Last shipment version seen by the editor; stale changes are rejected.
         status:
           $ref: "#/components/schemas/LogisticsShipmentStatus"
         assignedStaffClerkUserId:
@@ -5529,10 +5969,12 @@ components:
           minimum: 1
         carrierCostAmount:
           type: number
-          minimum: 0
+          exclusiveMinimum: 0
+          maximum: 9999999999999.99
         customerPriceAmount:
           type: number
-          minimum: 0
+          exclusiveMinimum: 0
+          maximum: 9999999999999.99
         currency:
           type: string
           minLength: 3
@@ -5642,8 +6084,11 @@ components:
           type: string
     LogisticsOperationsResponse:
       type: object
-      required: [requests, carriers, shipments, offers, communications, staff]
+      required: [requests, carriers, shipments, offers, communications, staff, canApprove]
       properties:
+        canApprove:
+          type: boolean
+          description: True only for the configured founder identity.
         requests:
           type: array
           items:
@@ -5668,6 +6113,56 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LogisticsStaffMember"
+    LogisticsCarrierReviewInput:
+      type: object
+      additionalProperties: false
+      required: [status, note]
+      properties:
+        status:
+          type: string
+          enum: [approved, rejected]
+        note:
+          type: string
+          minLength: 3
+          maxLength: 1000
+    LogisticsOfferRevisionInput:
+      type: object
+      additionalProperties: false
+      required: [carrierId, carrierCostAmount, customerPriceAmount, currency, includedServices, validUntil, expectedUpdatedAt]
+      properties:
+        expectedUpdatedAt: { type: string, format: date-time }
+        carrierId: { type: integer, minimum: 1 }
+        carrierCostAmount: { type: number, exclusiveMinimum: 0, maximum: 9999999999999.99 }
+        customerPriceAmount: { type: number, exclusiveMinimum: 0, maximum: 9999999999999.99 }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        includedServices: { type: string, minLength: 2, maxLength: 2000 }
+        validUntil: { type: string, format: date-time }
+    LogisticsOfferDecisionInput:
+      type: object
+      additionalProperties: false
+      required: [decision, note, expectedUpdatedAt]
+      properties:
+        expectedUpdatedAt: { type: string, format: date-time }
+        decision:
+          type: string
+          enum: [reject, accept_customer]
+        note: { type: string, minLength: 3, maxLength: 1000 }
+    LogisticsOfferDispatchInput:
+      type: object
+      additionalProperties: false
+      required: [channel, note, expectedUpdatedAt]
+      properties:
+        expectedUpdatedAt: { type: string, format: date-time }
+        channel:
+          type: string
+          enum: [phone, email, whatsapp]
+        note: { type: string, minLength: 3, maxLength: 1000 }
+    LogisticsOfferApprovalInput:
+      type: object
+      additionalProperties: false
+      required: [expectedUpdatedAt]
+      properties:
+        expectedUpdatedAt: { type: string, format: date-time }
     ErrorResponse:
       type: object
       required:

@@ -20,3 +20,15 @@ Payment integration scope is MMT service invoices only; do not change the constr
 **Why:** Service billing and physical-product commerce use separate providers and legal/payment controls. A development misconfiguration must not create a real charge.
 
 **How to apply:** Keep the invoice payment routes separate from Shopify, verify test and production modes independently, and leave live collection disabled until written company/provider authorization is recorded.
+
+Treat a generic payment callback as an untrusted lookup hint, not as an authenticated Tami notification. Tami's public hosted-payment documentation describes browser redirects and Query reconciliation; it does not establish a signed server-notification contract.
+
+**Why:** A generic Flask example accepted `status: success` without authenticating the sender. Reusing that shape as a Tami webhook would invent a provider contract and allow unsupported confirmation claims.
+
+**How to apply:** Trust only a verified provider query matching the stored order, invoice amount and currency. Keep notification-driven Telegram/operation automation disabled until Tami confirms its signature, acknowledgement and retry requirements. Collection never substitutes for the company owner's operation approval.
+
+Telegram payment messages must distinguish a verified Tami card collection from money credited to the Garanti bank account. A card-payment success is not evidence of bank settlement or an EFT/havale receipt.
+
+**Why:** Confusing these events would give the owner an incorrect financial confirmation.
+
+**How to apply:** Label a verified card payment as a Tami collection, not a bank-account credit. Bank-credit messages require a separately verified bank source. Before enabling any financial Telegram notification, confirm the owner's authorized private recipient; do not reuse a public media channel.

@@ -14,11 +14,13 @@ import {
   db,
   type B2BListing,
   type B2BListingSocialLinks,
+  logisticsListingDraftsTable,
 } from "@workspace/db";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
-import { requireStaff, requireUser } from "../lib/staffAuth";
+import { requireB2BReviewer, requireUser } from "../lib/staffAuth";
 import { ObjectStorageService } from "../lib/objectStorage";
 import { randomBytes } from "node:crypto";
+import { isLogisticsFounder, isMissingLogisticsSchema } from "../lib/logisticsListingAuth";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -135,7 +137,7 @@ router.get("/b2b-listings/:id/image", async (req, res): Promise<void> => {
     return;
   }
 
-  if (listing.status !== "approved" && !(await requireStaff(req, res))) {
+  if (listing.status !== "approved" && !(await requireB2BReviewer(req, res))) {
     return;
   }
 
@@ -268,7 +270,7 @@ router.post("/b2b-listings", async (req, res): Promise<void> => {
 });
 
 router.get("/b2b-listings/review", async (req, res): Promise<void> => {
-  const authorization = await requireStaff(req, res);
+  const authorization = await requireB2BReviewer(req, res);
   if (!authorization) return;
 
   const parsed = GetB2BListingReviewQueueQueryParams.safeParse(req.query);
@@ -332,7 +334,7 @@ router.get("/b2b-listings/:id", async (req, res): Promise<void> => {
 });
 
 router.patch("/b2b-listings/:id/status", async (req, res): Promise<void> => {
-  const authorization = await requireStaff(req, res);
+  const authorization = await requireB2BReviewer(req, res);
   if (!authorization) return;
 
   const params = UpdateB2BListingStatusParams.safeParse(req.params);
@@ -354,6 +356,27 @@ router.patch("/b2b-listings/:id/status", async (req, res): Promise<void> => {
   }
 
   const now = new Date();
+  if (body.data.status === "approved" && !isLogisticsFounder(authorization.userId)) {
+    // Every logistics listing needs founder approval, including ordinary public
+    // submissions without a workspace draft or the optional draft schema.
+    if (existing.role === "logistics") {
+      res.status(403).json({ error: "Bu lojistik ilanını yalnız kurucu yayımlayabilir." });
+      return;
+    }
+    // Also protect linked drafts if a legacy record's role has been changed.
+    let scopedDraft;
+    try {
+      [scopedDraft] = await db.select({ id: logisticsListingDraftsTable.id })
+        .from(logisticsListingDraftsTable)
+        .where(eq(logisticsListingDraftsTable.publishedListingId, existing.id)).limit(1);
+    } catch (error) {
+      if (!isMissingLogisticsSchema(error)) throw error;
+    }
+    if (scopedDraft) {
+      res.status(403).json({ error: "Bu lojistik ilanını yalnız kurucu yayımlayabilir." });
+      return;
+    }
+  }
   const [updated] = await db
     .update(b2bListingsTable)
     .set({

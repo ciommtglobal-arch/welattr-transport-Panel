@@ -179,4 +179,21 @@ describe("B2B company invitation acceptance email verification", () => {
     expect(state.update).not.toHaveBeenCalled();
     expect(state.member?.inviteTokenHash).toBe(inviteTokenHash);
   });
+
+  it("returns a conflict when another request consumes the invite before the update", async () => {
+    state.emailAddresses = [
+      {
+        emailAddress: "member@example.com",
+        verification: { status: "verified" },
+      },
+    ];
+    state.update.mockImplementationOnce(() => []);
+
+    const response = await request(app)
+      .post("/b2b/business-profile/members/invitations/accept")
+      .send({ token: inviteToken });
+
+    expect(response.status).toBe(409);
+    expect(response.body.error).toContain("başka bir oturumda");
+  });
 });

@@ -1,0 +1,77 @@
+const { v4: uuidv4 } = require('uuid'); // Benzersiz ve çakışmasız kimlik üretimi için
+
+app.post('/api/webhook/logistics-inbound', async (req, res) => {
+    // Veritabanı işlemleri için transaction (atomik işlem) başlatılır
+    const clientDbSession = await db.startSession();
+    clientDbSession.startTransaction();
+
+    try {
+        const { customerName, origin, destination, cargoDetails, contactNumber, companyId, userRole } = req.body;
+
+        // 1. Kapsam ve Alan Doğrulama (Zorunlu alanlar ve tip kontrolü)
+        if (!customerName || !origin || !destination || !contactNumber || !companyId) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Eksik veya geçersiz alan! Zorunlu parametreler eksik.' 
+            });
+        }
+
+        // 2. Yetki ve Rol Kapsamı Kontrolü (Lider/Asistan yetkilendirmesi)
+        if (userRole !== 'LEADER' && userRole !== 'ASSISTANT') {
+            return res.status(403).json({ success: false, message: 'Yetkisiz erişim denemesi.' });
+        }
+
+        // 3. Atomik Benzersiz Kayıt Kimliği (UUID v4)
+        const uniqueRequestId = uuidv4();
+
+        // 4. Veritabanı Düzeyinde Mükerrer Kayıt Kontrolü (Concurrent-safe)
+        const existingCheck = await db.requests.findOne({ 
+            customerName, contactNumber, destination, status: 'PENDING_BROKER_MATCH' 
+        }, { session: clientDbSession });
+
+        if (existingCheck) {
+            await clientDbSession.abortTransaction();
+            clientDbSession.endSession();
+            return res.status(200).json({ 
+                success: true, 
+                message: 'Aynı bilgilere sahip aktif bir talep zaten mevcut (Mükerrer engellendi).' 
+            });
+        }
+
+        // 5. Kalıcı Veritabanı Kaydı
+        const newRequestData = {
+            id: uniqueRequestId,
+            companyId,
+            customerName,
+            origin,
+            destination,
+            cargoDetails,
+            contactNumber,
+            status: 'PENDING_BROKER_MATCH',
+            createdByRole: userRole,
+            createdAt: new Date()
+        };
+
+        await db.requests.insertOne(newRequestData, { session: clientDbSession });
+
+        // İşlemi onayla ve oturumu kapat
+        await clientDbSession.commitTransaction();
+        clientDbSession.endSession();
+
+        // 6. Sadece Kalıcı Kayıt Tamamlandıktan Sonra Başarı Yanıtı Döner
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Talep MMT Connect veritabanına atomik olarak işlendi.', 
+            dataId: uniqueRequestId 
+        });
+
+    } catch (error) {
+        await clientDbSession.abortTransaction();
+        clientDbSession.endSession();
+        console.error('Kritik Veritabanı İşlem Hatası:', error.message);
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Veritabanı kayıt hatası, işlem geri alındı.' 
+        });
+    }
+});

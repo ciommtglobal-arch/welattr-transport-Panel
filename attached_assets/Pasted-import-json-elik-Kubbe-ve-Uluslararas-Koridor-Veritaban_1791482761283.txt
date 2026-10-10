@@ -1,0 +1,72 @@
+import json
+
+# Çelik Kubbe ve Uluslararası Koridor Veritabanı / Doğrulanmış Piyasa Referansları
+CORRIDOR_STANDARDS = {
+    "Irak Hattı": {
+        "hedef_marj": 18.0,
+        "max_risk_skoru": 5,
+        "piyasa_referans_navlun": 2800, # USD (Doğrulanmış Piyasa Fiyatı)
+        "para_birimi": "USD",
+        "ortalama_sure_gun": 3
+    },
+    "Dubai / BAE Hattı": {
+        "hedef_marj": 22.0,
+        "max_risk_skoru": 7,
+        "piyasa_referans_navlun": 6500, # USD (Doğrulanmış Piyasa Fiyatı)
+        "para_birimi": "USD",
+        "ortalama_sure_gun": 12
+    },
+    "Avrupa Koridoru": {
+        "hedef_marj": 20.0,
+        "max_risk_skoru": 4,
+        "piyasa_referans_navlun": 5200, # USD (Doğrulanmış Piyasa Fiyatı)
+        "para_birimi": "USD",
+        "ortalama_sure_gun": 8
+    },
+    "Ukrayna & Doğu Avrupa": {
+        "hedef_marj": 25.0,
+        "max_risk_skoru": 8,
+        "piyasa_referans_navlun": 4800, # USD (Doğrulanmış Piyasa Fiyatı)
+        "para_birimi": "USD",
+        "ortalama_sure_gun": 7
+    }
+}
+
+def celik_kubbe_marj_denetimi(koridor_adi, teklif_edilen_marj, risk_skoru, teklif_navlun):
+    """
+    Çelik Kubbe prensiplerine göre ön kontrol yapar. 
+    ASLA nihai onay vermez; son karar Kurucuya (CIO) aittir.
+    """
+    if koridor_adi not in CORRIDOR_STANDARDS:
+        return {"durum": "HATA", "mesaj": "Geçersiz koridor tanımı."}
+    
+    standart = CORRIDOR_STANDARDS[koridor_adi]
+    
+    # Kriter Kontrolleri
+    marj_uygun = teklif_edilen_marj >= standart["hedef_marj"]
+    risk_uygun = risk_skoru <= standart["max_risk_skoru"]
+    navlun_uygun = teklif_navlun >= standart["piyasa_referans_navlun"]
+    
+    if marj_uygun and risk_uygun and navlun_uygun:
+        return {
+            "durum": "ÖN KONTROL UYGUN — KURUCU ONAYI BEKLENİYOR",
+            "mesaj": f"Çelik Kubbe ön denetiminden geçti (Piyasa Referansı: ${standart['piyasa_referans_navlun']} {standart['para_birimi']}). Son onay için CIO / WelatTR bekleniyor."
+        }
+    else:
+        sebep = []
+        if not marj_uygun:
+            sebep.append(f"Marj yetersiz (%{teklif_edilen_marj}, Hedef: %{standart['hedef_marj']})")
+        if not risk_uygun:
+            sebep.append(f"Risk skoru yüksek ({risk_skoru}, Max: {standart['max_risk_skoru']})")
+        if not navlun_uygun:
+            sebep.append(f"Navlun piyasa referansının altında (${teklif_navlun}, Referans: ${standart['piyasa_referans_navlun']})")
+            
+        return {
+            "durum": "BLOKE / CIO ONAYINA DÜŞTÜ",
+            "mesaj": "Çelik Kubbe risk uyarısı: " + " | ".join(sebep)
+        }
+
+# Test
+if __name__ == "__main__":
+    sonuc = celik_kubbe_marj_denetimi("Irak Hattı", 16.5, 4, 2800)
+    print(json.dumps(sonuc, ensure_ascii=False, indent=2))

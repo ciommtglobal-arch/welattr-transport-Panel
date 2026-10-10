@@ -1,0 +1,52 @@
+import json
+
+# MMT Global - Şahıs Hesabı Entegreli Otonom Pazar Yeri Motoru
+MARKETPLACE_SAHIS_HESABI_CONFIG = {
+    "hesap_sahibi": "Mehmet Alioğlu",
+    "islem_tipi": "Doğrudan Şahıs Hesabına Komisyon Tahsilatı",
+    "koridorlar": {
+        "Irak Hattı": {"toplam_komisyon": 6.0, "max_risk": 5},
+        "Dubai / BAE Hattı": {"toplam_komisyon": 8.0, "max_risk": 7},
+        "Avrupa Koridoru": {"toplam_komisyon": 7.0, "max_risk": 4},
+        "Ukrayna & Doğu Avrupa": {"toplam_komisyon": 10.0, "max_risk": 8}
+    }
+}
+
+def sahıs_hesabi_komisyon_isleyicisi(koridor, musteri_satis_fiyati, risk_skoru):
+    """
+    Pazar yerinde gerçekleşen eşleşmelerde, belirlenen toplam komisyonu 
+    doğrudan şahıs hesabınıza aktaracak şekilde hesaplar.
+    """
+    config = MARKETPLACE_SAHIS_HESABI_CONFIG
+    if koridor not in config["koridorlar"]:
+        return {"durum": "HATA", "mesaj": "Geçersiz koridor tanımı."}
+    
+    kural = config["koridorlar"][koridor]
+    toplam_komisyon = musteri_satis_fiyati * (kural["toplam_komisyon"] / 100.0)
+    
+    # %50 Yük Veren, %50 Taşıyıcı Paylaşımı (Toplam Komisyon Havuzu)
+    yuk_veren_payi = toplam_komisyon / 2.0
+    tasiyici_payi = toplam_komisyon / 2.0
+    
+    if risk_skoru <= kural["max_risk"]:
+        return {
+            "durum": "AKTİF — ŞAHIS HESABINA TAHSİLAT HAZIR",
+            "hesap_sahibi": config["hesap_sahibi"],
+            "detaylar": {
+                "koridor": koridor,
+                "toplam_komisyon_usd": round(toplam_komisyon, 2),
+                "yuk_veren_odeyecegi": round(yuk_veren_payi, 2),
+                "tasiyici_odeyecegi": round(tasiyici_payi, 2)
+            },
+            "mesaj": f"Pazar yeri eşleşmesi onaylandı. Toplam ${round(toplam_komisyon, 2)} komisyon doğrudan şahıs hesabınıza yönlendiriliyor."
+        }
+    else:
+        return {
+            "durum": "BLOKE / RİSK EŞİĞİ AŞILDI",
+            "mesaj": "Çelik Kubbe güvenlik denetimi nedeniyle işlem askıya alındı."
+        }
+
+if __name__ == "__main__":
+    # Test: Irak hattı üzerinden şahıs hesabına komisyon akışı simülasyonu
+    sonuc = sahıs_hesabi_komisyon_isleyicisi("Irak Hattı", 3000.0, 3)
+    print(json.dumps(sonuc, ensure_ascii=False, indent=2))

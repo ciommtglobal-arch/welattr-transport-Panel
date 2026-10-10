@@ -15,4 +15,5 @@ export const GetStaffAccess200Role = {
   operations: 'operations',
   finance: 'finance',
   reviewer: 'reviewer',
+  logistics_listings: 'logistics_listings',
 } as const;

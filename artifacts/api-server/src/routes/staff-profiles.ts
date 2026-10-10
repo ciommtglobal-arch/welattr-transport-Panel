@@ -2,10 +2,12 @@ import { Router, type IRouter } from "express";
 import {
   db,
   staffProfilesTable,
+  staffUsersTable,
   type StaffProfile,
 } from "@workspace/db";
-import { asc } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { requireOperationsStaff, requireStaff, requireUser } from "../lib/staffAuth";
+import { findLogisticsGrant } from "../lib/logisticsListingAuth";
 
 const router: IRouter = Router();
 
@@ -16,6 +18,15 @@ router.get("/staff/access", async (req, res): Promise<void> => {
   if (founderId && userId === founderId) {
     res.json({ role: "founder", workspace: "/staff/yonetim-paneli" });
     return;
+  }
+  const grant = await findLogisticsGrant(userId);
+  if (grant) {
+    const [existingStaff] = await db.select().from(staffUsersTable)
+      .where(and(eq(staffUsersTable.clerkUserId, userId), eq(staffUsersTable.active, 1))).limit(1);
+    if (!existingStaff) {
+      res.json({ role: "logistics_listings", workspace: "/staff/lojistik-ilanlari" });
+      return;
+    }
   }
   const authorization = await requireStaff(req, res);
   if (!authorization) return;

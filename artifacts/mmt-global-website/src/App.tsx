@@ -47,6 +47,10 @@ const publicQueryClient = createQueryClient();
 
 const NotFound = lazy(() => import('@/pages/not-found'));
 const CorporateHome = lazy(() => import('@/pages/corporate-home'));
+
+const LogisticsPreview = import.meta.env.DEV
+  ? lazy(() => import('@/pages/logistics-preview'))
+  : null;
 const LimitChooser = lazy(() =>
   import('@/pages/limit').then((module) => ({ default: module.LimitChooser })),
 );
@@ -67,6 +71,8 @@ const ConstructionQuotePage = lazy(() =>
   import('@/pages/construction-shop').then((module) => ({ default: module.ConstructionQuotePage })),
 );
 const StaffConstructionQuotes = lazy(() => import('@/pages/staff-construction-quotes'));
+
+const StaffNexusDesk = lazy(() => import('@/pages/staff-nexus-desk'));
 const PaymentPage = lazy(() => import('@/pages/payment'));
 const MockPaymentPage = lazy(() =>
   import('@/pages/payment').then((module) => ({ default: module.MockPaymentPage })),
@@ -102,6 +108,10 @@ const StaffWorkspaceRedirect = lazy(() =>
 const FounderDashboard = lazy(() =>
   import('@/pages/staff-workspace').then((module) => ({ default: module.FounderDashboard })),
 );
+
+const StaffLogisticsListings = lazy(() => import('@/pages/staff-logistics-listings'));
+
+const StaffLogisticsOperations = lazy(() => import('@/pages/staff-logistics-operations'));
 const AboutPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.AboutPage })));
 const CareersPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.CareersPage })));
 const CookiePage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.CookiePage })));
@@ -337,6 +347,7 @@ function Router() {
     <RoutedErrorBoundary>
       <Suspense fallback={<RouteLoading />}>
       <Switch>
+        {LogisticsPreview && <Route path="/lojistik-onizleme" component={LogisticsPreview} />}
         <Route path="/" component={PanelAwareHome} />
         <Route path="/ecosystem" component={PanelAwareHome} />
         <Route path="/limit" component={LimitChooser} />
@@ -379,10 +390,13 @@ function Router() {
         <Route path="/staff/b2b-sikayetler" component={StaffB2BReports} />
         <Route path="/staff/b2b-talepler" component={StaffB2BRequests} />
         <Route path="/staff/insaat-teklifleri" component={StaffConstructionQuotes} />
+        <Route path="/staff/nexus-denetim" component={StaffNexusDesk} />
         <Route path="/staff/sorumluluk-merkezi" component={StaffResponsibilityCenter} />
         <Route path="/staff/yonlendir" component={StaffWorkspaceRedirect} />
         <Route path="/staff/yonetim-paneli" component={FounderDashboard} />
         <Route path="/staff/calisma-alani" component={StaffExpertWorkspace} />
+        <Route path="/staff/lojistik-ilanlari" component={StaffLogisticsListings} />
+        <Route path="/staff/lojistik-operasyon" component={StaffLogisticsOperations} />
         <Route path="/staff/operasyon-masasi" component={StaffOperationsDesk} />
         <Route path="/staff/giris/*?" component={StaffSignInPage} />
         <Route path="/staff/kayit/*?" component={StaffSignUpPage} />
@@ -445,13 +459,20 @@ function App() {
 
 function PageLanguageSelector() {
   const [location] = useLocation();
+  if (import.meta.env.DEV && normalizeRoutePath(location) === '/lojistik-onizleme') return null;
   const isCorporateHome = ['/', '/ecosystem'].includes(normalizeRoutePath(location));
   return isCorporateHome && !isStaffDomain ? null : <LanguageSelector />;
 }
 
 function PanelAwareHome() {
+  const [location] = useLocation();
   if (isStaffDomain) {
     return <Redirect to="/staff/yonlendir" />;
+  }
+  // Only the development preview's home changes; production keeps CorporateHome.
+  // /ecosystem remains available for the existing business-area presentation.
+  if (LogisticsPreview && normalizeRoutePath(location) === '/') {
+    return <LogisticsPreview />;
   }
   return <CorporateHome />;
 }

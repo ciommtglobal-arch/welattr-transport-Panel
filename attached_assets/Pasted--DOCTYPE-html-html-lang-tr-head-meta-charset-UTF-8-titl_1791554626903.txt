@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>MMT Connect - Lojistik Talep Girişi</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .container { max-width: 600px; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: auto; }
+        h2 { color: #1e293b; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #475569; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #0f172a; color: white; padding: 12px; border: none; border-radius: 4px; width: 100%; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #1e293b; }
+        .success-msg { display: none; background: #d1fae5; color: #065f46; padding: 10px; border-radius: 4px; text-align: center; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>MMT Global | Lojistik Talep Formu</h2>
+    <div id="successAlert" class="success-msg">Talebiniz başarıyla MMT Connect paneline iletildi!</div>
+    
+    <form id="logisticsForm">
+        <div class="form-group">
+            <label>Firma / Ad Soyad:</label>
+            <input type="text" id="customerName" required placeholder="Örn: Mersin İhracat Ltd. Şti.">
+        </div>
+        <div class="form-group">
+            <label>İletişim Numarası:</label>
+            <input type="text" id="contactNumber" required placeholder="05XX XXX XX XX">
+        </div>
+        <div class="form-group">
+            <label>Yükleme Noktası (Kalkış):</label>
+            <select id="origin">
+                <option value="Mersin">Mersin</option>
+                <option value="Gaziantep">Gaziantep</option>
+                <option value="Diğer">Diğer İç Bölge</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Varış Noktası:</label>
+            <select id="destination">
+                <option value="Zaxo / İbrahim Halil">Zaxo / İbrahim Halil (Irak)</option>
+                <option value="Erbil">Erbil (Irak)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Yük Detayları ve Tonaj:</label>
+            <textarea id="cargoDetails" rows="3" placeholder="Örn: 22 Ton Kuru Gıda / Tenteli Dorse"></textarea>
+        </div>
+        <button type="submit">Talebi Sisteme Gönder</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('logisticsForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const payload = {
+            customerName: document.getElementById('customerName').value,
+            contactNumber: document.getElementById('contactNumber').value,
+            origin: document.getElementById('origin').value,
+            destination: document.getElementById('destination').value,
+            cargoDetails: document.getElementById('cargoDetails').value,
+            messageId: 'WEB-' + Date.now()
+        };
+
+        try {
+            const response = await fetch('/api/webhook/logistics-inbound', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            const result = await response.json();
+            if(result.success) {
+                document.getElementById('successAlert').style.display = 'block';
+                document.getElementById('logisticsForm').reset();
+                setTimeout(() => { document.getElementById('successAlert').style.display = 'none'; }, 4000);
+            } else {
+                alert('Hata: ' + result.message);
+            }
+        } catch (err) {
+            alert('Bağlantı hatası oluştu.');
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -354,12 +354,13 @@ router.post(
       return;
     }
 
+    const acceptanceTime = new Date();
     const [accepted] = await db
       .update(b2bCompanyMembersTable)
       .set({
         clerkUserId: userId,
         status: "active",
-        acceptedAt: new Date(),
+        acceptedAt: acceptanceTime,
         inviteTokenHash: null,
         inviteExpiresAt: null,
       })
@@ -367,9 +368,18 @@ router.post(
         and(
           eq(b2bCompanyMembersTable.id, member.id),
           eq(b2bCompanyMembersTable.status, "invited"),
+          eq(b2bCompanyMembersTable.inviteTokenHash, hashInviteToken(parsed.data.token)),
+          gt(b2bCompanyMembersTable.inviteExpiresAt, acceptanceTime),
         ),
       )
       .returning();
+
+    if (!accepted) {
+      res.status(409).json({
+        error: "Bu davet başka bir oturumda kullanılmış veya süresi dolmuş.",
+      });
+      return;
+    }
 
     res.json(serializeMember(accepted));
   },

@@ -13,6 +13,8 @@ import type { LogisticsShipmentRecord } from './logisticsShipmentRecord';
 import type { LogisticsStaffMember } from './logisticsStaffMember';
 
 export interface LogisticsOperationsResponse {
+  /** True only for the configured founder identity. */
+  canApprove: boolean;
   requests: LogisticsRequestRecord[];
   carriers: LogisticsCarrierRecord[];
   shipments: LogisticsShipmentRecord[];

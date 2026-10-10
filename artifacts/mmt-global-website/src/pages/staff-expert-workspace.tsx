@@ -1,5 +1,5 @@
 import { useAuth, UserButton } from "@clerk/react";
-import { getGetStaffAccessQueryKey, useGetStaffAccess } from "@workspace/api-client-react";
+import { getGetLogisticsListingAccessQueryKey, getGetStaffAccessQueryKey, useGetLogisticsListingAccess, useGetStaffAccess } from "@workspace/api-client-react";
 import { BriefcaseBusiness, CircleHelp, ListChecks, RefreshCw } from "lucide-react";
 import { Link, Redirect } from "wouter";
 import { isStaffAccessDenied, StaffAccessUnavailable } from "./staff-workspace";
@@ -15,6 +15,7 @@ const workspaces = {
       { href: "/staff/b2b-sikayetler", label: "Şikâyet incelemeleri", description: "Şikâyet inceleme aracını açın." },
       { href: "/staff/operasyon-masasi", label: "Operasyon masası", description: "Operasyon çalışma aracını açın." },
       { href: "/staff/applications", label: "Başvurular", description: "Finans başvuru aracını açın." },
+      { href: "/staff/lojistik-ilanlari", label: "Lojistik İlanları", description: "Taslakları ve lojistik ilan yetkilerini yönetin." },
     ],
   },
   operations: {
@@ -62,17 +63,24 @@ const previews = [
 ];
 
 export function ExpertDashboard() {
-  const { isLoaded, isSignedIn } = useAuth();
-  const access = useGetStaffAccess({ query: { queryKey: getGetStaffAccessQueryKey(), enabled: isLoaded && Boolean(isSignedIn) } });
+  const { isLoaded, isSignedIn, userId } = useAuth();
+  const enabled = isLoaded && Boolean(isSignedIn);
+  const access = useGetStaffAccess({ query: { queryKey: [...getGetStaffAccessQueryKey(), userId], enabled } });
+  const logisticsAccess = useGetLogisticsListingAccess({ query: {
+    queryKey: [...getGetLogisticsListingAccessQueryKey(), userId], enabled, retry: false, refetchOnMount: "always",
+  } });
   if (!isLoaded) return <AccessLoading />;
   if (!isSignedIn) return <Redirect to="/staff/giris" />;
   if (access.isPending) return <AccessLoading />;
   if (access.isError && isStaffAccessDenied(access.error)) return <AccessDenied />;
   if (access.isError || !access.data) return <StaffAccessUnavailable retry={() => void access.refetch()} />;
   if (access.data.role === "founder") return <AccessDenied />;
+  if (access.data.role === "logistics_listings") return <Redirect to="/staff/lojistik-ilanlari" />;
 
   const workspace = workspaces[access.data.role];
-  const links = workspace.primary;
+  const links = [...workspace.primary, ...(access.data.role !== "admin" && logisticsAccess.data?.canDraft ? [
+    { href: "/staff/lojistik-ilanlari", label: "Lojistik İlanları", description: "Ayrı taslak yetkinizle lojistik ilanı hazırlayın; mevcut rolünüz değişmez." },
+  ] : [])];
 
   return (
     <main className="mmt-management-page">

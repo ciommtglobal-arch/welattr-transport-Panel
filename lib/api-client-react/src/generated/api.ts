@@ -90,6 +90,7 @@ import type {
   GetKasaRequestsParams,
   GetKasaSummaryParams,
   GetLimitApplicationsParams,
+  GetLogisticsListingDraftsParams,
   GetLogisticsOperationsParams,
   GetMediaItemsParams,
   GetStaffAccess200,
@@ -118,10 +119,23 @@ import type {
   LimitApplicationStatusUpdate,
   LogisticsCarrierInput,
   LogisticsCarrierRecord,
+  LogisticsCarrierReviewInput,
   LogisticsCommunicationInput,
   LogisticsCommunicationRecord,
+  LogisticsListingAccess,
+  LogisticsListingDraft,
+  LogisticsListingDraftInput,
+  LogisticsListingDraftPage,
+  LogisticsListingDraftUpdate,
+  LogisticsListingGrant,
+  LogisticsListingGrantInput,
+  LogisticsListingPublicationInput,
+  LogisticsOfferApprovalInput,
+  LogisticsOfferDecisionInput,
+  LogisticsOfferDispatchInput,
   LogisticsOfferInput,
   LogisticsOfferRecord,
+  LogisticsOfferRevisionInput,
   LogisticsOperationsResponse,
   LogisticsRequestInput,
   LogisticsRequestRecord,
@@ -137,11 +151,15 @@ import type {
   MediaUploadUrlRequest,
   MediaUploadUrlResponse,
   MockPaymentResultInput,
+  NexusIntake,
+  NexusShopifyOrderInput,
   ObjectDownloadUrlRequest,
   ObjectDownloadUrlResponse,
   OperationsDesk,
   OrphanUploadCleanupRequest,
   OrphanUploadCleanupResponse,
+  PaymentCallbackHint,
+  PaymentCallbackResult,
   PaymentCheckoutInput,
   PaymentCheckoutSession,
   PaymentReadiness,
@@ -212,6 +230,753 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetNexusIntakesUrl = () => {
+
+
+
+
+  return `/api/nexus/intakes`
+}
+
+/**
+ * @summary Founder-only Nexus audit desk, latest 100 records
+ */
+export const getNexusIntakes = async ( options?: Parameters<typeof customFetch>[1]): Promise<NexusIntake[]> => {
+
+  return customFetch<NexusIntake[]>(getGetNexusIntakesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetNexusIntakesQueryKey = () => {
+    return [
+    `/api/nexus/intakes`
+    ] as const;
+    }
+
+
+export const getGetNexusIntakesQueryOptions = <TData = Awaited<ReturnType<typeof getNexusIntakes>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNexusIntakes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetNexusIntakesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNexusIntakes>>> = ({ signal }) => getNexusIntakes({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNexusIntakes>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetNexusIntakesQueryResult = NonNullable<Awaited<ReturnType<typeof getNexusIntakes>>>
+export type GetNexusIntakesQueryError = ErrorType<void>
+
+
+/**
+ * @summary Founder-only Nexus audit desk, latest 100 records
+ */
+
+export function useGetNexusIntakes<TData = Awaited<ReturnType<typeof getNexusIntakes>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNexusIntakes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetNexusIntakesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getReceiveNexusShopifyWebhookUrl = () => {
+
+
+
+
+  return `/api/webhook/shopify/nexus`
+}
+
+/**
+ * Requires configured shop, variant mapping and HMAC secret. Does not register Shopify webhooks. Returns 503 on persistence failure so Shopify can retry.
+ * @summary Signed Shopify order intake, never charges or approves
+ */
+export const receiveNexusShopifyWebhook = async (nexusShopifyOrderInput: NexusShopifyOrderInput, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<void>(getReceiveNexusShopifyWebhookUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(nexusShopifyOrderInput)
+  }
+);}
+
+
+
+
+
+export const getReceiveNexusShopifyWebhookMutationKey = () => ['receiveNexusShopifyWebhook'] as const;
+
+export const getReceiveNexusShopifyWebhookMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveNexusShopifyWebhook>>, TError,ReceiveNexusShopifyWebhookMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof receiveNexusShopifyWebhook>>, TError,ReceiveNexusShopifyWebhookMutationVariables, TContext> => {
+
+const mutationKey = getReceiveNexusShopifyWebhookMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof receiveNexusShopifyWebhook>>, ReceiveNexusShopifyWebhookMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  receiveNexusShopifyWebhook(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReceiveNexusShopifyWebhookMutationResult = NonNullable<Awaited<ReturnType<typeof receiveNexusShopifyWebhook>>>
+    export type ReceiveNexusShopifyWebhookMutationBody = BodyType<NexusShopifyOrderInput>
+    export type ReceiveNexusShopifyWebhookMutationError = ErrorType<void>
+    export type ReceiveNexusShopifyWebhookMutationVariables = {data: BodyType<NexusShopifyOrderInput>}
+
+    /**
+ * @summary Signed Shopify order intake, never charges or approves
+ */
+export const useReceiveNexusShopifyWebhook = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveNexusShopifyWebhook>>, TError,ReceiveNexusShopifyWebhookMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof receiveNexusShopifyWebhook>>,
+        TError,
+        ReceiveNexusShopifyWebhookMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReceiveNexusShopifyWebhookMutationOptions(options));
+    }
+
+export const getGetLogisticsListingAccessUrl = () => {
+
+
+
+
+  return `/api/logistics-listings/access`
+}
+
+export const getLogisticsListingAccess = async ( options?: Parameters<typeof customFetch>[1]): Promise<LogisticsListingAccess> => {
+
+  return customFetch<LogisticsListingAccess>(getGetLogisticsListingAccessUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLogisticsListingAccessQueryKey = () => {
+    return [
+    `/api/logistics-listings/access`
+    ] as const;
+    }
+
+
+export const getGetLogisticsListingAccessQueryOptions = <TData = Awaited<ReturnType<typeof getLogisticsListingAccess>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsListingAccess>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLogisticsListingAccessQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLogisticsListingAccess>>> = ({ signal }) => getLogisticsListingAccess({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLogisticsListingAccess>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLogisticsListingAccessQueryResult = NonNullable<Awaited<ReturnType<typeof getLogisticsListingAccess>>>
+export type GetLogisticsListingAccessQueryError = ErrorType<void>
+
+
+
+export function useGetLogisticsListingAccess<TData = Awaited<ReturnType<typeof getLogisticsListingAccess>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsListingAccess>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLogisticsListingAccessQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetLogisticsListingGrantsUrl = () => {
+
+
+
+
+  return `/api/logistics-listings/grants`
+}
+
+export const getLogisticsListingGrants = async ( options?: Parameters<typeof customFetch>[1]): Promise<LogisticsListingGrant[]> => {
+
+  return customFetch<LogisticsListingGrant[]>(getGetLogisticsListingGrantsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLogisticsListingGrantsQueryKey = () => {
+    return [
+    `/api/logistics-listings/grants`
+    ] as const;
+    }
+
+
+export const getGetLogisticsListingGrantsQueryOptions = <TData = Awaited<ReturnType<typeof getLogisticsListingGrants>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsListingGrants>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLogisticsListingGrantsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLogisticsListingGrants>>> = ({ signal }) => getLogisticsListingGrants({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLogisticsListingGrants>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLogisticsListingGrantsQueryResult = NonNullable<Awaited<ReturnType<typeof getLogisticsListingGrants>>>
+export type GetLogisticsListingGrantsQueryError = ErrorType<void>
+
+
+
+export function useGetLogisticsListingGrants<TData = Awaited<ReturnType<typeof getLogisticsListingGrants>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsListingGrants>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLogisticsListingGrantsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getAssignLogisticsListingGrantUrl = () => {
+
+
+
+
+  return `/api/logistics-listings/grants`
+}
+
+export const assignLogisticsListingGrant = async (logisticsListingGrantInput: LogisticsListingGrantInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsListingGrant> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsListingGrant>(getAssignLogisticsListingGrantUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsListingGrantInput)
+  }
+);}
+
+
+
+
+
+export const getAssignLogisticsListingGrantMutationKey = () => ['assignLogisticsListingGrant'] as const;
+
+export const getAssignLogisticsListingGrantMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof assignLogisticsListingGrant>>, TError,AssignLogisticsListingGrantMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof assignLogisticsListingGrant>>, TError,AssignLogisticsListingGrantMutationVariables, TContext> => {
+
+const mutationKey = getAssignLogisticsListingGrantMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof assignLogisticsListingGrant>>, AssignLogisticsListingGrantMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  assignLogisticsListingGrant(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AssignLogisticsListingGrantMutationResult = NonNullable<Awaited<ReturnType<typeof assignLogisticsListingGrant>>>
+    export type AssignLogisticsListingGrantMutationBody = BodyType<LogisticsListingGrantInput>
+    export type AssignLogisticsListingGrantMutationError = ErrorType<void>
+    export type AssignLogisticsListingGrantMutationVariables = {data: BodyType<LogisticsListingGrantInput>}
+
+    export const useAssignLogisticsListingGrant = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof assignLogisticsListingGrant>>, TError,AssignLogisticsListingGrantMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof assignLogisticsListingGrant>>,
+        TError,
+        AssignLogisticsListingGrantMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAssignLogisticsListingGrantMutationOptions(options));
+    }
+
+export const getRevokeLogisticsListingGrantUrl = (id: number,) => {
+
+
+
+
+  return `/api/logistics-listings/grants/${id}`
+}
+
+/**
+ * Deactivates only this capability; preserves account, roles and drafts.
+ */
+export const revokeLogisticsListingGrant = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getRevokeLogisticsListingGrantUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRevokeLogisticsListingGrantMutationKey = () => ['revokeLogisticsListingGrant'] as const;
+
+export const getRevokeLogisticsListingGrantMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeLogisticsListingGrant>>, TError,RevokeLogisticsListingGrantMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof revokeLogisticsListingGrant>>, TError,RevokeLogisticsListingGrantMutationVariables, TContext> => {
+
+const mutationKey = getRevokeLogisticsListingGrantMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revokeLogisticsListingGrant>>, RevokeLogisticsListingGrantMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  revokeLogisticsListingGrant(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevokeLogisticsListingGrantMutationResult = NonNullable<Awaited<ReturnType<typeof revokeLogisticsListingGrant>>>
+
+    export type RevokeLogisticsListingGrantMutationError = ErrorType<void>
+    export type RevokeLogisticsListingGrantMutationVariables = {id: number}
+
+    export const useRevokeLogisticsListingGrant = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeLogisticsListingGrant>>, TError,RevokeLogisticsListingGrantMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof revokeLogisticsListingGrant>>,
+        TError,
+        RevokeLogisticsListingGrantMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRevokeLogisticsListingGrantMutationOptions(options));
+    }
+
+export const getGetLogisticsListingDraftsUrl = (params?: GetLogisticsListingDraftsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/logistics-listings/drafts?${stringifiedParams}` : `/api/logistics-listings/drafts`
+}
+
+export const getLogisticsListingDrafts = async (params?: GetLogisticsListingDraftsParams, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsListingDraftPage> => {
+
+  return customFetch<LogisticsListingDraftPage>(getGetLogisticsListingDraftsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLogisticsListingDraftsQueryKey = (params?: GetLogisticsListingDraftsParams,) => {
+    return [
+    `/api/logistics-listings/drafts`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetLogisticsListingDraftsQueryOptions = <TData = Awaited<ReturnType<typeof getLogisticsListingDrafts>>, TError = ErrorType<void>>(params?: GetLogisticsListingDraftsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsListingDrafts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLogisticsListingDraftsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLogisticsListingDrafts>>> = ({ signal }) => getLogisticsListingDrafts(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLogisticsListingDrafts>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLogisticsListingDraftsQueryResult = NonNullable<Awaited<ReturnType<typeof getLogisticsListingDrafts>>>
+export type GetLogisticsListingDraftsQueryError = ErrorType<void>
+
+
+
+export function useGetLogisticsListingDrafts<TData = Awaited<ReturnType<typeof getLogisticsListingDrafts>>, TError = ErrorType<void>>(
+ params?: GetLogisticsListingDraftsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsListingDrafts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLogisticsListingDraftsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateLogisticsListingDraftUrl = () => {
+
+
+
+
+  return `/api/logistics-listings/drafts`
+}
+
+export const createLogisticsListingDraft = async (logisticsListingDraftInput: LogisticsListingDraftInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsListingDraft> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsListingDraft>(getCreateLogisticsListingDraftUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsListingDraftInput)
+  }
+);}
+
+
+
+
+
+export const getCreateLogisticsListingDraftMutationKey = () => ['createLogisticsListingDraft'] as const;
+
+export const getCreateLogisticsListingDraftMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLogisticsListingDraft>>, TError,CreateLogisticsListingDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createLogisticsListingDraft>>, TError,CreateLogisticsListingDraftMutationVariables, TContext> => {
+
+const mutationKey = getCreateLogisticsListingDraftMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createLogisticsListingDraft>>, CreateLogisticsListingDraftMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createLogisticsListingDraft(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateLogisticsListingDraftMutationResult = NonNullable<Awaited<ReturnType<typeof createLogisticsListingDraft>>>
+    export type CreateLogisticsListingDraftMutationBody = BodyType<LogisticsListingDraftInput>
+    export type CreateLogisticsListingDraftMutationError = ErrorType<void>
+    export type CreateLogisticsListingDraftMutationVariables = {data: BodyType<LogisticsListingDraftInput>}
+
+    export const useCreateLogisticsListingDraft = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLogisticsListingDraft>>, TError,CreateLogisticsListingDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createLogisticsListingDraft>>,
+        TError,
+        CreateLogisticsListingDraftMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateLogisticsListingDraftMutationOptions(options));
+    }
+
+export const getSaveLogisticsListingDraftUrl = (id: number,) => {
+
+
+
+
+  return `/api/logistics-listings/drafts/${id}`
+}
+
+export const saveLogisticsListingDraft = async (id: number,
+    logisticsListingDraftUpdate: LogisticsListingDraftUpdate, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsListingDraft> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsListingDraft>(getSaveLogisticsListingDraftUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsListingDraftUpdate)
+  }
+);}
+
+
+
+
+
+export const getSaveLogisticsListingDraftMutationKey = () => ['saveLogisticsListingDraft'] as const;
+
+export const getSaveLogisticsListingDraftMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveLogisticsListingDraft>>, TError,SaveLogisticsListingDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveLogisticsListingDraft>>, TError,SaveLogisticsListingDraftMutationVariables, TContext> => {
+
+const mutationKey = getSaveLogisticsListingDraftMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveLogisticsListingDraft>>, SaveLogisticsListingDraftMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  saveLogisticsListingDraft(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveLogisticsListingDraftMutationResult = NonNullable<Awaited<ReturnType<typeof saveLogisticsListingDraft>>>
+    export type SaveLogisticsListingDraftMutationBody = BodyType<LogisticsListingDraftUpdate>
+    export type SaveLogisticsListingDraftMutationError = ErrorType<void>
+    export type SaveLogisticsListingDraftMutationVariables = {id: number;data: BodyType<LogisticsListingDraftUpdate>}
+
+    export const useSaveLogisticsListingDraft = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveLogisticsListingDraft>>, TError,SaveLogisticsListingDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof saveLogisticsListingDraft>>,
+        TError,
+        SaveLogisticsListingDraftMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSaveLogisticsListingDraftMutationOptions(options));
+    }
+
+export const getPublishLogisticsListingDraftUrl = (id: number,) => {
+
+
+
+
+  return `/api/logistics-listings/drafts/${id}/publish`
+}
+
+export const publishLogisticsListingDraft = async (id: number,
+    logisticsListingPublicationInput: LogisticsListingPublicationInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsListingDraft> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsListingDraft>(getPublishLogisticsListingDraftUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsListingPublicationInput)
+  }
+);}
+
+
+
+
+
+export const getPublishLogisticsListingDraftMutationKey = () => ['publishLogisticsListingDraft'] as const;
+
+export const getPublishLogisticsListingDraftMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishLogisticsListingDraft>>, TError,PublishLogisticsListingDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publishLogisticsListingDraft>>, TError,PublishLogisticsListingDraftMutationVariables, TContext> => {
+
+const mutationKey = getPublishLogisticsListingDraftMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publishLogisticsListingDraft>>, PublishLogisticsListingDraftMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  publishLogisticsListingDraft(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublishLogisticsListingDraftMutationResult = NonNullable<Awaited<ReturnType<typeof publishLogisticsListingDraft>>>
+    export type PublishLogisticsListingDraftMutationBody = BodyType<LogisticsListingPublicationInput>
+    export type PublishLogisticsListingDraftMutationError = ErrorType<void>
+    export type PublishLogisticsListingDraftMutationVariables = {id: number;data: BodyType<LogisticsListingPublicationInput>}
+
+    export const usePublishLogisticsListingDraft = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishLogisticsListingDraft>>, TError,PublishLogisticsListingDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publishLogisticsListingDraft>>,
+        TError,
+        PublishLogisticsListingDraftMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPublishLogisticsListingDraftMutationOptions(options));
+    }
 
 export const getExportCompanyRecordsUrl = (kind: 'funds' | 'instructions',
     params: ExportCompanyRecordsParams,) => {
@@ -3030,6 +3795,87 @@ export const useUpdateStaffTrialCandidateEvaluation = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getUpdateStaffTrialCandidateEvaluationMutationOptions(options));
+    }
+
+export const getCheckPaymentCallbackUrl = () => {
+
+
+
+
+  return `/api/payment/callback`
+}
+
+/**
+ * This is not an authenticated provider webhook or a PayTR/iyzico/Stripe integration. merchant_oid identifies an existing Tami service-invoice payment. Incoming status and total_amount are ignored, never payment evidence. Only a signed Tami query with matching order, amount and currency may change payment state. Mock payments are rejected. No operation approval, Telegram message or queue dispatch is performed.
+ * @summary Untrusted callback hint checked against Tami's signed payment query
+ */
+export const checkPaymentCallback = async (paymentCallbackHint: PaymentCallbackHint, options?: Parameters<typeof customFetch>[1]): Promise<PaymentCallbackResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<PaymentCallbackResult>(getCheckPaymentCallbackUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(paymentCallbackHint)
+  }
+);}
+
+
+
+
+
+export const getCheckPaymentCallbackMutationKey = () => ['checkPaymentCallback'] as const;
+
+export const getCheckPaymentCallbackMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof checkPaymentCallback>>, TError,CheckPaymentCallbackMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof checkPaymentCallback>>, TError,CheckPaymentCallbackMutationVariables, TContext> => {
+
+const mutationKey = getCheckPaymentCallbackMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof checkPaymentCallback>>, CheckPaymentCallbackMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  checkPaymentCallback(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CheckPaymentCallbackMutationResult = NonNullable<Awaited<ReturnType<typeof checkPaymentCallback>>>
+    export type CheckPaymentCallbackMutationBody = BodyType<PaymentCallbackHint>
+    export type CheckPaymentCallbackMutationError = ErrorType<void>
+    export type CheckPaymentCallbackMutationVariables = {data: BodyType<PaymentCallbackHint>}
+
+    /**
+ * @summary Untrusted callback hint checked against Tami's signed payment query
+ */
+export const useCheckPaymentCallback = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof checkPaymentCallback>>, TError,CheckPaymentCallbackMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof checkPaymentCallback>>,
+        TError,
+        CheckPaymentCallbackMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCheckPaymentCallbackMutationOptions(options));
     }
 
 export const getGetTamiPaymentStatusUrl = (orderId: string,) => {
@@ -6169,7 +7015,7 @@ export const getCreateLogisticsOfferUrl = () => {
 }
 
 /**
- * @summary Yönetici onayına teklif gönderir
+ * @summary Kurucu onayına teklif taslağı gönderir
  */
 export const createLogisticsOffer = async (logisticsOfferInput: LogisticsOfferInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsOfferRecord> => {
 
@@ -6227,7 +7073,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type CreateLogisticsOfferMutationVariables = {data: BodyType<LogisticsOfferInput>}
 
     /**
- * @summary Yönetici onayına teklif gönderir
+ * @summary Kurucu onayına teklif taslağı gönderir
  */
 export const useCreateLogisticsOffer = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLogisticsOffer>>, TError,CreateLogisticsOfferMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -6249,16 +7095,23 @@ export const getApproveLogisticsOfferUrl = (id: number,) => {
 }
 
 /**
- * @summary Teklifi yönetici olarak onaylar
+ * @summary Teklifi yalnız allowlist kurucusu onaylar
  */
-export const approveLogisticsOffer = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsOfferRecord> => {
+export const approveLogisticsOffer = async (id: number,
+    logisticsOfferApprovalInput: LogisticsOfferApprovalInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsOfferRecord> => {
 
-  return customFetch<LogisticsOfferRecord>(getApproveLogisticsOfferUrl(id),
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsOfferRecord>(getApproveLogisticsOfferUrl(id),
   {
     ...options,
-    method: 'POST'
-
-
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsOfferApprovalInput)
   }
 );}
 
@@ -6283,9 +7136,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveLogisticsOffer>>, ApproveLogisticsOfferMutationVariables> = (props) => {
-          const {id} = props ?? {};
+          const {id,data} = props ?? {};
 
-          return  approveLogisticsOffer(id,requestOptions)
+          return  approveLogisticsOffer(id,data,requestOptions)
         }
 
 
@@ -6296,12 +7149,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type ApproveLogisticsOfferMutationResult = NonNullable<Awaited<ReturnType<typeof approveLogisticsOffer>>>
-
+    export type ApproveLogisticsOfferMutationBody = BodyType<LogisticsOfferApprovalInput>
     export type ApproveLogisticsOfferMutationError = ErrorType<ErrorResponse>
-    export type ApproveLogisticsOfferMutationVariables = {id: number}
+    export type ApproveLogisticsOfferMutationVariables = {id: number;data: BodyType<LogisticsOfferApprovalInput>}
 
     /**
- * @summary Teklifi yönetici olarak onaylar
+ * @summary Teklifi yalnız allowlist kurucusu onaylar
  */
 export const useApproveLogisticsOffer = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveLogisticsOffer>>, TError,ApproveLogisticsOfferMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -6323,16 +7176,24 @@ export const getMarkLogisticsOfferSentUrl = (id: number,) => {
 }
 
 /**
+ * Harici mesaj göndermez; kullanıcının doğruladığı manuel gönderim kaydını tutar.
  * @summary Onaylı teklifi müşteriye gönderildi olarak işaretler
  */
-export const markLogisticsOfferSent = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsOfferRecord> => {
+export const markLogisticsOfferSent = async (id: number,
+    logisticsOfferDispatchInput: LogisticsOfferDispatchInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsOfferRecord> => {
 
-  return customFetch<LogisticsOfferRecord>(getMarkLogisticsOfferSentUrl(id),
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsOfferRecord>(getMarkLogisticsOfferSentUrl(id),
   {
     ...options,
-    method: 'POST'
-
-
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsOfferDispatchInput)
   }
 );}
 
@@ -6357,9 +7218,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof markLogisticsOfferSent>>, MarkLogisticsOfferSentMutationVariables> = (props) => {
-          const {id} = props ?? {};
+          const {id,data} = props ?? {};
 
-          return  markLogisticsOfferSent(id,requestOptions)
+          return  markLogisticsOfferSent(id,data,requestOptions)
         }
 
 
@@ -6370,9 +7231,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type MarkLogisticsOfferSentMutationResult = NonNullable<Awaited<ReturnType<typeof markLogisticsOfferSent>>>
-
+    export type MarkLogisticsOfferSentMutationBody = BodyType<LogisticsOfferDispatchInput>
     export type MarkLogisticsOfferSentMutationError = ErrorType<ErrorResponse>
-    export type MarkLogisticsOfferSentMutationVariables = {id: number}
+    export type MarkLogisticsOfferSentMutationVariables = {id: number;data: BodyType<LogisticsOfferDispatchInput>}
 
     /**
  * @summary Onaylı teklifi müşteriye gönderildi olarak işaretler
@@ -6386,6 +7247,250 @@ export const useMarkLogisticsOfferSent = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getMarkLogisticsOfferSentMutationOptions(options));
+    }
+
+export const getReviewLogisticsCarrierUrl = (id: number,) => {
+
+
+
+
+  return `/api/logistics/carriers/${id}/review`
+}
+
+/**
+ * @summary Bekleyen taşıyıcı başvurusunu yalnız kurucu değerlendirir
+ */
+export const reviewLogisticsCarrier = async (id: number,
+    logisticsCarrierReviewInput: LogisticsCarrierReviewInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsCarrierRecord> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsCarrierRecord>(getReviewLogisticsCarrierUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsCarrierReviewInput)
+  }
+);}
+
+
+
+
+
+export const getReviewLogisticsCarrierMutationKey = () => ['reviewLogisticsCarrier'] as const;
+
+export const getReviewLogisticsCarrierMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewLogisticsCarrier>>, TError,ReviewLogisticsCarrierMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reviewLogisticsCarrier>>, TError,ReviewLogisticsCarrierMutationVariables, TContext> => {
+
+const mutationKey = getReviewLogisticsCarrierMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reviewLogisticsCarrier>>, ReviewLogisticsCarrierMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  reviewLogisticsCarrier(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReviewLogisticsCarrierMutationResult = NonNullable<Awaited<ReturnType<typeof reviewLogisticsCarrier>>>
+    export type ReviewLogisticsCarrierMutationBody = BodyType<LogisticsCarrierReviewInput>
+    export type ReviewLogisticsCarrierMutationError = ErrorType<void>
+    export type ReviewLogisticsCarrierMutationVariables = {id: number;data: BodyType<LogisticsCarrierReviewInput>}
+
+    /**
+ * @summary Bekleyen taşıyıcı başvurusunu yalnız kurucu değerlendirir
+ */
+export const useReviewLogisticsCarrier = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewLogisticsCarrier>>, TError,ReviewLogisticsCarrierMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reviewLogisticsCarrier>>,
+        TError,
+        ReviewLogisticsCarrierMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReviewLogisticsCarrierMutationOptions(options));
+    }
+
+export const getReviseLogisticsOfferUrl = (id: number,) => {
+
+
+
+
+  return `/api/logistics/offers/${id}`
+}
+
+/**
+ * @summary Yalnız onay bekleyen teklif taslağını revize eder
+ */
+export const reviseLogisticsOffer = async (id: number,
+    logisticsOfferRevisionInput: LogisticsOfferRevisionInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsOfferRecord> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsOfferRecord>(getReviseLogisticsOfferUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsOfferRevisionInput)
+  }
+);}
+
+
+
+
+
+export const getReviseLogisticsOfferMutationKey = () => ['reviseLogisticsOffer'] as const;
+
+export const getReviseLogisticsOfferMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviseLogisticsOffer>>, TError,ReviseLogisticsOfferMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reviseLogisticsOffer>>, TError,ReviseLogisticsOfferMutationVariables, TContext> => {
+
+const mutationKey = getReviseLogisticsOfferMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reviseLogisticsOffer>>, ReviseLogisticsOfferMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  reviseLogisticsOffer(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReviseLogisticsOfferMutationResult = NonNullable<Awaited<ReturnType<typeof reviseLogisticsOffer>>>
+    export type ReviseLogisticsOfferMutationBody = BodyType<LogisticsOfferRevisionInput>
+    export type ReviseLogisticsOfferMutationError = ErrorType<void>
+    export type ReviseLogisticsOfferMutationVariables = {id: number;data: BodyType<LogisticsOfferRevisionInput>}
+
+    /**
+ * @summary Yalnız onay bekleyen teklif taslağını revize eder
+ */
+export const useReviseLogisticsOffer = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviseLogisticsOffer>>, TError,ReviseLogisticsOfferMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reviseLogisticsOffer>>,
+        TError,
+        ReviseLogisticsOfferMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReviseLogisticsOfferMutationOptions(options));
+    }
+
+export const getDecideLogisticsOfferUrl = (id: number,) => {
+
+
+
+
+  return `/api/logistics/offers/${id}/decision`
+}
+
+/**
+ * Müşteri kabul kaydı hukuki imza, sözleşme veya tahsilat değildir.
+ * @summary Kurucu teklif reddini veya müşterinin harici kabul kaydını işler
+ */
+export const decideLogisticsOffer = async (id: number,
+    logisticsOfferDecisionInput: LogisticsOfferDecisionInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsOfferRecord> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsOfferRecord>(getDecideLogisticsOfferUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsOfferDecisionInput)
+  }
+);}
+
+
+
+
+
+export const getDecideLogisticsOfferMutationKey = () => ['decideLogisticsOffer'] as const;
+
+export const getDecideLogisticsOfferMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideLogisticsOffer>>, TError,DecideLogisticsOfferMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof decideLogisticsOffer>>, TError,DecideLogisticsOfferMutationVariables, TContext> => {
+
+const mutationKey = getDecideLogisticsOfferMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof decideLogisticsOffer>>, DecideLogisticsOfferMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  decideLogisticsOffer(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DecideLogisticsOfferMutationResult = NonNullable<Awaited<ReturnType<typeof decideLogisticsOffer>>>
+    export type DecideLogisticsOfferMutationBody = BodyType<LogisticsOfferDecisionInput>
+    export type DecideLogisticsOfferMutationError = ErrorType<void>
+    export type DecideLogisticsOfferMutationVariables = {id: number;data: BodyType<LogisticsOfferDecisionInput>}
+
+    /**
+ * @summary Kurucu teklif reddini veya müşterinin harici kabul kaydını işler
+ */
+export const useDecideLogisticsOffer = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideLogisticsOffer>>, TError,DecideLogisticsOfferMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof decideLogisticsOffer>>,
+        TError,
+        DecideLogisticsOfferMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDecideLogisticsOfferMutationOptions(options));
     }
 
 export const getCreateLogisticsCommunicationUrl = () => {

@@ -1,0 +1,108 @@
+import { db } from '@workspace/db'; // Projenin gerçek veritabanı katmanı[span_8](start_span)[span_8](end_span)
+import { logisticsRequests } from '@workspace/db/schema'; // Gerçek tablo şeması[span_9](start_span)[span_9](end_span)
+import { eq } from 'drizzle-orm';
+import { v4 as uuidv4 } from 'uuid';
+
+/**
+ * 1. DIŞ WEBHOOK AKIŞI (WhatsApp / Dış Kaynaklı İstekler)
+ * Dışarıdan gelen veri oturum taşımaz; sağlayıcı ve mesaj kimliğiyle (messageId) doğrulanır.
+ */
+app.post('/api/webhook/logistics-inbound', async (req, res) => {
+    try {
+        const { customerName, origin, destination, cargoDetails, contactNumber, messageId } = req.body;
+
+        // Alan ve biçim doğrulaması
+        if (!customerName || !origin || !destination || !contactNumber || !messageId) {
+            return res.status(400).json({ success: false, message: 'Eksik veya hatalı parametre.' });
+        }
+
+        // Veritabanı transaction ve unique mesaj koruması
+        const result = await db.transaction(async (tx) => {
+            // Veritabanı seviyesinde mükerrer (çifte kayıt) kontrolü
+            const existing = await tx
+                .select()
+                .from(logisticsRequests)
+                .where(eq(logisticsRequests.messageId, messageId))
+                .limit(1);
+
+            if (existing.length > 0) {
+                return { status: 'DUPLICATE', id: existing[0].id };
+            }
+
+            const newId = uuidv4();
+            await tx.insert(logisticsRequests).values({
+                id: newId,
+                messageId,
+                customerName,
+                origin,
+                destination,
+                cargoDetails,
+                contactNumber,
+                status: 'PENDING_BROKER_MATCH',
+                source: 'EXTERNAL_WEBHOOK',
+                createdAt: new Date()
+            });
+
+            return { status: 'CREATED', id: newId };
+        });
+
+        if (result.status === 'DUPLICATE') {
+            return res.status(200).json({ success: true, message: 'Mükerrer talep engellendi.' });
+        }
+
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Talep MMT Connect paneline güvenle işlendi.', 
+            dataId: result.id 
+        });
+
+    } catch (error) {
+        console.error('Webhook işleme hatası:', error.message);
+        return res.status(500).json({ success: false, message: 'Sunucu hatası, işlem güvenle geri alındı.' });
+    }
+});
+
+
+/**
+ * 2. YÖNETİCİ PANELİ AKIŞI (CIO / Yetkili Girişleri)
+ * Doğrulanmış oturum token'ı (`req.user`) üzerinden çalışır; rol ve şirket yetkisi sunucudan alınır.
+ */
+app.post('/api/panel/logistics-create', async (req, res) => {
+    try {
+        const userAuth = req.user; // Aktif yönetici/oturum doğrulaması[span_10](start_span)[span_10](end_span)[span_11](start_span)[span_11](end_span)
+        if (!userAuth || !userAuth.companyId) {
+            return res.status(401).json({ success: false, message: 'Yetkisiz erişim denemesi.' });
+        }
+
+        const { customerName, origin, destination, cargoDetails, contactNumber } = req.body;
+
+        if (!customerName || !origin || !destination || !contactNumber) {
+            return res.status(400).json({ success: false, message: 'Zorunlu alanlar eksik.' });
+        }
+
+        const newId = uuidv4();
+        await db.insert(logisticsRequests).values({
+            id: newId,
+            companyId: userAuth.companyId, // Güvenli şirket eşlemesi[span_12](start_span)[span_12](end_span)
+            customerName,
+            origin,
+            destination,
+            cargoDetails,
+            contactNumber,
+            status: 'PENDING_BROKER_MATCH',
+            createdByUserId: userAuth.userId,
+            source: 'PANEL_ADMIN',
+            createdAt: new Date()
+        });
+
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Talep onay kuyruğuna eklendi.', 
+            dataId: newId 
+        });
+
+    } catch (error) {
+        console.error('Panel kayıt hatası:', error.message);
+        return res.status(500).json({ success: false, message: 'İşlem başarısız.' });
+    }
+});

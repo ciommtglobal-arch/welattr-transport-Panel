@@ -8,6 +8,8 @@
 import type { LogisticsShipmentStatus } from './logisticsShipmentStatus';
 
 export interface LogisticsRequestStatusUpdate {
+  /** Last shipment version seen by the editor; stale changes are rejected. */
+  expectedUpdatedAt: Date;
   status: LogisticsShipmentStatus;
   /** @nullable */
   assignedStaffClerkUserId?: string | null;

@@ -4,7 +4,7 @@
 - [Telegram bot log secrets](telegram-bot-log-secrets.md) — Bot API request URLs contain the token; keep HTTP request logs above INFO.
 - [VIP payment split](vip-payment-split.md) — Keep VIP access on a separate bot; launch with Stars while Wallet Pay awaits merchant approval.
 - [Tami hosted payment](tami-hosted-payment.md) — Hosted token auth and payment-status query use different Tami signing materials.
-- [MMT Global free B2B network](mmt-global-free-b2b-network.md) — Keep producer promotion, buyer requests, and core matching/services free; grow trust and reach before monetization.
+- [MMT Global B2B commission scope](mmt-global-free-b2b-network.md) — Registration/listings free; matching fees split 50/50; corridor rates approved for drafts only, not live collection.
 - [Clerk public route isolation](clerk-public-route-isolation.md) — Keep public pages usable without Clerk; Replit dev previews may fail loading Clerk JS while auth routes still work.
 - [MMT Connect auth callbacks](mmt-connect-auth-callbacks.md) — Keep dedicated Clerk routes: sign-in returns to the panel, sign-up to profile onboarding, invites to acceptance.
 - [MMT Connect verification](mmt-connect-verification.md) — Use one-time business verification, then let verified firms publish their own free B2B listings.
@@ -34,3 +34,11 @@
 - [Project model preference](project-model-preference.md) — The user prefers Gemini for MMT Global work; do not claim model selection without confirmation.
 - [Partial development schema pushes](partial-dev-schema-push.md) — A failed Drizzle push can leave partial changes; inspect the target schema before retrying or testing.
 - [Regional logistics approval](regional-logistics-approval.md) — Mersin is the main logistics center; Ukraine/Dubai remain preparation areas, with founder-controlled publication.
+- [Lojistik taslak yetkisi](logistics-draft-permission.md) — Taslak yetkisi mevcut erişimleri değiştirmemeli; yeni yayımlama kararı kurucuda, ilk gösterim önizlemede kalmalı.
+- [Kullanıcının yayın onayı](publication-consent-boundary.md) — Çelik Kubbe, Telegram ve WelatTR için kullanıcı istemeden yayın yapılmayacak.
+- [Hukuki süreç ve resmiyet](legal-formality-notes.md) — Kullanıcı bu konuların proje notlarında korunmasını istiyor; not tutmak resmî işlem veya hukuki onay değildir.
+- [MMT lojistik önceliği](mmt-logistics-priority.md) — Ana marka MMT Global; lojistik öncelikli, Mersin merkezli; dış bölgeler hazırlıkta, yayın kurucu onayına bağlı.
+- [Lojistik teklif fiyatı](logistics-offer-pricing.md) — Teklif navlunu müşteri satış fiyatıdır; kullanıcı komisyon ve ayrı brüt ticari satış farkı modelini seçti.
+- [Entegrasyon kontrolü](integration-control-boundary.md) — MMT Nexus ve Shopify çalışmalarında kullanıcı kontrolün kendilerinde kalmasını istiyor.
+- [İncelenen kayıtla onay bağı](approval-version-boundary.md) — Kurucu yetkisi tek başına yetmez; onay, gerçekten incelenen kayıt sürümüne bağlı kalmalı.
+- [Preview routing health](preview-routing-health.md) — A development-domain 200 can be a “Running” placeholder, not the app; verify response content and the application router.

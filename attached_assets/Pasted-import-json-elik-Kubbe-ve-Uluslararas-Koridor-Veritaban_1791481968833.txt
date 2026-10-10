@@ -1,0 +1,64 @@
+import json
+
+# Çelik Kubbe ve Uluslararası Koridor Veritabanı / Kuralları
+CORRIDOR_STANDARDS = {
+    "Irak Hattı": {
+        "hedef_marj": 18.0,
+        "max_risk_skoru": 5,
+        "varsayilan_navlun": 2800,
+        "ortalama_sure_gun": 3
+    },
+    "Dubai / BAE Hattı": {
+        "hedef_marj": 22.0,
+        "max_risk_skoru": 7,
+        "varsayilan_navlun": 6500,
+        "ortalama_sure_gun": 12
+    },
+    "Avrupa Koridoru": {
+        "hedef_marj": 20.0,
+        "max_risk_skoru": 4,
+        "varsayilan_navlun": 5200,
+        "ortalama_sure_gun": 8
+    },
+    "Ukrayna & Doğu Avrupa": {
+        "hedef_marj": 25.0,
+        "max_risk_skoru": 8,
+        "varsayilan_navlun": 4800,
+        "ortalama_sure_gun": 7
+    }
+}
+
+def celik_kubbe_marj_denetimi(koridor_adi, teklif_edilen_marj, risk_skoru):
+    """
+    Çelik Kubbe prensiplerine göre sevkiyat marjını ve riskini denetler.
+    """
+    if koridor_adi not in CORRIDOR_STANDARDS:
+        return {"durum": "HATA", "mesaj": "Geçersiz koridor tanımı."}
+    
+    standart = CORRIDOR_STANDARDS[koridor_adi]
+    
+    # Risk ve Marj Kontrolü
+    marj_uygun = teklif_edilen_marj >= standart["hedef_marj"]
+    risk_uygun = risk_skoru <= standart["max_risk_skoru"]
+    
+    if marj_uygun and risk_uygun:
+        return {
+            "durum": "ONAYLANDI",
+            "mesaj": f"Çelik Kubbe denetiminden geçti. Hedef marj ({standart['hedef_marj']}%) sağlandı."
+        }
+    else:
+        sebep = []
+        if not marj_uygun:
+            sebep.append(f"Marj yetersiz (%{teklif_edilen_marj}, Hedef: %{standart['hedef_marj']})")
+        if not risk_uygun:
+            sebep.append(f"Risk skoru yüksek ({risk_skoru}, Max: {standart['max_risk_skoru']})")
+            
+        return {
+            "durum": "BLOKE / ONAYA DÜŞTÜ",
+            "mesaj": "Çelik Kubbe uyarı verdi: " + " | ".join(sebep)
+        }
+
+# Örnek Test Kullanımı
+if __name__ == "__main__":
+    sonuc = celik_kubbe_marj_denetimi("Irak Hattı", 16.5, 4)
+    print(json.dumps(sonuc, ensure_ascii=False, indent=2))

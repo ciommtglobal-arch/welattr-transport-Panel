@@ -1,0 +1,67 @@
+import json
+from decimal import Decimal, ROUND_HALF_UP
+
+# MMT Global - Pazar Yeri Hassas Taslak Komisyon Motoru (Decimal Tabanlı)
+TASLAK_KOMISYON_TARIFESI = {
+    "Irak": {"toplam_komisyon_orani": Decimal("6.0"), "max_risk": 5},
+    "Dubai / BAE": {"toplam_komisyon_orani": Decimal("8.0"), "max_risk": 7},
+    "Avrupa": {"toplam_komisyon_orani": Decimal("7.0"), "max_risk": 4},
+    "Ukrayna / Doğu Avrupa": {"toplam_komisyon_orani": Decimal("10.0"), "max_risk": 8}
+}
+
+def taslak_komisyon_hesapla_guvenli(koridor, musteri_satis_fiyati, risk_skoru):
+    """
+    1. Negatif, sıfır veya geçersiz satış fiyatlarını ve risk değerlerini kesin olarak reddeder.
+    2. Decimal kullanarak kuruş hassasiyetinde hesap yapar; 
+       iki payın toplamı (yük veren + taşıyıcı) kuruş sapması olmadan tam komisyona eşit olur.
+    3. Yalnızca taslak iç kontrol raporu üretir; gerçek tahsilat/aktarım yapmaz.
+    """
+    # 1. Geçersiz Değer Koruması
+    try:
+        satis = Decimal(str(musteri_satis_fiyati))
+        risk = int(risk_skoru)
+    except (ValueError, TypeError):
+        return {"durum": "HATA", "mesaj": "Geçersiz veri biçimi girdisi."}
+    
+    if satis <= Decimal("0.00") or risk < 0:
+        return {
+            "durum": "REDDEDİLDİ / GEÇERSİZ DEĞER",
+            "mesaj": "Satış fiyatı sıfır veya negatif olamaz; risk değeri geçerli aralıkta olmalıdır."
+        }
+    
+    if koridor not in TASLAK_KOMISYON_TARIFESI:
+        return {"durum": "HATA", "mesaj": "Geçersiz koridor tanımı."}
+    
+    kural = TASLAK_KOMISYON_TARIFESI[koridor]
+    
+    if risk > kural["max_risk"]:
+        return {
+            "durum": "BLOKE / RİSK EŞİĞİ AŞILDI",
+            "mesaj": f"Çelik Kubbe risk denetiminden geçemedi (Risk: {risk}, Max: {kural['max_risk']})."
+        }
+
+    # 2. Decimal ile Kuruş Hassasiyetinde Toplam Komisyon Hesabı
+    yuzde_oran = kural["toplam_komisyon_orani"] / Decimal("100.0")
+    toplam_komisyon = (satis * yuzde_oran).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    
+    # %50 - %50 Eşit Paylaşım (Kuruş farkı olmaması için yuvarlama dengesi)
+    yuk_veren_payi = (toplam_komisyon / Decimal("2.0")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    tasiyici_payi = toplam_komisyon - yuk_veren_payi  # Kalan kuruş farkı otomatik dengelenir
+    
+    return {
+        "durum": "TASLAK KOMİSYON HESABI — KURUCU ONAYI BEKLENİYOR",
+        "bilgilendirme": "Tahsilat veya para aktarımı yapılmadı. Sadece iç kontrol taslak tarifesidir.",
+        "detaylar": {
+            "koridor": koridor,
+            "musteri_satis_fiyati_usd": float(satis),
+            "toplam_komisyon_usd": float(toplam_komisyon),
+            "yuk_veren_odemesi_50_usd": float(yuk_veren_payi),
+            "tasiyici_odemesi_50_usd": float(tasiyici_payi),
+            "kuruş_kontrol_esitligi": float(yuk_veren_payi + tasiyici_payi) == float(toplam_komisyon)
+        }
+    }
+
+if __name__ == "__main__":
+    # Test: 3,000 USD satış fiyatı, Irak hattı, 3 risk skoru
+    sonuc = taslak_komisyon_hesapla_guvenli("Irak", 3000.0, 3)
+    print(json.dumps(sonuc, ensure_ascii=False, indent=2))

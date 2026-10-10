@@ -11,9 +11,15 @@ export interface LogisticsOfferInput {
   requestId: number;
   /** @minimum 1 */
   carrierId: number;
-  /** @minimum 0 */
+  /**
+     * @maximum 9999999999999.99
+     * @exclusiveMinimum 0
+     */
   carrierCostAmount: number;
-  /** @minimum 0 */
+  /**
+     * @maximum 9999999999999.99
+     * @exclusiveMinimum 0
+     */
   customerPriceAmount: number;
   /**
      * @minLength 3

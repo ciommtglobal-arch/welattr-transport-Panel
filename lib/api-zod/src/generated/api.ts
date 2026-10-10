@@ -9,6 +9,306 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Founder-only Nexus audit desk, latest 100 records
+ */
+export const GetNexusIntakesResponseItem = zod.object({
+  "id": zod.int(),
+  "shopDomain": zod.string(),
+  "orderId": zod.string(),
+  "orderName": zod.string(),
+  "lineId": zod.string(),
+  "variantId": zod.string(),
+  "kind": zod.enum(['reservation', 'financing_interest']),
+  "productTitle": zod.string(),
+  "quantity": zod.int(),
+  "unitPrice": zod.string(),
+  "currency": zod.string(),
+  "financialStatus": zod.string(),
+  "cancelled": zod.int(),
+  "warning": zod.string().nullish(),
+  "status": zod.enum(['PENDING_FOUNDER_APPROVAL', 'FOUNDER_APPROVED', 'FOUNDER_REJECTED']),
+  "sourceUpdatedAt": zod.coerce.date(),
+  "createdAt": zod.coerce.date()
+})
+export const GetNexusIntakesResponse = zod.array(GetNexusIntakesResponseItem)
+
+
+/**
+ * Requires configured shop, variant mapping and HMAC secret. Does not register Shopify webhooks. Returns 503 on persistence failure so Shopify can retry.
+ * @summary Signed Shopify order intake, never charges or approves
+ */
+export const ReceiveNexusShopifyWebhookBody = zod.record(zod.string(), zod.unknown()).describe('Shopify order JSON; signature is verified against untouched raw bytes.')
+
+export const ReceiveNexusShopifyWebhookResponse = zod.unknown()
+
+
+export const GetLogisticsListingAccessResponse = zod.object({
+  "userId": zod.string(),
+  "canDraft": zod.boolean(),
+  "canManageGrants": zod.boolean(),
+  "canPublish": zod.boolean()
+})
+
+
+export const GetLogisticsListingGrantsResponseItem = zod.object({
+  "id": zod.int(),
+  "clerkUserId": zod.string(),
+  "verifiedEmail": zod.string(),
+  "displayName": zod.string(),
+  "active": zod.boolean(),
+  "assignedBy": zod.string(),
+  "updatedAt": zod.string()
+})
+export const GetLogisticsListingGrantsResponse = zod.array(GetLogisticsListingGrantsResponseItem)
+
+
+export const assignLogisticsListingGrantBodyEmailMax = 254;
+
+
+
+export const AssignLogisticsListingGrantBody = zod.object({
+  "email": zod.email().max(assignLogisticsListingGrantBodyEmailMax)
+})
+
+export const AssignLogisticsListingGrantResponse = zod.object({
+  "id": zod.int(),
+  "clerkUserId": zod.string(),
+  "verifiedEmail": zod.string(),
+  "displayName": zod.string(),
+  "active": zod.boolean(),
+  "assignedBy": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * Deactivates only this capability; preserves account, roles and drafts.
+ */
+
+
+
+export const RevokeLogisticsListingGrantParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const RevokeLogisticsListingGrantResponse = zod.void()
+
+
+export const getLogisticsListingDraftsQueryPageDefault = 1;
+
+
+
+export const GetLogisticsListingDraftsQueryParams = zod.object({
+  "page": zod.coerce.number().int().min(1).default(getLogisticsListingDraftsQueryPageDefault)
+})
+
+export const getLogisticsListingDraftsResponseItemsItemOneTitleMax = 140;
+
+export const getLogisticsListingDraftsResponseItemsItemOneFullNameMax = 160;
+
+export const getLogisticsListingDraftsResponseItemsItemOneOrganizationMax = 200;
+
+export const getLogisticsListingDraftsResponseItemsItemOneLocationMax = 160;
+
+export const getLogisticsListingDraftsResponseItemsItemOneContactMax = 180;
+
+export const getLogisticsListingDraftsResponseItemsItemOneDescriptionMax = 2000;
+
+
+
+export const GetLogisticsListingDraftsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "title": zod.string().min(1).max(getLogisticsListingDraftsResponseItemsItemOneTitleMax),
+  "fullName": zod.string().max(getLogisticsListingDraftsResponseItemsItemOneFullNameMax),
+  "organization": zod.string().max(getLogisticsListingDraftsResponseItemsItemOneOrganizationMax),
+  "location": zod.string().max(getLogisticsListingDraftsResponseItemsItemOneLocationMax),
+  "contact": zod.string().max(getLogisticsListingDraftsResponseItemsItemOneContactMax),
+  "description": zod.string().max(getLogisticsListingDraftsResponseItemsItemOneDescriptionMax)
+}).and(zod.object({
+  "id": zod.int(),
+  "authorClerkUserId": zod.string(),
+  "revision": zod.int(),
+  "publishedListingId": zod.int().nullable(),
+  "publishedBy": zod.string().nullable(),
+  "publishedAt": zod.string().nullable(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+}))),
+  "hasMore": zod.boolean(),
+  "page": zod.int()
+})
+
+
+export const createLogisticsListingDraftBodyTitleMax = 140;
+
+export const createLogisticsListingDraftBodyFullNameMax = 160;
+
+export const createLogisticsListingDraftBodyOrganizationMax = 200;
+
+export const createLogisticsListingDraftBodyLocationMax = 160;
+
+export const createLogisticsListingDraftBodyContactMax = 180;
+
+export const createLogisticsListingDraftBodyDescriptionMax = 2000;
+
+
+
+export const CreateLogisticsListingDraftBody = zod.object({
+  "title": zod.string().min(1).max(createLogisticsListingDraftBodyTitleMax),
+  "fullName": zod.string().max(createLogisticsListingDraftBodyFullNameMax),
+  "organization": zod.string().max(createLogisticsListingDraftBodyOrganizationMax),
+  "location": zod.string().max(createLogisticsListingDraftBodyLocationMax),
+  "contact": zod.string().max(createLogisticsListingDraftBodyContactMax),
+  "description": zod.string().max(createLogisticsListingDraftBodyDescriptionMax)
+})
+
+export const createLogisticsListingDraftResponseOneTitleMax = 140;
+
+export const createLogisticsListingDraftResponseOneFullNameMax = 160;
+
+export const createLogisticsListingDraftResponseOneOrganizationMax = 200;
+
+export const createLogisticsListingDraftResponseOneLocationMax = 160;
+
+export const createLogisticsListingDraftResponseOneContactMax = 180;
+
+export const createLogisticsListingDraftResponseOneDescriptionMax = 2000;
+
+
+
+export const CreateLogisticsListingDraftResponse = zod.object({
+  "title": zod.string().min(1).max(createLogisticsListingDraftResponseOneTitleMax),
+  "fullName": zod.string().max(createLogisticsListingDraftResponseOneFullNameMax),
+  "organization": zod.string().max(createLogisticsListingDraftResponseOneOrganizationMax),
+  "location": zod.string().max(createLogisticsListingDraftResponseOneLocationMax),
+  "contact": zod.string().max(createLogisticsListingDraftResponseOneContactMax),
+  "description": zod.string().max(createLogisticsListingDraftResponseOneDescriptionMax)
+}).and(zod.object({
+  "id": zod.int(),
+  "authorClerkUserId": zod.string(),
+  "revision": zod.int(),
+  "publishedListingId": zod.int().nullable(),
+  "publishedBy": zod.string().nullable(),
+  "publishedAt": zod.string().nullable(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+}))
+
+
+
+
+
+export const SaveLogisticsListingDraftParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const saveLogisticsListingDraftBodyOneTitleMax = 140;
+
+export const saveLogisticsListingDraftBodyOneFullNameMax = 160;
+
+export const saveLogisticsListingDraftBodyOneOrganizationMax = 200;
+
+export const saveLogisticsListingDraftBodyOneLocationMax = 160;
+
+export const saveLogisticsListingDraftBodyOneContactMax = 180;
+
+export const saveLogisticsListingDraftBodyOneDescriptionMax = 2000;
+
+
+
+
+export const SaveLogisticsListingDraftBody = zod.object({
+  "title": zod.string().min(1).max(saveLogisticsListingDraftBodyOneTitleMax),
+  "fullName": zod.string().max(saveLogisticsListingDraftBodyOneFullNameMax),
+  "organization": zod.string().max(saveLogisticsListingDraftBodyOneOrganizationMax),
+  "location": zod.string().max(saveLogisticsListingDraftBodyOneLocationMax),
+  "contact": zod.string().max(saveLogisticsListingDraftBodyOneContactMax),
+  "description": zod.string().max(saveLogisticsListingDraftBodyOneDescriptionMax)
+}).and(zod.object({
+  "revision": zod.int().min(1)
+}))
+
+export const saveLogisticsListingDraftResponseOneTitleMax = 140;
+
+export const saveLogisticsListingDraftResponseOneFullNameMax = 160;
+
+export const saveLogisticsListingDraftResponseOneOrganizationMax = 200;
+
+export const saveLogisticsListingDraftResponseOneLocationMax = 160;
+
+export const saveLogisticsListingDraftResponseOneContactMax = 180;
+
+export const saveLogisticsListingDraftResponseOneDescriptionMax = 2000;
+
+
+
+export const SaveLogisticsListingDraftResponse = zod.object({
+  "title": zod.string().min(1).max(saveLogisticsListingDraftResponseOneTitleMax),
+  "fullName": zod.string().max(saveLogisticsListingDraftResponseOneFullNameMax),
+  "organization": zod.string().max(saveLogisticsListingDraftResponseOneOrganizationMax),
+  "location": zod.string().max(saveLogisticsListingDraftResponseOneLocationMax),
+  "contact": zod.string().max(saveLogisticsListingDraftResponseOneContactMax),
+  "description": zod.string().max(saveLogisticsListingDraftResponseOneDescriptionMax)
+}).and(zod.object({
+  "id": zod.int(),
+  "authorClerkUserId": zod.string(),
+  "revision": zod.int(),
+  "publishedListingId": zod.int().nullable(),
+  "publishedBy": zod.string().nullable(),
+  "publishedAt": zod.string().nullable(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+}))
+
+
+
+
+
+export const PublishLogisticsListingDraftParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+
+
+
+export const PublishLogisticsListingDraftBody = zod.object({
+  "revision": zod.int().min(1)
+})
+
+export const publishLogisticsListingDraftResponseOneTitleMax = 140;
+
+export const publishLogisticsListingDraftResponseOneFullNameMax = 160;
+
+export const publishLogisticsListingDraftResponseOneOrganizationMax = 200;
+
+export const publishLogisticsListingDraftResponseOneLocationMax = 160;
+
+export const publishLogisticsListingDraftResponseOneContactMax = 180;
+
+export const publishLogisticsListingDraftResponseOneDescriptionMax = 2000;
+
+
+
+export const PublishLogisticsListingDraftResponse = zod.object({
+  "title": zod.string().min(1).max(publishLogisticsListingDraftResponseOneTitleMax),
+  "fullName": zod.string().max(publishLogisticsListingDraftResponseOneFullNameMax),
+  "organization": zod.string().max(publishLogisticsListingDraftResponseOneOrganizationMax),
+  "location": zod.string().max(publishLogisticsListingDraftResponseOneLocationMax),
+  "contact": zod.string().max(publishLogisticsListingDraftResponseOneContactMax),
+  "description": zod.string().max(publishLogisticsListingDraftResponseOneDescriptionMax)
+}).and(zod.object({
+  "id": zod.int(),
+  "authorClerkUserId": zod.string(),
+  "revision": zod.int(),
+  "publishedListingId": zod.int().nullable(),
+  "publishedBy": zod.string().nullable(),
+  "publishedAt": zod.string().nullable(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+}))
+
+
+/**
  * Aktif owner/admin/manager için yalnızca oturumun firması. Tarihler Europe/Istanbul günleridir, iki sınır dahil en fazla 92 gün. En fazla 10000 kayıt ve 20 MiB; aşımda eksik dosya yerine 413. Tutarlar tam ondalık metindir, para birimleri birleştirilmez. Banka belgesi, mühür, kredi onayı veya finansal güvence değildir.
  * @summary Özel şirket içi CSV arşivi
  */
@@ -1050,6 +1350,35 @@ export const UpdateStaffTrialCandidateEvaluationResponse = zod.object({
   "evaluationNote": zod.string().nullable(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * This is not an authenticated provider webhook or a PayTR/iyzico/Stripe integration. merchant_oid identifies an existing Tami service-invoice payment. Incoming status and total_amount are ignored, never payment evidence. Only a signed Tami query with matching order, amount and currency may change payment state. Mock payments are rejected. No operation approval, Telegram message or queue dispatch is performed.
+ * @summary Untrusted callback hint checked against Tami's signed payment query
+ */
+export const checkPaymentCallbackBodyMerchantOidMin = 2;
+export const checkPaymentCallbackBodyMerchantOidMax = 36;
+
+
+export const checkPaymentCallbackBodyMerchantOidRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+export const checkPaymentCallbackBodyStatusMax = 32;
+
+export const checkPaymentCallbackBodyTotalAmountMax = 32;
+
+
+
+export const CheckPaymentCallbackBody = zod.object({
+  "merchant_oid": zod.string().min(checkPaymentCallbackBodyMerchantOidMin).max(checkPaymentCallbackBodyMerchantOidMax).regex(checkPaymentCallbackBodyMerchantOidRegExp),
+  "status": zod.string().max(checkPaymentCallbackBodyStatusMax).optional().describe('Untrusted hint; ignored'),
+  "total_amount": zod.string().max(checkPaymentCallbackBodyTotalAmountMax).optional().describe('Untrusted hint; ignored')
+})
+
+export const CheckPaymentCallbackResponse = zod.object({
+  "status": zod.enum(['pending', 'success', 'failed', 'cancelled']),
+  "paymentReference": zod.string(),
+  "operationApproved": zod.literal(false),
+  "message": zod.string()
 })
 
 
@@ -2365,6 +2694,7 @@ export const GetLogisticsOperationsQueryParams = zod.object({
 })
 
 export const GetLogisticsOperationsResponse = zod.object({
+  "canApprove": zod.boolean().describe('True only for the configured founder identity.'),
   "requests": zod.array(zod.object({
   "id": zod.int(),
   "referenceCode": zod.string(),
@@ -2469,6 +2799,7 @@ export const updateLogisticsRequestStatusBodyInternalNoteMax = 4000;
 
 
 export const UpdateLogisticsRequestStatusBody = zod.object({
+  "expectedUpdatedAt": zod.coerce.date().describe('Last shipment version seen by the editor; stale changes are rejected.'),
   "status": zod.enum(['new_request', 'planning', 'quote_approval', 'customer_approval', 'loading', 'in_transit', 'delivered']),
   "assignedStaffClerkUserId": zod.string().nullish(),
   "plannedLoadingAt": zod.coerce.date().nullish(),
@@ -2493,13 +2824,15 @@ export const UpdateLogisticsRequestStatusResponse = zod.object({
 
 
 /**
- * @summary Yönetici onayına teklif gönderir
+ * @summary Kurucu onayına teklif taslağı gönderir
  */
 
 
-export const createLogisticsOfferBodyCarrierCostAmountMin = 0;
+export const createLogisticsOfferBodyCarrierCostAmountExclusiveMin = 0;
+export const createLogisticsOfferBodyCarrierCostAmountMax = 9999999999999.99;
 
-export const createLogisticsOfferBodyCustomerPriceAmountMin = 0;
+export const createLogisticsOfferBodyCustomerPriceAmountExclusiveMin = 0;
+export const createLogisticsOfferBodyCustomerPriceAmountMax = 9999999999999.99;
 
 export const createLogisticsOfferBodyCurrencyMin = 3;
 export const createLogisticsOfferBodyCurrencyMax = 8;
@@ -2512,8 +2845,8 @@ export const createLogisticsOfferBodyIncludedServicesMax = 2000;
 export const CreateLogisticsOfferBody = zod.object({
   "requestId": zod.int().min(1),
   "carrierId": zod.int().min(1),
-  "carrierCostAmount": zod.number().min(createLogisticsOfferBodyCarrierCostAmountMin),
-  "customerPriceAmount": zod.number().min(createLogisticsOfferBodyCustomerPriceAmountMin),
+  "carrierCostAmount": zod.number().gt(createLogisticsOfferBodyCarrierCostAmountExclusiveMin).max(createLogisticsOfferBodyCarrierCostAmountMax),
+  "customerPriceAmount": zod.number().gt(createLogisticsOfferBodyCustomerPriceAmountExclusiveMin).max(createLogisticsOfferBodyCustomerPriceAmountMax),
   "currency": zod.string().min(createLogisticsOfferBodyCurrencyMin).max(createLogisticsOfferBodyCurrencyMax),
   "includedServices": zod.string().min(createLogisticsOfferBodyIncludedServicesMin).max(createLogisticsOfferBodyIncludedServicesMax),
   "validUntil": zod.coerce.date(),
@@ -2541,13 +2874,17 @@ export const CreateLogisticsOfferResponse = zod.object({
 
 
 /**
- * @summary Teklifi yönetici olarak onaylar
+ * @summary Teklifi yalnız allowlist kurucusu onaylar
  */
 
 
 
 export const ApproveLogisticsOfferParams = zod.object({
   "id": zod.coerce.number().int().min(1)
+})
+
+export const ApproveLogisticsOfferBody = zod.object({
+  "expectedUpdatedAt": zod.coerce.date()
 })
 
 export const ApproveLogisticsOfferResponse = zod.object({
@@ -2571,6 +2908,7 @@ export const ApproveLogisticsOfferResponse = zod.object({
 
 
 /**
+ * Harici mesaj göndermez; kullanıcının doğruladığı manuel gönderim kaydını tutar.
  * @summary Onaylı teklifi müşteriye gönderildi olarak işaretler
  */
 
@@ -2580,7 +2918,155 @@ export const MarkLogisticsOfferSentParams = zod.object({
   "id": zod.coerce.number().int().min(1)
 })
 
+export const markLogisticsOfferSentBodyNoteMin = 3;
+export const markLogisticsOfferSentBodyNoteMax = 1000;
+
+
+
+export const MarkLogisticsOfferSentBody = zod.object({
+  "expectedUpdatedAt": zod.coerce.date(),
+  "channel": zod.enum(['phone', 'email', 'whatsapp']),
+  "note": zod.string().min(markLogisticsOfferSentBodyNoteMin).max(markLogisticsOfferSentBodyNoteMax)
+})
+
 export const MarkLogisticsOfferSentResponse = zod.object({
+  "id": zod.int(),
+  "requestId": zod.int(),
+  "carrierId": zod.int(),
+  "carrierCostAmount": zod.number(),
+  "customerPriceAmount": zod.number(),
+  "currency": zod.string(),
+  "includedServices": zod.string(),
+  "validUntil": zod.coerce.date(),
+  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired']),
+  "createdByClerkUserId": zod.string(),
+  "approvedByClerkUserId": zod.string().nullable(),
+  "approvedAt": zod.coerce.date().nullable(),
+  "sentAt": zod.coerce.date().nullable(),
+  "isTest": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Bekleyen taşıyıcı başvurusunu yalnız kurucu değerlendirir
+ */
+
+
+
+export const ReviewLogisticsCarrierParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const reviewLogisticsCarrierBodyNoteMin = 3;
+export const reviewLogisticsCarrierBodyNoteMax = 1000;
+
+
+
+export const ReviewLogisticsCarrierBody = zod.object({
+  "status": zod.enum(['approved', 'rejected']),
+  "note": zod.string().min(reviewLogisticsCarrierBodyNoteMin).max(reviewLogisticsCarrierBodyNoteMax)
+})
+
+export const ReviewLogisticsCarrierResponse = zod.object({
+  "id": zod.int(),
+  "referenceCode": zod.string(),
+  "companyName": zod.string(),
+  "contactName": zod.string(),
+  "email": zod.string(),
+  "phone": zod.string(),
+  "serviceRoutes": zod.string(),
+  "transportMode": zod.enum(['road', 'sea', 'air']),
+  "capacity": zod.string(),
+  "availability": zod.string(),
+  "notes": zod.string().nullish(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "isTest": zod.boolean(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Yalnız onay bekleyen teklif taslağını revize eder
+ */
+
+
+
+export const ReviseLogisticsOfferParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+
+export const reviseLogisticsOfferBodyCarrierCostAmountExclusiveMin = 0;
+export const reviseLogisticsOfferBodyCarrierCostAmountMax = 9999999999999.99;
+
+export const reviseLogisticsOfferBodyCustomerPriceAmountExclusiveMin = 0;
+export const reviseLogisticsOfferBodyCustomerPriceAmountMax = 9999999999999.99;
+
+export const reviseLogisticsOfferBodyCurrencyMin = 3;
+export const reviseLogisticsOfferBodyCurrencyMax = 3;
+
+export const reviseLogisticsOfferBodyIncludedServicesMin = 2;
+export const reviseLogisticsOfferBodyIncludedServicesMax = 2000;
+
+
+
+export const ReviseLogisticsOfferBody = zod.object({
+  "expectedUpdatedAt": zod.coerce.date(),
+  "carrierId": zod.int().min(1),
+  "carrierCostAmount": zod.number().gt(reviseLogisticsOfferBodyCarrierCostAmountExclusiveMin).max(reviseLogisticsOfferBodyCarrierCostAmountMax),
+  "customerPriceAmount": zod.number().gt(reviseLogisticsOfferBodyCustomerPriceAmountExclusiveMin).max(reviseLogisticsOfferBodyCustomerPriceAmountMax),
+  "currency": zod.string().min(reviseLogisticsOfferBodyCurrencyMin).max(reviseLogisticsOfferBodyCurrencyMax),
+  "includedServices": zod.string().min(reviseLogisticsOfferBodyIncludedServicesMin).max(reviseLogisticsOfferBodyIncludedServicesMax),
+  "validUntil": zod.coerce.date()
+})
+
+export const ReviseLogisticsOfferResponse = zod.object({
+  "id": zod.int(),
+  "requestId": zod.int(),
+  "carrierId": zod.int(),
+  "carrierCostAmount": zod.number(),
+  "customerPriceAmount": zod.number(),
+  "currency": zod.string(),
+  "includedServices": zod.string(),
+  "validUntil": zod.coerce.date(),
+  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired']),
+  "createdByClerkUserId": zod.string(),
+  "approvedByClerkUserId": zod.string().nullable(),
+  "approvedAt": zod.coerce.date().nullable(),
+  "sentAt": zod.coerce.date().nullable(),
+  "isTest": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * Müşteri kabul kaydı hukuki imza, sözleşme veya tahsilat değildir.
+ * @summary Kurucu teklif reddini veya müşterinin harici kabul kaydını işler
+ */
+
+
+
+export const DecideLogisticsOfferParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const decideLogisticsOfferBodyNoteMin = 3;
+export const decideLogisticsOfferBodyNoteMax = 1000;
+
+
+
+export const DecideLogisticsOfferBody = zod.object({
+  "expectedUpdatedAt": zod.coerce.date(),
+  "decision": zod.enum(['reject', 'accept_customer']),
+  "note": zod.string().min(decideLogisticsOfferBodyNoteMin).max(decideLogisticsOfferBodyNoteMax)
+})
+
+export const DecideLogisticsOfferResponse = zod.object({
   "id": zod.int(),
   "requestId": zod.int(),
   "carrierId": zod.int(),
@@ -2676,8 +3162,8 @@ export const GetStaffProfilesResponse = zod.array(GetStaffProfilesResponseItem)
  * @summary Mevcut hesap için yetkili personel veya kurucu çalışma alanı
  */
 export const GetStaffAccessResponse = zod.object({
-  "role": zod.enum(['founder', 'admin', 'operations', 'finance', 'reviewer']),
-  "workspace": zod.enum(['/staff/yonetim-paneli', '/staff/calisma-alani'])
+  "role": zod.enum(['founder', 'admin', 'operations', 'finance', 'reviewer', 'logistics_listings']),
+  "workspace": zod.enum(['/staff/yonetim-paneli', '/staff/calisma-alani', '/staff/lojistik-ilanlari'])
 })
 
 

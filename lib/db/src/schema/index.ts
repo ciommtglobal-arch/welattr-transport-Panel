@@ -16,3 +16,6 @@ export * from "./staff-trial";
 export * from "./kasa";
 export * from "./company-instructions";
 export * from "./company-fund-records";
+export * from "./logistics-listing-workspace";
+export * from "./logistics-whatsapp-intake";
+export * from "./nexus-shopify";

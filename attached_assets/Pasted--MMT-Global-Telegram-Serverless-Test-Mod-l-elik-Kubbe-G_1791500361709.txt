@@ -1,0 +1,70 @@
+# MMT Global - Telegram Serverless Test Modülü
+# Çelik Kubbe Güvenlik ve Decimal Finansal Kontrol Altyapısı
+
+from decimal import Decimal
+
+# Test ortamı için kurucu yetki ID'si
+KURUCU_TELEGRAM_ID = 123456789
+
+def serverless_finansal_kontrol(veri):
+    """
+    Telegram Serverless altyapısında çalışacak hafifletilmiş ve 
+    Decimal tabanlı güvenli finansal doğrulama fonksiyonu.
+    """
+    try:
+        satis = Decimal(str(veri.get("satis", "0.00")))
+        yuk_veren_komisyon_payi = Decimal(str(veri.get("yuk_veren_komisyon_payi", "0.00")))
+        
+        tir_sahibi_net_hakedis = Decimal(str(veri.get("tir_sahibi_net_hakedis", "0.00")))
+        toplam_komisyon = Decimal(str(veri.get("toplam_komisyon", "0.00")))
+        brut_ticari_satis_farki = Decimal(str(veri.get("brut_ticari_satis_farki", "0.00")))
+        
+        alicinin_toplam_odemesi = satis + yuk_veren_komisyon_payi
+        dagitim_toplami = tir_sahibi_net_hakedis + toplam_komisyon + brut_ticari_satis_farki
+        
+        fark = alicinin_toplam_odemesi - dagitim_toplami
+        
+        if fark != Decimal("0.00"):
+            return {
+                "durum": "BLOKE",
+                "mesaj": f"Para dağılımı dengeli değil. Fark: {fark:.2f} USD."
+            }
+            
+        return {
+            "durum": "TASLAK HESAP – KURUCU ONAYI BEKLENİYOR",
+            "matematiksel_dogrulandi": True,
+            "mesaj": "Matematiksel denge sağlandı, kurucu onayı bekleniyor."
+        }
+        
+    except Exception as e:
+        return {
+            "durum": "HATA",
+            "mesaj": f"Hesaplama hatası: {str(e)}"
+        }
+
+def serverless_buton_isleyici(callback_veri, kullanici_id):
+    """
+    Tek tıkla onay mekanizması için kurucu yetki ve veri doğrulama katmanı.
+    """
+    if kullanici_id != KURUCU_TELEGRAM_ID:
+        return {"durum": "YETKISIZ", "mesaj": "Bu işlemi onaylamaya yetkiniz yok."}
+        
+    if not callback_veri or "_" not in callback_veri:
+        return {"durum": "GECERSIZ", "mesaj": "Geçersiz işlem verisi."}
+        
+    islem_turu, islem_id = callback_veri.split("_", 1)
+    
+    if islem_turu == "onayla":
+        return {
+            "durum": "ONAYLANDI",
+            "islem_id": islem_id,
+            "mesaj": f"İşlem ID {islem_id} Kurucu tarafından başarıyla onaylandı."
+        }
+    elif islem_turu == "reddet":
+        return {
+            "durum": "REDDEDILDI",
+            "islem_id": islem_id,
+            "mesaj": f"İşlem ID {islem_id} reddedildi."
+        }
+        
+    return {"durum": "BILINMIYOR", "mesaj": "Tanımlanamayan işlem türü."}

@@ -1,9 +1,21 @@
 ---
-name: MMT Global free B2B network
-description: The fixed mission for MMT Global's social-benefit B2B network and the boundaries that prevent strategy drift.
+name: MMT Global B2B commission scope
+description: Free registration/listings, shared matching commissions, and initial operating-cost coverage.
 ---
 
-MMT Global's primary project is a free, social-benefit B2B network. Producer promotions/listings, buyer announcements/requests, and core matchmaking and service access must remain free. The near-term objective is trust, reach, and useful connections—not profit, payment collection, or physical retail. The user's own commercial activities may continue to use the existing payment integration, but that channel must stay separate from the free network.
+MMT Global's primary project is a social-benefit B2B network. Company registration, producer promotions/listings, and buyer announcements/requests remain free. The user subsequently chose commissions for “MMT Connect’teki eşleştirmeler,” not only for MMT's own commercial transport work. This supersedes the previous requirement that core matching must be free; it does not authorize charging for registration or listings.
+
+Eşleştirme komisyonunu yük veren firma ile taşıyıcı eşit paylaşacak: toplam platform komisyonunun %50'si yük verene, %50'si taşıyıcıya ait. Bu oranlar taşıma satış fiyatının değil, toplam komisyonun paylaşımıdır. İlk aşamadaki amaç sistem, personel ve ofis kira masraflarını karşılamak. Toplam komisyon oranları yalnızca taslak olarak onaylandı; hangi aşamada ücret doğacağı ve canlı hesaplama/tahsilat koşulları henüz belirlenmedi.
+
+**Why:** Kullanıcı ödeme sorumluluğu için “İkisi arasında paylaşılsın” seçeneğini seçti ve “Sistem eleman ofis kira masrafı çıksın ilk aşamada” dedi. Ardından açıkça “Evet: %50 yük veren, %50 taşıyıcı” paylaşımını onayladı.
+
+**How to apply:** Tek toplam platform komisyonu üzerinden iki eşit pay hesaplayıp ayrı gösterin; her iki tarafa da tam komisyon uygulamayın. Taslak oranları canlı ücret olarak kullanmayın; toplam komisyonun canlı hesaplama esasını/oranını ve ücretin hangi aşamada doğacağını doğrulamadan tahsilatı etkinleştirmeyin.
+
+Yalnızca taslak tarife olarak onaylanan toplam komisyon oranları: Irak Hattı %6; Dubai/BAE Hattı %8; Avrupa Koridoru %7; Ukrayna/Doğu Avrupa %10. Bunlar iki tarafa ayrı ayrı uygulanacak oranlar değil, %50/%50 paylaşılacak toplam komisyon oranlarıdır.
+
+**Why:** Kullanıcı, bu dört oran açıkça gösterilerek sorulduğunda “Evet, yalnız taslak tarife olarak” seçeneğini onayladı.
+
+**How to apply:** Bu oranları planlama/taslak hesaplarda açıkça taslak etiketiyle kullanın. Canlı tarife veya tahsilat onayı olarak yorumlamayın; gerçek giderlerin karşılanacağını işlem hacmi ve gider verileri olmadan iddia etmeyin.
 
 Kullanıcının genel yaklaşımı: iş ortakları ve projeyi temsil eden insanlarla bağ kurmak; amaç para kazanmak değil, vizyonunu insanlarla birlikte gerçekleştirmek.
 
@@ -11,6 +23,6 @@ Kullanıcının genel yaklaşımı: iş ortakları ve projeyi temsil eden insanl
 
 **How to apply:** Proje önerilerini ortaklıklar, insanlarla bağ kurma ve vizyonu birlikte gerçekleştirme odağında değerlendir; para kazanmayı ana hedef olarak sunma.
 
-**Why:** The user explicitly chose this direction after weighing financial and brand goals. Charging producers or buyers, or repeatedly pivoting toward POS, paid marketplace features, or stores, would conflict with the mission and create confusion. Keeping a separate commercial payment channel lets the brand remain operational without charging people for the social B2B network.
+**Why:** When explicitly offered a choice between MMT's own commercial transport work and commissions on MMT Connect matching, with the change to the free-matching policy explained, the user selected MMT Connect matching.
 
-**How to apply:** Keep website and social copy free-first; prioritize verified profiles, safe matching, multilingual communication, and practical support. Label commercial payment pages as being for the user's own trade or authorized paid services, not for core network access. If a feature involves fees, flag it as outside the agreed line before building. Future sponsorships, grants, or voluntary operating support must not turn core access into a paid service. Warn the user when a proposed step drifts toward paid access, payment-first operations, inventory-heavy retail, or a different product direction. Supporting the user means protecting this mission while clearly calling out legal, financial, safety, and operational risks.
+**How to apply:** Keep registration and listings free; prioritize verified profiles, safe matching, multilingual communication, and practical support. Do not describe all matching as free after this decision. Distinguish a platform matching commission from MMT's own transport sales margin. Apply the confirmed 50/50 payment split. The four corridor rates are approved for drafts only; confirm live calculation terms and the event that creates the fee before activation. Draft tariff approval is not approval to publish, enable collection, or modify production records; obtain separate approval for live changes.

@@ -1,11 +1,26 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request, type Response } from "express";
+import { getAuth } from "@clerk/express";
 import {
   ApproveLogisticsOfferParams,
+  ApproveLogisticsOfferBody,
   CreateLogisticsCarrierBody,
   CreateLogisticsCommunicationBody,
   CreateLogisticsOfferBody,
   CreateLogisticsRequestBody,
+  CreateLogisticsRequestResponse,
+  CreateLogisticsCarrierResponse,
+  CreateLogisticsOfferResponse,
+  CreateLogisticsCommunicationResponse,
+  UpdateLogisticsRequestStatusResponse,
   GetLogisticsOperationsQueryParams,
+  GetLogisticsOperationsResponse,
+  ReviewLogisticsCarrierBody,
+  ReviewLogisticsCarrierParams,
+  ReviseLogisticsOfferBody,
+  ReviseLogisticsOfferParams,
+  DecideLogisticsOfferBody,
+  DecideLogisticsOfferParams,
+  MarkLogisticsOfferSentBody,
   UpdateLogisticsRequestStatusBody,
   UpdateLogisticsRequestStatusParams,
 } from "@workspace/api-zod";
@@ -23,11 +38,29 @@ import {
   type LogisticsRequest,
   type LogisticsShipment,
 } from "@workspace/db";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
-import { requireStaff } from "../lib/staffAuth";
+import { requireLogisticsOperator, requireLogisticsFounder } from "../lib/logisticsWorkflowAuth";
+import {
+  LogisticsWorkflowError, saveLogisticsOffer, approveLogisticsOffer,
+  markLogisticsOfferSent, decideLogisticsOffer, reviewLogisticsCarrier, updateLogisticsShipment,
+} from "../lib/logisticsWorkflow";
 
 const router: IRouter = Router();
+
+async function runWorkflow<T>(req: Request, res: Response, action: () => Promise<T>,
+  serialize: (row: T) => unknown, successStatus = 200): Promise<void> {
+  try {
+    const row = await action();
+    res.status(successStatus).json(serialize(row));
+  } catch (error) {
+    if (error instanceof LogisticsWorkflowError) {
+      res.status(error.status).json({ error: error.message }); return;
+    }
+    req.log?.error({ errorType: error instanceof Error ? error.name : "unknown" }, "Logistics workflow persistence failed");
+    res.status(503).json({ error: "Kayıt işlemi tamamlanamadı. Yenileyip kayıt durumunu kontrol edin." });
+  }
+}
 
 function referenceCode(prefix: string) {
   return `${prefix}-${new Date().getUTCFullYear()}-${randomBytes(4)
@@ -43,7 +76,7 @@ function serializeRequest(
   request: LogisticsRequest,
   shipment?: LogisticsShipment,
 ) {
-  return {
+  return CreateLogisticsRequestResponse.parse({
     id: request.id,
     referenceCode: request.referenceCode,
     requesterName: request.requesterName,
@@ -62,11 +95,11 @@ function serializeRequest(
     isTest: request.isTest,
     createdAt: request.createdAt.toISOString(),
     updatedAt: request.updatedAt.toISOString(),
-  };
+  });
 }
 
 function serializeCarrier(carrier: LogisticsCarrier) {
-  return {
+  return CreateLogisticsCarrierResponse.parse({
     id: carrier.id,
     referenceCode: carrier.referenceCode,
     companyName: carrier.companyName,
@@ -83,11 +116,11 @@ function serializeCarrier(carrier: LogisticsCarrier) {
     reviewedAt: iso(carrier.reviewedAt),
     createdAt: carrier.createdAt.toISOString(),
     updatedAt: carrier.updatedAt.toISOString(),
-  };
+  });
 }
 
 function serializeShipment(shipment: LogisticsShipment) {
-  return {
+  return UpdateLogisticsRequestStatusResponse.parse({
     id: shipment.id,
     requestId: shipment.requestId,
     referenceCode: shipment.referenceCode,
@@ -100,11 +133,11 @@ function serializeShipment(shipment: LogisticsShipment) {
     internalNote: shipment.internalNote,
     createdAt: shipment.createdAt.toISOString(),
     updatedAt: shipment.updatedAt.toISOString(),
-  };
+  });
 }
 
 function serializeOffer(offer: LogisticsOffer) {
-  return {
+  return CreateLogisticsOfferResponse.parse({
     id: offer.id,
     requestId: offer.requestId,
     carrierId: offer.carrierId,
@@ -121,11 +154,11 @@ function serializeOffer(offer: LogisticsOffer) {
     isTest: offer.isTest,
     createdAt: offer.createdAt.toISOString(),
     updatedAt: offer.updatedAt.toISOString(),
-  };
+  });
 }
 
 function serializeCommunication(communication: LogisticsCommunication) {
-  return {
+  return CreateLogisticsCommunicationResponse.parse({
     id: communication.id,
     requestId: communication.requestId,
     channel: communication.channel,
@@ -134,7 +167,7 @@ function serializeCommunication(communication: LogisticsCommunication) {
     createdByClerkUserId: communication.createdByClerkUserId,
     isTest: communication.isTest,
     createdAt: communication.createdAt.toISOString(),
-  };
+  });
 }
 
 router.post("/logistics/requests", async (req, res): Promise<void> => {
@@ -147,12 +180,16 @@ router.post("/logistics/requests", async (req, res): Promise<void> => {
   }
 
   const input = parsed.data;
+  if ([input.requesterName, input.email, input.phone, input.origin, input.destination, input.cargoType].some(x => !x.trim())) {
+    res.status(400).json({ error: "Zorunlu yük talebi alanları boş bırakılamaz." }); return;
+  }
   const created = await db.transaction(async (tx) => {
     const [request] = await tx
       .insert(logisticsRequestsTable)
       .values({
         referenceCode: referenceCode("LOAD"),
         requesterName: input.requesterName.trim(),
+        requesterClerkUserId: getAuth(req).userId ?? null,
         organization: input.organization?.trim() || null,
         email: input.email.trim().toLowerCase(),
         phone: input.phone.trim(),
@@ -197,11 +234,15 @@ router.post("/logistics/carriers", async (req, res): Promise<void> => {
   }
 
   const input = parsed.data;
+  if ([input.companyName, input.contactName, input.email, input.phone, input.serviceRoutes, input.capacity, input.availability].some(x => !x.trim())) {
+    res.status(400).json({ error: "Zorunlu taşıyıcı başvuru alanları boş bırakılamaz." }); return;
+  }
   const [carrier] = await db
     .insert(logisticsCarriersTable)
     .values({
       referenceCode: referenceCode("CARRIER"),
       companyName: input.companyName.trim(),
+      applicantClerkUserId: getAuth(req).userId ?? null,
       contactName: input.contactName.trim(),
       email: input.email.trim().toLowerCase(),
       phone: input.phone.trim(),
@@ -223,7 +264,7 @@ router.post("/logistics/carriers", async (req, res): Promise<void> => {
 });
 
 router.get("/logistics/staff", async (req, res): Promise<void> => {
-  const authorization = await requireStaff(req, res);
+  const authorization = await requireLogisticsOperator(req, res);
   if (!authorization) return;
 
   const staff = await db
@@ -240,7 +281,7 @@ router.get("/logistics/staff", async (req, res): Promise<void> => {
 });
 
 router.get("/logistics/operations", async (req, res): Promise<void> => {
-  const authorization = await requireStaff(req, res);
+  const authorization = await requireLogisticsOperator(req, res);
   if (!authorization) return;
 
   const parsed = GetLogisticsOperationsQueryParams.safeParse(req.query);
@@ -303,22 +344,25 @@ router.get("/logistics/operations", async (req, res): Promise<void> => {
     ]);
 
   const shipmentByRequest = new Map(shipments.map((shipment) => [shipment.requestId, shipment]));
-  res.json({
-    requests: requests.map((request) =>
+  const included = (id: number) => !status || shipmentByRequest.has(id);
+  res.setHeader("Cache-Control", "no-store");
+  res.json(GetLogisticsOperationsResponse.parse({
+    canApprove: authorization.isFounder,
+    requests: requests.filter(request => included(request.id)).map((request) =>
       serializeRequest(request, shipmentByRequest.get(request.id)),
     ),
     carriers: carriers.map(serializeCarrier),
     shipments: shipments.map(serializeShipment),
-    offers: offers.map(serializeOffer),
-    communications: communications.map(serializeCommunication),
+    offers: offers.filter(offer => included(offer.requestId)).map(serializeOffer),
+    communications: communications.filter(row => included(row.requestId)).map(serializeCommunication),
     staff,
-  });
+  }));
 });
 
 router.patch(
   "/logistics/requests/:id/status",
   async (req, res): Promise<void> => {
-    const authorization = await requireStaff(req, res);
+    const authorization = await requireLogisticsOperator(req, res);
     if (!authorization) return;
 
     const params = UpdateLogisticsRequestStatusParams.safeParse(req.params);
@@ -328,81 +372,12 @@ router.patch(
       return;
     }
 
-    const [existing] = await db
-      .select()
-      .from(logisticsShipmentsTable)
-      .where(eq(logisticsShipmentsTable.requestId, params.data.id))
-      .limit(1);
-    if (!existing) {
-      res.status(404).json({ error: "Lojistik iş kaydı bulunamadı." });
-      return;
-    }
-
-    if (body.data.assignedStaffClerkUserId) {
-      const [assignedStaff] = await db
-        .select({ clerkUserId: staffUsersTable.clerkUserId })
-        .from(staffUsersTable)
-        .where(
-          and(
-            eq(staffUsersTable.clerkUserId, body.data.assignedStaffClerkUserId),
-            eq(staffUsersTable.active, 1),
-          ),
-        )
-        .limit(1);
-      if (!assignedStaff) {
-        res.status(400).json({ error: "Sorumlu personel bulunamadı." });
-        return;
-      }
-    }
-
-    const now = new Date();
-    const [updated] = await db
-      .update(logisticsShipmentsTable)
-      .set({
-        status: body.data.status,
-        assignedStaffClerkUserId:
-          body.data.assignedStaffClerkUserId === undefined
-            ? existing.assignedStaffClerkUserId
-            : body.data.assignedStaffClerkUserId,
-        plannedLoadingAt:
-          body.data.plannedLoadingAt === undefined
-            ? existing.plannedLoadingAt
-            : body.data.plannedLoadingAt,
-        plannedDeliveryAt:
-          body.data.plannedDeliveryAt === undefined
-            ? existing.plannedDeliveryAt
-            : body.data.plannedDeliveryAt,
-        internalNote:
-          body.data.internalNote === undefined
-            ? existing.internalNote
-            : body.data.internalNote?.trim() || null,
-        actualLoadingAt:
-          body.data.status === "loading"
-            ? existing.actualLoadingAt ?? now
-            : existing.actualLoadingAt,
-        actualDeliveryAt:
-          body.data.status === "delivered"
-            ? existing.actualDeliveryAt ?? now
-            : existing.actualDeliveryAt,
-      })
-      .where(eq(logisticsShipmentsTable.id, existing.id))
-      .returning();
-
-    req.log.info(
-      {
-        requestId: params.data.id,
-        previousStatus: existing.status,
-        nextStatus: updated.status,
-        staffUserId: authorization.userId,
-      },
-      "Logistics shipment status updated",
-    );
-    res.json(serializeShipment(updated));
+    await runWorkflow(req, res, () => updateLogisticsShipment(params.data.id, body.data, authorization), serializeShipment);
   },
 );
 
 router.post("/logistics/offers", async (req, res): Promise<void> => {
-  const authorization = await requireStaff(req, res);
+  const authorization = await requireLogisticsOperator(req, res);
   if (!authorization) return;
 
   const parsed = CreateLogisticsOfferBody.safeParse(req.body);
@@ -410,127 +385,43 @@ router.post("/logistics/offers", async (req, res): Promise<void> => {
     res.status(400).json({ error: "Teklif bilgileri geçersiz." });
     return;
   }
-  const input = parsed.data;
-  const [[request], [carrier]] = await Promise.all([
-    db
-      .select({ id: logisticsRequestsTable.id })
-      .from(logisticsRequestsTable)
-      .where(eq(logisticsRequestsTable.id, input.requestId))
-      .limit(1),
-    db
-      .select({ id: logisticsCarriersTable.id, status: logisticsCarriersTable.status })
-      .from(logisticsCarriersTable)
-      .where(eq(logisticsCarriersTable.id, input.carrierId))
-      .limit(1),
-  ]);
-  if (!request) {
-    res.status(404).json({ error: "Yük talebi bulunamadı." });
-    return;
-  }
-  if (!carrier || carrier.status !== "approved") {
-    res.status(400).json({ error: "Teklif için onaylı taşıyıcı seçilmelidir." });
-    return;
-  }
-
-  const [offer] = await db
-    .insert(logisticsOffersTable)
-    .values({
-      requestId: input.requestId,
-      carrierId: input.carrierId,
-      carrierCostAmount: input.carrierCostAmount,
-      customerPriceAmount: input.customerPriceAmount,
-      currency: input.currency.trim().toUpperCase(),
-      includedServices: input.includedServices.trim(),
-      validUntil: input.validUntil,
-      status: "pending_approval",
-      createdByClerkUserId: authorization.userId,
-      isTest: input.isTest ?? false,
-    })
-    .returning();
-  res.status(201).json(serializeOffer(offer));
+  await runWorkflow(req, res, () => saveLogisticsOffer(parsed.data, authorization), serializeOffer, 201);
 });
 
 router.post(
   "/logistics/offers/:id/approve",
   async (req, res): Promise<void> => {
-    const authorization = await requireStaff(req, res);
+    const authorization = requireLogisticsFounder(req, res);
     if (!authorization) return;
-    if (authorization.staff.role !== "admin") {
-      res.status(403).json({ error: "Teklif onayı için yönetici yetkisi gerekiyor." });
-      return;
-    }
 
     const params = ApproveLogisticsOfferParams.safeParse(req.params);
-    if (!params.success) {
+    const body = ApproveLogisticsOfferBody.safeParse(req.body);
+    if (!params.success || !body.success) {
       res.status(400).json({ error: "Teklif numarası geçersiz." });
       return;
     }
-    const [existing] = await db
-      .select()
-      .from(logisticsOffersTable)
-      .where(eq(logisticsOffersTable.id, params.data.id))
-      .limit(1);
-    if (!existing) {
-      res.status(404).json({ error: "Teklif bulunamadı." });
-      return;
-    }
-    if (existing.status !== "pending_approval") {
-      res.status(400).json({ error: "Bu teklif artık yönetici onayı beklemiyor." });
-      return;
-    }
-
-    const [updated] = await db
-      .update(logisticsOffersTable)
-      .set({
-        status: "approved",
-        approvedByClerkUserId: authorization.userId,
-        approvedAt: new Date(),
-      })
-      .where(eq(logisticsOffersTable.id, existing.id))
-      .returning();
-    res.json(serializeOffer(updated));
+    await runWorkflow(req, res, () => approveLogisticsOffer(params.data.id, authorization, body.data.expectedUpdatedAt), serializeOffer);
   },
 );
 
 router.post(
   "/logistics/offers/:id/mark-sent",
   async (req, res): Promise<void> => {
-    const authorization = await requireStaff(req, res);
+    const authorization = await requireLogisticsOperator(req, res);
     if (!authorization) return;
 
     const params = ApproveLogisticsOfferParams.safeParse(req.params);
-    if (!params.success) {
+    const body = MarkLogisticsOfferSentBody.safeParse(req.body);
+    if (!params.success || !body.success) {
       res.status(400).json({ error: "Teklif numarası geçersiz." });
       return;
     }
-    const [existing] = await db
-      .select()
-      .from(logisticsOffersTable)
-      .where(eq(logisticsOffersTable.id, params.data.id))
-      .limit(1);
-    if (!existing) {
-      res.status(404).json({ error: "Teklif bulunamadı." });
-      return;
-    }
-    if (existing.status !== "approved") {
-      res.status(400).json({ error: "Teklif önce yönetici tarafından onaylanmalıdır." });
-      return;
-    }
-    const [updated] = await db
-      .update(logisticsOffersTable)
-      .set({ status: "sent", sentAt: new Date() })
-      .where(eq(logisticsOffersTable.id, existing.id))
-      .returning();
-    req.log.info(
-      { offerId: updated.id, requestId: updated.requestId, staffUserId: authorization.userId },
-      "Logistics offer manually marked as sent",
-    );
-    res.json(serializeOffer(updated));
+    await runWorkflow(req, res, () => markLogisticsOfferSent(params.data.id, authorization, body.data), serializeOffer);
   },
 );
 
 router.post("/logistics/communications", async (req, res): Promise<void> => {
-  const authorization = await requireStaff(req, res);
+  const authorization = await requireLogisticsOperator(req, res);
   if (!authorization) return;
 
   const parsed = CreateLogisticsCommunicationBody.safeParse(req.body);
@@ -540,13 +431,16 @@ router.post("/logistics/communications", async (req, res): Promise<void> => {
   }
   const input = parsed.data;
   const [request] = await db
-    .select({ id: logisticsRequestsTable.id })
+    .select({ id: logisticsRequestsTable.id, isTest: logisticsRequestsTable.isTest })
     .from(logisticsRequestsTable)
     .where(eq(logisticsRequestsTable.id, input.requestId))
     .limit(1);
   if (!request) {
     res.status(404).json({ error: "Yük talebi bulunamadı." });
     return;
+  }
+  if (!input.message.trim() || (input.isTest !== undefined && input.isTest !== request.isTest)) {
+    res.status(400).json({ error: "İletişim notu boş olamaz; TEST durumu yük talebiyle aynı olmalıdır." }); return;
   }
 
   const [communication] = await db
@@ -557,10 +451,37 @@ router.post("/logistics/communications", async (req, res): Promise<void> => {
       direction: input.direction,
       message: input.message.trim(),
       createdByClerkUserId: authorization.userId,
-      isTest: input.isTest ?? false,
+      isTest: request.isTest,
     })
     .returning();
   res.status(201).json(serializeCommunication(communication));
+});
+
+router.post("/logistics/carriers/:id/review", async (req, res): Promise<void> => {
+  const actor = requireLogisticsFounder(req, res);
+  if (!actor) return;
+  const params = ReviewLogisticsCarrierParams.safeParse(req.params);
+  const body = ReviewLogisticsCarrierBody.safeParse(req.body);
+  if (!params.success || !body.success) { res.status(400).json({ error: "Taşıyıcı değerlendirmesi geçersiz." }); return; }
+  await runWorkflow(req, res, () => reviewLogisticsCarrier(params.data.id, body.data.status, body.data.note, actor), serializeCarrier);
+});
+
+router.patch("/logistics/offers/:id", async (req, res): Promise<void> => {
+  const actor = await requireLogisticsOperator(req, res);
+  if (!actor) return;
+  const params = ReviseLogisticsOfferParams.safeParse(req.params);
+  const body = ReviseLogisticsOfferBody.safeParse(req.body);
+  if (!params.success || !body.success) { res.status(400).json({ error: "Teklif revizyonu geçersiz." }); return; }
+  await runWorkflow(req, res, () => saveLogisticsOffer(body.data, actor, params.data.id), serializeOffer);
+});
+
+router.post("/logistics/offers/:id/decision", async (req, res): Promise<void> => {
+  const actor = requireLogisticsFounder(req, res);
+  if (!actor) return;
+  const params = DecideLogisticsOfferParams.safeParse(req.params);
+  const body = DecideLogisticsOfferBody.safeParse(req.body);
+  if (!params.success || !body.success) { res.status(400).json({ error: "Teklif kararı geçersiz." }); return; }
+  await runWorkflow(req, res, () => decideLogisticsOffer(params.data.id, actor, body.data), serializeOffer);
 });
 
 export default router;

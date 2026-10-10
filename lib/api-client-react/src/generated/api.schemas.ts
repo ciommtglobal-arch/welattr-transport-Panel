@@ -5,6 +5,49 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+/**
+ * Shopify order JSON; signature is verified against untouched raw bytes.
+ */
+export interface NexusShopifyOrderInput { [key: string]: unknown }
+
+export type NexusIntakeKind = typeof NexusIntakeKind[keyof typeof NexusIntakeKind];
+
+
+export const NexusIntakeKind = {
+  reservation: 'reservation',
+  financing_interest: 'financing_interest',
+} as const;
+
+export type NexusIntakeStatus = typeof NexusIntakeStatus[keyof typeof NexusIntakeStatus];
+
+
+export const NexusIntakeStatus = {
+  PENDING_FOUNDER_APPROVAL: 'PENDING_FOUNDER_APPROVAL',
+  FOUNDER_APPROVED: 'FOUNDER_APPROVED',
+  FOUNDER_REJECTED: 'FOUNDER_REJECTED',
+} as const;
+
+export interface NexusIntake {
+  id: number;
+  shopDomain: string;
+  orderId: string;
+  orderName: string;
+  lineId: string;
+  variantId: string;
+  kind: NexusIntakeKind;
+  productTitle: string;
+  quantity: number;
+  unitPrice: string;
+  currency: string;
+  financialStatus: string;
+  cancelled: number;
+  /** @nullable */
+  warning?: string | null;
+  status: NexusIntakeStatus;
+  sourceUpdatedAt: string;
+  createdAt: string;
+}
+
 export type KasaUserRole = typeof KasaUserRole[keyof typeof KasaUserRole];
 
 
@@ -348,14 +391,94 @@ export interface StaffTrialCandidateReportReviewPage {
   hasMore: boolean;
 }
 
-export type PaymentCurrency = typeof PaymentCurrency[keyof typeof PaymentCurrency];
+export interface LogisticsListingAccess {
+  userId: string;
+  canDraft: boolean;
+  canManageGrants: boolean;
+  canPublish: boolean;
+}
 
+export interface LogisticsListingGrantInput {
+  /** @maxLength 254 */
+  email: string;
+}
 
-export const PaymentCurrency = {
-  TRY: 'TRY',
-  USD: 'USD',
-  EUR: 'EUR',
-} as const;
+export interface LogisticsListingGrant {
+  id: number;
+  clerkUserId: string;
+  verifiedEmail: string;
+  displayName: string;
+  active: boolean;
+  assignedBy: string;
+  updatedAt: string;
+}
+
+export interface LogisticsListingDraftInput {
+  /**
+     * @minLength 1
+     * @maxLength 140
+     */
+  title: string;
+  /** @maxLength 160 */
+  fullName: string;
+  /** @maxLength 200 */
+  organization: string;
+  /** @maxLength 160 */
+  location: string;
+  /** @maxLength 180 */
+  contact: string;
+  /** @maxLength 2000 */
+  description: string;
+}
+
+export type LogisticsListingDraftUpdate = LogisticsListingDraftInput & {
+  /** @minimum 1 */
+  revision: number;
+};
+
+export interface LogisticsListingPublicationInput {
+  /** @minimum 1 */
+  revision: number;
+}
+
+export type LogisticsListingDraft = LogisticsListingDraftInput & ({
+  id: number;
+  authorClerkUserId: string;
+  revision: number;
+  /** @nullable */
+  publishedListingId: number | null;
+  /** @nullable */
+  publishedBy: string | null;
+  /** @nullable */
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+});
+
+export interface LogisticsListingDraftPage {
+  items: LogisticsListingDraft[];
+  hasMore: boolean;
+  page: number;
+}
+
+export interface PaymentCallbackHint {
+  /**
+     * @minLength 2
+     * @maxLength 36
+     * @pattern ^[A-Za-z0-9_-]+$
+     */
+  merchant_oid: string;
+  /**
+     * Untrusted hint; ignored
+     * @maxLength 32
+     */
+  status?: string;
+  /**
+     * Untrusted hint; ignored
+     * @maxLength 32
+     */
+  total_amount?: string;
+}
 
 export type TamiPaymentStatusValue = typeof TamiPaymentStatusValue[keyof typeof TamiPaymentStatusValue];
 
@@ -365,6 +488,22 @@ export const TamiPaymentStatusValue = {
   success: 'success',
   failed: 'failed',
   cancelled: 'cancelled',
+} as const;
+
+export interface PaymentCallbackResult {
+  status: TamiPaymentStatusValue;
+  paymentReference: string;
+  operationApproved: false;
+  message: string;
+}
+
+export type PaymentCurrency = typeof PaymentCurrency[keyof typeof PaymentCurrency];
+
+
+export const PaymentCurrency = {
+  TRY: 'TRY',
+  USD: 'USD',
+  EUR: 'EUR',
 } as const;
 
 export type PaymentMode = typeof PaymentMode[keyof typeof PaymentMode];
@@ -1673,6 +1812,8 @@ export interface LogisticsShipmentRecord {
 }
 
 export interface LogisticsRequestStatusUpdate {
+  /** Last shipment version seen by the editor; stale changes are rejected. */
+  expectedUpdatedAt: string;
   status: LogisticsShipmentStatus;
   /** @nullable */
   assignedStaffClerkUserId?: string | null;
@@ -1692,9 +1833,15 @@ export interface LogisticsOfferInput {
   requestId: number;
   /** @minimum 1 */
   carrierId: number;
-  /** @minimum 0 */
+  /**
+     * @maximum 9999999999999.99
+     * @exclusiveMinimum 0
+     */
   carrierCostAmount: number;
-  /** @minimum 0 */
+  /**
+     * @maximum 9999999999999.99
+     * @exclusiveMinimum 0
+     */
   customerPriceAmount: number;
   /**
      * @minLength 3
@@ -1764,12 +1911,99 @@ export interface LogisticsStaffMember {
 }
 
 export interface LogisticsOperationsResponse {
+  /** True only for the configured founder identity. */
+  canApprove: boolean;
   requests: LogisticsRequestRecord[];
   carriers: LogisticsCarrierRecord[];
   shipments: LogisticsShipmentRecord[];
   offers: LogisticsOfferRecord[];
   communications: LogisticsCommunicationRecord[];
   staff: LogisticsStaffMember[];
+}
+
+export type LogisticsCarrierReviewInputStatus = typeof LogisticsCarrierReviewInputStatus[keyof typeof LogisticsCarrierReviewInputStatus];
+
+
+export const LogisticsCarrierReviewInputStatus = {
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface LogisticsCarrierReviewInput {
+  status: LogisticsCarrierReviewInputStatus;
+  /**
+     * @minLength 3
+     * @maxLength 1000
+     */
+  note: string;
+}
+
+export interface LogisticsOfferRevisionInput {
+  expectedUpdatedAt: string;
+  /** @minimum 1 */
+  carrierId: number;
+  /**
+     * @maximum 9999999999999.99
+     * @exclusiveMinimum 0
+     */
+  carrierCostAmount: number;
+  /**
+     * @maximum 9999999999999.99
+     * @exclusiveMinimum 0
+     */
+  customerPriceAmount: number;
+  /**
+     * @minLength 3
+     * @maxLength 3
+     */
+  currency: string;
+  /**
+     * @minLength 2
+     * @maxLength 2000
+     */
+  includedServices: string;
+  validUntil: string;
+}
+
+export type LogisticsOfferDecisionInputDecision = typeof LogisticsOfferDecisionInputDecision[keyof typeof LogisticsOfferDecisionInputDecision];
+
+
+export const LogisticsOfferDecisionInputDecision = {
+  reject: 'reject',
+  accept_customer: 'accept_customer',
+} as const;
+
+export interface LogisticsOfferDecisionInput {
+  expectedUpdatedAt: string;
+  decision: LogisticsOfferDecisionInputDecision;
+  /**
+     * @minLength 3
+     * @maxLength 1000
+     */
+  note: string;
+}
+
+export type LogisticsOfferDispatchInputChannel = typeof LogisticsOfferDispatchInputChannel[keyof typeof LogisticsOfferDispatchInputChannel];
+
+
+export const LogisticsOfferDispatchInputChannel = {
+  phone: 'phone',
+  email: 'email',
+  whatsapp: 'whatsapp',
+} as const;
+
+export interface LogisticsOfferDispatchInput {
+  expectedUpdatedAt: string;
+  channel: LogisticsOfferDispatchInputChannel;
+  /**
+     * @minLength 3
+     * @maxLength 1000
+     */
+  note: string;
+}
+
+export interface LogisticsOfferApprovalInput {
+  expectedUpdatedAt: string;
 }
 
 export interface ErrorResponse {
@@ -2901,6 +3135,13 @@ export type TrialPageParameter = number;
 
 export type TrialPageSizeParameter = number;
 
+export type GetLogisticsListingDraftsParams = {
+/**
+ * @minimum 1
+ */
+page?: number;
+};
+
 export type ExportCompanyRecordsParams = {
 /**
  * @pattern ^\d{4}-\d{2}-\d{2}$
@@ -3095,6 +3336,7 @@ export const GetStaffAccess200Role = {
   operations: 'operations',
   finance: 'finance',
   reviewer: 'reviewer',
+  logistics_listings: 'logistics_listings',
 } as const;
 
 export type GetStaffAccess200Workspace = typeof GetStaffAccess200Workspace[keyof typeof GetStaffAccess200Workspace];
@@ -3103,6 +3345,7 @@ export type GetStaffAccess200Workspace = typeof GetStaffAccess200Workspace[keyof
 export const GetStaffAccess200Workspace = {
   '/staff/yonetim-paneli': '/staff/yonetim-paneli',
   '/staff/calisma-alani': '/staff/calisma-alani',
+  '/staff/lojistik-ilanlari': '/staff/lojistik-ilanlari',
 } as const;
 
 export type GetStaffAccess200 = {

@@ -8,7 +8,7 @@ import {
   useGetStaffB2BCompanyTaskReports,
   useGetStaffTrialTasks,
 } from "@workspace/api-client-react";
-import { ChevronLeft, ChevronRight, ClipboardCheck, FileText, MapPinned, RefreshCw, UsersRound } from "lucide-react";
+import { ChevronLeft, ChevronRight, ClipboardCheck, FileText, MapPinned, RefreshCw, Truck, UsersRound } from "lucide-react";
 import { Link, Redirect } from "wouter";
 import "@/styles/mmt-corporate.css";
 import { FounderTrialCandidates } from "@/pages/staff-trial";
@@ -48,8 +48,8 @@ export function StaffAccessUnavailable({ retry }: { retry: () => void }) {
 }
 
 export function StaffWorkspaceRedirect() {
-  const { isLoaded, isSignedIn } = useAuth();
-  const access = useGetStaffAccess({ query: { queryKey: getGetStaffAccessQueryKey(), enabled: isLoaded && Boolean(isSignedIn) } });
+  const { isLoaded, isSignedIn, userId } = useAuth();
+  const access = useGetStaffAccess({ query: { queryKey: [...getGetStaffAccessQueryKey(), userId], enabled: isLoaded && Boolean(isSignedIn), refetchOnMount: "always" } });
   const trial = useGetStaffTrialTasks({ page: 1, pageSize: 1 }, {
     query: {
       queryKey: getGetStaffTrialTasksQueryKey({ page: 1, pageSize: 1 }),
@@ -72,6 +72,20 @@ export function StaffWorkspaceRedirect() {
 }
 
 const founderPanels = [
+  {
+    title: "Lojistik operasyon",
+    icon: Truck,
+    text: "Yük talepleri, taşıyıcı değerlendirmesi, teklifler ve sevkiyat takibi. Kayıtlar manueldir; mesaj, sözleşme veya ödeme işlemi yapılmaz.",
+    href: "/staff/lojistik-operasyon",
+    link: "Operasyon masasını aç",
+  },
+  {
+    title: "Çelik Kubbe / MMT Nexus",
+    icon: ClipboardCheck,
+    text: "Shopify rezervasyon ve finansman ilgi kayıtları; otomatik onay veya para aktarımı yoktur.",
+    href: "/staff/nexus-denetim",
+    link: "Denetim masasını aç",
+  },
   {
     title: "Bekleyen kararlar ve onaylar",
     icon: ClipboardCheck,
@@ -123,6 +137,7 @@ export function FounderDashboard() {
             <Link href="/staff/b2b-dogrulamalar">Firma doğrulaması</Link>
             <Link href="/staff/medya-merkezi">Medya Merkezi</Link>
             <Link href="/staff/insaat-teklifleri">İnşaat teklifleri</Link>
+            <Link href="/staff/lojistik-ilanlari">Lojistik İlanları</Link>
           </nav>
           <UserButton />
         </header>
