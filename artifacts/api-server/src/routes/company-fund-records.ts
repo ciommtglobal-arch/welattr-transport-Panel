@@ -6,6 +6,7 @@ import { CreateCompanyFundRecordBody, GetCompanyRecordStatusQueryParams, CreateC
 import { requireMyCompany } from "../lib/companyAuth";
 import { logger } from "../lib/logger";
 import { serializeCompanyInstruction } from "./company-instructions";
+import { FundAmendmentSchemaPending, requireFundAmendmentRelationships } from "../lib/fundAmendmentReadiness";
 
 const router: IRouter = Router();
 router.use(["/celik-kubbe/fon-islem", "/celik-kubbe/durum"], (_req, res, next) => {
@@ -135,6 +136,7 @@ router.post("/celik-kubbe/fon-islem/:id/duzeltmeler", async (req, res): Promise<
   } : null;
   try {
     const result = await db.transaction(async (tx) => {
+      await requireFundAmendmentRelationships(tx);
       // Lock the scoped original: competing corrections cannot branch history.
       const [original] = await tx.select().from(funds).where(and(
         eq(funds.businessProfileId, access.profile.id), eq(funds.id, params.data.id),
@@ -181,7 +183,12 @@ router.post("/celik-kubbe/fon-islem/:id/duzeltmeler", async (req, res): Promise<
   } catch (error) {
     // Postgres unique violations also protect distinct-record, same-key races.
     const dbError = error as { code?: string; cause?: { code?: string } };
-    if (error instanceof FundNotFound) {
+    if (error instanceof FundAmendmentSchemaPending) {
+      res.status(503).json({
+        code: "FUND_SCHEMA_PENDING",
+        error: "Düzeltme/iptal güvenlik ilişkileri henüz tamamlanmadı. İkinci yayın doğrulanana kadar bu işlem kapalıdır; hiçbir kayıt değiştirilmedi.",
+      });
+    } else if (error instanceof FundNotFound) {
       res.status(404).json({ error: "Bu firmada kayıt bulunamadı." });
     } else if (error instanceof AmendmentConflict || dbError.code === "23505" || dbError.cause?.code === "23505") {
       res.status(409).json({ error: "Kayıt zaten düzeltilmiş/iptal edilmiş veya istek anahtarı başka içerikle kullanılmış. Güncel kaydı kontrol edin." });

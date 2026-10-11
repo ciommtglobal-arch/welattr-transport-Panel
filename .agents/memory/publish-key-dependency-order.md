@@ -20,3 +20,9 @@ Use a SELECT result before ROLLBACK to report rehearsal failures; do not rely so
 **Why:** The database query callback returned command statuses but omitted PostgreSQL notices, hiding a caught rehearsal failure.
 
 **How to apply:** Capture outcome, failing step and SQLSTATE in a transaction-local temporary result table, SELECT it, then roll back. A successful callback alone does not mean the rehearsal passed.
+
+The user requires MMT release progression to be system-controlled: “Herşey sistemsel olacak hata istemiyorum”.
+
+**Why:** The user explicitly required this when approving staged publication.
+
+**How to apply:** Base advancement on actual production metadata and rollback-tested SQL, not a manually asserted success state. Stop on failed checks; do not promise zero errors or automatically publish.

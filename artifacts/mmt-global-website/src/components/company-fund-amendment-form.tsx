@@ -53,7 +53,12 @@ export function CompanyFundAmendmentForm({
       await onSaved();
     } catch (e) {
       const status = typeof e === "object" && e !== null && "status" in e ? e.status : undefined;
-      setError(status === 409
+      const data = typeof e === "object" && e !== null && "data" in e ? e.data : undefined;
+      const schemaPending = status === 503 && typeof data === "object" && data !== null &&
+        "code" in data && data.code === "FUND_SCHEMA_PENDING";
+      setError(schemaPending
+        ? "Güvenlik kontrolü: düzeltme/iptal işlemi ikinci yayın tamamlanana kadar kapalıdır. Hiçbir kayıt değiştirilmedi; girdiğiniz bilgiler korundu."
+        : status === 409
         ? "Kayıt zaten düzeltilmiş/iptal edilmiş veya istek anahtarı başka içerikle kullanılmış. Listeyi yenileyin; girdiğiniz bilgiler korundu."
         : "Düzeltme sonucu doğrulanamadı. Listeyi kontrol edin. Bilgileriniz korundu; aynı taslağı yeniden gönderdiğinizde çift kayıt oluşturulmaz.");
     } finally {

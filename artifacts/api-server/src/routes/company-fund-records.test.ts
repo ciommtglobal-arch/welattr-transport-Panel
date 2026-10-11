@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const state = vi.hoisted(() => ({
   role: "owner" as string | null, active: true, companyId: 7, failed: false, failAmendment: false, trueOwner: true,
   rows: {} as Record<string, Record<string, any>[]>, scopes: [] as number[],
+  schemaReady: true as unknown, guardQueries: [] as string[],
 }));
 vi.mock("../lib/companyAuth", () => ({
   requireMyCompany: async (_req: unknown, res: any, roles: string[]) => {
@@ -25,6 +26,12 @@ vi.mock("@workspace/db", async () => {
   });
   let queue = Promise.resolve();
   const db: any = {
+      execute: async (statement: any) => {
+        if (state.failed) throw new Error("Database unavailable");
+        const query = new PgDialect().sqlToQuery(statement);
+        state.guardQueries.push(query.sql);
+        return { rows: query.sql.trimStart().startsWith("LOCK") ? [] : [{ ready: state.schemaReady }] };
+      },
       insert: (tbl: any) => ({
         values: (data: any) => {
           let deduplicate = false;
@@ -101,6 +108,7 @@ beforeEach(() => {
   state.role = "owner"; state.active = true; state.companyId = 7; state.failed = false;
   state.rows = { funds: [], instructions: [], amendments: [] }; state.scopes = [];
   state.trueOwner = true; state.failAmendment = false;
+  state.schemaReady = true; state.guardQueries = [];
 });
 
 describe("append-only fund corrections and cancellations", () => {
@@ -113,6 +121,39 @@ describe("append-only fund corrections and cancellations", () => {
   async function original() {
     return (await request(app).post(fundPath).send(body())).body.veri.id as number;
   }
+
+  it("blocks both correction and cancellation without verified schema, with zero writes", async () => {
+    const id = await original();
+    const snapshot = structuredClone(state.rows);
+    state.scopes = [];
+    for (const readiness of [false, undefined, null, "true", 1]) {
+      state.schemaReady = readiness;
+      for (const draft of [correction(), cancel()]) {
+        const result = await request(app).post(path(id)).send(draft);
+        expect(result.status).toBe(503);
+        expect(result.body.code).toBe("FUND_SCHEMA_PENDING");
+        expect(state.rows).toEqual(snapshot);
+      }
+    }
+    expect(state.guardQueries[0]).toContain("LOCK TABLE");
+    expect(state.guardQueries[1]).toContain("c.convalidated");
+    expect(state.scopes).toEqual([]);
+    state.schemaReady = true;
+    expect((await request(app).post(path(id)).send(correction())).status).toBe(201);
+  });
+
+  it("cannot override schema readiness through body, query or unauthorized roles", async () => {
+    const id = await original();
+    state.schemaReady = false;
+    expect((await request(app).post(path(id)).send({ ...cancel(), ready: true })).status).toBe(400);
+    expect((await request(app).post(`${path(id)}?ready=true`).send(cancel())).status).toBe(400);
+    for (const role of [null, "admin", "manager", "member"]) {
+      state.role = role;
+      expect((await request(app).post(path(id)).send(cancel())).status).toBe(role === null ? 401 : 403);
+    }
+    expect(state.guardQueries).toEqual([]);
+    expect(state.rows.amendments).toHaveLength(0);
+  });
 
   it("preserves original content/author/time, derives statuses and permits a subsequent correction of the replacement", async () => {
     const id = await original();

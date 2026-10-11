@@ -294,3 +294,17 @@ mtime_ms = 1791714243654
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/ed918474-ab4b-4fe8-8536-c0331b1666a9/0c83b504-fce9-493c-b246-dfe8193be418"
 storage_version_token = "1791714245253546"
 content_type = "text/plain"
+
+[[outputs]]
+id = "evAQ0D_8YVNriM09qIKkW"
+uri = "file://generated-artifacts/schema-release/ilk-asama-raporu.txt"
+type = "text"
+title = "Güvenli ilk aşama — doğrulama raporu"
+description = "10 tablo, 57 eklemeli SQL işlemi, yazma kilitleri, testler ve başarılı PostgreSQL provası. Canlıya henüz uygulanmadı."
+logical_id = "5bc7c9e7-18f8-4c4b-b149-9bdd937ab6c5"
+content_hash = "sha256:acccf2fd5096a266ea962752380fa93894dbf2eecc2ea9fa81c99418f68be408"
+size = 3456
+mtime_ms = 1791716359535
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/5bc7c9e7-18f8-4c4b-b149-9bdd937ab6c5/c35259d7-9147-412e-b8da-0885a71e38c1"
+storage_version_token = "1791716361182558"
+content_type = "text/plain"

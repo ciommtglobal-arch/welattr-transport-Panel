@@ -4,6 +4,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { b2bBusinessProfilesTable } from "./b2b-business-profiles";
 import { b2bCompanyMembersTable } from "./b2b-company-management";
+import { fundAmendmentReleasePlan } from "./fund-release-stage";
 
 // An immutable internal record, NOT a loan, payment, guarantee or approval.
 export const companyFundRecordsTable = pgTable("company_fund_records", {
@@ -33,7 +34,9 @@ export type InsertCompanyFundRecord = z.infer<typeof insertCompanyFundRecordSche
 export type CompanyFundRecord = typeof companyFundRecordsTable.$inferSelect;
 
 // Append-only audit edge. A record can have only one successor (or cancellation).
-// Composite foreign keys prevent a cross-company correction, even at DB level.
+// The write API checks real, validated composite FKs inside its transaction.
+// Keys-first release defers ONLY these two new relationships; all other
+// restrictions remain. Phase 2 provides cross-company protection at DB level.
 export const companyFundAmendmentsTable = pgTable("company_fund_amendments", {
   id: serial("id").primaryKey(),
   businessProfileId: integer("business_profile_id").notNull()
@@ -52,12 +55,20 @@ export const companyFundAmendmentsTable = pgTable("company_fund_amendments", {
   uniqueIndex("company_fund_amendments_original_idx").on(table.originalRecordId),
   uniqueIndex("company_fund_amendments_replacement_idx").on(table.replacementRecordId),
   index("company_fund_amendments_company_idx").on(table.businessProfileId),
+  ...(fundAmendmentReleasePlan.stage === "relationships" ? [
   foreignKey({ columns: [table.businessProfileId, table.originalRecordId],
     foreignColumns: [companyFundRecordsTable.businessProfileId, companyFundRecordsTable.id],
     name: "company_fund_amendments_original_fk" }).onDelete("restrict"),
   foreignKey({ columns: [table.businessProfileId, table.replacementRecordId],
     foreignColumns: [companyFundRecordsTable.businessProfileId, companyFundRecordsTable.id],
     name: "company_fund_amendments_replacement_fk" }).onDelete("restrict"),
+  ] : []),
+  // Also blocks inserts from the OLD application during the first Publish.
+  // A non-null primary key cannot differ from itself. Avoid a literal false:
+  // the managed diff renderer double-wraps that simple CHECK incorrectly.
+  ...(fundAmendmentReleasePlan.stage === "keys-first" ? [
+    check("company_fund_amendments_release_closed", sql`${table.id} <> ${table.id}`),
+  ] : []),
   check("company_fund_amendments_kind", sql`(${table.kind} = 'duzeltme' AND ${table.replacementRecordId} IS NOT NULL AND ${table.replacementRecordId} > ${table.originalRecordId}) OR (${table.kind} = 'iptal' AND ${table.replacementRecordId} IS NULL)`),
   check("company_fund_amendments_reason", sql`length(trim(${table.reason})) BETWEEN 5 AND 2000`),
 ]);
