@@ -8,6 +8,7 @@
     "types": ["node"]
   },
   "include": ["src"],
+  "exclude": ["src/lib/logistics-preview-model.test.ts"],
   "references": [
     {
       "path": "../../lib/db"

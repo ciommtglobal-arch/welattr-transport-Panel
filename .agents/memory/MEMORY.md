@@ -33,6 +33,7 @@
 - [Live panel identification](live-panel-identification.md) — Confirm the intended screen and published site before diagnosing a frozen or old-looking panel.
 - [Project model preference](project-model-preference.md) — The user prefers Gemini for MMT Global work; do not claim model selection without confirmation.
 - [Partial development schema pushes](partial-dev-schema-push.md) — A failed Drizzle push can leave partial changes; inspect the target schema before retrying or testing.
+- [Publish key dependency ordering](publish-key-dependency-order.md) — Non-destructive diffs can still put FKs before unique keys; rehearse actual SQL order and stage Publish safely.
 - [Regional logistics approval](regional-logistics-approval.md) — Mersin is the main logistics center; Ukraine/Dubai remain preparation areas, with founder-controlled publication.
 - [Lojistik taslak yetkisi](logistics-draft-permission.md) — Taslak yetkisi mevcut erişimleri değiştirmemeli; yeni yayımlama kararı kurucuda, ilk gösterim önizlemede kalmalı.
 - [Kullanıcının yayın onayı](publication-consent-boundary.md) — Çelik Kubbe, Telegram ve WelatTR için kullanıcı istemeden yayın yapılmayacak.

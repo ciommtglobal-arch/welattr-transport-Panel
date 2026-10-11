@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "../..",
+    "lib": ["es2022", "dom"],
+    "tsBuildInfoFile": "node_modules/.cache/preview-test-types.tsbuildinfo"
+  },
+  "include": ["src/lib/logistics-preview-model.test.ts"],
+  "exclude": []
+}

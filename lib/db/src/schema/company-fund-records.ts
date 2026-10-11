@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, serial, integer, text, numeric, uuid, timestamp, index, uniqueIndex, check, foreignKey } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, text, numeric, uuid, timestamp, index, uniqueIndex, unique, check, foreignKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { b2bBusinessProfilesTable } from "./b2b-business-profiles";
@@ -23,6 +23,7 @@ export const companyFundRecordsTable = pgTable("company_fund_records", {
 }, (table) => [
   uniqueIndex("company_fund_records_request_idx").on(table.businessProfileId, table.requestKey),
   uniqueIndex("company_fund_records_company_id_idx").on(table.businessProfileId, table.id),
+  unique("company_fund_records_company_id_key").on(table.businessProfileId, table.id),
   index("company_fund_records_profile_created_idx").on(table.businessProfileId, table.createdAt, table.id),
   check("company_fund_records_positive_amount", sql`${table.amount} > 0 AND ${table.amount} <= 999999999999.99`),
   check("company_fund_records_currency", sql`${table.currency} IN ('TRY', 'EUR', 'USD')`),

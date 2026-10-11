@@ -280,3 +280,17 @@ mtime_ms = 1791712446997
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/d4c66870-c6c4-482e-b566-b5928761fd0f/d5e38930-0ba3-48e2-97b0-dee6473d798d"
 storage_version_token = "1791712481934525"
 content_type = "text/plain"
+
+[[outputs]]
+id = "D9LJ4cKyqkAlT0SelwgpX"
+uri = "file://generated-artifacts/schema-release/rapor.txt"
+type = "text"
+title = "Drizzle şema onarımı ve güvenli yayın planı"
+description = "Onarım ve test sonuçları, 10 gerçek tablo, PostgreSQL yayın provası, kalan sıra hatası ve önerilen iki aşamalı yayın. Canlıya uygulanmadı."
+logical_id = "ed918474-ab4b-4fe8-8536-c0331b1666a9"
+content_hash = "sha256:829ab345fa797c5c964d462b57fae69a0748565e3f2ad2b408ef3bc3e15466b5"
+size = 16560
+mtime_ms = 1791714243654
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/ed918474-ab4b-4fe8-8536-c0331b1666a9/0c83b504-fce9-493c-b246-dfe8193be418"
+storage_version_token = "1791714245253546"
+content_type = "text/plain"

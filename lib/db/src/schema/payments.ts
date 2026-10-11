@@ -32,7 +32,8 @@ export const serviceInvoicesTable = pgTable(
   "service_invoices",
   {
     id: serial("id").primaryKey(),
-    reference: text("reference").notNull(),
+    // A referenced key must be available at CREATE TABLE time, before foreign keys.
+    reference: text("reference").notNull().unique("service_invoices_reference_key"),
     amount: numeric("amount", { precision: 15, scale: 2 }).notNull(),
     currency: text("currency").$type<"TRY" | "USD" | "EUR">().notNull(),
     description: text("description").notNull(),
@@ -71,7 +72,8 @@ export const paymentSessionsTable = pgTable(
   "payment_sessions",
   {
     id: serial("id").primaryKey(),
-    orderId: text("order_id").notNull(),
+    // Keep a declared key as well as the legacy index used by existing releases.
+    orderId: text("order_id").notNull().unique("payment_sessions_order_id_key"),
     provider: text("provider").notNull().default("tami"),
     invoiceReference: text("invoice_reference").references(
       () => serviceInvoicesTable.reference,
