@@ -42,3 +42,4 @@
 - [Entegrasyon kontrolü](integration-control-boundary.md) — MMT Nexus ve Shopify çalışmalarında kullanıcı kontrolün kendilerinde kalmasını istiyor.
 - [İncelenen kayıtla onay bağı](approval-version-boundary.md) — Kurucu yetkisi tek başına yetmez; onay, gerçekten incelenen kayıt sürümüne bağlı kalmalı.
 - [Preview routing health](preview-routing-health.md) — A development-domain 200 can be a “Running” placeholder, not the app; verify response content and the application router.
+- [Dorse Dünyası kapsamı](dorse-dunyasi-scope.md) — Al-sat, yük bulma, nakliye, alıcı-üretici eşleştirmesi, leasing ve ekspertiz; adlandırılmış kapsamı uygulanmış özellik sanma.

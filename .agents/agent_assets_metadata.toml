@@ -266,3 +266,17 @@ mtime_ms = 1791248048402
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/870b0245-82a6-416f-be36-ed8c281548db/295dc84d-acfa-4054-ac97-2d8ccadcf4df"
 storage_version_token = "1791248151898441"
 content_type = "text/plain"
+
+[[outputs]]
+id = "Q0KQJia2fmxL_QxusJUi7"
+uri = "file://generated-artifacts/dorse-audit/rapor.txt"
+type = "text"
+title = "Dorse Dünyası — Tam doğrulama raporu"
+description = "Altı modülün mevcut durumu, entegrasyon sınırları, 46 tablonun geliştirme/canlı sütun ve indeks envanteri, test sonuçları ve yayın engelleri. Salt okunur denetim; canlı değişiklik yapılmadı."
+logical_id = "d4c66870-c6c4-482e-b566-b5928761fd0f"
+content_hash = "sha256:9994131417dc1d1d4ba5589da0dc7cbb83ecddcc1ce33a99368f44b96554ae11"
+size = 91689
+mtime_ms = 1791712446997
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/d4c66870-c6c4-482e-b566-b5928761fd0f/d5e38930-0ba3-48e2-97b0-dee6473d798d"
+storage_version_token = "1791712481934525"
+content_type = "text/plain"
