@@ -1,0 +1,64 @@
+import { Request, Response } from 'express';
+import crypto from 'crypto';
+import { db } from '@workspace/db';
+import { nexusShopifyEventsTable, nexusShopifyIntakesTable } from '@workspace/db';
+
+export async function handleShopifySecureSync(req: Request, res: Response) {
+  try {
+    const hmacHeader = req.get('X-Shopify-Hmac-Sha256');
+    const topic = req.get('X-Shopify-Topic') || 'unknown';
+    const shopDomain = req.get('X-Shopify-Shop-Domain') || '';
+    const webhookId = req.get('X-Shopify-Webhook-Id') || '';
+
+    const webhookSecret = process.env.SHOPIFY_NEXUS_WEBHOOK_SECRET;
+    if (!webhookSecret || !hmacHeader) {
+      return res.status(401).json({ error: 'Unauthorized: Missing secret or signature' });
+    }
+
+    const rawBody = (req as any).rawBody || JSON.stringify(req.body);
+    const calculatedHmac = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(rawBody, 'utf8')
+      .digest('base64');
+
+    // Zamanlama-güvenli (Timing-safe) imza doğrulaması
+    const hmacBuffer = Buffer.from(hmacHeader, 'utf8');
+    const calculatedBuffer = Buffer.from(calculatedHmac, 'utf8');
+    if (hmacBuffer.length !== calculatedBuffer.length || !crypto.timingSafeEqual(hmacBuffer, calculatedBuffer)) {
+      return res.status(401).json({ error: 'Unauthorized: Invalid signature' });
+    }
+
+    // Yinelenen webhook olay kontrolü
+    if (webhookId) {
+      const existingEvent = await db.query.nexusShopifyEventsTable.findFirst({
+        where: (events, { eq }) => eq(events.webhookId, webhookId),
+      });
+
+      if (existingEvent) {
+        return res.status(200).json({ status: 'Ignored: Duplicate webhook event' });
+      }
+    }
+
+    // 1. Olayı Kaydet
+    await db.insert(nexusShopifyEventsTable).values({
+      webhookId,
+      topic,
+      shopDomain,
+    });
+
+    // 2. Kıtalar arası tüm siparişleri bölge filtresi olmaksızın güvenle işle
+    if (topic.includes('orders/')) {
+      const orderData = req.body;
+      await db.insert(nexusShopifyIntakesTable).values({
+        webhookId,
+        shopDomain,
+        payload: orderData,
+      });
+    }
+
+    return res.status(200).json({ status: 'Success', message: 'Global cross-border webhook securely synced.' });
+  } catch (error) {
+    console.error('Shopify Secure-Sync Error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
