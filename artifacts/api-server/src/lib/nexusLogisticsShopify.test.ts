@@ -87,4 +87,81 @@ describe("Strict Shopify logistics snapshots", () => {
     expect(verifyShopifySignature(Buffer.from(raw), signature, "unit-test-only")).toBe(true);
     expect(verifyShopifySignature(raw.trim(), signature, "unit-test-only")).toBe(false);
   });
+  it("accepts the koridor alias but rejects aliases that disagree", () => {
+    const { corridor: _, ...source } = order();
+    expect(parseLogisticsShopifyOrder({
+      ...source, note_attributes: [{ name: "koridor", value: "Samsun-Gurcistan" }],
+    }, mapping, "orders/create").corridor).toBe("Samsun-Gurcistan");
+    expect(() => parseLogisticsShopifyOrder({
+      ...source, note_attributes: [
+        { name: "corridor", value: "Samsun-Irak-Proje" },
+        { name: "koridor", value: "Samsun-Gurcistan" },
+      ],
+    }, mapping, "orders/create")).toThrow();
+  });
+  it.each([null, {}, "corridor", [null], [false], [[]]])("rejects malformed note attributes: %j", note_attributes => {
+    expect(() => parseLogisticsShopifyOrder({ ...order(), note_attributes }, mapping, "orders/paid")).toThrow();
+  });
+  it.each(["", null, undefined])("never hides a supplied empty corridor value: %s", value => {
+    expect(() => parseLogisticsShopifyOrder({
+      ...order(), note_attributes: [{ name: "corridor", value }],
+    }, mapping, "orders/paid")).toThrow();
+  });
+  it.each(["id", "variant_id"])("validates real IDs on every line: %s", field => {
+    for (const invalid of ["0", "00", "-1", "0x10", "1e3", "abc", true, Number.MAX_SAFE_INTEGER + 1]) {
+      const source = order();
+      expect(() => parseLogisticsShopifyOrder({
+        ...source, line_items: [{ ...source.line_items[0], [field]: invalid }],
+      }, mapping, "orders/create")).toThrow();
+    }
+  });
+  it("preserves large textual line and variant IDs without numeric coercion", () => {
+    const source = order();
+    const parsed = parseLogisticsShopifyOrder({
+      ...source, line_items: [{
+        ...source.line_items[0], id: "9007199254740999", variant_id: "9007199254740997",
+      }],
+    }, mapping, "orders/create");
+    expect(parsed.rows[0]).toMatchObject({ lineId: "9007199254740999", variantId: "9007199254740997" });
+  });
+  it.each([
+    "2026-10-10", "2026-10-10T10:00:00",
+    "2026-02-30T10:00:00Z", "2026-04-31T10:00:00Z",
+    "2026-10-10T24:00:00Z", "2026-10-10T10:60:00Z",
+    "2026-10-10T10:00:60Z", "0000-01-01T00:00:00Z",
+  ])("rejects invalid calendar/version/cancellation dates: %s", value => {
+    for (const field of ["updated_at", "cancelled_at"]) {
+      expect(() => parseLogisticsShopifyOrder({
+        ...order(), [field]: value,
+      }, mapping, "orders/updated")).toThrow();
+    }
+  });
+  it("accepts real leap days and explicit timezone offsets", () => {
+    const parsed = parseLogisticsShopifyOrder({
+      ...order(), updated_at: "2024-02-29T13:00:00+03:00",
+    }, mapping, "orders/updated");
+    expect(parsed.sourceUpdatedAt.toISOString()).toBe("2024-02-29T10:00:00.000Z");
+  });
+  it("normalizes equivalent prices exactly and rejects malformed or overprecise prices", () => {
+    for (const price of ["2", "2.0", "2.00", "0002.00"]) {
+      expect(parseLogisticsShopifyOrder({
+        ...order(), line_items: [{ ...order().line_items[0], price }],
+      }, mapping, "orders/create").rows[0].unitPrice).toBe("2.00");
+    }
+    for (const price of ["", " ", "0x10", "1e2", "1.239", -1, Infinity, null]) {
+      expect(() => parseLogisticsShopifyOrder({
+        ...order(), line_items: [{ ...order().line_items[0], price }],
+      }, mapping, "orders/create")).toThrow();
+    }
+  });
+  it.each([null, "", "0", false, 1.5, Infinity])("never coerces an invalid current_quantity: %s", current_quantity => {
+    expect(() => parseLogisticsShopifyOrder({
+      ...order(), line_items: [{ ...order().line_items[0], current_quantity }],
+    }, mapping, "orders/updated")).toThrow();
+  });
+  it("rejects unsupported topics even when the parser is used independently", () => {
+    expect(() => parseLogisticsShopifyOrder({
+      ...order(), line_items: [],
+    }, mapping, "orders/unknown")).toThrow();
+  });
 });

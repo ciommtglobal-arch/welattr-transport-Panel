@@ -11,7 +11,9 @@ import * as zod from 'zod';
 /**
  * Uses the untouched req.rawBody with HMAC verification. Allows only
  * Samsun-Irak-Proje and Samsun-Gurcistan, supplied in corridor or the
- * corridor note_attribute. Stores all validated lines in the existing
+ * corridor (or koridor) note_attribute; all supplied values must agree.
+ * Invalid calendar timestamps and malformed attributes are rejected.
+ * Stores all validated lines in the existing
  * Nexus tables. The corridor is retained in the existing warning field.
  * Each line requires a real, non-null variant_id supported by that schema;
  * incompatible custom/deleted-product lines reject the entire delivery.

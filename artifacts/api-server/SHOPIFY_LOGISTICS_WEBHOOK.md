@@ -32,7 +32,10 @@ Required headers: `X-Shopify-Hmac-Sha256`, `X-Shopify-Shop-Domain`,
 Requires a complete Shopify order snapshot, not a partial list of line items.
 Required order fields: `id`, `name`, `currency`, `financial_status`,
 `updated_at`, `line_items`. Provide exactly one consistent corridor, either
-top-level `corridor` or Shopify `note_attributes` with name `corridor`.
+top-level `corridor` or Shopify `note_attributes` with name `corridor`
+(the `koridor` attribute alias is also recognized). All supplied definitions,
+including aliases, must agree; empty/null values and malformed attributes
+reject the complete delivery.
 Allowed values: `Samsun-Irak-Proje`, `Samsun-Gurcistan`. No corridor is assumed.
 
 All line items are processed, including variants outside configured product
@@ -40,6 +43,11 @@ mappings. Required line fields: `id`, `variant_id`, `title`, `quantity`, `price`
 Zero quantity is retained. When present, validated `current_quantity` supplies
 the effective quantity. Missing/invalid fields reject the entire snapshot,
 without partially writing lines or substituting fake IDs/titles/prices.
+
+Numeric IDs must be safe positive integers; large textual IDs stay textual.
+Prices are normalized with decimal-string arithmetic, never float rounding.
+Timestamps require a timezone and actual calendar dates; normalized-invalid
+dates such as February 30 and 24:00 are rejected for updates and cancellations.
 
 **Existing schema limitation:** the current Nexus table requires a non-null
 variant ID. Custom/deleted-product lines with `variant_id: null` are explicitly
@@ -74,6 +82,9 @@ Drizzle schema definitions. They do not connect to or alter a database.
 They cover signature tampering, all-line validation, both corridors, retries,
 concurrent duplicate deliveries, quantity/price/status changes, zero quantity,
 line addition/removal, cancellation, stale/equal-version snapshots and rollback.
+They also cover failure after saving an earlier line and its event followed by
+retry of the same event, approval retention for equivalent prices, malformed
+dates/IDs/attributes, missing/null variants, and body-size/compression limits.
 
 Real PostgreSQL concurrency and actual merchant deliveries require an explicitly
 approved isolated test environment. No merchant webhook has been registered,

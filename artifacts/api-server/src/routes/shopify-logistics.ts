@@ -2,10 +2,10 @@ import { Router } from "express";
 import { and, eq, lte, notInArray, sql } from "drizzle-orm";
 import { db, nexusShopifyEventsTable as events, nexusShopifyIntakesTable as intakes } from "@workspace/db";
 import { nexusMapping, verifyShopifySignature } from "../lib/nexusShopify";
-import { parseLogisticsShopifyOrder, type ShopifyRawRequest } from "../lib/nexusLogisticsShopify";
+import { parseLogisticsShopifyOrder, shopifyLogisticsTopics, type ShopifyRawRequest } from "../lib/nexusLogisticsShopify";
 
 const router = Router();
-const topics = new Set(["orders/create", "orders/paid", "orders/updated", "orders/cancelled"]);
+const topics = new Set<string>(shopifyLogisticsTopics);
 const pending = "PENDING_FOUNDER_APPROVAL" as const;
 type SourceRow = ReturnType<typeof parseLogisticsShopifyOrder>["rows"][number];
 const sourceFields = [
@@ -24,7 +24,7 @@ function nextStatus(row: SourceRow) {
 }
 class ConflictingSnapshot extends Error {}
 
-router.post("/mmt/secure-sync", async (req, res) => {
+router.post("/mmt/secure-sync", async (req, res): Promise<void> => {
   const mapping = nexusMapping(true);
   const secret = process.env.SHOPIFY_NEXUS_WEBHOOK_SECRET;
   if (!mapping || !secret) {

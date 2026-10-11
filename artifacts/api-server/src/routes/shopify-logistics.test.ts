@@ -7,7 +7,7 @@ import { createShopifyLogisticsRawParser } from "../lib/nexusLogisticsShopify";
 
 type Stored = Record<string, unknown>;
 const state = vi.hoisted(() => ({
-  rows: [] as Stored[], events: new Set<string>(), fail: false,
+  rows: [] as Stored[], events: new Set<string>(), fail: false, failLineId: "",
   transactions: 0, lockQueries: [] as string[], statusQueries: [] as string[],
   queue: Promise.resolve() as Promise<void>,
 }));
@@ -57,6 +57,7 @@ vi.mock("@workspace/db", async () => {
               } }),
               onConflictDoUpdate: async (options: { set: Stored }) => {
                 if (table !== tables.nexusShopifyIntakesTable) throw new Error("Unexpected table");
+                if (row.lineId === state.failLineId) throw new Error("test failure while saving a later line");
                 save(row, options.set);
               },
             }) }),
@@ -98,7 +99,7 @@ function send(payload: unknown = source(), event = "event-1", topic = "orders/pa
     .set("X-Shopify-Webhook-Id", event).send(raw);
 }
 beforeEach(() => {
-  state.rows = []; state.events = new Set(); state.fail = false; state.transactions = 0;
+  state.rows = []; state.events = new Set(); state.fail = false; state.failLineId = ""; state.transactions = 0;
   state.lockQueries = []; state.statusQueries = []; state.queue = Promise.resolve();
   vi.stubEnv("SHOPIFY_NEXUS_SHOP_DOMAIN", "test-shop.myshopify.com");
   vi.stubEnv("SHOPIFY_NEXUS_WEBHOOK_SECRET", secret);
@@ -218,5 +219,52 @@ describe("Shopify logistics receiver (in-memory DB double, no real writes)", () 
     const { sql } = await import("drizzle-orm");
     const query = new PgDialect().sqlToQuery(sql`SELECT ${nexusShopifyIntakesTable.lineId} FROM ${nexusShopifyIntakesTable}`);
     expect(query.sql).toContain('"nexus_shopify_intakes"');
+  });
+  it("rolls back a mid-order failure and permits retry of the same event", async () => {
+    state.failLineId = "21";
+    expect((await send()).status).toBe(503);
+    expect(state.rows).toEqual([]);
+    expect(state.events.size).toBe(0);
+    state.failLineId = "";
+    expect((await send()).body).toMatchObject({ received: 2, duplicate: false });
+    expect(state.rows).toHaveLength(2);
+    expect(state.events.size).toBe(1);
+  });
+  it("preserves founder approval for equivalent prices without float rounding", async () => {
+    const payload = source(); payload.line_items[0].price = "2";
+    await send(payload);
+    state.rows[0].status = "FOUNDER_APPROVED";
+    payload.updated_at = "2026-10-10T11:00:00Z";
+    payload.line_items[0].price = "2.00";
+    expect((await send(payload, "event-2", "orders/updated")).status).toBe(200);
+    expect(state.rows[0]).toMatchObject({ unitPrice: "2.00", status: "FOUNDER_APPROVED" });
+  });
+  it("rejects malformed or wrong-length signatures before any database work", async () => {
+    for (const signature of ["", "invalid", "a".repeat(44), `${"A".repeat(43)}=`]) {
+      expect((await request(app).post(path).set("Content-Type", "application/json")
+        .set("X-Shopify-Hmac-Sha256", signature).send(JSON.stringify(source()))).status).toBe(401);
+    }
+    expect(state.transactions).toBe(0);
+  });
+  it("rejects signed null-variant and invalid-date snapshots before any writes", async () => {
+    expect((await send({
+      ...source(), line_items: [source().line_items[0], { ...source().line_items[1], variant_id: null }],
+    })).status).toBe(400);
+    expect((await send({ ...source(), cancelled_at: "2026-02-30T10:00:00Z" })).status).toBe(400);
+    expect(state.rows).toEqual([]);
+    expect(state.events.size).toBe(0);
+    expect(state.transactions).toBe(0);
+  });
+  it("rejects signed conflicting corridor aliases before any writes", async () => {
+    expect((await send({
+      ...source(), note_attributes: [{ name: "koridor", value: "Samsun-Gurcistan" }],
+    })).status).toBe(400);
+    expect(state.transactions).toBe(0);
+  });
+  it("enforces body size and compression limits without any database work", async () => {
+    expect((await send(`${JSON.stringify(source())}${" ".repeat(1024 * 1024)}`)).status).toBe(413);
+    expect((await request(app).post(path).set("Content-Type", "application/json")
+      .set("Content-Encoding", "gzip").send("not-an-accepted-body")).status).toBe(415);
+    expect(state.transactions).toBe(0);
   });
 });

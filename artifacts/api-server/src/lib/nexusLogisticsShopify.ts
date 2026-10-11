@@ -12,6 +12,7 @@ export function createShopifyLogisticsRawParser() {
 }
 export const logisticsCorridors = ["Samsun-Irak-Proje", "Samsun-Gurcistan"] as const;
 export type LogisticsCorridor = typeof logisticsCorridors[number];
+export const shopifyLogisticsTopics = ["orders/create", "orders/paid", "orders/updated", "orders/cancelled"] as const;
 
 type JsonObject = Record<string, unknown>;
 function object(value: unknown): JsonObject {
@@ -31,8 +32,15 @@ function id(value: unknown): string {
 }
 function date(value: unknown): Date {
   const source = text(value, 50);
-  if (!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)$/.test(source))
-    throw new Error("Invalid timestamp");
+  const match = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.\d+)?(Z|[+-]\d\d:\d\d)$/.exec(source);
+  if (!match) throw new Error("Invalid timestamp");
+  const [year, month, day, hour, minute, second] = match.slice(1, 7).map(Number);
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const monthDays = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  // JS Date normalizes some invalid dates (e.g. February 30 or 24:00).
+  // Reject these before any source version or cancellation reaches storage.
+  if (year < 1 || month < 1 || month > 12 || day < 1 || day > monthDays[month - 1] ||
+      hour > 23 || minute > 59 || second > 59) throw new Error("Invalid timestamp");
   const result = new Date(source);
   if (!Number.isFinite(result.getTime())) throw new Error("Invalid timestamp");
   return result;
@@ -50,7 +58,7 @@ function corridorFor(order: JsonObject): LogisticsCorridor {
     if (!Array.isArray(order.note_attributes)) throw new Error("Invalid note attributes");
     for (const value of order.note_attributes) {
       const attribute = object(value);
-      if (attribute.name === "corridor") candidates.push(attribute.value);
+      if (attribute.name === "corridor" || attribute.name === "koridor") candidates.push(attribute.value);
     }
   }
   if (!candidates.length || candidates.some(value => value !== candidates[0]) ||
@@ -64,6 +72,7 @@ function corridorFor(order: JsonObject): LogisticsCorridor {
  * remain financing interests and never become approved bank applications.
  */
 export function parseLogisticsShopifyOrder(payload: unknown, mapping: NexusMapping, topic: string) {
+  if (!shopifyLogisticsTopics.some(allowed => allowed === topic)) throw new Error("Invalid topic");
   const order = object(payload);
   const corridor = corridorFor(order);
   const orderId = id(order.id);
