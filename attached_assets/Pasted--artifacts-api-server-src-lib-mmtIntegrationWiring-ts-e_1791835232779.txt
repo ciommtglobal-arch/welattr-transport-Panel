@@ -1,0 +1,74 @@
+// artifacts/api-server/src/lib/mmtIntegrationWiring.ts
+//
+// Çelik Kubbe Güvencesiyle Geliştirilmiş Entegrasyon Katmanı
+
+import { raw, type Express, type IRouter, type Request, type Response, type NextFunction } from "express";
+import crypto from "crypto";
+
+import { createShopifyLogisticsRawParser } from "./nexusLogisticsShopify";
+import shopifyLogisticsRouter from "../routes/shopify-logistics";
+import nexusShopifyRouter from "../routes/nexus-shopify";
+import whatsappLogisticsWebhookRouter from "../routes/whatsapp-logistics-webhook";
+
+/**
+ * 1. Ham Gövde Ayrıştırıcıları
+ */
+export function registerIntegrationRawParsers(app: Express): void {
+  app.use(
+    "/api/webhook/whatsapp",
+    raw({
+      type: "application/json",
+      limit: "256kb",
+      inflate: false,
+    }),
+  );
+
+  app.use(
+    "/api/webhook/shopify/nexus",
+    raw({
+      type: "application/json",
+      limit: "1mb",
+      inflate: false,
+    }),
+  );
+
+  app.use(
+    "/api/mmt/secure-sync",
+    createShopifyLogisticsRawParser(),
+  );
+}
+
+/**
+ * 2. Çelik Kubbe Güvenlik ve Idempotency Middleware Örneği
+ */
+export function mmtSecurityMiddleware(req: Request, res: Response, next: NextFunction): void {
+  const eventId = req.headers["x-shopify-webhook-id"] || req.headers["x-whatsapp-event-id"];
+  
+  // Örnek Idempotency Kontrolü (Redis / DB entegrasyonu için yapı taşı)
+  if (eventId && global.processedEvents?.has(eventId)) {
+    res.status(200).json({ status: "skipped", reason: "duplicate_event" });
+    return;
+  }
+  if (eventId) {
+    global.processedEvents = global.processedEvents || new Set();
+    global.processedEvents.add(eventId);
+  }
+
+  // HMAC Hata Yakalama ve Fallback Loglama
+  try {
+    next();
+  } catch (error) {
+    console.error("[ÇELİK KUBBE GÜVENLİK UYARISI] İmza veya İşleme Hatası:", error);
+    res.status(401).json({ error: "Unauthorized / Karantina Kriterine Takıldı" });
+  }
+}
+
+/**
+ * 3. Entegrasyon Yönlendiricileri
+ */
+export function registerIntegrationRoutes(router: IRouter): void {
+  router.use(mmtSecurityMiddleware);
+  router.use(shopifyLogisticsRouter);
+  router.use(whatsappLogisticsWebhookRouter);
+  router.use(nexusShopifyRouter);
+}
