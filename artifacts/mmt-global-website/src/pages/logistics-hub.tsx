@@ -21,6 +21,7 @@ import {
 } from "@workspace/api-client-react";
 import { useI18n } from "@/lib/i18n";
 import logisticsHero from "@assets/generated_images/logistics_hero.png";
+import PublicNexusSection from "@/components/nexus-publications";
 
 function formatDate(dateStr: string, locale: string) {
   return new Intl.DateTimeFormat(locale, {
@@ -152,6 +153,7 @@ export default function LogisticsHubPage() {
             <div className="animate-slide-up-fade flex-1 min-h-[40vh]">
               {activeTab === "listings" ? <ListingsView /> : <MediaView />}
             </div>
+            <PublicNexusSection />
           </div>
         </section>
       </div>

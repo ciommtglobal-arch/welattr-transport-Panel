@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { NexusIntakeCorridor } from './nexusIntakeCorridor';
 import type { NexusIntakeKind } from './nexusIntakeKind';
 import type { NexusIntakeStatus } from './nexusIntakeStatus';
 
@@ -27,4 +28,15 @@ export interface NexusIntake {
   status: NexusIntakeStatus;
   sourceUpdatedAt: Date;
   createdAt: Date;
+  /** @pattern ^[a-f0-9]{64}$ */
+  snapshotToken: string;
+  approvalValid: boolean;
+  canPublish: boolean;
+  isPublished: boolean;
+  /** @nullable */
+  corridor: NexusIntakeCorridor;
+  /** @nullable */
+  reviewedAt: Date | null;
+  /** @nullable */
+  publishedAt: Date | null;
 }

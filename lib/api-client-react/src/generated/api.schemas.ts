@@ -27,6 +27,17 @@ export const NexusIntakeStatus = {
   FOUNDER_REJECTED: 'FOUNDER_REJECTED',
 } as const;
 
+/**
+ * @nullable
+ */
+export type NexusIntakeCorridor = typeof NexusIntakeCorridor[keyof typeof NexusIntakeCorridor] | null;
+
+
+export const NexusIntakeCorridor = {
+  'Samsun-Irak-Proje': 'Samsun-Irak-Proje',
+  'Samsun-Gurcistan': 'Samsun-Gurcistan',
+} as const;
+
 export interface NexusIntake {
   id: number;
   shopDomain: string;
@@ -46,6 +57,68 @@ export interface NexusIntake {
   status: NexusIntakeStatus;
   sourceUpdatedAt: string;
   createdAt: string;
+  /** @pattern ^[a-f0-9]{64}$ */
+  snapshotToken: string;
+  approvalValid: boolean;
+  canPublish: boolean;
+  isPublished: boolean;
+  /** @nullable */
+  corridor: NexusIntakeCorridor;
+  /** @nullable */
+  reviewedAt: string | null;
+  /** @nullable */
+  publishedAt: string | null;
+}
+
+export type NexusDecisionInputAction = typeof NexusDecisionInputAction[keyof typeof NexusDecisionInputAction];
+
+
+export const NexusDecisionInputAction = {
+  approve: 'approve',
+  reject: 'reject',
+} as const;
+
+export interface NexusDecisionInput {
+  action: NexusDecisionInputAction;
+  /** @pattern ^[a-f0-9]{64}$ */
+  snapshotToken: string;
+}
+
+export type NexusPublicationInputAction = typeof NexusPublicationInputAction[keyof typeof NexusPublicationInputAction];
+
+
+export const NexusPublicationInputAction = {
+  publish: 'publish',
+  withdraw: 'withdraw',
+} as const;
+
+export interface NexusPublicationInput {
+  action: NexusPublicationInputAction;
+  /** @pattern ^[a-f0-9]{64}$ */
+  snapshotToken: string;
+}
+
+export type PublicNexusPublicationKind = typeof PublicNexusPublicationKind[keyof typeof PublicNexusPublicationKind];
+
+
+export const PublicNexusPublicationKind = {
+  reservation: 'reservation',
+  financing_interest: 'financing_interest',
+} as const;
+
+export type PublicNexusPublicationCorridor = typeof PublicNexusPublicationCorridor[keyof typeof PublicNexusPublicationCorridor];
+
+
+export const PublicNexusPublicationCorridor = {
+  'Samsun-Irak-Proje': 'Samsun-Irak-Proje',
+  'Samsun-Gurcistan': 'Samsun-Gurcistan',
+} as const;
+
+export interface PublicNexusPublication {
+  id: number;
+  kind: PublicNexusPublicationKind;
+  corridor: PublicNexusPublicationCorridor;
+  publishedAt: string;
 }
 
 export type KasaUserRole = typeof KasaUserRole[keyof typeof KasaUserRole];

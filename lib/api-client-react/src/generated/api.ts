@@ -151,7 +151,9 @@ import type {
   MediaUploadUrlRequest,
   MediaUploadUrlResponse,
   MockPaymentResultInput,
+  NexusDecisionInput,
   NexusIntake,
+  NexusPublicationInput,
   NexusShopifyOrderInput,
   ObjectDownloadUrlRequest,
   ObjectDownloadUrlResponse,
@@ -166,6 +168,7 @@ import type {
   PaymentRefund,
   PaymentRefundInput,
   PublicLogisticsMedia,
+  PublicNexusPublication,
   ServiceInvoice,
   ServiceInvoiceInput,
   ServiceInvoicePaymentView,
@@ -389,6 +392,246 @@ export function useGetNexusIntakes<TData = Awaited<ReturnType<typeof getNexusInt
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetNexusIntakesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getReviewNexusIntakeUrl = (id: number,) => {
+
+
+
+
+  return `/api/nexus/intakes/${id}/decision`
+}
+
+/**
+ * @summary Founder decision on the exact reviewed snapshot; never publishes
+ */
+export const reviewNexusIntake = async (id: number,
+    nexusDecisionInput: NexusDecisionInput, options?: Parameters<typeof customFetch>[1]): Promise<NexusIntake> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<NexusIntake>(getReviewNexusIntakeUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(nexusDecisionInput)
+  }
+);}
+
+
+
+
+
+export const getReviewNexusIntakeMutationKey = () => ['reviewNexusIntake'] as const;
+
+export const getReviewNexusIntakeMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewNexusIntake>>, TError,ReviewNexusIntakeMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reviewNexusIntake>>, TError,ReviewNexusIntakeMutationVariables, TContext> => {
+
+const mutationKey = getReviewNexusIntakeMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reviewNexusIntake>>, ReviewNexusIntakeMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  reviewNexusIntake(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReviewNexusIntakeMutationResult = NonNullable<Awaited<ReturnType<typeof reviewNexusIntake>>>
+    export type ReviewNexusIntakeMutationBody = BodyType<NexusDecisionInput>
+    export type ReviewNexusIntakeMutationError = ErrorType<void>
+    export type ReviewNexusIntakeMutationVariables = {id: number;data: BodyType<NexusDecisionInput>}
+
+    /**
+ * @summary Founder decision on the exact reviewed snapshot; never publishes
+ */
+export const useReviewNexusIntake = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewNexusIntake>>, TError,ReviewNexusIntakeMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reviewNexusIntake>>,
+        TError,
+        ReviewNexusIntakeMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReviewNexusIntakeMutationOptions(options));
+    }
+
+export const getSetNexusPublicationUrl = (id: number,) => {
+
+
+
+
+  return `/api/nexus/intakes/${id}/publication`
+}
+
+/**
+ * @summary Separate founder publish or withdrawal decision on the reviewed snapshot
+ */
+export const setNexusPublication = async (id: number,
+    nexusPublicationInput: NexusPublicationInput, options?: Parameters<typeof customFetch>[1]): Promise<NexusIntake> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<NexusIntake>(getSetNexusPublicationUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(nexusPublicationInput)
+  }
+);}
+
+
+
+
+
+export const getSetNexusPublicationMutationKey = () => ['setNexusPublication'] as const;
+
+export const getSetNexusPublicationMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setNexusPublication>>, TError,SetNexusPublicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setNexusPublication>>, TError,SetNexusPublicationMutationVariables, TContext> => {
+
+const mutationKey = getSetNexusPublicationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setNexusPublication>>, SetNexusPublicationMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  setNexusPublication(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetNexusPublicationMutationResult = NonNullable<Awaited<ReturnType<typeof setNexusPublication>>>
+    export type SetNexusPublicationMutationBody = BodyType<NexusPublicationInput>
+    export type SetNexusPublicationMutationError = ErrorType<void>
+    export type SetNexusPublicationMutationVariables = {id: number;data: BodyType<NexusPublicationInput>}
+
+    /**
+ * @summary Separate founder publish or withdrawal decision on the reviewed snapshot
+ */
+export const useSetNexusPublication = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setNexusPublication>>, TError,SetNexusPublicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setNexusPublication>>,
+        TError,
+        SetNexusPublicationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSetNexusPublicationMutationOptions(options));
+    }
+
+export const getGetPublicNexusPublicationsUrl = () => {
+
+
+
+
+  return `/api/logistics/nexus/publications`
+}
+
+/**
+ * No customer data, product titles, order identifiers, quantities, prices or shop domains. Changed, cancelled and withdrawn records are excluded.
+ * @summary Public-safe corridor cards explicitly approved and published by the founder
+ */
+export const getPublicNexusPublications = async ( options?: Parameters<typeof customFetch>[1]): Promise<PublicNexusPublication[]> => {
+
+  return customFetch<PublicNexusPublication[]>(getGetPublicNexusPublicationsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicNexusPublicationsQueryKey = () => {
+    return [
+    `/api/logistics/nexus/publications`
+    ] as const;
+    }
+
+
+export const getGetPublicNexusPublicationsQueryOptions = <TData = Awaited<ReturnType<typeof getPublicNexusPublications>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicNexusPublications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicNexusPublicationsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicNexusPublications>>> = ({ signal }) => getPublicNexusPublications({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicNexusPublications>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicNexusPublicationsQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicNexusPublications>>>
+export type GetPublicNexusPublicationsQueryError = ErrorType<void>
+
+
+/**
+ * @summary Public-safe corridor cards explicitly approved and published by the founder
+ */
+
+export function useGetPublicNexusPublications<TData = Awaited<ReturnType<typeof getPublicNexusPublications>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicNexusPublications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicNexusPublicationsQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

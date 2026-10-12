@@ -41,6 +41,6 @@
 - [MMT lojistik önceliği](mmt-logistics-priority.md) — Ana marka MMT Global; lojistik öncelikli, Mersin merkezli; dış bölgeler hazırlıkta, yayın kurucu onayına bağlı.
 - [Lojistik teklif fiyatı](logistics-offer-pricing.md) — Teklif navlunu müşteri satış fiyatıdır; kullanıcı komisyon ve ayrı brüt ticari satış farkı modelini seçti.
 - [Entegrasyon kontrolü](integration-control-boundary.md) — MMT Nexus ve Shopify çalışmalarında kullanıcı kontrolün kendilerinde kalmasını istiyor.
-- [İncelenen kayıtla onay bağı](approval-version-boundary.md) — Kurucu yetkisi tek başına yetmez; onay, gerçekten incelenen kayıt sürümüne bağlı kalmalı.
+- [İncelenen kayıtla onay bağı](approval-version-boundary.md) — Karar incelenen sürüme bağlı kalmalı; Nexus onayı tek başına yayın değildir, ayrı kurucu kararı gerekir.
 - [Preview routing health](preview-routing-health.md) — A development-domain 200 can be a “Running” placeholder, not the app; verify response content and the application router.
 - [Dorse Dünyası kapsamı](dorse-dunyasi-scope.md) — Al-sat, yük bulma, nakliye, alıcı-üretici eşleştirmesi, leasing ve ekspertiz; adlandırılmış kapsamı uygulanmış özellik sanma.

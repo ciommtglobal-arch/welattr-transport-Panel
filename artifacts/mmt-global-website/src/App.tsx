@@ -91,6 +91,9 @@ const B2BCompanyPanel = lazy(() => import('@/pages/b2b-company-panel'));
 const StaffB2BRequests = lazy(() => import('@/pages/staff-b2b-requests'));
 const StaffMediaCenter = lazy(() => import('@/pages/staff-media-center'));
 const LogisticsHubPage = lazy(() => import('@/pages/logistics-hub'));
+const NexusPreview = import.meta.env.DEV
+  ? lazy(() => import('@/pages/nexus-review-preview'))
+  : undefined;
 const DepartmentsOverviewPage = lazy(() =>
   import('@/pages/departments').then((module) => ({ default: module.default })),
 );
@@ -348,6 +351,7 @@ function Router() {
       <Suspense fallback={<RouteLoading />}>
       <Switch>
         {LogisticsPreview && <Route path="/lojistik-onizleme" component={LogisticsPreview} />}
+        {NexusPreview && <Route path="/nexus-onizleme" component={NexusPreview} />}
         <Route path="/" component={PanelAwareHome} />
         <Route path="/ecosystem" component={PanelAwareHome} />
         <Route path="/limit" component={LimitChooser} />

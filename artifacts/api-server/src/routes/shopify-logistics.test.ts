@@ -22,10 +22,14 @@ vi.mock("@workspace/db", async () => {
     const old = state.rows.find(row => key(row) === key(source));
     if (!old) { state.rows.push({ ...source, id: state.rows.length + 1, createdAt: new Date() }); return; }
     if ((old.sourceUpdatedAt as Date).getTime() > (source.sourceUpdatedAt as Date).getTime()) return;
-    const keys = Object.keys(set).filter(field => field !== "status" && field !== "sourceUpdatedAt");
-    const changed = keys.some(field => old[field] !== set[field]);
+    const keys = ["orderName", "variantId", "kind", "productTitle", "quantity", "unitPrice",
+      "currency", "financialStatus", "cancelled", "warning", "corridor"].filter(field => field in set);
+    const changed = keys.some(field => (old[field] ?? null) !== (set[field] ?? null));
     state.statusQueries.push(dialect.sqlToQuery(set.status as Parameters<typeof dialect.sqlToQuery>[0]).sql);
-    Object.assign(old, { ...set, status: changed ? "PENDING_FOUNDER_APPROVAL" : old.status });
+    const reviewFields = ["reviewedSourceHash", "reviewedAt", "reviewedBy",
+      "publishedSourceHash", "publishedAt", "publishedBy"];
+    const preserved = Object.fromEntries(reviewFields.map(field => [field, changed ? null : old[field] ?? null]));
+    Object.assign(old, { ...set, ...preserved, status: changed ? "PENDING_FOUNDER_APPROVAL" : old.status });
   }
   return {
     ...tables,

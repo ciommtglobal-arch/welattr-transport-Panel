@@ -91,6 +91,74 @@ paths:
           description: Founder identity required
         "503":
           description: Mapping or database schema unavailable
+  /nexus/intakes/{id}/decision:
+    post:
+      operationId: reviewNexusIntake
+      summary: Founder decision on the exact reviewed snapshot; never publishes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NexusDecisionInput" }
+      responses:
+        "200":
+          description: Saved founder decision
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NexusIntake" }
+        "400": { description: Invalid decision }
+        "401": { description: Sign-in required }
+        "403": { description: Founder identity required }
+        "404": { description: Record not found in the configured shop }
+        "409": { description: Snapshot changed or record cannot be approved }
+        "415": { description: JSON body required }
+        "503": { description: Configuration or schema unavailable }
+  /nexus/intakes/{id}/publication:
+    post:
+      operationId: setNexusPublication
+      summary: Separate founder publish or withdrawal decision on the reviewed snapshot
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NexusPublicationInput" }
+      responses:
+        "200":
+          description: Publication state saved; no Shopify, payment or social dispatch
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NexusIntake" }
+        "400": { description: Invalid publication decision }
+        "401": { description: Sign-in required }
+        "403": { description: Founder identity required }
+        "404": { description: Record not found in the configured shop }
+        "409": { description: Changed snapshot or valid founder approval missing }
+        "415": { description: JSON body required }
+        "503": { description: Configuration or schema unavailable }
+  /logistics/nexus/publications:
+    get:
+      operationId: getPublicNexusPublications
+      summary: Public-safe corridor cards explicitly approved and published by the founder
+      description: No customer data, product titles, order identifiers, quantities, prices or shop domains. Changed, cancelled and withdrawn records are excluded.
+      responses:
+        "200":
+          description: Latest eligible published cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PublicNexusPublication" }
+        "503": { description: Configuration or schema unavailable; no fabricated records }
   /webhook/shopify/nexus:
     post:
       operationId: receiveNexusShopifyWebhook
@@ -111,6 +179,8 @@ paths:
           description: Invalid HMAC signature
         "403":
           description: Wrong shop
+        "409":
+          description: Conflicting snapshots with the same timestamp
         "503":
           description: Configuration or storage not ready
   /logistics-listings/access:
@@ -4085,7 +4155,7 @@ components:
       description: Shopify order JSON; signature is verified against untouched raw bytes.
     NexusIntake:
       type: object
-      required: [id, shopDomain, orderId, orderName, lineId, variantId, kind, productTitle, quantity, unitPrice, currency, financialStatus, cancelled, status, sourceUpdatedAt, createdAt]
+      required: [id, shopDomain, orderId, orderName, lineId, variantId, kind, productTitle, quantity, unitPrice, currency, financialStatus, cancelled, status, sourceUpdatedAt, createdAt, snapshotToken, approvalValid, canPublish, isPublished, corridor, reviewedAt, publishedAt]
       properties:
         id:
           type: integer
@@ -4125,6 +4195,47 @@ components:
         createdAt:
           type: string
           format: date-time
+        snapshotToken:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        approvalValid:
+          type: boolean
+        canPublish:
+          type: boolean
+        isPublished:
+          type: boolean
+        corridor:
+          type: [string, "null"]
+          enum: [Samsun-Irak-Proje, Samsun-Gurcistan, null]
+        reviewedAt:
+          type: [string, "null"]
+          format: date-time
+        publishedAt:
+          type: [string, "null"]
+          format: date-time
+    NexusDecisionInput:
+      type: object
+      additionalProperties: false
+      required: [action, snapshotToken]
+      properties:
+        action: { type: string, enum: [approve, reject] }
+        snapshotToken: { type: string, pattern: "^[a-f0-9]{64}$" }
+    NexusPublicationInput:
+      type: object
+      additionalProperties: false
+      required: [action, snapshotToken]
+      properties:
+        action: { type: string, enum: [publish, withdraw] }
+        snapshotToken: { type: string, pattern: "^[a-f0-9]{64}$" }
+    PublicNexusPublication:
+      type: object
+      additionalProperties: false
+      required: [id, kind, corridor, publishedAt]
+      properties:
+        id: { type: integer }
+        kind: { type: string, enum: [reservation, financing_interest] }
+        corridor: { type: string, enum: [Samsun-Irak-Proje, Samsun-Gurcistan] }
+        publishedAt: { type: string, format: date-time }
     KasaUser:
       type: object
       required: [id, name, role, branchId, active]

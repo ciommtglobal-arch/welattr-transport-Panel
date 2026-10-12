@@ -32,6 +32,9 @@ export const ReceiveShopifyLogisticsWebhookResponse = zod.unknown()
 /**
  * @summary Founder-only Nexus audit desk, latest 100 records
  */
+export const getNexusIntakesResponseSnapshotTokenRegExp = new RegExp('^[a-f0-9]{64}$');
+
+
 export const GetNexusIntakesResponseItem = zod.object({
   "id": zod.int(),
   "shopDomain": zod.string(),
@@ -49,9 +52,127 @@ export const GetNexusIntakesResponseItem = zod.object({
   "warning": zod.string().nullish(),
   "status": zod.enum(['PENDING_FOUNDER_APPROVAL', 'FOUNDER_APPROVED', 'FOUNDER_REJECTED']),
   "sourceUpdatedAt": zod.coerce.date(),
-  "createdAt": zod.coerce.date()
+  "createdAt": zod.coerce.date(),
+  "snapshotToken": zod.string().regex(getNexusIntakesResponseSnapshotTokenRegExp),
+  "approvalValid": zod.boolean(),
+  "canPublish": zod.boolean(),
+  "isPublished": zod.boolean(),
+  "corridor": zod.union([zod.literal('Samsun-Irak-Proje'),zod.literal('Samsun-Gurcistan'),zod.literal(null)]).nullable(),
+  "reviewedAt": zod.coerce.date().nullable(),
+  "publishedAt": zod.coerce.date().nullable()
 })
 export const GetNexusIntakesResponse = zod.array(GetNexusIntakesResponseItem)
+
+
+/**
+ * @summary Founder decision on the exact reviewed snapshot; never publishes
+ */
+
+
+
+export const ReviewNexusIntakeParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const reviewNexusIntakeBodySnapshotTokenRegExp = new RegExp('^[a-f0-9]{64}$');
+
+
+export const ReviewNexusIntakeBody = zod.object({
+  "action": zod.enum(['approve', 'reject']),
+  "snapshotToken": zod.string().regex(reviewNexusIntakeBodySnapshotTokenRegExp)
+})
+
+export const reviewNexusIntakeResponseSnapshotTokenRegExp = new RegExp('^[a-f0-9]{64}$');
+
+
+export const ReviewNexusIntakeResponse = zod.object({
+  "id": zod.int(),
+  "shopDomain": zod.string(),
+  "orderId": zod.string(),
+  "orderName": zod.string(),
+  "lineId": zod.string(),
+  "variantId": zod.string(),
+  "kind": zod.enum(['reservation', 'financing_interest']),
+  "productTitle": zod.string(),
+  "quantity": zod.int(),
+  "unitPrice": zod.string(),
+  "currency": zod.string(),
+  "financialStatus": zod.string(),
+  "cancelled": zod.int(),
+  "warning": zod.string().nullish(),
+  "status": zod.enum(['PENDING_FOUNDER_APPROVAL', 'FOUNDER_APPROVED', 'FOUNDER_REJECTED']),
+  "sourceUpdatedAt": zod.coerce.date(),
+  "createdAt": zod.coerce.date(),
+  "snapshotToken": zod.string().regex(reviewNexusIntakeResponseSnapshotTokenRegExp),
+  "approvalValid": zod.boolean(),
+  "canPublish": zod.boolean(),
+  "isPublished": zod.boolean(),
+  "corridor": zod.union([zod.literal('Samsun-Irak-Proje'),zod.literal('Samsun-Gurcistan'),zod.literal(null)]).nullable(),
+  "reviewedAt": zod.coerce.date().nullable(),
+  "publishedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Separate founder publish or withdrawal decision on the reviewed snapshot
+ */
+
+
+
+export const SetNexusPublicationParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const setNexusPublicationBodySnapshotTokenRegExp = new RegExp('^[a-f0-9]{64}$');
+
+
+export const SetNexusPublicationBody = zod.object({
+  "action": zod.enum(['publish', 'withdraw']),
+  "snapshotToken": zod.string().regex(setNexusPublicationBodySnapshotTokenRegExp)
+})
+
+export const setNexusPublicationResponseSnapshotTokenRegExp = new RegExp('^[a-f0-9]{64}$');
+
+
+export const SetNexusPublicationResponse = zod.object({
+  "id": zod.int(),
+  "shopDomain": zod.string(),
+  "orderId": zod.string(),
+  "orderName": zod.string(),
+  "lineId": zod.string(),
+  "variantId": zod.string(),
+  "kind": zod.enum(['reservation', 'financing_interest']),
+  "productTitle": zod.string(),
+  "quantity": zod.int(),
+  "unitPrice": zod.string(),
+  "currency": zod.string(),
+  "financialStatus": zod.string(),
+  "cancelled": zod.int(),
+  "warning": zod.string().nullish(),
+  "status": zod.enum(['PENDING_FOUNDER_APPROVAL', 'FOUNDER_APPROVED', 'FOUNDER_REJECTED']),
+  "sourceUpdatedAt": zod.coerce.date(),
+  "createdAt": zod.coerce.date(),
+  "snapshotToken": zod.string().regex(setNexusPublicationResponseSnapshotTokenRegExp),
+  "approvalValid": zod.boolean(),
+  "canPublish": zod.boolean(),
+  "isPublished": zod.boolean(),
+  "corridor": zod.union([zod.literal('Samsun-Irak-Proje'),zod.literal('Samsun-Gurcistan'),zod.literal(null)]).nullable(),
+  "reviewedAt": zod.coerce.date().nullable(),
+  "publishedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * No customer data, product titles, order identifiers, quantities, prices or shop domains. Changed, cancelled and withdrawn records are excluded.
+ * @summary Public-safe corridor cards explicitly approved and published by the founder
+ */
+export const GetPublicNexusPublicationsResponseItem = zod.object({
+  "id": zod.int(),
+  "kind": zod.enum(['reservation', 'financing_interest']),
+  "corridor": zod.enum(['Samsun-Irak-Proje', 'Samsun-Gurcistan']),
+  "publishedAt": zod.coerce.date()
+})
+export const GetPublicNexusPublicationsResponse = zod.array(GetPublicNexusPublicationsResponseItem)
 
 
 /**

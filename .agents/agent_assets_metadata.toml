@@ -322,3 +322,17 @@ mtime_ms = 1791814157069
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/85eca514-a032-478f-b703-3538f725995f/0af57ee9-658e-4dbf-9c3b-85bf1dc5941b"
 storage_version_token = "1791814158720862"
 content_type = "text/plain"
+
+[[outputs]]
+id = "Y6fWN1b88rDcR_bcTVqF1"
+uri = "file://generated-artifacts/nexus-preview-raporu.txt"
+type = "text"
+title = "Nexus önizleme ve dosya raporu"
+description = "108 testin sonucu, dosya dökümü, veritabanı kapsamı ve canlı yayın öncesi kalan kontroller."
+logical_id = "09da2dfa-129c-40f1-b674-2577bda14a79"
+content_hash = "sha256:ad76b75115a1761accac91bcaf6cab9680b250a130866a3bac739a2443297371"
+size = 5283
+mtime_ms = 1791817967612
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/09da2dfa-129c-40f1-b674-2577bda14a79/25b50953-aae1-45ba-8189-88d10b4d32a0"
+storage_version_token = "1791818067439673"
+content_type = "text/plain"

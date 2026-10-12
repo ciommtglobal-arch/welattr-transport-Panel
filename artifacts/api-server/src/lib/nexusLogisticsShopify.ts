@@ -107,7 +107,7 @@ export function parseLogisticsShopifyOrder(payload: unknown, mapping: NexusMappi
     return {
       shopDomain: mapping.shopDomain, orderId, orderName, lineId, variantId, kind,
       productTitle: text(line.title, 1000), quantity, unitPrice: money(line.price),
-      currency, financialStatus, cancelled, warning,
+      currency, financialStatus, cancelled, warning, corridor,
       status: "PENDING_FOUNDER_APPROVAL" as const, sourceUpdatedAt,
     };
   });
