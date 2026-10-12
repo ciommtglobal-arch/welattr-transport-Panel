@@ -1,6 +1,6 @@
 ---
 name: Publish key dependency ordering
-description: Managed Publish diffs can be non-destructive yet fail when foreign keys precede referenced unique keys.
+description: Managed Publish key ordering, backing-index introspection mismatches and rollback-only validation.
 ---
 
 Treat schema-diff safety flags as data-loss warnings, not proof that its SQL can execute. Rehearse the actual statement order against empty development-only structures in a transaction that always rolls back.
@@ -14,6 +14,12 @@ Foreign-key-backed standalone unique indexes may be treated as implicit during i
 **Why:** Catalog comparisons found identical valid unique indexes in both environments, but their foreign keys depended on different backing indexes. Depending on which side has that dependency, introspection can produce either a false DROP or a false CREATE. An extra unique constraint plus a retained legacy index fixed a pre-release false DROP, but did not guarantee matching bindings after publication.
 
 **How to apply:** Compare actual index definitions, owning constraints and foreign-key backing-index dependencies in both environments. Never assume the earlier repair is universally sufficient or blindly add IF NOT EXISTS. If a redundant unreferenced development index is the mismatch, ask before removing it and align the Drizzle declaration; preserve validated uniqueness, foreign keys and records. Leave production's referenced physical index alone and verify the supported Publish diff afterwards.
+
+A clean supported Publish diff can coexist with different physical backing-index ownership or counts.
+
+**Why:** Preserving production's FK-backed legacy index while removing an unused development duplicate produced logical Publish parity without weakening uniqueness or foreign keys.
+
+**How to apply:** Check enforcement and dependencies in the catalog and verify the regenerated diff. Do not force physical identity through production DDL or describe a no-diff result as proof that every physical index is identical.
 
 Use a SELECT result before ROLLBACK to report rehearsal failures; do not rely solely on RAISE NOTICE.
 

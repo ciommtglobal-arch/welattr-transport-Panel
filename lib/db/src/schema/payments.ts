@@ -72,7 +72,8 @@ export const paymentSessionsTable = pgTable(
   "payment_sessions",
   {
     id: serial("id").primaryKey(),
-    // Keep a declared key as well as the legacy index used by existing releases.
+    // This constraint enforces order uniqueness. Do not redeclare the legacy
+    // standalone index: Publish may omit it when a production FK depends on it.
     orderId: text("order_id").notNull().unique("payment_sessions_order_id_key"),
     provider: text("provider").notNull().default("tami"),
     invoiceReference: text("invoice_reference").references(
@@ -101,7 +102,6 @@ export const paymentSessionsTable = pgTable(
       .$onUpdate(() => new Date()),
   },
   (table) => [
-    uniqueIndex("payment_sessions_order_id_idx").on(table.orderId),
     uniqueIndex("payment_sessions_idempotency_key_idx").on(table.idempotencyKey),
     uniqueIndex("payment_sessions_one_pending_invoice_idx")
       .on(table.invoiceReference)

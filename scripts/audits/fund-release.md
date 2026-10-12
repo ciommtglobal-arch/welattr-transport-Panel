@@ -32,6 +32,10 @@ Generated proof files belong in ignored `generated-artifacts/schema-release/`.
    Compare actual index ownership and foreign-key index bindings as well:
    introspection can hide a referenced standalone index. A proposed CREATE for
    an index that physically exists is a blocker, not permission to run it.
+   Where production's legacy index is FK-backed but development's equivalent
+   is unused beside a validated unique constraint, reconcile the redundant
+   development index and its source declaration only after explicit approval.
+   Do not remove production's referenced index or recreate the refund FK.
 2. Only after that confirmation, change the source stage to `relationships`.
    Apply the corresponding change to **development only**, atomically restoring
    both composite foreign keys and removing the temporary fence. Preflight all

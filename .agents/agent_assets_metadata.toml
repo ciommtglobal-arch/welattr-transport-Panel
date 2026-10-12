@@ -308,3 +308,17 @@ mtime_ms = 1791716359535
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/5bc7c9e7-18f8-4c4b-b149-9bdd937ab6c5/c35259d7-9147-412e-b8da-0885a71e38c1"
 storage_version_token = "1791716361182558"
 content_type = "text/plain"
+
+[[outputs]]
+id = "CB6KBjjgd6cjYNUoQk3bK"
+uri = "file://generated-artifacts/schema-release/index-repair-report.txt"
+type = "text"
+title = "Publish migration repair — verified"
+description = "Development-only repair, preserved records and foreign keys, 39 passing tests, and an empty regenerated migration diff."
+logical_id = "85eca514-a032-478f-b703-3538f725995f"
+content_hash = "sha256:8eda90afa0263bbf96a1b04942d86891f2e25c0c8e09c23bc38baeba9a92f568"
+size = 1748
+mtime_ms = 1791814157069
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/85eca514-a032-478f-b703-3538f725995f/0af57ee9-658e-4dbf-9c3b-85bf1dc5941b"
+storage_version_token = "1791814158720862"
+content_type = "text/plain"
