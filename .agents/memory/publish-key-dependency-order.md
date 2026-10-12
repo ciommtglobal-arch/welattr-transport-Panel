@@ -11,9 +11,9 @@ Treat schema-diff safety flags as data-loss warnings, not proof that its SQL can
 
 Foreign-key-backed standalone unique indexes may be treated as implicit during introspection and spuriously omitted from a schema diff.
 
-**Why:** A physical index existed in both databases but the diff proposed removing it after a development foreign key began relying on it. Declaring a unique constraint, attaching the referenced index to it, and retaining the legacy standalone index resolved that false removal without changing records.
+**Why:** Catalog comparisons found identical valid unique indexes in both environments, but their foreign keys depended on different backing indexes. Depending on which side has that dependency, introspection can produce either a false DROP or a false CREATE. An extra unique constraint plus a retained legacy index fixed a pre-release false DROP, but did not guarantee matching bindings after publication.
 
-**How to apply:** Compare diff output to the actual PostgreSQL catalog before removing apparently redundant indexes. Preserve compatibility while changing key ownership.
+**How to apply:** Compare actual index definitions, owning constraints and foreign-key backing-index dependencies in both environments. Never assume the earlier repair is universally sufficient or blindly add IF NOT EXISTS. If a redundant unreferenced development index is the mismatch, ask before removing it and align the Drizzle declaration; preserve validated uniqueness, foreign keys and records. Leave production's referenced physical index alone and verify the supported Publish diff afterwards.
 
 Use a SELECT result before ROLLBACK to report rehearsal failures; do not rely solely on RAISE NOTICE.
 
