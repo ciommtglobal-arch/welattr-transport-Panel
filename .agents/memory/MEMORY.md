@@ -44,3 +44,4 @@
 - [İncelenen kayıtla onay bağı](approval-version-boundary.md) — Karar incelenen sürüme bağlı kalmalı; Nexus onayı tek başına yayın değildir, ayrı kurucu kararı gerekir.
 - [Preview routing health](preview-routing-health.md) — A development-domain 200 can be a “Running” placeholder, not the app; verify response content and the application router.
 - [Dorse Dünyası kapsamı](dorse-dunyasi-scope.md) — Al-sat, yük bulma, nakliye, alıcı-üretici eşleştirmesi, leasing ve ekspertiz; adlandırılmış kapsamı uygulanmış özellik sanma.
+- [Lojistik pilot TEST sınırı](logistics-pilot-test-scope.md) — UKR-MERSİN-NARENCİYE-001 yalnız TEST; gerçek müşteri, sevkiyat, sözleşme veya ticari onay oluşturma.

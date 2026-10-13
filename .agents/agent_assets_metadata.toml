@@ -336,3 +336,17 @@ mtime_ms = 1791817967612
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/09da2dfa-129c-40f1-b674-2577bda14a79/25b50953-aae1-45ba-8189-88d10b4d32a0"
 storage_version_token = "1791818067439673"
 content_type = "text/plain"
+
+[[outputs]]
+id = "rBg7t0cv8jbYpx9_UpQCh"
+uri = "file://generated-artifacts/lojistik-pilot-denetim-raporu.txt"
+type = "text"
+title = "Lojistik pilot denetim raporu"
+description = "Dokuz kontrolün PASS / FAIL / NOT TESTED sonuçları, 110 testin komutları, eksikler ve değiştirilen dosyalar. Yalnız TEST; canlıya alınmadı."
+logical_id = "1e5ca06f-ada9-4b98-9151-617c64d1cdb7"
+content_hash = "sha256:edac9d96a4fcf5b3d5f45c3e0edab4cba89aabdae0dfb83ad6668c4a4adb4c36"
+size = 6788
+mtime_ms = 1791899524854
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/1e5ca06f-ada9-4b98-9151-617c64d1cdb7/78d849de-9aba-4585-ba18-91fc99f78587"
+storage_version_token = "1791899587285246"
+content_type = "text/plain"

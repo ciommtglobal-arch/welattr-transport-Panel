@@ -196,4 +196,83 @@ describe("B2B company invitation acceptance email verification", () => {
     expect(response.status).toBe(409);
     expect(response.body.error).toContain("başka bir oturumda");
   });
+
+  // Isolated TEST fixtures only: Clerk and PostgreSQL are mocked above.
+  // These cover company invitations, not a pilot-file invitation workflow.
+  it.each([new Date("2000-01-01T00:00:00Z"), null])(
+    "rejects an expired or missing expiry without changing membership",
+    async (inviteExpiresAt) => {
+      state.member = { ...createMember(), inviteExpiresAt };
+      await request(app)
+        .post("/b2b/business-profile/members/invitations/accept")
+        .send({ token: inviteToken })
+        .expect(400);
+      expect(state.update).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(["revoked", "active"])(
+    "rejects a %s invitation without changing membership",
+    async (status) => {
+      state.member = { ...createMember(), status };
+      await request(app)
+        .post("/b2b/business-profile/members/invitations/accept")
+        .send({ token: inviteToken })
+        .expect(400);
+      expect(state.update).not.toHaveBeenCalled();
+    },
+  );
+
+  it("rejects an invitation already bound to another identity", async () => {
+    state.member = { ...createMember(), clerkUserId: "TEST-other-user" };
+    await request(app)
+      .post("/b2b/business-profile/members/invitations/accept")
+      .send({ token: inviteToken })
+      .expect(400);
+    expect(state.update).not.toHaveBeenCalled();
+  });
+
+  it("rejects a consumed or unknown token when no matching row exists", async () => {
+    state.member = null;
+    await request(app)
+      .post("/b2b/business-profile/members/invitations/accept")
+      .send({ token: inviteToken })
+      .expect(404);
+    expect(state.update).not.toHaveBeenCalled();
+  });
+
+  it("requires authentication before accepting an invitation", async () => {
+    state.userId = null;
+    await request(app)
+      .post("/b2b/business-profile/members/invitations/accept")
+      .send({ token: inviteToken })
+      .expect(401);
+    expect(state.selectCount).toBe(0);
+    expect(state.update).not.toHaveBeenCalled();
+  });
+
+  it("retains the invited company and role rather than trusting request overrides", async () => {
+    state.emailAddresses = [{
+      emailAddress: "member@example.com",
+      verification: { status: "verified" },
+    }];
+    const response = await request(app)
+      .post("/b2b/business-profile/members/invitations/accept")
+      .send({
+        token: inviteToken,
+        role: "owner",
+        businessProfileId: 999,
+        clerkUserId: "TEST-attacker",
+      })
+      .expect(200);
+    expect(response.body).toMatchObject({
+      businessProfileId: 7,
+      role: "member",
+      clerkUserId: "clerk-user-1",
+    });
+    const updates = state.update.mock.calls[0][0];
+    expect(updates).not.toHaveProperty("role");
+    expect(updates).not.toHaveProperty("businessProfileId");
+    expect(updates.clerkUserId).toBe("clerk-user-1");
+  });
 });
