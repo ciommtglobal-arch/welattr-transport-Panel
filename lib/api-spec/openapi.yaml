@@ -31,6 +31,82 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /mmt/test-integration/events:
+    post:
+      operationId: receiveMmtTestEvent
+      tags: [logistics-operations]
+      summary: TEST-only signed internal event for an existing assigned TEST logistics record
+      description: |
+        Disabled unless server TEST mode is explicitly enabled in development/test;
+        always disabled in production or a published deployment. Requires BOTH
+        a real Clerk session and a special X-MMT service HMAC. Never accepts
+        Shopify/WhatsApp signatures. HMAC signs timestamp.eventId.rawBody.
+        Only existing isTest logistics records are eligible; operations users
+        must own or be assigned to the record, or be the existing founder.
+        Stores an internal activity attributed to the Clerk identity, not a
+        review-queue entry, shipment, task, or commercial approval.
+      parameters:
+        - { in: header, name: X-MMT-Signature, required: true, schema: { type: string }, description: SHA256 HMAC hex }
+        - { in: header, name: X-MMT-Timestamp, required: true, schema: { type: string }, description: Unix milliseconds within five minutes }
+        - { in: header, name: X-MMT-Event-Id, required: true, schema: { type: string, minLength: 1, maxLength: 128 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MmtTestEventInput'
+      responses:
+        '200':
+          description: Persisted or idempotently acknowledged internal TEST activity; no approval
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, eventId, alreadyReceived, persisted, activityRecorded, testOnly, queuedForReview, shipmentApproved]
+                properties:
+                  ok: { type: boolean }
+                  eventId: { type: string }
+                  alreadyReceived: { type: boolean }
+                  persisted: { type: boolean }
+                  activityRecorded: { type: boolean }
+                  testOnly: { type: boolean }
+                  queuedForReview: { type: boolean, description: Always false; no review queue is created }
+                  shipmentApproved: { type: boolean, description: Always false }
+        '400': { description: Invalid JSON or input }
+        '401': { description: Missing Clerk session or invalid service signature }
+        '403': { description: Role or record access denied }
+        '404': { description: Integration disabled or no accessible existing TEST record }
+        '409': { description: Event ID was used with different content or actor }
+        '413': { description: Body exceeds 16 KiB }
+        '415': { description: Compressed body rejected }
+        '503': { description: Missing TEST signing key or storage failure }
+  /mmt/test-integration/approve:
+    post:
+      operationId: unavailableMmtTestApproval
+      tags: [logistics-operations]
+      summary: Closed TEST integration approval; never performs an approval
+      description: |
+        Same server-only TEST gate and raw-body service HMAC. Requires a real
+        Clerk session and the existing founder allowlist. Always returns 501
+        after authentication; no record/task/status/audit mutation is performed.
+      parameters:
+        - { in: header, name: X-MMT-Signature, required: true, schema: { type: string } }
+        - { in: header, name: X-MMT-Timestamp, required: true, schema: { type: string } }
+        - { in: header, name: X-MMT-Event-Id, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MmtTestApprovalInput'
+      responses:
+        '401': { description: Missing session or invalid signature }
+        '403': { description: Not the existing authorized founder }
+        '404': { description: Integration disabled }
+        '413': { description: Body exceeds 16 KiB }
+        '415': { description: Compressed body rejected }
+        '501': { description: This integration approval workflow is not implemented }
+        '503': { description: Missing TEST signing key }
   /mmt/secure-sync:
     post:
       operationId: receiveShopifyLogisticsWebhook
@@ -4149,6 +4225,17 @@ components:
       name: pageSize
       schema: { type: integer, minimum: 1, maximum: 50, default: 25 }
   schemas:
+    MmtTestEventInput:
+      type: object
+      additionalProperties: false
+      required: [docRef, kind]
+      properties:
+        docRef: { type: string, minLength: 1, maxLength: 256, description: NFC Unicode reference; Turkish İ is preserved }
+        kind: { type: string, enum: [invoice_verification, identity_document, contract_review, compliance_check] }
+    MmtTestApprovalInput:
+      type: object
+      additionalProperties: false
+      description: No approval input is processed; the endpoint remains 501.
     NexusShopifyOrderInput:
       type: object
       additionalProperties: true

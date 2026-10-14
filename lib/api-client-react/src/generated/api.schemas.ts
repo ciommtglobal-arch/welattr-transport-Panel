@@ -5,6 +5,31 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type MmtTestEventInputKind = typeof MmtTestEventInputKind[keyof typeof MmtTestEventInputKind];
+
+
+export const MmtTestEventInputKind = {
+  invoice_verification: 'invoice_verification',
+  identity_document: 'identity_document',
+  contract_review: 'contract_review',
+  compliance_check: 'compliance_check',
+} as const;
+
+export interface MmtTestEventInput {
+  /**
+     * NFC Unicode reference; Turkish İ is preserved
+     * @minLength 1
+     * @maxLength 256
+     */
+  docRef: string;
+  kind: MmtTestEventInputKind;
+}
+
+/**
+ * No approval input is processed; the endpoint remains 501.
+ */
+export interface MmtTestApprovalInput { [key: string]: unknown }
+
 /**
  * Shopify order JSON; signature is verified against untouched raw bytes.
  */
@@ -3207,6 +3232,19 @@ export interface WorkflowNotificationPage {
 export type TrialPageParameter = number;
 
 export type TrialPageSizeParameter = number;
+
+export type ReceiveMmtTestEvent200 = {
+  ok: boolean;
+  eventId: string;
+  alreadyReceived: boolean;
+  persisted: boolean;
+  activityRecorded: boolean;
+  testOnly: boolean;
+  /** Always false; no review queue is created */
+  queuedForReview: boolean;
+  /** Always false */
+  shipmentApproved: boolean;
+};
 
 export type GetLogisticsListingDraftsParams = {
 /**

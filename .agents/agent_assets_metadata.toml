@@ -350,3 +350,17 @@ mtime_ms = 1791899524854
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/1e5ca06f-ada9-4b98-9151-617c64d1cdb7/78d849de-9aba-4585-ba18-91fc99f78587"
 storage_version_token = "1791899587285246"
 content_type = "text/plain"
+
+[[outputs]]
+id = "5f2Tg2xiZ4aV5BPbVkBn8"
+uri = "file://generated-artifacts/mmt-test-entegrasyon-sonucu.txt"
+type = "text"
+title = "MMT TEST entegrasyonu — uygulama ve test raporu"
+description = "Güvenlik sınırları, iki endpoint, 255 test sonucu, çalıştırılan komutlar ve değişen dosyalar. Yayın başlatılmadı; entegrasyon varsayılan olarak kapalı."
+logical_id = "0a406c5d-ae71-4359-a2fb-970ba28cc929"
+content_hash = "sha256:49224a64266e9d3ddc772e4541da6801cbb4384b5bf5827cb6015be9dafca766"
+size = 5238
+mtime_ms = 1791949098493
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/0a406c5d-ae71-4359-a2fb-970ba28cc929/bc364a7a-5ec4-44f8-9cbb-006c2edf6028"
+storage_version_token = "1791949126689834"
+content_type = "text/plain"

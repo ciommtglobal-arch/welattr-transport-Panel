@@ -150,6 +150,8 @@ import type {
   MediaPublicationRecord,
   MediaUploadUrlRequest,
   MediaUploadUrlResponse,
+  MmtTestApprovalInput,
+  MmtTestEventInput,
   MockPaymentResultInput,
   NexusDecisionInput,
   NexusIntake,
@@ -169,6 +171,7 @@ import type {
   PaymentRefundInput,
   PublicLogisticsMedia,
   PublicNexusPublication,
+  ReceiveMmtTestEvent200,
   ServiceInvoice,
   ServiceInvoiceInput,
   ServiceInvoicePaymentView,
@@ -233,6 +236,177 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getReceiveMmtTestEventUrl = () => {
+
+
+
+
+  return `/api/mmt/test-integration/events`
+}
+
+/**
+ * Disabled unless server TEST mode is explicitly enabled in development/test;
+ * always disabled in production or a published deployment. Requires BOTH
+ * a real Clerk session and a special X-MMT service HMAC. Never accepts
+ * Shopify/WhatsApp signatures. HMAC signs timestamp.eventId.rawBody.
+ * Only existing isTest logistics records are eligible; operations users
+ * must own or be assigned to the record, or be the existing founder.
+ * Stores an internal activity attributed to the Clerk identity, not a
+ * review-queue entry, shipment, task, or commercial approval.
+ * @summary TEST-only signed internal event for an existing assigned TEST logistics record
+ */
+export const receiveMmtTestEvent = async (mmtTestEventInput: MmtTestEventInput, options?: Parameters<typeof customFetch>[1]): Promise<ReceiveMmtTestEvent200> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<ReceiveMmtTestEvent200>(getReceiveMmtTestEventUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(mmtTestEventInput)
+  }
+);}
+
+
+
+
+
+export const getReceiveMmtTestEventMutationKey = () => ['receiveMmtTestEvent'] as const;
+
+export const getReceiveMmtTestEventMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveMmtTestEvent>>, TError,ReceiveMmtTestEventMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof receiveMmtTestEvent>>, TError,ReceiveMmtTestEventMutationVariables, TContext> => {
+
+const mutationKey = getReceiveMmtTestEventMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof receiveMmtTestEvent>>, ReceiveMmtTestEventMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  receiveMmtTestEvent(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReceiveMmtTestEventMutationResult = NonNullable<Awaited<ReturnType<typeof receiveMmtTestEvent>>>
+    export type ReceiveMmtTestEventMutationBody = BodyType<MmtTestEventInput>
+    export type ReceiveMmtTestEventMutationError = ErrorType<void>
+    export type ReceiveMmtTestEventMutationVariables = {data: BodyType<MmtTestEventInput>}
+
+    /**
+ * @summary TEST-only signed internal event for an existing assigned TEST logistics record
+ */
+export const useReceiveMmtTestEvent = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveMmtTestEvent>>, TError,ReceiveMmtTestEventMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof receiveMmtTestEvent>>,
+        TError,
+        ReceiveMmtTestEventMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReceiveMmtTestEventMutationOptions(options));
+    }
+
+export const getUnavailableMmtTestApprovalUrl = () => {
+
+
+
+
+  return `/api/mmt/test-integration/approve`
+}
+
+/**
+ * Same server-only TEST gate and raw-body service HMAC. Requires a real
+ * Clerk session and the existing founder allowlist. Always returns 501
+ * after authentication; no record/task/status/audit mutation is performed.
+ * @summary Closed TEST integration approval; never performs an approval
+ */
+export const unavailableMmtTestApproval = async (mmtTestApprovalInput: MmtTestApprovalInput, options?: Parameters<typeof customFetch>[1]): Promise<unknown> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<unknown>(getUnavailableMmtTestApprovalUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(mmtTestApprovalInput)
+  }
+);}
+
+
+
+
+
+export const getUnavailableMmtTestApprovalMutationKey = () => ['unavailableMmtTestApproval'] as const;
+
+export const getUnavailableMmtTestApprovalMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unavailableMmtTestApproval>>, TError,UnavailableMmtTestApprovalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof unavailableMmtTestApproval>>, TError,UnavailableMmtTestApprovalMutationVariables, TContext> => {
+
+const mutationKey = getUnavailableMmtTestApprovalMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unavailableMmtTestApproval>>, UnavailableMmtTestApprovalMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  unavailableMmtTestApproval(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnavailableMmtTestApprovalMutationResult = NonNullable<Awaited<ReturnType<typeof unavailableMmtTestApproval>>>
+    export type UnavailableMmtTestApprovalMutationBody = BodyType<MmtTestApprovalInput>
+    export type UnavailableMmtTestApprovalMutationError = ErrorType<void>
+    export type UnavailableMmtTestApprovalMutationVariables = {data: BodyType<MmtTestApprovalInput>}
+
+    /**
+ * @summary Closed TEST integration approval; never performs an approval
+ */
+export const useUnavailableMmtTestApproval = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unavailableMmtTestApproval>>, TError,UnavailableMmtTestApprovalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof unavailableMmtTestApproval>>,
+        TError,
+        UnavailableMmtTestApprovalMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUnavailableMmtTestApprovalMutationOptions(options));
+    }
 
 export const getReceiveShopifyLogisticsWebhookUrl = () => {
 

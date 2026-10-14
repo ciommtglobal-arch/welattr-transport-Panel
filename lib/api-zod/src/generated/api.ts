@@ -9,6 +9,67 @@ import * as zod from 'zod';
 
 
 /**
+ * Disabled unless server TEST mode is explicitly enabled in development/test;
+ * always disabled in production or a published deployment. Requires BOTH
+ * a real Clerk session and a special X-MMT service HMAC. Never accepts
+ * Shopify/WhatsApp signatures. HMAC signs timestamp.eventId.rawBody.
+ * Only existing isTest logistics records are eligible; operations users
+ * must own or be assigned to the record, or be the existing founder.
+ * Stores an internal activity attributed to the Clerk identity, not a
+ * review-queue entry, shipment, task, or commercial approval.
+ * @summary TEST-only signed internal event for an existing assigned TEST logistics record
+ */
+export const receiveMmtTestEventHeaderXMMTEventIdMax = 128;
+
+
+
+export const ReceiveMmtTestEventHeader = zod.object({
+  "X-MMT-Signature": zod.string().describe('SHA256 HMAC hex'),
+  "X-MMT-Timestamp": zod.string().describe('Unix milliseconds within five minutes'),
+  "X-MMT-Event-Id": zod.string().min(1).max(receiveMmtTestEventHeaderXMMTEventIdMax)
+})
+
+export const receiveMmtTestEventBodyDocRefMax = 256;
+
+
+
+export const ReceiveMmtTestEventBody = zod.object({
+  "docRef": zod.string().min(1).max(receiveMmtTestEventBodyDocRefMax).describe('NFC Unicode reference; Turkish İ is preserved'),
+  "kind": zod.enum(['invoice_verification', 'identity_document', 'contract_review', 'compliance_check'])
+})
+
+export const ReceiveMmtTestEventResponse = zod.object({
+  "ok": zod.boolean(),
+  "eventId": zod.string(),
+  "alreadyReceived": zod.boolean(),
+  "persisted": zod.boolean(),
+  "activityRecorded": zod.boolean(),
+  "testOnly": zod.boolean(),
+  "queuedForReview": zod.boolean().describe('Always false; no review queue is created'),
+  "shipmentApproved": zod.boolean().describe('Always false')
+})
+
+
+/**
+ * Same server-only TEST gate and raw-body service HMAC. Requires a real
+ * Clerk session and the existing founder allowlist. Always returns 501
+ * after authentication; no record/task/status/audit mutation is performed.
+ * @summary Closed TEST integration approval; never performs an approval
+ */
+export const UnavailableMmtTestApprovalHeader = zod.object({
+  "X-MMT-Signature": zod.string(),
+  "X-MMT-Timestamp": zod.string(),
+  "X-MMT-Event-Id": zod.string()
+})
+
+export const UnavailableMmtTestApprovalBody = zod.object({
+
+}).describe('No approval input is processed; the endpoint remains 501.')
+
+export const UnavailableMmtTestApprovalResponse = zod.void()
+
+
+/**
  * Uses the untouched req.rawBody with HMAC verification. Allows only
  * Samsun-Irak-Proje and Samsun-Gurcistan, supplied in corridor or the
  * corridor (or koridor) note_attribute; all supplied values must agree.

@@ -7,6 +7,7 @@ import router from "./routes";
 import kasaRouter from "./routes/kasa";
 import { logger } from "./lib/logger";
 import { createShopifyLogisticsRawParser } from "./lib/nexusLogisticsShopify";
+import { createMmtTestRawParser, requireMmtTestEnvironment } from "./lib/mmtTestIntegration";
 import {
   CLERK_PROXY_PATH,
   clerkProxyMiddleware,
@@ -50,6 +51,7 @@ app.use(
 );
 app.use("/api/webhook/shopify/nexus", express.raw({ type: "application/json", limit: "1mb" }));
 app.use("/api/mmt/secure-sync", createShopifyLogisticsRawParser());
+app.use("/api/mmt/test-integration", requireMmtTestEnvironment, createMmtTestRawParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
