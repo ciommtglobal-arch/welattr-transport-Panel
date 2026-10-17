@@ -4,6 +4,7 @@
 - [Telegram bot log secrets](telegram-bot-log-secrets.md) — Bot API request URLs contain the token; keep HTTP request logs above INFO.
 - [VIP payment split](vip-payment-split.md) — Keep VIP access on a separate bot; launch with Stars while Wallet Pay awaits merchant approval.
 - [Tami hosted payment](tami-hosted-payment.md) — Hosted token auth and payment-status query use different Tami signing materials.
+- [Birlikte ödeme kanalları](payment-channel-scope.md) — Kullanıcı Tami, Shopify ve Stripe’ın uluslararası işlerde birlikte çalışmasını istiyor; tamamlanmış entegrasyon sanma.
 - [MMT Global B2B commission scope](mmt-global-free-b2b-network.md) — Registration/listings free; matching fees split 50/50; corridor rates approved for drafts only, not live collection.
 - [Clerk public route isolation](clerk-public-route-isolation.md) — Keep public pages usable without Clerk; Replit dev previews may fail loading Clerk JS while auth routes still work.
 - [MMT Connect auth callbacks](mmt-connect-auth-callbacks.md) — Keep dedicated Clerk routes: sign-in returns to the panel, sign-up to profile onboarding, invites to acceptance.

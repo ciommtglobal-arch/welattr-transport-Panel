@@ -29,7 +29,11 @@ export function getTamiCredentials(): TamiCredentials | null {
   const secretKey = process.env.TAMI_SECRET_KEY?.trim();
   const jwkKid = process.env.TAMI_JWK_KID?.trim();
   const jwkKey = process.env.TAMI_JWK_K?.trim();
-  if (!merchantNumber || !terminalNumber || !secretKey || !jwkKid || !jwkKey) {
+  const environment = process.env.TAMI_ENVIRONMENT?.trim().toLowerCase();
+  if (
+    !merchantNumber || !terminalNumber || !secretKey || !jwkKid || !jwkKey ||
+    (environment !== "sandbox" && environment !== "production")
+  ) {
     return null;
   }
 
@@ -39,20 +43,22 @@ export function getTamiCredentials(): TamiCredentials | null {
     secretKey,
     jwkKid,
     jwkKey,
-    environment:
-      process.env.TAMI_ENVIRONMENT?.trim().toLowerCase() === "production"
-        ? "production"
-        : "sandbox",
+    environment,
   };
 }
 
 export function getPaymentReadiness() {
   const credentials = getTamiCredentials();
+  // A published service may have an incorrectly configured NODE_ENV. Never
+  // permit sandbox or simulated collection on a published deployment.
+  const localTestRuntime =
+    (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") &&
+    !process.env.REPLIT_DEPLOYMENT;
   const bankAccountVerified = isTrue("MMT_BANK_ACCOUNT_VERIFIED");
   const providerApproved = isTrue("TAMI_PROVIDER_APPROVED");
   const productionCredentialsVerified = isTrue("TAMI_PRODUCTION_CREDENTIALS_VERIFIED");
   const sandboxEnabled =
-    process.env.NODE_ENV !== "production" &&
+    localTestRuntime &&
     credentials?.environment === "sandbox" &&
     isTrue("TAMI_SANDBOX_TEST_ENABLED");
   const threeDSecureVerified = isTrue("TAMI_3DS_VERIFIED");
@@ -89,7 +95,7 @@ export function getPaymentReadiness() {
     writtenAuthorizationConfigured,
     liveEnabled,
     testEnabled:
-      process.env.NODE_ENV !== "production" && isTrue("MMT_PAYMENT_TEST_MODE"),
+      localTestRuntime && isTrue("MMT_PAYMENT_TEST_MODE"),
     cardDataCollected: false as const,
   };
 }

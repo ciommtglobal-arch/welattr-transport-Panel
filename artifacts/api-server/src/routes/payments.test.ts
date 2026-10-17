@@ -32,6 +32,7 @@ const readinessKeys = [
   "TAMI_JWK_KID",
   "TAMI_JWK_K",
   "TAMI_ENVIRONMENT",
+  "REPLIT_DEPLOYMENT",
 ] as const;
 
 const previousEnvironment = new Map<string, string | undefined>();
@@ -132,6 +133,75 @@ describe("company payment safeguards", () => {
     const production = await request(app).get("/payments/readiness");
     expect(production.body.sandboxEnabled).toBe(false);
     expect(production.body.liveEnabled).toBe(false);
+  });
+
+  it.each(["staging", "", "unknown"])(
+    "blocks sandbox and simulated collection for unsupported NODE_ENV=%s",
+    async (environment) => {
+      process.env.NODE_ENV = environment;
+      process.env.MMT_PAYMENT_TEST_MODE = "true";
+      process.env.TAMI_ENVIRONMENT = "sandbox";
+      process.env.TAMI_MERCHANT_NUMBER = "test-merchant";
+      process.env.TAMI_TERMINAL_NUMBER = "test-terminal";
+      process.env.TAMI_SECRET_KEY = "test-secret";
+      process.env.TAMI_JWK_KID = "test-kid";
+      process.env.TAMI_JWK_K = Buffer.from("test-key").toString("base64url");
+      process.env.TAMI_SANDBOX_TEST_ENABLED = "true";
+
+      const response = await request(app).get("/payments/readiness");
+      expect(response.body.sandboxEnabled).toBe(false);
+      expect(response.body.testEnabled).toBe(false);
+      expect(response.body.liveEnabled).toBe(false);
+      const checkout = await sameOriginPost("/payments/checkout").send(checkoutInput);
+      expect(checkout.status).toBe(503);
+    },
+  );
+
+  it("blocks sandbox and simulated collection on published deployments even with development NODE_ENV", async () => {
+    process.env.NODE_ENV = "development";
+    process.env.REPLIT_DEPLOYMENT = "1";
+    process.env.MMT_PAYMENT_TEST_MODE = "true";
+    process.env.TAMI_ENVIRONMENT = "sandbox";
+    process.env.TAMI_MERCHANT_NUMBER = "test-merchant";
+    process.env.TAMI_TERMINAL_NUMBER = "test-terminal";
+    process.env.TAMI_SECRET_KEY = "test-secret";
+    process.env.TAMI_JWK_KID = "test-kid";
+    process.env.TAMI_JWK_K = Buffer.from("test-key").toString("base64url");
+    process.env.TAMI_SANDBOX_TEST_ENABLED = "true";
+
+    const response = await request(app).get("/payments/readiness");
+    expect(response.body.sandboxEnabled).toBe(false);
+    expect(response.body.testEnabled).toBe(false);
+    expect(response.body.liveEnabled).toBe(false);
+    const checkout = await sameOriginPost("/payments/checkout").send(checkoutInput);
+    expect(checkout.status).toBe(503);
+  });
+
+  it.each(["", "sandobx", "staging"])(
+    "does not infer sandbox from missing or invalid TAMI_ENVIRONMENT=%s",
+    async (environment) => {
+      process.env.TAMI_ENVIRONMENT = environment;
+      process.env.TAMI_MERCHANT_NUMBER = "test-merchant";
+      process.env.TAMI_TERMINAL_NUMBER = "test-terminal";
+      process.env.TAMI_SECRET_KEY = "test-secret";
+      process.env.TAMI_JWK_KID = "test-kid";
+      process.env.TAMI_JWK_K = Buffer.from("test-key").toString("base64url");
+      process.env.TAMI_SANDBOX_TEST_ENABLED = "true";
+
+      const response = await request(app).get("/payments/readiness");
+      expect(response.body.sandboxEnabled).toBe(false);
+      expect(response.body.liveEnabled).toBe(false);
+    },
+  );
+
+  it("allows explicit local simulation without representing it as bank or provider approval", async () => {
+    process.env.MMT_PAYMENT_TEST_MODE = "true";
+    const response = await request(app).get("/payments/readiness");
+    expect(response.body.testEnabled).toBe(true);
+    expect(response.body.liveEnabled).toBe(false);
+    expect(response.body.sandboxEnabled).toBe(false);
+    expect(response.body.bankAccountVerified).toBe(false);
+    expect(response.body.providerApproved).toBe(false);
   });
 
   it("rejects arbitrary amounts, currencies, descriptions, and card data", async () => {

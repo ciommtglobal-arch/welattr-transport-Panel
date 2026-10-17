@@ -164,6 +164,7 @@ router.get("/payments/invoices/:reference", async (req, res): Promise<void> => {
         invoice.status === "issued" &&
         !pendingSession &&
         !successfulSession &&
+        (readiness.liveEnabled || readiness.sandboxEnabled || readiness.testEnabled) &&
         (!(readiness.liveEnabled || readiness.sandboxEnabled) || invoice.currency === "TRY"),
       paymentReference: latestPayment?.orderId ?? null,
       paymentStatus: latestPayment?.status ?? null,
