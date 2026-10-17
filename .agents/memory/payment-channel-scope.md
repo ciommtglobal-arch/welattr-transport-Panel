@@ -71,3 +71,14 @@ konunun yabancı Stripe hesabından Türkiye'ye para çekimi olduğunu açıklad
 çözün. Stripe hesabının ülkesini, kabul edilen banka ve para birimini doğrulayın;
 Türk IBAN desteğini, doğrudan Stripe→Tami aktarımını veya Global Payouts
 uygunluğunu hesaba özel kanıt olmadan vaat etmeyin.
+
+Uluslararası tahsilatı başka bir şirketin hesabına bağımlı olmadan kendi
+kontrolündeki yapıyla yürütmek kullanıcı için bir hedeftir; Dubai'de şirket
+kurmayı bu amaçla değerlendirmek istiyor.
+
+**Why:** Kullanıcı, başka firmaya ihtiyaç kalmaması için Dubai şirketi
+alternatifini gündeme getirdi.
+
+**How to apply:** Bunu araştırılacak bir kuruluş seçeneği olarak ele alın;
+kurulmuş şirket, kesinleşmiş merkez değişikliği, banka/Stripe onayı veya yayın
+izni gibi göstermeyin. Mevcut Mersin operasyon merkezini ve verileri koruyun.
