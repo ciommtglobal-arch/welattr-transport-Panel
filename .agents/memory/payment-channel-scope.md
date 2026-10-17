@@ -94,7 +94,9 @@ maliyeti birlikte inceleyin; şirket kurmayı kredi veya hibe garantisi gibi
 sunmayın.
 
 Kullanıcı gıda ve kozmetik online mağazalarının MMT Global ekosistemiyle
-entegre olmasını istiyor.
+entegre olmasını istiyor. İşin dijital ve otomasyonlu yürütülmesini istiyor;
+bu ifadeyi tek başına indirilebilir dijital ürün satışına geçiş kararı olarak
+yorumlamayın.
 
 **Why:** Kullanıcı bu iki ürün alanını ve mevcut ekosistemle birlikte çalışma
 hedefini açıkça belirtti.
