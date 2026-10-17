@@ -34,6 +34,16 @@ account must not be presumed to be a sandbox account. Use the secure secrets flo
 keep raw provider bodies, computed authentication values and signatures out of
 logs, and keep collection disabled until the required verification succeeds.
 
+The user states that the supplied Tami API credentials belong to their own
+company's existing, real Tami account, not a sandbox account.
+
+**Why:** The user clarified and repeated that they mean their own previously
+supplied company account.
+
+**How to apply:** Do not request a new account or describe this account as
+sandbox. Distinguish this ownership/environment statement from independently
+verified application payment readiness; it does not authorize a charge.
+
 The current Tami merchant account supports TRY only. Foreign-currency amounts are converted to TRY by Tami, so MMT must reject USD/EUR live requests instead of presenting them as true multi-currency payments.
 
 **Why:** Tami technical support confirmed that the current account has no multi-currency support.
