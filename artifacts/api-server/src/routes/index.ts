@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
 import mmtTestIntegrationRouter from "./mmt-test-integration";
+import logisticsTestPilotRouter from "./logistics-test-pilot";
 import limitApplicationsRouter from "./limit-applications";
 import storageRouter from "./storage";
 import tamiPaymentsRouter from "./tami-payments";
@@ -33,6 +34,7 @@ router.use(shopifyLogisticsRouter);
 router.use(kasaRouter);
 router.use(healthRouter);
 router.use("/mmt/test-integration", mmtTestIntegrationRouter);
+router.use(logisticsTestPilotRouter);
 router.use(limitApplicationsRouter);
 router.use(storageRouter);
 router.use(paymentsRouter);

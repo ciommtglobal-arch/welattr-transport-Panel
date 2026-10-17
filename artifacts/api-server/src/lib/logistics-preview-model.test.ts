@@ -43,13 +43,20 @@ describe('isolated logistics preview', () => {
     }
     expect(() => lpText('tr', 'unknown-key')).toThrow('Missing preview translation');
   });
-  it('contains exactly the requested ten modules and three regions', () => {
+  it('contains ten modules and the five requested regions without changing storage identity', () => {
     expect(MODULES.map((module) => module.id)).toEqual([
       'company', 'invitation', 'partnership', 'shipper', 'carrier',
       'dealer', 'personnel', 'quote', 'contract', 'operation',
     ]);
-    expect(REGION_IDS).toEqual(['mersin', 'ukraine', 'dubai']);
+    expect(REGION_IDS).toEqual(['mersin', 'ukraine', 'dubai', 'iraq', 'russia']);
     expect(PREVIEW_STORAGE_KEY).toBe('mmt-logistics-preview-drafts-v1');
+  });
+  it.each(['iraq', 'russia'] as const)('preserves existing drafts when reloading a new %s regional draft', (region) => {
+    const existing = createDraft(input(), 'existing-mersin', now);
+    const added = createDraft({ ...input(), region }, `test-${region}`, now);
+    expect(readDrafts(serializeDrafts([existing, added]))).toEqual([existing, added]);
+    expect(added.status).toBe('draft');
+    expect(canPublish()).toBe(false);
   });
   it.each(MODULES.map((module) => module.id))('creates and reloads a %s draft without publishing', (module) => {
     const record = createDraft(input(module), `preview-${module}`, now);

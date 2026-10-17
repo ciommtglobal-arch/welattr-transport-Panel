@@ -5,6 +5,34 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type LogisticsTestPilotCheckStatus = typeof LogisticsTestPilotCheckStatus[keyof typeof LogisticsTestPilotCheckStatus];
+
+
+export const LogisticsTestPilotCheckStatus = {
+  PASS: 'PASS',
+  FAIL: 'FAIL',
+  NOT_TESTED: 'NOT_TESTED',
+} as const;
+
+export interface LogisticsTestPilotCheck {
+  key: string;
+  label: string;
+  status: LogisticsTestPilotCheckStatus;
+  detail: string;
+}
+
+export interface LogisticsTestPilotReadiness {
+  fileCode: string;
+  testOnly: boolean;
+  readOnly: boolean;
+  readyForLive: boolean;
+  shipmentApproved: boolean;
+  recordFound: boolean;
+  checkedAt: string;
+  checks: LogisticsTestPilotCheck[];
+  nextActions: string[];
+}
+
 export type MmtTestEventInputKind = typeof MmtTestEventInputKind[keyof typeof MmtTestEventInputKind];
 
 

@@ -31,6 +31,26 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /logistics/test-pilot/readiness:
+    get:
+      operationId: getLogisticsTestPilotReadiness
+      tags: [logistics-operations]
+      summary: Read-only development TEST pilot readiness; never completes or approves a shipment
+      responses:
+        '200':
+          description: Current accessible TEST record and explicitly scoped implementation gaps
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogisticsTestPilotReadiness'
+        '401':
+          description: Clerk session required
+        '403':
+          description: Existing operations permission and file assignment required
+        '404':
+          description: Disabled outside development/test or inaccessible TEST record
+        '503':
+          description: Read failed; no successful result fabricated
   /mmt/test-integration/events:
     post:
       operationId: receiveMmtTestEvent
@@ -4225,6 +4245,46 @@ components:
       name: pageSize
       schema: { type: integer, minimum: 1, maximum: 50, default: 25 }
   schemas:
+    LogisticsTestPilotReadiness:
+      type: object
+      required: [fileCode, testOnly, readOnly, readyForLive, shipmentApproved, recordFound, checkedAt, checks, nextActions]
+      properties:
+        fileCode:
+          type: string
+        testOnly:
+          type: boolean
+        readOnly:
+          type: boolean
+        readyForLive:
+          type: boolean
+        shipmentApproved:
+          type: boolean
+        recordFound:
+          type: boolean
+        checkedAt:
+          type: string
+          format: date-time
+        checks:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogisticsTestPilotCheck'
+        nextActions:
+          type: array
+          items:
+            type: string
+    LogisticsTestPilotCheck:
+      type: object
+      required: [key, label, status, detail]
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        status:
+          type: string
+          enum: [PASS, FAIL, NOT_TESTED]
+        detail:
+          type: string
     MmtTestEventInput:
       type: object
       additionalProperties: false

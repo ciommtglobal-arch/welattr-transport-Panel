@@ -142,6 +142,7 @@ import type {
   LogisticsRequestStatusUpdate,
   LogisticsShipmentRecord,
   LogisticsStaffMember,
+  LogisticsTestPilotReadiness,
   MediaDecision,
   MediaItem,
   MediaItemInput,
@@ -236,6 +237,83 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetLogisticsTestPilotReadinessUrl = () => {
+
+
+
+
+  return `/api/logistics/test-pilot/readiness`
+}
+
+/**
+ * @summary Read-only development TEST pilot readiness; never completes or approves a shipment
+ */
+export const getLogisticsTestPilotReadiness = async ( options?: Parameters<typeof customFetch>[1]): Promise<LogisticsTestPilotReadiness> => {
+
+  return customFetch<LogisticsTestPilotReadiness>(getGetLogisticsTestPilotReadinessUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLogisticsTestPilotReadinessQueryKey = () => {
+    return [
+    `/api/logistics/test-pilot/readiness`
+    ] as const;
+    }
+
+
+export const getGetLogisticsTestPilotReadinessQueryOptions = <TData = Awaited<ReturnType<typeof getLogisticsTestPilotReadiness>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsTestPilotReadiness>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLogisticsTestPilotReadinessQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLogisticsTestPilotReadiness>>> = ({ signal }) => getLogisticsTestPilotReadiness({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLogisticsTestPilotReadiness>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLogisticsTestPilotReadinessQueryResult = NonNullable<Awaited<ReturnType<typeof getLogisticsTestPilotReadiness>>>
+export type GetLogisticsTestPilotReadinessQueryError = ErrorType<void>
+
+
+/**
+ * @summary Read-only development TEST pilot readiness; never completes or approves a shipment
+ */
+
+export function useGetLogisticsTestPilotReadiness<TData = Awaited<ReturnType<typeof getLogisticsTestPilotReadiness>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsTestPilotReadiness>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLogisticsTestPilotReadinessQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getReceiveMmtTestEventUrl = () => {
 

@@ -1,6 +1,6 @@
 // Isolated preview data only. This module has no API, database or identity client.
 export const PREVIEW_STORAGE_KEY = 'mmt-logistics-preview-drafts-v1';
-export const REGION_IDS = ['mersin', 'ukraine', 'dubai'] as const;
+export const REGION_IDS = ['mersin', 'ukraine', 'dubai', 'iraq', 'russia'] as const;
 export type RegionId = typeof REGION_IDS[number];
 export type DraftStatus = 'draft' | 'founder_review';
 export type ModuleId = 'company' | 'invitation' | 'partnership' | 'shipper' | 'carrier' | 'dealer' | 'personnel' | 'quote' | 'contract' | 'operation';

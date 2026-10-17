@@ -9,6 +9,27 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Read-only development TEST pilot readiness; never completes or approves a shipment
+ */
+export const GetLogisticsTestPilotReadinessResponse = zod.object({
+  "fileCode": zod.string(),
+  "testOnly": zod.boolean(),
+  "readOnly": zod.boolean(),
+  "readyForLive": zod.boolean(),
+  "shipmentApproved": zod.boolean(),
+  "recordFound": zod.boolean(),
+  "checkedAt": zod.coerce.date(),
+  "checks": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string(),
+  "status": zod.enum(['PASS', 'FAIL', 'NOT_TESTED']),
+  "detail": zod.string()
+})),
+  "nextActions": zod.array(zod.string())
+})
+
+
+/**
  * Disabled unless server TEST mode is explicitly enabled in development/test;
  * always disabled in production or a published deployment. Requires BOTH
  * a real Clerk session and a special X-MMT service HMAC. Never accepts

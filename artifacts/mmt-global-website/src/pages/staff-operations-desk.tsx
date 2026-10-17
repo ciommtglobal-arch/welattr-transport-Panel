@@ -13,6 +13,7 @@ import {
   type OperationsDesk,
 } from "@workspace/api-client-react";
 import { TrialCandidateDesk } from "@/pages/staff-trial";
+import { LogisticsPilotReadiness } from "@/components/logistics-pilot-readiness";
 
 const statusLabels: Record<LogisticsShipmentStatus, string> = {
   new_request: "Yeni talep",
@@ -284,14 +285,7 @@ function StaffOperationsDeskView({ desk }: { desk: OperationsDesk }) {
           </section>
 
           <aside className="space-y-6">
-            <section className="border border-primary/30 bg-primary/10 p-6">
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Pilot dosyası</p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight">UKR-MERSİN-NARENCİYE-001</h2>
-              <p className="mt-4 text-sm leading-7 text-foreground/65">
-                Ukrayna–Mersin hattında görev sahiplerini, riskleri ve sonraki
-                adımı tek kayıtta takip edin.
-              </p>
-            </section>
+            <LogisticsPilotReadiness />
 
             <section className="border border-border bg-card p-6">
               <div className="flex items-center gap-2">

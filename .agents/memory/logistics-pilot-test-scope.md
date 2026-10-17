@@ -25,3 +25,15 @@ kullanıcı kimliğinin ayrılmasını açıkça istedi.
 
 **How to apply:** Yeni olay türleri veya inceleme işlevleri eklenirken bu
 ayrımı koruyun; TEST alındısını ticari onay veya tamamlanmış görev saymayın.
+
+Salt okunur hazırlık kontrolü onayı, kalıcı davet/görev oluşturma veya eksik
+dosyayı otomatik tamamlama yetkisi değildir. Kullanıcının dosyanın bitmesi ve
+başka projelere geçmek için çalışma alanı istemesi de tek başına bu sınırı
+kaldırmaz.
+
+**Why:** Kullanıcı kayıtları değiştirmeden eksikleri raporlayan güvenli TEST
+kontrolünü seçti; otomatik tamamlanmış/onaylanmış kayıt üretmeyi seçmedi.
+
+**How to apply:** Çalışma alanının hazırlanması ile lojistik dosyasının gerçek
+yaşam döngüsünün tamamlanmasını ayrı raporlayın. Sonraki davet/görev geliştirmesini
+bu salt okunur kontrolün tamamlanmış bir özelliği gibi sunmayın.

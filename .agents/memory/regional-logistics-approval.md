@@ -5,6 +5,15 @@ description: Regional logistics scope and founder approval requirements for futu
 
 MMT GLOBAL is the main brand, with MMT LOJİSTİK as the primary operational focus. Mersin / Türkiye is the main logistics operations center; Ukraine and Dubai / BAE are regional preparation areas.
 
+Include Iraq and Russia alongside Ukraine and Dubai in regional preparation.
+Their inclusion is a draft/planning scope, not an active foreign operation.
+
+**Why:** The user pointed out that Iraq and Russia were missing from the regional
+preview and wanted them included.
+
+**How to apply:** Preserve Mersin as the main center and the separate founder
+publication boundary for every foreign preparation region.
+
 **Why:** The user explicitly defined these brand, operational, and regional priorities.
 
 **How to apply:** Keep logistics primary without removing finance, health, or media. Do not describe regional preparation as an already active or published operation.
