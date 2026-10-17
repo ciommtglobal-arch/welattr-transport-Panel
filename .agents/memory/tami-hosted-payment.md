@@ -36,13 +36,17 @@ logs, and keep collection disabled until the required verification succeeds.
 
 The user states that the supplied Tami API credentials belong to their own
 company's existing, real Tami account, not a sandbox account.
+They explicitly chose to begin real collection through this existing Tami
+account instead of opening another provider account.
 
 **Why:** The user clarified and repeated that they mean their own previously
 supplied company account.
 
 **How to apply:** Do not request a new account or describe this account as
 sandbox. Distinguish this ownership/environment statement from independently
-verified application payment readiness; it does not authorize a charge.
+verified application payment readiness. Prioritize the existing Tami channel,
+but do not treat the choice as proof of API/3DS readiness, permission to execute
+a customer's charge, or separate consent to publish the application.
 
 The current Tami merchant account supports TRY only. Foreign-currency amounts are converted to TRY by Tami, so MMT must reject USD/EUR live requests instead of presenting them as true multi-currency payments.
 
