@@ -21,6 +21,17 @@ Payment integration scope is MMT service invoices only; do not change the constr
 
 **How to apply:** Keep the invoice payment routes separate from Shopify, verify test and production modes independently, and leave live collection disabled until written company/provider authorization is recorded.
 
+A lookup for a deliberately nonexistent sandbox order is not sufficient evidence
+that merchant credentials or signed reconciliation work.
+
+**Why:** Such probes can return an unsigned error rather than an authenticated
+business result. Neither a response from the sandbox host nor the presence of
+stored secrets proves the test account is valid.
+
+**How to apply:** Report connectivity, verified signatures, and completed sandbox
+payment/refund evidence separately. Do not approve payment readiness from an
+unsigned error or weaken signature verification to make the probe pass.
+
 Treat a generic payment callback as an untrusted lookup hint, not as an authenticated Tami notification. Tami's public hosted-payment documentation describes browser redirects and Query reconciliation; it does not establish a signed server-notification contract.
 
 **Why:** A generic Flask example accepted `status: success` without authenticating the sender. Reusing that shape as a Tami webhook would invent a provider contract and allow unsupported confirmation claims.

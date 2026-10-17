@@ -78,3 +78,5 @@ ORPHAN_UPLOAD_CLEANUP_ENABLED = "false"
 
 [userenv.development]
 MMT_FOUNDER_REVIEWER_CLERK_USER_ID = "user_3JkMLrofYErCprsVsLHiIgoslrj"
+TAMI_ENVIRONMENT = "sandbox"
+TAMI_SANDBOX_TEST_ENABLED = "false"
