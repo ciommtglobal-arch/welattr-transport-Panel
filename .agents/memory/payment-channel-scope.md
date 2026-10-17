@@ -92,3 +92,15 @@ Krediye başvurmak ile finansal hizmet sunma lisansını karıştırmayın. Ger�
 faaliyet, banka kabulü, programın ortaklık/sektör şartları ve toplam yıllık
 maliyeti birlikte inceleyin; şirket kurmayı kredi veya hibe garantisi gibi
 sunmayın.
+
+Kullanıcı gıda ve kozmetik online mağazalarının MMT Global ekosistemiyle
+entegre olmasını istiyor.
+
+**Why:** Kullanıcı bu iki ürün alanını ve mevcut ekosistemle birlikte çalışma
+hedefini açıkça belirtti.
+
+**How to apply:** Bunu yeni bir ticari kapsam olarak değerlendirin; mevcut
+danışmanlık lisansının ürün satışına yettiğini, Dubai şirketinin kurulduğunu
+veya mağazaların hazır olduğunu varsaymayın. Gerçek tedarikçi, ürün uygunluğu,
+satıcı kimliği ve mağazada desteklenen ödeme kanalı doğrulanmadan katalog,
+stok, gelir veya ödeme başarısı uydurmayın.
