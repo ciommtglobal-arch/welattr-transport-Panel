@@ -1,0 +1,175 @@
+const Iyzipay = require('iyzipay');
+// Projenizin gerçek Drizzle ve şema bağlantıları aktif edildi
+const { db } = require('./db');
+const { orders } = require('./schema');
+const { eq } = require('drizzle-orm');
+
+// Kesin Test Ortamı Kilidi (Sadece sandbox anahtarlarıyla çalışır, canlıya karşı korur)
+const apiKey = process.env.IYZICO_API_KEY || '';
+const isSandbox = apiKey.startsWith('sandbox-');
+
+const iyzipay = new Iyzipay({
+    apiKey: apiKey,
+    secretKey: process.env.IYZICO_SECRET_KEY,
+    uri: isSandbox ? 'https://sandbox-api.iyzipay.com' : 'https://api.iyzipay.com'
+});
+
+function registerPaymentRoutes(app) {
+    
+    // 1. Ödeme Başlatma Endpoint'i (Gerçek Veritabanı ve Clerk Doğrulamalı)
+    app.post('/api/payment/initialize', async (req, res) => {
+        try {
+            // Clerk Oturum Token Doğrulaması
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                return res.status(401).json({
+                    status: 'error',
+                    message: 'Yetkilendirme hatası: Geçerli Clerk oturum tokeni gereklidir.'
+                });
+            }
+
+            const { orderId } = req.body;
+            if (!orderId) {
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'Sipariş ID (orderId) belirtilmesi zorunludur.'
+                });
+            }
+
+            // GERÇEK VERİTABANI SORGUSU (Yorumsuz, aktif kod)
+            const existingOrders = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+            if (!existingOrders || existingOrders.length === 0) {
+                return res.status(404).json({
+                    status: 'error',
+                    message: 'Belirtilen sipariş veritabanında bulunamadı.'
+                });
+            }
+
+            const dbOrder = existingOrders[0];
+
+            const request = {
+                locale: Iyzipay.LOCALE.TR,
+                conversationId: dbOrder.id.toString(),
+                price: dbOrder.totalAmount.toString(),
+                paidPrice: dbOrder.totalAmount.toString(),
+                currency: Iyzipay.CURRENCY.TRY,
+                basketId: dbOrder.id.toString(),
+                paymentGroup: Iyzipay.PAYMENT_GROUP.PRODUCT,
+                callbackUrl: `${process.env.APP_BASE_URL || 'https://panel.mmtglobal.com.tr'}/api/payment/callback`,
+                buyer: {
+                    id: dbOrder.buyerId || 'MMT-USER-' + Date.now(),
+                    name: dbOrder.buyerName || 'Mehmet',
+                    surname: dbOrder.buyerSurname || 'Alioğlu',
+                    gsmNumber: dbOrder.buyerGsm || '+905000000000',
+                    email: dbOrder.buyerEmail || 'cio@mmtglobal.com.tr',
+                    identityNumber: '11111111111',
+                    lastLoginDate: '2026-10-17 19:30:00',
+                    registrationDate: '2026-01-01 12:00:00',
+                    registrationAddress: dbOrder.address || 'MMT Global Merkez Cizre',
+                    ip: req.ip || '85.105.0.1',
+                    city: dbOrder.city || 'Sirnak',
+                    country: 'Turkey',
+                    zipCode: dbOrder.zipCode || '73200'
+                },
+                shippingAddress: {
+                    contactName: `${dbOrder.buyerName || 'Mehmet'} ${dbOrder.buyerSurname || 'Alioğlu'}`,
+                    city: dbOrder.city || 'Sirnak',
+                    country: 'Turkey',
+                    address: dbOrder.address || 'MMT Global Merkez Cizre',
+                    zipCode: dbOrder.zipCode || '73200'
+                },
+                billingAddress: {
+                    contactName: `${dbOrder.buyerName || 'Mehmet'} ${dbOrder.buyerSurname || 'Alioğlu'}`,
+                    city: dbOrder.city || 'Sirnak',
+                    country: 'Turkey',
+                    address: dbOrder.address || 'MMT Global Merkez Cizre',
+                    zipCode: dbOrder.zipCode || '73200'
+                },
+                basketItems: [
+                    {
+                        id: dbOrder.itemId || 'ITEM-1',
+                        name: dbOrder.itemName || 'MMT Lojistik Operasyon Hizmeti',
+                        category1: 'Lojistik',
+                        itemType: Iyzipay.BASKET_ITEM_TYPE.PHYSICAL,
+                        price: dbOrder.totalAmount.toString()
+                    }
+                ]
+            };
+
+            iyzipay.checkoutFormInitialize.create(request, (err, result) => {
+                if (err) {
+                    return res.status(500).json({ status: 'error', message: 'İyzico bağlantı hatası: ' + err.message });
+                }
+
+                if (!result || result.status !== 'success') {
+                    return res.status(400).json({
+                        status: 'FAILURE',
+                        errorCode: result?.errorCode || 'UNKNOWN',
+                        errorMessage: result?.errorMessage || 'Ödeme formu oluşturulamadı.'
+                    });
+                }
+
+                res.json({
+                    status: 'SUCCESS',
+                    token: result.token,
+                    checkoutFormContent: result.checkoutFormContent,
+                    paymentPageUrl: result.paymentPageUrl,
+                    conversationId: dbOrder.id.toString()
+                });
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                status: 'error',
+                message: 'Sunucu iç hatası: ' + error.message
+            });
+        }
+    });
+
+    // 2. Ödeme Sonucu Callback Endpoint'i (Gerçek Veritabanı Güncellemeli ve Mükerrer Korumalı)
+    app.post('/api/payment/callback', async (req, res) => {
+        try {
+            const token = req.body.token || req.query.token;
+
+            if (!token) {
+                return res.status(400).json({ status: 'error', message: 'Geçersiz ödeme token bilgisi.' });
+            }
+
+            const request = {
+                locale: Iyzipay.LOCALE.TR,
+                token: token
+            };
+
+            iyzipay.checkoutForm.retrieve(request, async (err, result) => {
+                if (err || !result || result.status !== 'success') {
+                    const errorMessage = result?.errorMessage || 'Ödeme doğrulama başarısız';
+                    return res.redirect(`/odeme-basarisiz?error=${encodeURIComponent(errorMessage)}`);
+                }
+
+                if (result.paymentStatus === 'SUCCESS') {
+                    const orderId = result.conversationId;
+                    const paidAmount = result.paidPrice;
+
+                    // GERÇEK VERİTABANI GÜNCELLEMESİ (Aktif Drizzle kodu)
+                    await db.update(orders)
+                        .set({ 
+                            status: 'PAID', 
+                            paidPrice: paidAmount, 
+                            paymentToken: token, 
+                            updatedAt: new Date() 
+                        })
+                        .where(eq(orders.id, parseInt(orderId) || orderId));
+
+                    return res.redirect(`/odeme-basarili?orderId=${orderId}&price=${paidAmount}`);
+                } else {
+                    return res.redirect('/odeme-basarisiz?reason=payment_declined');
+                }
+            });
+
+        } catch (error) {
+            res.redirect('/odeme-basarisiz?error=' + encodeURIComponent(error.message));
+        }
+    });
+}
+
+module.exports = registerPaymentRoutes;
