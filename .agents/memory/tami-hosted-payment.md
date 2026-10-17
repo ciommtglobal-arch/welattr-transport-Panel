@@ -48,6 +48,18 @@ verified application payment readiness. Prioritize the existing Tami channel,
 but do not treat the choice as proof of API/3DS readiness, permission to execute
 a customer's charge, or separate consent to publish the application.
 
+The user explicitly confirmed that Tami's native Link ile Ödeme is already
+working and that they have received payments through it repeatedly.
+
+**Why:** After repeated account/feature checks, the user corrected the assistant
+that this is an established collection method, not a new account to activate.
+
+**How to apply:** Do not ask again whether their Tami account or native payment
+link feature works. Focus on connecting the established method to MMT. Keep
+native collection separate from verified MMT API integration and automated
+invoice reconciliation; do not assume a customer-specific or fixed-amount
+payment link can pay every invoice.
+
 The current Tami merchant account supports TRY only. Foreign-currency amounts are converted to TRY by Tami, so MMT must reject USD/EUR live requests instead of presenting them as true multi-currency payments.
 
 **Why:** Tami technical support confirmed that the current account has no multi-currency support.
