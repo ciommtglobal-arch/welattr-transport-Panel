@@ -63,7 +63,7 @@ function QueryErrorView({ error, retry }: { error: unknown; retry: () => void })
   const kind = classifyError(error);
   const btn = <button type="button" className={btnPrimary} onClick={retry} data-testid="button-retry"><RefreshCw size={14} />Yeniden dene</button>;
   if (kind === "unauthenticated") return <Centered icon={Lock} title="Oturum doğrulanamadı (401)" text="Oturumunuz sona ermiş olabilir. Mevcut giriş ekranından yeniden giriş yapın; yeni hesap oluşturmanız gerekmez." action={<Link href="/staff/giris" className={btnPrimary} data-testid="link-signin">Girişe git</Link>} />;
-  if (kind === "forbidden") return <Centered icon={ShieldAlert} title="Erişim reddedildi (403)" text="Oturumunuz geçerli, ancak sunucu bu lojistik kayıtları için kurucu yetkisi tanımıyor." />;
+  if (kind === "forbidden") return <Centered icon={ShieldAlert} title="Erişim reddedildi (403)" text="Oturumunuz geçerli, ancak sunucu bu lojistik masası için kurucu veya operasyon yetkisi tanımıyor." />;
   if (kind === "schema") return <Centered icon={AlertTriangle} title="Beklenmeyen sunucu yanıtı" text="Yanıt beklenen veri biçiminde değil. Bu bir yetki sorunu değildir; sürüm uyuşmazlığı olabilir." action={btn} />;
   return <Centered icon={WifiOff} title="Kayıtlar alınamadı" text="Bağlantı veya sunucu hatası. Bu durum yetkinizin olmadığı anlamına gelmez." action={btn} />;
 }
@@ -71,11 +71,11 @@ function QueryErrorView({ error, retry }: { error: unknown; retry: () => void })
 export default function StaffLogisticsOperations() {
   const { isLoaded, isSignedIn, userId } = useAuth();
   const access = useGetStaffAccess({ query: { queryKey: [...getGetStaffAccessQueryKey(), userId], enabled: isLoaded && Boolean(isSignedIn), staleTime: 60_000, retry: noAuthRetry } });
-  const isFounder = access.data?.role === "founder";
+  const canOperate = access.data?.role === "founder" || access.data?.role === "operations";
   const ops = useGetLogisticsOperations(undefined, {
     query: {
       queryKey: [...getGetLogisticsOperationsQueryKey(), userId],
-      enabled: isLoaded && Boolean(isSignedIn) && isFounder,
+      enabled: isLoaded && Boolean(isSignedIn) && canOperate,
       staleTime: 15_000,
       refetchInterval: 30_000,
       retry: noAuthRetry,
@@ -88,7 +88,7 @@ export default function StaffLogisticsOperations() {
   if (!isSignedIn) return <Redirect to="/staff/giris" />;
   if (access.isPending) return <Shell><Skeleton /></Shell>;
   if (access.isError) return <Shell><QueryErrorView error={access.error} retry={() => void access.refetch()} /></Shell>;
-  if (!isFounder) return <Shell><Centered icon={ShieldAlert} title="Bu ekran kurucuya özeldir" text="Hesabınızın personel rolü kurucu değil. Bu sayfa yeni yetki vermez." action={<Link href="/staff/yonlendir" className={btnGhost}>Çalışma alanıma dön</Link>} /></Shell>;
+  if (!canOperate) return <Shell><Centered icon={ShieldAlert} title="Operasyon yetkisi gerekiyor" text="Bu masa mevcut kurucu ve operasyon personeline açıktır. Son doğrulama ve onay yalnız kurucudadır; bu sayfa yeni yetki vermez." action={<Link href="/staff/yonlendir" className={btnGhost}>Çalışma alanıma dön</Link>} /></Shell>;
   if (ops.isPending) return <Shell><Skeleton /></Shell>;
   if (ops.isError || !ops.data) return <Shell><QueryErrorView error={ops.error} retry={() => void ops.refetch()} /></Shell>;
   return <Shell><Workspace data={ops.data} fetching={ops.isFetching} updatedAt={ops.dataUpdatedAt} refetch={() => void ops.refetch()} /></Shell>;
@@ -170,7 +170,7 @@ function Workspace({ data, fetching, updatedAt, refetch }: { data: LogisticsOper
         </p>
       ) : null}
 
-      <nav className="mt-6 flex gap-1 border-b border-border" role="tablist">
+      <nav className="mt-6 flex flex-wrap gap-1 border-b border-border" role="tablist">
         {([["requests", "Talepler", ClipboardList], ["carriers", "Taşıyıcılar", Truck], ["capture", "Manuel kayıt", ClipboardList]] as const).map(([k, l, Icon]) => (
           <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} data-testid={`tab-${k}`}
             className={`relative flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.12em] transition-colors ${tab === k ? "text-foreground" : "text-foreground/45 hover:text-foreground/75"}`}>
@@ -182,7 +182,7 @@ function Workspace({ data, fetching, updatedAt, refetch }: { data: LogisticsOper
       </nav>
 
       {tab === "requests" ? (
-        <div className="mt-5 grid gap-5 lg:grid-cols-[400px_1fr]">
+        <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[400px_minmax(0,1fr)]">
           <aside className={`${selected ? "hidden lg:block" : ""} space-y-3`}>
             <div className="relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/35" />

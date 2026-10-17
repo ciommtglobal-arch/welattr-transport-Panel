@@ -20,3 +20,4 @@ export * from "./logistics-listing-workspace";
 export * from "./logistics-whatsapp-intake";
 export * from "./nexus-shopify";
 export * from "./logistics-pilot";
+export * from "./logistics-automation";

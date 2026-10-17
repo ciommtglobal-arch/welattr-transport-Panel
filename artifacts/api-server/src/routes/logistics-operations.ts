@@ -41,6 +41,7 @@ import {
 import { and, desc, eq } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import { requireLogisticsOperator, requireLogisticsFounder } from "../lib/logisticsWorkflowAuth";
+import { ensureLogisticsAutomation } from "../lib/logisticsAutomation";
 import {
   LogisticsWorkflowError, saveLogisticsOffer, approveLogisticsOffer,
   markLogisticsOfferSent, decideLogisticsOffer, reviewLogisticsCarrier, updateLogisticsShipment,
@@ -212,6 +213,7 @@ router.post("/logistics/requests", async (req, res): Promise<void> => {
         status: "new_request",
       })
       .returning();
+    await ensureLogisticsAutomation(tx, request);
     return { request, shipment };
   });
 

@@ -6,6 +6,7 @@ const state = vi.hoisted(() => ({
   userId: "clerk-user-1",
   role: "admin" as "admin" | "operations" | "reviewer",
   references: [] as string[],
+  logisticsReferences: [] as string[],
 }));
 
 const mockTables = vi.hoisted(() => ({
@@ -25,6 +26,7 @@ const mockTables = vi.hoisted(() => ({
   mediaItemsTable: {
     objectPath: "media_object_path",
   },
+  logisticsAutomationDocumentsTable: { objectPath: "logistics_object_path" },
 }));
 
 vi.mock("@clerk/express", () => ({
@@ -39,6 +41,8 @@ vi.mock("@workspace/db", () => ({
           const rows =
             table === mockTables.limitApplicationDocumentsTable
               ? state.references.map((objectPath) => ({ objectPath }))
+              : table === mockTables.logisticsAutomationDocumentsTable
+              ? state.logisticsReferences.map((objectPath) => ({ objectPath }))
               : table === mockTables.b2bBusinessProfilesTable ||
                   table === mockTables.b2bListingsTable ||
                   table === mockTables.mediaItemsTable
@@ -69,6 +73,7 @@ vi.mock("@workspace/db", () => ({
   b2bBusinessProfilesTable: mockTables.b2bBusinessProfilesTable,
   b2bListingsTable: mockTables.b2bListingsTable,
   mediaItemsTable: mockTables.mediaItemsTable,
+  logisticsAutomationDocumentsTable: mockTables.logisticsAutomationDocumentsTable,
 }));
 
 import { ObjectStorageService } from "../lib/objectStorage";
@@ -103,6 +108,14 @@ const objects = [
 ];
 
 describe("orphan upload cleanup", () => {
+  beforeEach(() => { state.logisticsReferences = []; });
+  it("never classifies a saved logistics document as an orphan", async () => {
+    state.logisticsReferences = [oldOrphanPath];
+    const response = await request(app).post("/storage/uploads/cleanup-orphans").send({ dryRun: true });
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({ referencedObjects: 2, eligibleObjects: 0, deletedObjectPaths: [] });
+    expect(deleteObjectEntityFile).not.toHaveBeenCalled();
+  });
   const listObjectEntityFiles = vi.spyOn(
     ObjectStorageService.prototype,
     "listObjectEntityFiles",

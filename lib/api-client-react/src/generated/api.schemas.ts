@@ -5,6 +5,149 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type LogisticsAutomationActionAction = typeof LogisticsAutomationActionAction[keyof typeof LogisticsAutomationActionAction];
+
+
+export const LogisticsAutomationActionAction = {
+  prepare: 'prepare',
+  edit: 'edit',
+  request_upload: 'request_upload',
+  confirm_upload: 'confirm_upload',
+  download: 'download',
+  verify: 'verify',
+  approve: 'approve',
+  reject: 'reject',
+  retry: 'retry',
+} as const;
+
+export type LogisticsAutomationActionRequiredDocumentsItem = typeof LogisticsAutomationActionRequiredDocumentsItem[keyof typeof LogisticsAutomationActionRequiredDocumentsItem];
+
+
+export const LogisticsAutomationActionRequiredDocumentsItem = {
+  request_confirmation: 'request_confirmation',
+  cargo_details: 'cargo_details',
+  company_authority: 'company_authority',
+  customs: 'customs',
+  transport: 'transport',
+} as const;
+
+export type LogisticsAutomationActionKind = typeof LogisticsAutomationActionKind[keyof typeof LogisticsAutomationActionKind];
+
+
+export const LogisticsAutomationActionKind = {
+  request_confirmation: 'request_confirmation',
+  cargo_details: 'cargo_details',
+  company_authority: 'company_authority',
+  customs: 'customs',
+  transport: 'transport',
+} as const;
+
+export type LogisticsAutomationActionContentType = typeof LogisticsAutomationActionContentType[keyof typeof LogisticsAutomationActionContentType];
+
+
+export const LogisticsAutomationActionContentType = {
+  'application/pdf': 'application/pdf',
+  'image/jpeg': 'image/jpeg',
+  'image/png': 'image/png',
+} as const;
+
+export interface LogisticsAutomationAction {
+  action: LogisticsAutomationActionAction;
+  /** @minimum 1 */
+  expectedVersion?: number;
+  /**
+     * @minLength 1
+     * @maxLength 3000
+     */
+  publicMessage?: string;
+  /**
+     * @minItems 1
+     * @maxItems 5
+     */
+  requiredDocuments?: LogisticsAutomationActionRequiredDocumentsItem[];
+  documentId?: string;
+  kind?: LogisticsAutomationActionKind;
+  /**
+     * @minLength 1
+     * @maxLength 150
+     */
+  fileName?: string;
+  contentType?: LogisticsAutomationActionContentType;
+  /**
+     * @minimum 1
+     * @maximum 10485760
+     */
+  size?: number;
+  /**
+     * @minLength 3
+     * @maxLength 2000
+     */
+  note?: string;
+  informationConfirmed?: boolean;
+  publicContentConfirmed?: boolean;
+}
+
+export type LogisticsAutomationResponseTasksItem = {
+  key: string;
+  title: string;
+  done: boolean;
+};
+
+export type LogisticsAutomationJobRecordEventsItem = {
+  at: string;
+  actorKind: string;
+  /** @nullable */
+  actorUserId: string | null;
+  action: string;
+  detail: string;
+};
+
+export interface LogisticsAutomationJobRecord {
+  id: number;
+  status: string;
+  version: number;
+  sourceCurrent: boolean;
+  publicMessage: string;
+  requiredDocuments: string[];
+  /** @nullable */
+  verifiedBy?: string | null;
+  /** @nullable */
+  verifiedAt?: string | null;
+  /** @nullable */
+  approvedBy?: string | null;
+  /** @nullable */
+  approvedAt?: string | null;
+  /** @nullable */
+  providerMessageId?: string | null;
+  /** @nullable */
+  lastError?: string | null;
+  events: LogisticsAutomationJobRecordEventsItem[];
+}
+
+export interface LogisticsAutomationDocumentRecord {
+  id: string;
+  kind: string;
+  fileName: string;
+  size: number;
+  uploadedBy: string;
+  confirmed: boolean;
+}
+
+export interface LogisticsAutomationResponse {
+  requestId: number;
+  reference: string;
+  isTest: boolean;
+  canApprove: boolean;
+  dispatchAvailable: boolean;
+  dispatchBlockers: string[];
+  uploadURL?: string;
+  uploadDocumentId?: string;
+  downloadURL?: string;
+  job: LogisticsAutomationJobRecord | null;
+  documents: LogisticsAutomationDocumentRecord[];
+  tasks: LogisticsAutomationResponseTasksItem[];
+}
+
 export type LogisticsPilotActionAction = typeof LogisticsPilotActionAction[keyof typeof LogisticsPilotActionAction];
 
 

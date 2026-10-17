@@ -16,3 +16,18 @@ Kurucu onayı tek başına halka yayın değildir. Kullanıcı, “Ayrı Yayıml
 **Why:** Kullanıcı onaylanan kaydın kamuya görünmesini ayrı bir kurucu kararına bağladı.
 
 **How to apply:** Onay ve yayın adımlarını ayrı tut; ikisini de incelenen sürüme bağla. Kamuya yalnız özel bilgi içermeyen koridor kartı çıkar, tüm siparişi veya ham Shopify metinlerini değil.
+
+## Evrak ve gönderim hedefi
+
+Evrak onayı yalnız nesne yoluna bağlanmamalıdır: yükleme URL'si süresi dolana
+kadar aynı nesnenin içeriği değiştirilebilir. İncelenen evrak sabitlenmiş bir
+sürüme bağlanmalı; yükleme URL'si bu sürümü değiştirememelidir.
+Yayın hedefi değişmesi de önceki incelemeyi geçersiz kılmalıdır.
+
+**Why:** Aynı dosya yolu veya aynı ilan metni, incelenen evrakın/alıcının aynı
+kaldığını tek başına kanıtlamaz.
+
+**How to apply:** Yükleme tamamlandıktan sonra değiştirilemeyen belge sürümü
+sakla, sürüm/checksum kontrollerini yap ve yayın hedefini onaylanan kaynak
+parmak izine dahil et. Belirsiz sağlayıcı alındısını başarıya veya otomatik
+tekrara dönüştürme.

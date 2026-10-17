@@ -8,6 +8,143 @@
 import * as zod from 'zod';
 
 
+
+
+
+export const GetLogisticsAutomationParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const GetLogisticsAutomationResponse = zod.object({
+  "requestId": zod.int(),
+  "reference": zod.string(),
+  "isTest": zod.boolean(),
+  "canApprove": zod.boolean(),
+  "dispatchAvailable": zod.boolean(),
+  "dispatchBlockers": zod.array(zod.string()),
+  "uploadURL": zod.string().optional(),
+  "uploadDocumentId": zod.string().optional(),
+  "downloadURL": zod.string().optional(),
+  "job": zod.union([zod.object({
+  "id": zod.int(),
+  "status": zod.string(),
+  "version": zod.int(),
+  "sourceCurrent": zod.boolean(),
+  "publicMessage": zod.string(),
+  "requiredDocuments": zod.array(zod.string()),
+  "verifiedBy": zod.string().nullish(),
+  "verifiedAt": zod.coerce.date().nullish(),
+  "approvedBy": zod.string().nullish(),
+  "approvedAt": zod.coerce.date().nullish(),
+  "providerMessageId": zod.string().nullish(),
+  "lastError": zod.string().nullish(),
+  "events": zod.array(zod.object({
+  "at": zod.coerce.date(),
+  "actorKind": zod.string(),
+  "actorUserId": zod.string().nullable(),
+  "action": zod.string(),
+  "detail": zod.string()
+}))
+}),zod.null()]),
+  "documents": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "fileName": zod.string(),
+  "size": zod.int(),
+  "uploadedBy": zod.string(),
+  "confirmed": zod.boolean()
+})),
+  "tasks": zod.array(zod.object({
+  "key": zod.string(),
+  "title": zod.string(),
+  "done": zod.boolean()
+}))
+})
+
+
+
+
+
+export const ActLogisticsAutomationParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+
+export const actLogisticsAutomationBodyPublicMessageMax = 3000;
+
+export const actLogisticsAutomationBodyRequiredDocumentsMax = 5;
+
+export const actLogisticsAutomationBodyFileNameMax = 150;
+
+export const actLogisticsAutomationBodySizeMax = 10485760;
+
+export const actLogisticsAutomationBodyNoteMin = 3;
+export const actLogisticsAutomationBodyNoteMax = 2000;
+
+
+
+export const ActLogisticsAutomationBody = zod.object({
+  "action": zod.enum(['prepare', 'edit', 'request_upload', 'confirm_upload', 'download', 'verify', 'approve', 'reject', 'retry']),
+  "expectedVersion": zod.int().min(1).optional(),
+  "publicMessage": zod.string().min(1).max(actLogisticsAutomationBodyPublicMessageMax).optional(),
+  "requiredDocuments": zod.array(zod.enum(['request_confirmation', 'cargo_details', 'company_authority', 'customs', 'transport'])).min(1).max(actLogisticsAutomationBodyRequiredDocumentsMax).optional(),
+  "documentId": zod.uuid().optional(),
+  "kind": zod.enum(['request_confirmation', 'cargo_details', 'company_authority', 'customs', 'transport']).optional(),
+  "fileName": zod.string().min(1).max(actLogisticsAutomationBodyFileNameMax).optional(),
+  "contentType": zod.enum(['application/pdf', 'image/jpeg', 'image/png']).optional(),
+  "size": zod.int().min(1).max(actLogisticsAutomationBodySizeMax).optional(),
+  "note": zod.string().min(actLogisticsAutomationBodyNoteMin).max(actLogisticsAutomationBodyNoteMax).optional(),
+  "informationConfirmed": zod.boolean().optional(),
+  "publicContentConfirmed": zod.boolean().optional()
+})
+
+export const ActLogisticsAutomationResponse = zod.object({
+  "requestId": zod.int(),
+  "reference": zod.string(),
+  "isTest": zod.boolean(),
+  "canApprove": zod.boolean(),
+  "dispatchAvailable": zod.boolean(),
+  "dispatchBlockers": zod.array(zod.string()),
+  "uploadURL": zod.string().optional(),
+  "uploadDocumentId": zod.string().optional(),
+  "downloadURL": zod.string().optional(),
+  "job": zod.union([zod.object({
+  "id": zod.int(),
+  "status": zod.string(),
+  "version": zod.int(),
+  "sourceCurrent": zod.boolean(),
+  "publicMessage": zod.string(),
+  "requiredDocuments": zod.array(zod.string()),
+  "verifiedBy": zod.string().nullish(),
+  "verifiedAt": zod.coerce.date().nullish(),
+  "approvedBy": zod.string().nullish(),
+  "approvedAt": zod.coerce.date().nullish(),
+  "providerMessageId": zod.string().nullish(),
+  "lastError": zod.string().nullish(),
+  "events": zod.array(zod.object({
+  "at": zod.coerce.date(),
+  "actorKind": zod.string(),
+  "actorUserId": zod.string().nullable(),
+  "action": zod.string(),
+  "detail": zod.string()
+}))
+}),zod.null()]),
+  "documents": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "fileName": zod.string(),
+  "size": zod.int(),
+  "uploadedBy": zod.string(),
+  "confirmed": zod.boolean()
+})),
+  "tasks": zod.array(zod.object({
+  "key": zod.string(),
+  "title": zod.string(),
+  "done": zod.boolean()
+}))
+})
+
+
 /**
  * @summary Development-only, Clerk-authenticated persistent TEST workspace
  */

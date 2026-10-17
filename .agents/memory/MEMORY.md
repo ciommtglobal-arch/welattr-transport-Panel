@@ -48,3 +48,4 @@
 - [Lojistik pilot TEST sınırı](logistics-pilot-test-scope.md) — UKR-MERSİN-NARENCİYE-001 yalnız TEST; gerçek müşteri, sevkiyat, sözleşme veya ticari onay oluşturma.
 - [OpenAPI body ad çakışmaları](openapi-inline-body-collisions.md) — Yeni POST gövdelerinde named components kullan; inline modeller Zod/TypeScript dışa aktarımıyla çakışabilir.
 - [Telegram pilot sınırı](telegram-pilot-boundary.md) — TEST isteği grup yayını değildir; Telegram kimliği MMT yetkisi sayılmaz, webhook sahipliğini bot bazında doğrula.
+- [Lojistik otomasyon yetkisi](logistics-automation-authority.md) — Hazırlık ve takip otomatik; evrakın varlığı doğruluk değildir, son karar açık politika olmadan kaldırılmaz.

@@ -31,6 +31,44 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /logistics/requests/{id}/automation:
+    get:
+      operationId: getLogisticsAutomation
+      tags: [logistics]
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: integer, minimum: 1}}
+      responses:
+        '200':
+          description: Actual document and founder-controlled dispatch state
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/LogisticsAutomationResponse'}
+        '401': {description: Clerk session required}
+        '403': {description: Existing operations grant required}
+        '404': {description: Request missing}
+        '503': {description: Automation unavailable}
+    post:
+      operationId: actLogisticsAutomation
+      tags: [logistics]
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: integer, minimum: 1}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/LogisticsAutomationAction'}
+      responses:
+        '200':
+          description: Persisted result; signed transfer URL returned transiently when requested
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/LogisticsAutomationResponse'}
+        '400': {description: Invalid fields or document}
+        '401': {description: Clerk session required}
+        '403': {description: Existing operations or founder permission required}
+        '404': {description: Record missing}
+        '409': {description: Stale version or incomplete requirements}
+        '503': {description: Provider or storage unavailable}
   /logistics/test-pilot/workspace:
     get:
       operationId: getLogisticsPilotWorkspace
@@ -4294,6 +4332,95 @@ components:
       name: pageSize
       schema: { type: integer, minimum: 1, maximum: 50, default: 25 }
   schemas:
+    LogisticsAutomationAction:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: [prepare, edit, request_upload, confirm_upload, download, verify, approve, reject, retry]
+        expectedVersion: {type: integer, minimum: 1}
+        publicMessage: {type: string, minLength: 1, maxLength: 3000}
+        requiredDocuments:
+          type: array
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+          items: {type: string, enum: [request_confirmation, cargo_details, company_authority, customs, transport]}
+        documentId: {type: string, format: uuid}
+        kind: {type: string, enum: [request_confirmation, cargo_details, company_authority, customs, transport]}
+        fileName: {type: string, minLength: 1, maxLength: 150}
+        contentType: {type: string, enum: [application/pdf, image/jpeg, image/png]}
+        size: {type: integer, minimum: 1, maximum: 10485760}
+        note: {type: string, minLength: 3, maxLength: 2000}
+        informationConfirmed: {type: boolean}
+        publicContentConfirmed: {type: boolean}
+    LogisticsAutomationResponse:
+      type: object
+      required: [requestId, reference, isTest, canApprove, dispatchAvailable, dispatchBlockers, job, documents, tasks]
+      properties:
+        requestId: {type: integer}
+        reference: {type: string}
+        isTest: {type: boolean}
+        canApprove: {type: boolean}
+        dispatchAvailable: {type: boolean}
+        dispatchBlockers: {type: array, items: {type: string}}
+        uploadURL: {type: string}
+        uploadDocumentId: {type: string}
+        downloadURL: {type: string}
+        job:
+          anyOf:
+            - {$ref: '#/components/schemas/LogisticsAutomationJobRecord'}
+            - {type: 'null'}
+        documents:
+          type: array
+          items: {$ref: '#/components/schemas/LogisticsAutomationDocumentRecord'}
+        tasks:
+          type: array
+          items:
+            type: object
+            required: [key, title, done]
+            properties:
+              key: {type: string}
+              title: {type: string}
+              done: {type: boolean}
+    LogisticsAutomationJobRecord:
+      type: object
+      required: [id, status, version, sourceCurrent, publicMessage, requiredDocuments, events]
+      properties:
+        id: {type: integer}
+        status: {type: string}
+        version: {type: integer}
+        sourceCurrent: {type: boolean}
+        publicMessage: {type: string}
+        requiredDocuments: {type: array, items: {type: string}}
+        verifiedBy: {type: [string, 'null']}
+        verifiedAt: {type: [string, 'null'], format: date-time}
+        approvedBy: {type: [string, 'null']}
+        approvedAt: {type: [string, 'null'], format: date-time}
+        providerMessageId: {type: [string, 'null']}
+        lastError: {type: [string, 'null']}
+        events:
+          type: array
+          items:
+            type: object
+            required: [at, actorKind, actorUserId, action, detail]
+            properties:
+              at: {type: string, format: date-time}
+              actorKind: {type: string}
+              actorUserId: {type: [string, 'null']}
+              action: {type: string}
+              detail: {type: string}
+    LogisticsAutomationDocumentRecord:
+      type: object
+      required: [id, kind, fileName, size, uploadedBy, confirmed]
+      properties:
+        id: {type: string}
+        kind: {type: string}
+        fileName: {type: string}
+        size: {type: integer}
+        uploadedBy: {type: string}
+        confirmed: {type: boolean}
     LogisticsPilotAction:
       type: object
       required: [action]

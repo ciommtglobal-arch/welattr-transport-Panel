@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { ensureLogisticsAutomation } from "../lib/logisticsAutomation";
 import { ReplitConnectors } from "@replit/connectors-sdk";
 import {
   db,
@@ -162,6 +163,7 @@ async function prepareReply(message: WhatsAppTextMessage) {
         referenceCode: request.referenceCode,
         status: "new_request",
       });
+      await ensureLogisticsAutomation(tx, request);
       await tx
         .update(logisticsInboundDraftsTable)
         .set({ status: "completed", requestId: request.id, updatedAt: new Date() })

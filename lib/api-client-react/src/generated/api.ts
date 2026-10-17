@@ -117,6 +117,8 @@ import type {
   LimitApplicationInput,
   LimitApplicationPage,
   LimitApplicationStatusUpdate,
+  LogisticsAutomationAction,
+  LogisticsAutomationResponse,
   LogisticsCarrierInput,
   LogisticsCarrierRecord,
   LogisticsCarrierReviewInput,
@@ -239,6 +241,152 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetLogisticsAutomationUrl = (id: number,) => {
+
+
+
+
+  return `/api/logistics/requests/${id}/automation`
+}
+
+export const getLogisticsAutomation = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsAutomationResponse> => {
+
+  return customFetch<LogisticsAutomationResponse>(getGetLogisticsAutomationUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLogisticsAutomationQueryKey = (id: number,) => {
+    return [
+    `/api/logistics/requests/${id}/automation`
+    ] as const;
+    }
+
+
+export const getGetLogisticsAutomationQueryOptions = <TData = Awaited<ReturnType<typeof getLogisticsAutomation>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsAutomation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLogisticsAutomationQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLogisticsAutomation>>> = ({ signal }) => getLogisticsAutomation(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLogisticsAutomation>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLogisticsAutomationQueryResult = NonNullable<Awaited<ReturnType<typeof getLogisticsAutomation>>>
+export type GetLogisticsAutomationQueryError = ErrorType<void>
+
+
+
+export function useGetLogisticsAutomation<TData = Awaited<ReturnType<typeof getLogisticsAutomation>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsAutomation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLogisticsAutomationQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getActLogisticsAutomationUrl = (id: number,) => {
+
+
+
+
+  return `/api/logistics/requests/${id}/automation`
+}
+
+export const actLogisticsAutomation = async (id: number,
+    logisticsAutomationAction: LogisticsAutomationAction, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsAutomationResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsAutomationResponse>(getActLogisticsAutomationUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsAutomationAction)
+  }
+);}
+
+
+
+
+
+export const getActLogisticsAutomationMutationKey = () => ['actLogisticsAutomation'] as const;
+
+export const getActLogisticsAutomationMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actLogisticsAutomation>>, TError,ActLogisticsAutomationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof actLogisticsAutomation>>, TError,ActLogisticsAutomationMutationVariables, TContext> => {
+
+const mutationKey = getActLogisticsAutomationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof actLogisticsAutomation>>, ActLogisticsAutomationMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  actLogisticsAutomation(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ActLogisticsAutomationMutationResult = NonNullable<Awaited<ReturnType<typeof actLogisticsAutomation>>>
+    export type ActLogisticsAutomationMutationBody = BodyType<LogisticsAutomationAction>
+    export type ActLogisticsAutomationMutationError = ErrorType<void>
+    export type ActLogisticsAutomationMutationVariables = {id: number;data: BodyType<LogisticsAutomationAction>}
+
+    export const useActLogisticsAutomation = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actLogisticsAutomation>>, TError,ActLogisticsAutomationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof actLogisticsAutomation>>,
+        TError,
+        ActLogisticsAutomationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getActLogisticsAutomationMutationOptions(options));
+    }
 
 export const getGetLogisticsPilotWorkspaceUrl = () => {
 

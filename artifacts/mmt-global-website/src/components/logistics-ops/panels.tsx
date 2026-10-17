@@ -20,6 +20,7 @@ import {
   expiresSoon, fmtDate, fmtDateTime, fmtMoney, inputCls, isExpired, modeLabels, offerLabels, offerTone,
   statusLabels, statusTone, toLocalInput, useInvalidateOperations,
 } from "./shared";
+import { AutomationPanel } from "./automation-panel";
 import { CommunicationForm, OfferForm, channelLabels, directionLabels } from "./forms";
 
 function NoteAction({ label, confirmLabel, tone = "primary", hint, withChannel, onSubmit, testId }: {
@@ -352,6 +353,10 @@ export function RequestDetail({ request, shipment, offers, carriers, communicati
             otherAccepted={Boolean(accepted && accepted.id !== o.id)} carriers={scopedCarriers} requestId={request.id} founderId={userId} />
         ))}
       </section>
+
+      <div className="border border-border bg-[#0f1621] p-4">
+        <AutomationPanel key={request.id} requestId={request.id} />
+      </div>
 
       <section className="space-y-3">
         <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/55">Görüşme kayıtları ({communications.length})</h3>

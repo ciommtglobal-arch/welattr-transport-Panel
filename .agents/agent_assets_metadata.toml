@@ -378,3 +378,17 @@ mtime_ms = 1792276048192
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/c1877315-d46a-4ca4-993c-91dc35b4a1cc/a635058b-43dc-4216-bc72-42454da49c79"
 storage_version_token = "1792276091303086"
 content_type = "text/markdown"
+
+[[outputs]]
+id = "y58r_Ez1uqwGHMTUPaH9d"
+uri = "file://docs/mmt-logistics-automation.md"
+type = "text"
+title = "MMT lojistik otomasyonu — kontrol raporu"
+description = "Hazırlanan akış, güvenlik sınırları, 160 sunucu testi, tarayıcı kontrolleri, dosya değişiklikleri ve yayın öncesi notlar. Canlı gönderim yapılmadı."
+logical_id = "3bc2d33a-0e82-45a0-8ea7-dd876ceb26d1"
+content_hash = "sha256:4701f677ff13e28a9dd2a4eba023ae7948ff825d45b7386462b6a994c3bc85af"
+size = 7770
+mtime_ms = 1792279450783
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/3bc2d33a-0e82-45a0-8ea7-dd876ceb26d1/0ef737ce-bbe9-43eb-997f-7f355e3d224f"
+storage_version_token = "1792279488941736"
+content_type = "text/markdown"

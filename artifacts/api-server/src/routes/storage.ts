@@ -20,6 +20,7 @@ import {
 } from "../lib/objectStorage";
 import { requireB2BReviewer, requireStaff } from "../lib/staffAuth";
 import type { Logger } from "pino";
+import { logisticsAutomationDocumentsTable } from "@workspace/db";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -71,12 +72,16 @@ async function getReferencedObjectPaths(objectPaths: string[]) {
     .select({ objectPath: mediaItemsTable.objectPath })
     .from(mediaItemsTable)
     .where(inArray(mediaItemsTable.objectPath, objectPaths));
+  const logisticsDocuments = await db.select({ objectPath: logisticsAutomationDocumentsTable.objectPath })
+    .from(logisticsAutomationDocumentsTable)
+    .where(inArray(logisticsAutomationDocumentsTable.objectPath, objectPaths));
 
   return new Set([
     ...documents.map((document) => document.objectPath),
     ...businessProfiles.map((profile) => profile.objectPath),
     ...listings.map((listing) => listing.objectPath).filter(Boolean),
     ...mediaItems.map((item) => item.objectPath).filter(Boolean),
+    ...logisticsDocuments.map((item) => item.objectPath),
   ]);
 }
 
