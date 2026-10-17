@@ -8,6 +8,7 @@ does not store Telegram tokens or user data in the repository.
 from __future__ import annotations
 
 import logging
+import asyncio
 import os
 import re
 import unicodedata
@@ -121,6 +122,7 @@ class Config:
     contact_admin_ids: frozenset[int]
     allowed_domains: tuple[str, ...]
     ban_after_strikes: int
+    pilot_mode: bool = False
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -150,6 +152,7 @@ class Config:
             contact_admin_ids=env_int_list("TELEGRAM_CONTACT_ADMIN_IDS"),
             allowed_domains=domains,
             ban_after_strikes=max(1, env_int("BAN_AFTER_STRIKES") or 3),
+            pilot_mode=os.getenv("TELEGRAM_PILOT_MODE", "").strip().lower() == "true",
         )
 
 
@@ -770,6 +773,9 @@ async def post_init(application: Application) -> None:
 
 
 def build_application(config: Config) -> Application:
+    if config.pilot_mode:
+        from pilot_mode import build_pilot_application
+        return build_pilot_application(config)
     application = (
         Application.builder()
         .token(config.token)
@@ -840,6 +846,16 @@ def build_application(config: Config) -> Application:
 
 def main() -> None:
     config = Config.from_env()
+    if config.pilot_mode:
+        from pilot_mode import run_pilot
+        try:
+            asyncio.run(run_pilot(config))
+        except (TelegramError, RuntimeError) as exc:
+            logger.error("Private TEST pilot stopped safely (%s).", type(exc).__name__)
+            raise SystemExit(1) from None
+        except KeyboardInterrupt:
+            logger.info("Private TEST pilot stopped.")
+        return
     logger.info(
         "Configuration loaded: group=%s loads_topic=%s vehicles_topic=%s public=%s",
         config.group_id,

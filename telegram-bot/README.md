@@ -49,6 +49,32 @@ python3 telegram-bot/bot.py
 Bot, ana API servisine bağlı değildir; bu nedenle API servisi yeniden başlasa bile
 bot için ayrı bir Replit workflow kullanılır.
 
+## Özel sohbet TEST pilotu
+
+`TELEGRAM_PILOT_MODE=true` yalnız geliştirme ortamında mevcut botu sınırlı pilot
+modunda çalıştırır. Ayrı bot, sunucu veya veritabanı oluşturulmaz.
+
+- Yalnız `TELEGRAM_CONTACT_ADMIN_IDS` içinde önceden tanımlı hesapların kendi
+  özel sohbetlerinde `/start`, `/help` ve `/pilot` komutlarına yanıt verir.
+- Grup mesajlarına, ilanlara ve diğer kullanıcılara yanıt vermez. İlan yayını,
+  moderasyon, davet üretme, finansal bildirim veya ticari onay çalıştırmaz.
+- Başlangıçta mesaj göndermez ve botun komut menüsünü değiştirmez.
+- Mevcut webhook veya bekleyen güncellemeler varsa bunları silmeden durur.
+- Kullanılan referans `UKR-MERSİN-NARENCİYE-001` olarak korunur. Yanıt, kalıcı
+  kayıt/görev durumunu okuyan bir yönetim özeti değildir; tamamlanmamış dosyayı
+  tamamlanmış veya ticari olarak onaylanmış göstermez.
+- Telegram kimliği MMT personel rolüne çevrilmez. Uygulamadaki dosya erişimi
+  mevcut Clerk ve yetki kontrollerine tabidir.
+- Production çalışma ortamında TEST modu başlamaz. Bu ayarı kapatmak normal
+  botun grup yayını/moderasyon davranışına geri döndürür; ayrı onay olmadan
+  kapatmayın veya normal çalışma modunu etkinleştirmeyin.
+
+İzole güvenlik testleri (gerçek Telegram isteği veya veri kaydı yok):
+
+```bash
+python3 -m unittest discover -s telegram-bot -p 'test_pilot_mode.py' -v
+```
+
 ## İlan şablonu
 
 Kullanıcılar doğrudan ilan yazacaksa şu alanların her biri kendi satırında ve `:`
