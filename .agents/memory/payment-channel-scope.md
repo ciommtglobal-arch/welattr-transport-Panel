@@ -93,6 +93,17 @@ faaliyet, banka kabulü, programın ortaklık/sektör şartları ve toplam yıll
 maliyeti birlikte inceleyin; şirket kurmayı kredi veya hibe garantisi gibi
 sunmayın.
 
+Kullanıcı iyzico ve PayTR'ye zaten başvurduğunu, ikisinde de sonuç alamadığını
+bildirdi. Bunu tek başına kesin başvuru reddi veya teknik entegrasyon arızası
+olarak sınıflandırmayın.
+
+**Why:** Bu iki sağlayıcı yeni başvuru önerisi olarak sunulduktan sonra kullanıcı
+başvuruları zaten yaptığını açıkladı.
+
+**How to apply:** Aynı başvuruları körlemesine yeniden önermeyin. Önce ticari
+onay engelini teknik bağlantı hatasından ayırın; kodun sağlayıcı/üye işyeri onayı
+yerine geçebileceğini vaat etmeyin.
+
 Kullanıcı gıda ve kozmetik online mağazalarının MMT Global ekosistemiyle
 entegre olmasını istiyor. İşin dijital ve otomasyonlu yürütülmesini istiyor;
 dijitalden kastını gıda ve kozmetik ürünlerinin online satışı olarak
