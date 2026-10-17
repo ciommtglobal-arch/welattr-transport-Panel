@@ -16,3 +16,15 @@ hedefle. Aynı ödemeyi farklı sağlayıcılarda otomatik yeniden deneme. Strip
 bağlantısı, ülke/para birimi uygunluğu ve uçtan uca doğrulama tamamlanmadan üçlü
 entegrasyon tamamlandı deme. Tahsilat yetkisini yayın veya kurucu operasyon onayı
 yerine kullanma.
+
+Kullanıcı Türkiye için zaten çalışması olduğunu belirtti; yabancı kart/3D yetkisi
+açılamıyorsa ilk etapta Stripe ve Shopify ile ilerlemek istiyor.
+
+**Why:** Kullanıcının uluslararası işe başlama tercihi budur; mevcut Türkiye
+tahsilatını bozmak veya MMT Connect içindeki canlı kapıların zaten açık olduğunu
+varsaymak için izin değildir.
+
+**How to apply:** Türkiye'deki mevcut düzeni koru. Yabancı kart kabulü ile 3D
+Secure yetkisini ayrı doğrula; kodla banka yetkisi açıldığını iddia etme. Stripe
+hesabının kullanıcının seçtiği ve yetkili olduğu hesap olduğunu, test/canlı
+durumunu ve uygulama bağlantısını ayrı ayrı doğrula.
