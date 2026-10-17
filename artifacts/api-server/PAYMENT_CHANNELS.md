@@ -12,7 +12,7 @@ providers or to enable production collection.
 | --- | --- | --- |
 | Tami | MMT service invoices; hosted card page; signed status reconciliation; refund routes and audit records | Approved merchant/test credentials, explicit environment and enablement, then sandbox evidence. Live collection retains all existing approval gates. |
 | Shopify | Physical-product catalog/cart and Shopify-hosted checkout | Existing app-scoped connection and merchant checkout readiness verified against the connected shop. Do not charge the Shopify cart separately through Tami. |
-| Stripe | Not implemented in this project | Connect the Replit Stripe integration before SDK/sync setup. Connection discovery timed out; no account eligibility or live readiness has been verified. |
+| Stripe | Merchant-authorized live 100 USD hosted Payment Link, displayed only in the development `/odeme` preview | This external link is separate from invoices and Shopify orders. Native API/webhook/sync integration remains unimplemented; connection discovery timed out. A working live link does not prove automatic invoice reconciliation or bank settlement. |
 
 The existing Tami account supports TRY collection. USD/EUR invoice fields are not
 evidence of supported foreign-currency collection. Do not convert currencies or
@@ -55,3 +55,21 @@ There is currently no implemented shared Tami/Stripe selector or combined
 three-provider settlement report. Do not describe the channels as fully linked
 until connected-account checkout, callbacks, refunds and reconciliation have
 been implemented and tested.
+
+## Standalone Stripe Payment Link
+
+The founder explicitly authorized the supplied live link displaying the
+beneficiary Parlar Global LLC for MMT Global use. This is a fixed 100 USD service
+fee link, not a provider choice for an arbitrary invoice or Shopify cart.
+Applicable tax/final total is determined by the hosted Stripe page.
+
+The preview identifies the beneficiary and live-payment nature, opens Stripe
+in a separate tab without appending customer or invoice data, and never marks
+a local invoice paid from a click/redirect. It is hidden whenever invoice
+reference entry/lookup is in progress. The component is development-only so an
+unrelated production publication cannot accidentally expose it.
+
+No SDK, new database pool, schema, native record mutation, API key, provider
+webhook or real payment was needed to add this outbound link. Native Stripe
+invoice checkout remains a separate task with the existing idempotency and
+provider-verification requirements.

@@ -39,3 +39,13 @@ olduğunu göstermez; test hesabına verilen yetkiyi canlı hesaba taşımaz.
 **How to apply:** Her kanalı kendi kanıtıyla değerlendir. Canlı linki kullanma
 yetkisini ayrıca doğrula; linkin açılması, ödemenin başarılı olması, banka
 hesabına aktarılması ve MMT faturasıyla otomatik eşleştirilmesini ayrı tut.
+
+Kullanıcı, alıcı adı Parlar Global LLC görünen canlı 100 USD Stripe hizmet bedeli
+bağlantısını MMT Global için kullanmaya yetkili olduğunu açıkça onayladı.
+
+**Why:** Kullanıcı doğrudan bu canlı hesabı kullanma yetkisi sorusuna evet dedi.
+
+**How to apply:** Aynı bağlantı ve alıcı için hesap yetkisini tekrar tekrar
+sormayın. Bu onayı gerçek tahsilat yapma, Tami/Shopify kaydını ödendi sayma,
+otomatik mutabakatın tamamlandığını iddia etme veya projeyi yayımlama iznine
+dönüştürmeyin. Bağlantı/alıcı değişirse kapsamı yeniden doğrulayın.

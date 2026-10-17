@@ -10,6 +10,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { Link } from "wouter";
+import { StripeServicePaymentLink } from "@/components/stripe-payment-link";
 import {
   useCreatePaymentCheckout,
   getGetPublicServiceInvoiceQueryKey,
@@ -438,12 +439,14 @@ export default function InvoicePaymentPage() {
             </span>
           </h1>
           <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-secondary-foreground/70">
-            Yalnızca MMT Global tarafından düzenlenmiş hizmet faturalarını ödeyin.
-            Tutar ve para birimi doğrulanmış faturadan alınır; kart bilgileri
+            Faturaya bağlı ödemelerde tutar ve para birimi doğrulanmış faturadan
+            alınır; kart bilgileri
             MMT Global sunucularına gönderilmez.
           </p>
         </div>
       </section>
+
+      {!lookupRequested && !normalizedReference && <StripeServicePaymentLink />}
 
       <section className="px-6 py-12 md:px-12 md:py-20">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.2fr_0.8fr]">
