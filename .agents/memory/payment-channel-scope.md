@@ -42,8 +42,10 @@ hesabına aktarılması ve MMT faturasıyla otomatik eşleştirilmesini ayrı tu
 
 Kullanıcı, alıcı adı Parlar Global LLC görünen canlı 100 USD Stripe hizmet bedeli
 bağlantısını MMT Global için kullanmaya yetkili olduğunu açıkça onayladı.
+Bu Stripe hesabının ABD'deki şirket üzerine kayıtlı olduğunu da belirtti.
 
-**Why:** Kullanıcı doğrudan bu canlı hesabı kullanma yetkisi sorusuna evet dedi.
+**Why:** Kullanıcı doğrudan bu canlı hesabı kullanma yetkisi sorusuna evet dedi;
+hesabın şirket ülkesini ayrıca Amerika Birleşik Devletleri olarak doğruladı.
 
 **How to apply:** Aynı bağlantı ve alıcı için hesap yetkisini tekrar tekrar
 sormayın. Bu onayı gerçek tahsilat yapma, Tami/Shopify kaydını ödendi sayma,
