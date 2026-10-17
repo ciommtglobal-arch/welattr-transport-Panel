@@ -38,6 +38,13 @@ export function mapTamiPaymentStatus(
     return "cancelled";
   }
   if (["SUCCESS", "SUCCEEDED", "PAID", "CAPTURED", "APPROVED"].includes(normalized)) {
+    // A successful authorization hold is not a captured sale. In particular,
+    // bank authentication / PRE_AUTH success must not pay the service invoice.
+    const operation =
+      typeof payload.orderStatus === "string"
+        ? payload.orderStatus.trim().toUpperCase()
+        : "";
+    if (operation === "PRE_AUTH") return "pending";
     return "success";
   }
   if (

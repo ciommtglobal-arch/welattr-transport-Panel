@@ -61,6 +61,31 @@ describe("Tami payment verification", () => {
     expect(resolveVerifiedPaymentStatus("failed", "success")).toBe("success");
   });
 
+  it("does not treat creation of a 3DS challenge as a completed payment", () => {
+    expect(mapTamiPaymentStatus({
+      success: true,
+      threeDSHtmlContent: Buffer.from("<html>TEST BANK CHALLENGE</html>").toString("base64"),
+    })).toBe("pending");
+  });
+
+  it("does not treat a successful authorization hold as collected funds", () => {
+    expect(mapTamiPaymentStatus({
+      paymentStatus: "SUCCESS",
+      orderStatus: "PRE_AUTH",
+    })).toBe("pending");
+    expect(mapTamiPaymentStatus({
+      paymentStatus: "SUCCESS",
+      orderStatus: " pre_auth ",
+    })).toBe("pending");
+  });
+
+  it.each(["AUTH", "POST_AUTH"])("accepts a provider-confirmed captured sale: %s", (orderStatus) => {
+    expect(mapTamiPaymentStatus({
+      paymentStatus: "SUCCESS",
+      orderStatus,
+    })).toBe("success");
+  });
+
   it("requires a matching signed order, amount, currency, and request correlation for refunds", () => {
     const response = {
       orderId: "order-123",

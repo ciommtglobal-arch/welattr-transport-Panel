@@ -112,7 +112,7 @@ describe("untrusted payment callback hints", () => {
     expect(state.events).toHaveLength(1);
   });
 
-  it.each(["NOT_COMPLETE", "FAILED", "CANCELLED"])(
+  it.each(["NOT_COMPLETE", "NOT_COMPLETED", "FAILED", "CANCELLED", "TIME_OUT"])(
     "does not confirm a claimed success when Tami reports %s",
     async (paymentStatus) => {
       state.payload.paymentStatus = paymentStatus;
@@ -122,6 +122,33 @@ describe("untrusted payment callback hints", () => {
       expect(state.invoice?.status).toBe("issued");
     },
   );
+
+  it("keeps an authenticated but uncompleted 3DS payment pending", async () => {
+    Object.assign(state.payload, {
+      success: true,
+      threeDSStatus: "SUCCESS",
+      paymentStatus: "NOT_COMPLETED",
+      orderStatus: "AUTH",
+    });
+    const result = await send({ status: "success" });
+    expect(result.status).toBe(200);
+    expect(result.body.status).toBe("pending");
+    expect(state.invoice?.status).toBe("issued");
+    expect(state.events).toHaveLength(0);
+  });
+
+  it("does not pay an invoice for a signed successful PRE_AUTH result", async () => {
+    Object.assign(state.payload, {
+      success: true,
+      paymentStatus: "SUCCESS",
+      orderStatus: "PRE_AUTH",
+    });
+    const result = await send({ status: "success" });
+    expect(result.status).toBe(200);
+    expect(result.body.status).toBe("pending");
+    expect(state.invoice?.status).toBe("issued");
+    expect(state.events).toHaveLength(0);
+  });
 
   it.each([
     { orderId: "different-order" },

@@ -40,6 +40,19 @@ The current Tami merchant account supports TRY only. Foreign-currency amounts ar
 
 **How to apply:** Keep USD/EUR available only in mock/test mode until a provider with genuine multi-currency settlement is approved.
 
+Keep the hosted checkout and direct 3DS integration contracts separate. The
+public hosted-token contract does not document a flag that enforces 3DS;
+direct 3DS uses card fields, a bank challenge and a subsequent completion step.
+
+**Why:** Adding a direct-auth/complete call to a hosted flow would mix different
+provider products and expand MMT's card-data/compliance scope. A provider-owned
+payment page does not itself prove that this merchant has enforced 3DS enabled.
+
+**How to apply:** Preserve provider-hosted card entry, confirm hosted/Masterpass
+entitlement and 3DS policy with Tami, and require real provider test evidence.
+The POS's disabled “3D'siz İşlem” option is not proof that 3DS is disabled;
+foreign-card acceptance is another separate permission.
+
 Payment integration scope is MMT service invoices only; do not change the construction store's Shopify checkout. Tami sandbox must be explicitly enabled outside production, and live collection must run only in production after all approval, 3D Secure, test-evidence, callback, and verified-credential gates pass.
 
 **Why:** Service billing and physical-product commerce use separate providers and legal/payment controls. A development misconfiguration must not create a real charge.
