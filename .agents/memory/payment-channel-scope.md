@@ -105,6 +105,18 @@ başvuruları zaten yaptığını, ardından kabul edilmediğini açıkladı.
 garantilemeyin veya kodun sağlayıcı/üye işyeri onayı yerine geçebileceğini
 vaat etmeyin.
 
+Kullanıcı Türkiye'deki şirketinin kendi adına USD veya EUR döviz hesabı
+bulunduğunu doğruladı.
+
+**Why:** Yabancı müşterilerden doğrudan şirket hesabına uluslararası havale
+seçeneği konuşulurken bunu açıkça belirtti.
+
+**How to apply:** Aynı hesap varlığı sorusunu yeniden sormayın. Bu beyanı
+bankanın gelen SWIFT kabulü, hesabın kullanılabilirliği, gerçek tahsilat veya
+otomatik banka hareketi entegrasyonunun doğrulandığı şeklinde yorumlamayın.
+Kart tahsilatı ile banka havalesini ayrı tutun; hesap numarası/IBAN'ı sohbette
+veya proje hafızasında istemeyin/saklamayın.
+
 Kullanıcı gıda ve kozmetik online mağazalarının MMT Global ekosistemiyle
 entegre olmasını istiyor. İşin dijital ve otomasyonlu yürütülmesini istiyor;
 dijitalden kastını gıda ve kozmetik ürünlerinin online satışı olarak
