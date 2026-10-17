@@ -9,6 +9,18 @@ MMT's hosted payment flow must keep card data on Tami's hosted page. Creating th
 
 **How to apply:** Keep merchant number, terminal number, secret key, JWK kid, and JWK k in workspace Secrets only. Never accept card fields in MMT API requests, and do not mark an order as paid from the browser callback alone; reconcile it with Tami's query response.
 
+Diagnose header authentication separately from JWK response verification. Tami's
+official error-code documentation identifies `4003` as a `PG-Auth-Token` mismatch.
+
+**Why:** The merchant/terminal/secret triple builds header authentication, while
+terminal JWK material signs the body. Changing JWK values or replacing the header
+with a generic Bearer secret does not establish correct header authentication.
+
+**How to apply:** On this provider error, first verify that the three header
+credentials belong to the same approved sandbox POS through the secure secrets
+flow. Keep raw provider bodies, computed authentication values and signatures out
+of logs, and keep collection disabled until provider verification succeeds.
+
 The current Tami merchant account supports TRY only. Foreign-currency amounts are converted to TRY by Tami, so MMT must reject USD/EUR live requests instead of presenting them as true multi-currency payments.
 
 **Why:** Tami technical support confirmed that the current account has no multi-currency support.
