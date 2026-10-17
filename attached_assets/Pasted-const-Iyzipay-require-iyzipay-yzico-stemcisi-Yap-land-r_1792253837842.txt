@@ -1,0 +1,150 @@
+const Iyzipay = require('iyzipay');
+
+// İyzico İstemcisi Yapılandırması (Canlı veya Sandbox Ortamı)
+const iyzipay = new Iyzipay({
+    apiKey: process.env.IYZICO_API_KEY,
+    secretKey: process.env.IYZICO_SECRET_KEY,
+    uri: process.env.IYZICO_BASE_URI || 'https://sandbox-api.iyzipay.com' // Canlı ortam için https://api.iyzipay.com
+});
+
+// MMT Connect İyzico Ödeme Rotaları Entegrasyonu
+function registerPaymentRoutes(app) {
+
+    // 1. Ödeme Başlatma Endpoint'i
+    app.post('/api/payment/initialize', async (req, res) => {
+        try {
+            // Clerk oturum veya yetki başlığı kontrolü
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                return res.status(401).json({
+                    status: 'error',
+                    message: 'Yetkilendirme hatası: Geçerli bir oturum tokeni gereklidir.'
+                });
+            }
+
+            const { orderId, price, buyer, basketItems } = req.body;
+
+            if (!orderId || !price || !buyer || !basketItems || basketItems.length === 0) {
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'Eksik parametre: orderId, price, buyer ve basketItems zorunludur.'
+                });
+            }
+
+            const request = {
+                locale: Iyzipay.LOCALE.TR,
+                conversationId: orderId,
+                price: price.toString(),
+                paidPrice: price.toString(),
+                currency: Iyzipay.CURRENCY.TRY,
+                basketId: orderId,
+                paymentGroup: Iyzipay.PAYMENT_GROUP.PRODUCT,
+                callbackUrl: `${process.env.APP_BASE_URL || 'https://panel.mmtglobal.com.tr'}/api/payment/callback`,
+                buyer: {
+                    id: buyer.id || 'MMT-USER-' + Date.now(),
+                    name: buyer.name,
+                    surname: buyer.surname,
+                    gsmNumber: buyer.gsmNumber,
+                    email: buyer.email,
+                    identityNumber: buyer.identityNumber || '11111111111',
+                    lastLoginDate: '2026-10-17 19:20:00',
+                    registrationDate: buyer.registrationDate || '2026-01-01 12:00:00',
+                    registrationAddress: buyer.registrationAddress || 'MMT Global Lojistik Merkez Cizre',
+                    ip: req.ip || '85.105.0.1',
+                    city: buyer.city || 'Sirnak',
+                    country: buyer.country || 'Turkey',
+                    zipCode: buyer.zipCode || '73200'
+                },
+                shippingAddress: {
+                    contactName: `${buyer.name} ${buyer.surname}`,
+                    city: buyer.city || 'Sirnak',
+                    country: buyer.country || 'Turkey',
+                    address: buyer.registrationAddress || 'MMT Global Lojistik Merkez Cizre',
+                    zipCode: buyer.zipCode || '73200'
+                },
+                billingAddress: {
+                    contactName: `${buyer.name} ${buyer.surname}`,
+                    city: buyer.city || 'Sirnak',
+                    country: buyer.country || 'Turkey',
+                    address: buyer.registrationAddress || 'MMT Global Lojistik Merkez Cizre',
+                    zipCode: buyer.zipCode || '73200'
+                },
+                basketItems: basketItems.map((item, index) => ({
+                    id: item.id || `ITEM-${index + 1}`,
+                    name: item.name || 'MMT Lojistik ve Taşımacılık Hizmeti',
+                    category1: item.category1 || 'Lojistik Operasyon',
+                    itemType: Iyzipay.BASKET_ITEM_TYPE.PHYSICAL,
+                    price: item.price.toString()
+                }))
+            };
+
+            iyzipay.checkoutFormInitialize.create(request, (err, result) => {
+                if (err) {
+                    return res.status(500).json({
+                        status: 'error',
+                        message: 'İyzico ağ bağlantı hatası',
+                        error: err.message
+                    });
+                }
+
+                // İyzico API dönüş standardı: status alanı 'success' (küçük harf) döner
+                if (!result || result.status !== 'success') {
+                    return res.status(400).json({
+                        status: 'FAILURE',
+                        errorCode: result?.errorCode || 'UNKNOWN',
+                        errorMessage: result?.errorMessage || 'Ödeme formu başlatılamadı.'
+                    });
+                }
+
+                res.json({
+                    status: 'SUCCESS',
+                    token: result.token,
+                    checkoutFormContent: result.checkoutFormContent,
+                    paymentPageUrl: result.paymentPageUrl,
+                    conversationId: orderId
+                });
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                status: 'error',
+                message: 'Sunucu iç hatası: ' + error.message
+            });
+        }
+    });
+
+    // 2. Ödeme Sonucu Callback Endpoint'i
+    app.post('/api/payment/callback', (req, res) => {
+        const token = req.body.token || req.query.token;
+
+        if (!token) {
+            return res.status(400).json({ status: 'error', message: 'Geçersiz ödeme token bilgisi.' });
+        }
+
+        const request = {
+            locale: Iyzipay.LOCALE.TR,
+            token: token
+        };
+
+        iyzipay.checkoutForm.retrieve(request, (err, result) => {
+            if (err || !result || result.status !== 'success') {
+                const errorMessage = result?.errorMessage || 'Ödeme doğrulama başarısız';
+                return res.redirect(`/odeme-basarisiz?error=${encodeURIComponent(errorMessage)}`);
+            }
+
+            // Ödeme durumunun tam olarak SUCCESS olduğunu kontrol et
+            if (result.paymentStatus === 'SUCCESS') {
+                const orderId = result.conversationId;
+                const paidAmount = result.paidPrice;
+
+                // BURADA: Sipariş durumu veritabanında 'Ödendi' olarak güncellenebilir.
+
+                return res.redirect(`/odeme-basarili?orderId=${orderId}&price=${paidAmount}`);
+            } else {
+                return res.redirect('/odeme-basarisiz?reason=payment_declined');
+            }
+        });
+    });
+}
+
+module.exports = registerPaymentRoutes;
