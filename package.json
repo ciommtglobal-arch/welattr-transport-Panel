@@ -15,5 +15,14 @@
   "devDependencies": {
     "prettier": "^3.9.6",
     "typescript": "~5.9.3"
-  }
+  },
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib"
+  },
+  "keywords": [],
+  "author": "",
+  "type": "commonjs"
 }
