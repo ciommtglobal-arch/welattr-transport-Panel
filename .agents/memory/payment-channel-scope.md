@@ -76,6 +76,8 @@ Uluslararası tahsilatı başka bir şirketin hesabına bağımlı olmadan kendi
 kontrolündeki yapıyla yürütmek kullanıcı için bir hedeftir; Dubai'de şirket
 kurmayı bu amaçla değerlendirmek istiyor. Dubai şirketi için danışmanlık ve
 finans faaliyetlerini de seçenek olarak gündeme getirdi.
+Kuruluş seçiminin BAE'deki banka kredileri ve finansman desteklerinden
+yararlanma imkânını da dikkate almasını istiyor.
 
 **Why:** Kullanıcı, başka firmaya ihtiyaç kalmaması için Dubai şirketi
 alternatifini gündeme getirdi.
@@ -86,3 +88,7 @@ izni gibi göstermeyin. Mevcut Mersin operasyon merkezini ve verileri koruyun.
 Kurumsal/lojistik danışmanlığı ile düzenlenmiş yatırım, kredi veya ödeme
 hizmetlerini aynı lisans altında varsaymayın; şirket kuruluşu ya da danışmanlık
 unvanı tek başına finansal hizmet yetkisi vermez.
+Krediye başvurmak ile finansal hizmet sunma lisansını karıştırmayın. Gerçek
+faaliyet, banka kabulü, programın ortaklık/sektör şartları ve toplam yıllık
+maliyeti birlikte inceleyin; şirket kurmayı kredi veya hibe garantisi gibi
+sunmayın.
