@@ -28,3 +28,14 @@ varsaymak için izin değildir.
 Secure yetkisini ayrı doğrula; kodla banka yetkisi açıldığını iddia etme. Stripe
 hesabının kullanıcının seçtiği ve yetkili olduğu hesap olduğunu, test/canlı
 durumunu ve uygulama bağlantısını ayrı ayrı doğrula.
+
+Bağımsız Stripe Payment Link'in çalışma modu ile MCP/API hesabının ve uygulama
+bağlantısının çalışma modunu birbirine eşitleme.
+
+**Why:** Kullanıcının sunduğu ödeme sayfası açıkça canlı mod gösterirken daha
+önce seçilen araç hesabı sandbox idi. Birinin test olması diğerinin de test
+olduğunu göstermez; test hesabına verilen yetkiyi canlı hesaba taşımaz.
+
+**How to apply:** Her kanalı kendi kanıtıyla değerlendir. Canlı linki kullanma
+yetkisini ayrıca doğrula; linkin açılması, ödemenin başarılı olması, banka
+hesabına aktarılması ve MMT faturasıyla otomatik eşleştirilmesini ayrı tut.
