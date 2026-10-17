@@ -5,6 +5,158 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type LogisticsPilotActionAction = typeof LogisticsPilotActionAction[keyof typeof LogisticsPilotActionAction];
+
+
+export const LogisticsPilotActionAction = {
+  create_file: 'create_file',
+  invite: 'invite',
+  revoke_invite: 'revoke_invite',
+  accept_invite: 'accept_invite',
+  create_task: 'create_task',
+  submit_task: 'submit_task',
+  request_revision: 'request_revision',
+  accept_task: 'accept_task',
+  request_review: 'request_review',
+  decide_review: 'decide_review',
+} as const;
+
+export type LogisticsPilotActionReference = typeof LogisticsPilotActionReference[keyof typeof LogisticsPilotActionReference];
+
+
+export const LogisticsPilotActionReference = {
+  'UKR-MERSİN-NARENCİYE-001': 'UKR-MERSİN-NARENCİYE-001',
+} as const;
+
+export type LogisticsPilotActionRole = typeof LogisticsPilotActionRole[keyof typeof LogisticsPilotActionRole];
+
+
+export const LogisticsPilotActionRole = {
+  worker: 'worker',
+  reviewer: 'reviewer',
+} as const;
+
+export type LogisticsPilotActionDecision = typeof LogisticsPilotActionDecision[keyof typeof LogisticsPilotActionDecision];
+
+
+export const LogisticsPilotActionDecision = {
+  approved_test: 'approved_test',
+  changes_requested: 'changes_requested',
+} as const;
+
+export interface LogisticsPilotAction {
+  action: LogisticsPilotActionAction;
+  reference?: LogisticsPilotActionReference;
+  /** @maxLength 100 */
+  targetUserId?: string;
+  role?: LogisticsPilotActionRole;
+  expiresAt?: string;
+  inviteId?: string;
+  /**
+     * @minLength 32
+     * @maxLength 128
+     */
+  token?: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  title?: string;
+  /** @maxLength 100 */
+  assignedTo?: string;
+  dueAt?: string;
+  taskId?: string;
+  /**
+     * @minLength 1
+     * @maxLength 20000
+     */
+  content?: string;
+  /**
+     * @minLength 1
+     * @maxLength 2000
+     */
+  note?: string;
+  decision?: LogisticsPilotActionDecision;
+}
+
+export type LogisticsPilotWorkspaceRole = typeof LogisticsPilotWorkspaceRole[keyof typeof LogisticsPilotWorkspaceRole];
+
+
+export const LogisticsPilotWorkspaceRole = {
+  owner: 'owner',
+  worker: 'worker',
+  reviewer: 'reviewer',
+  none: 'none',
+} as const;
+
+export type LogisticsPilotWorkspaceSummary = {
+  missing: number;
+  overdue: number;
+  awaitingDecision: number;
+};
+
+export interface LogisticsPilotFileRecord {
+  reference: string;
+  ownerUserId: string;
+  reviewState: string;
+  /** @nullable */
+  decisionNote?: string | null;
+  createdAt: string;
+}
+
+export interface LogisticsPilotInvitationRecord {
+  id: string;
+  targetUserId: string;
+  role: string;
+  expiresAt: string;
+  /** @nullable */
+  acceptedAt?: string | null;
+  /** @nullable */
+  revokedAt?: string | null;
+}
+
+export interface LogisticsPilotSubmissionRecord {
+  id: string;
+  revision: number;
+  content: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface LogisticsPilotTaskRecord {
+  id: string;
+  title: string;
+  assignedTo: string;
+  dueAt: string;
+  status: string;
+  /** @nullable */
+  revisionNote?: string | null;
+  submissions: LogisticsPilotSubmissionRecord[];
+}
+
+export interface LogisticsPilotEventRecord {
+  id: string;
+  actorUserId: string;
+  action: string;
+  detail: string;
+  createdAt: string;
+}
+
+export interface LogisticsPilotWorkspace {
+  reference: string;
+  isTest: boolean;
+  commercialApproval: boolean;
+  actorUserId: string;
+  isFounder: boolean;
+  role: LogisticsPilotWorkspaceRole;
+  inviteToken?: string;
+  file: LogisticsPilotFileRecord | null;
+  invitations: LogisticsPilotInvitationRecord[];
+  tasks: LogisticsPilotTaskRecord[];
+  history: LogisticsPilotEventRecord[];
+  summary: LogisticsPilotWorkspaceSummary;
+}
+
 export type LogisticsTestPilotCheckStatus = typeof LogisticsTestPilotCheckStatus[keyof typeof LogisticsTestPilotCheckStatus];
 
 

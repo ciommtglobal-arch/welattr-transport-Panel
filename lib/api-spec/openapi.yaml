@@ -31,6 +31,55 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /logistics/test-pilot/workspace:
+    get:
+      operationId: getLogisticsPilotWorkspace
+      tags: [logistics]
+      summary: Development-only, Clerk-authenticated persistent TEST workspace
+      responses:
+        '200':
+          description: Accessible TEST file; null before explicit initialization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogisticsPilotWorkspace'
+        '401':
+          description: Sign in required
+        '403':
+          description: File access denied
+        '404':
+          description: Disabled outside development
+        '503':
+          description: Workspace unavailable
+    post:
+      operationId: mutateLogisticsPilotWorkspace
+      tags: [logistics]
+      summary: Transactional TEST-only invitations, tasks and revisions; never commercial approval
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogisticsPilotAction'
+      responses:
+        '200':
+          description: Persisted action result; invitation token appears only on creation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogisticsPilotWorkspace'
+        '400':
+          description: Invalid action
+        '401':
+          description: Sign in required
+        '403':
+          description: File or action access denied
+        '404':
+          description: Disabled or TEST file missing
+        '409':
+          description: Invalid workflow state or unusable invitation
+        '503':
+          description: Workspace unavailable
   /logistics/test-pilot/readiness:
     get:
       operationId: getLogisticsTestPilotReadiness
@@ -4245,6 +4294,149 @@ components:
       name: pageSize
       schema: { type: integer, minimum: 1, maximum: 50, default: 25 }
   schemas:
+    LogisticsPilotAction:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: [create_file, invite, revoke_invite, accept_invite, create_task, submit_task, request_revision, accept_task, request_review, decide_review]
+        reference:
+          type: string
+          enum: ['UKR-MERSİN-NARENCİYE-001']
+        targetUserId:
+          type: string
+          maxLength: 100
+        role:
+          type: string
+          enum: [worker, reviewer]
+        expiresAt:
+          type: string
+          format: date-time
+        inviteId:
+          type: string
+          format: uuid
+        token:
+          type: string
+          minLength: 32
+          maxLength: 128
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        assignedTo:
+          type: string
+          maxLength: 100
+        dueAt:
+          type: string
+          format: date-time
+        taskId:
+          type: string
+          format: uuid
+        content:
+          type: string
+          minLength: 1
+          maxLength: 20000
+        note:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        decision:
+          type: string
+          enum: [approved_test, changes_requested]
+    LogisticsPilotWorkspace:
+      type: object
+      required: [reference, isTest, commercialApproval, actorUserId, isFounder, role, file, invitations, tasks, history, summary]
+      properties:
+        reference:
+          type: string
+        isTest:
+          type: boolean
+        commercialApproval:
+          type: boolean
+        actorUserId:
+          type: string
+        isFounder:
+          type: boolean
+        role:
+          type: string
+          enum: [owner, worker, reviewer, none]
+        inviteToken:
+          type: string
+        file:
+          anyOf:
+            - $ref: '#/components/schemas/LogisticsPilotFileRecord'
+            - type: 'null'
+        invitations:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogisticsPilotInvitationRecord'
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogisticsPilotTaskRecord'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogisticsPilotEventRecord'
+        summary:
+          type: object
+          required: [missing, overdue, awaitingDecision]
+          properties:
+            missing: {type: integer}
+            overdue: {type: integer}
+            awaitingDecision: {type: integer}
+    LogisticsPilotFileRecord:
+      type: object
+      required: [reference, ownerUserId, reviewState, createdAt]
+      properties:
+        reference: {type: string}
+        ownerUserId: {type: string}
+        reviewState: {type: string}
+        decisionNote: {type: [string, 'null']}
+        createdAt: {type: string, format: date-time}
+    LogisticsPilotInvitationRecord:
+      type: object
+      required: [id, targetUserId, role, expiresAt]
+      properties:
+        id: {type: string}
+        targetUserId: {type: string}
+        role: {type: string}
+        expiresAt: {type: string, format: date-time}
+        acceptedAt: {type: [string, 'null'], format: date-time}
+        revokedAt: {type: [string, 'null'], format: date-time}
+    LogisticsPilotTaskRecord:
+      type: object
+      required: [id, title, assignedTo, dueAt, status, submissions]
+      properties:
+        id: {type: string}
+        title: {type: string}
+        assignedTo: {type: string}
+        dueAt: {type: string, format: date-time}
+        status: {type: string}
+        revisionNote: {type: [string, 'null']}
+        submissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogisticsPilotSubmissionRecord'
+    LogisticsPilotSubmissionRecord:
+      type: object
+      required: [id, revision, content, createdBy, createdAt]
+      properties:
+        id: {type: string}
+        revision: {type: integer}
+        content: {type: string}
+        createdBy: {type: string}
+        createdAt: {type: string, format: date-time}
+    LogisticsPilotEventRecord:
+      type: object
+      required: [id, actorUserId, action, detail, createdAt]
+      properties:
+        id: {type: string}
+        actorUserId: {type: string}
+        action: {type: string}
+        detail: {type: string}
+        createdAt: {type: string, format: date-time}
     LogisticsTestPilotReadiness:
       type: object
       required: [fileCode, testOnly, readOnly, readyForLive, shipmentApproved, recordFound, checkedAt, checks, nextActions]

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@clerk/react";
+import { Link } from "wouter";
 import { ChevronDown, CircleAlert, CircleCheck, CircleDashed, CircleX, Loader2, RefreshCw } from "lucide-react";
 import {
   getGetLogisticsTestPilotReadinessQueryKey,
@@ -75,6 +76,11 @@ export function LogisticsPilotReadiness() {
         Salt okunur TEST görünümü. Canlı operasyon, onay veya sevkiyat işlemi yapılmaz.
       </p>
 
+      {import.meta.env.DEV && (
+        <Link href="/staff/test-lojistik" data-testid="link-test-workspace" className="mt-3 inline-block border border-primary px-3 py-2 text-[11px] font-bold uppercase tracking-[0.13em] text-primary hover:bg-primary/10">
+          TEST çalışma alanını aç
+        </Link>
+      )}
       <div aria-live="polite" className="mt-5">
         {readiness.isPending ? (
           <div className="space-y-2" role="status" aria-label="Hazırlık kontrolü yükleniyor">

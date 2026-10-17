@@ -7,12 +7,12 @@ type Check = {
   detail: string;
 };
 
-// These are explicitly scoped implementation gaps, not a claim to have executed
-// browser journeys. No mutation, geofence verification or approval occurs here.
+// Legacy request-record inspection, not a browser test or a query of the separate
+// persistent TEST workspace. Never infer its journey results from this endpoint.
 export function buildLogisticsPilotReadiness(recordFound: boolean) {
   const checks: Check[] = [
     {
-      key: "test_record", label: "Kalıcı TEST dosyası",
+      key: "test_record", label: "Eski lojistik talep tablosundaki TEST kaydı",
       status: recordFound ? "PASS" : "FAIL",
       detail: recordFound
         ? "Mevcut şemada aynı referanslı isTest=true kayıt okundu. Sevkiyat hazır demek değildir."
@@ -27,32 +27,32 @@ export function buildLogisticsPilotReadiness(recordFound: boolean) {
       detail: "Bu okuma isteği tam kullanıcı yaşam döngüsü testi çalıştırmaz.",
     },
     {
-      key: "invitation", label: "Dosyaya bağlı kullanıcı ve rol daveti", status: "FAIL",
-      detail: "Genel firma daveti pilot dosyasına bağlı davet/atama akışının yerine geçmez; pilot akışı tamamlanmadı.",
+      key: "invitation", label: "Dosyaya bağlı kullanıcı ve rol daveti", status: "NOT_TESTED",
+      detail: "Kalıcı davetler ayrı TEST çalışma alanındadır; bu eski talep kontrolü davet akışını çalıştırmaz.",
     },
     {
       key: "invitation_reuse", label: "Süresi dolmuş, iptal veya kullanılmış pilot daveti", status: "NOT_TESTED",
-      detail: "Dosyaya bağlı davet yaşam döngüsü olmadan uçtan uca doğrulanamaz.",
+      detail: "Davet yaşam döngüsü TEST çalışma alanında doğrulanır; bu okuma isteği davet kullanmaz.",
     },
     {
-      key: "task_delivery", label: "Görev sorumlusu, teslim tarihi ve çıktı", status: "FAIL",
-      detail: "Pilot dosyasına bağlı kalıcı görev ve teslim akışı tamamlanmadı; genel görevler otomatik ilişkilendirilmedi.",
+      key: "task_delivery", label: "Görev sorumlusu, teslim tarihi ve çıktı", status: "NOT_TESTED",
+      detail: "Kalıcı görevler ayrı TEST çalışma alanındadır; bu eski talep kontrolü görev teslimi yapmaz.",
     },
     {
-      key: "output_revision", label: "Çıktı sürümleri, düzeltme ve yeniden teslim", status: "FAIL",
-      detail: "Dosya çıktısının önceki sürümünü koruyan revizyon yaşam döngüsü tamamlanmadı.",
+      key: "output_revision", label: "Çıktı sürümleri, düzeltme ve yeniden teslim", status: "NOT_TESTED",
+      detail: "Değişmez çıktı sürümleri TEST çalışma alanındadır; bu kontrol yeniden teslim yolculuğu çalıştırmaz.",
     },
     {
       key: "commercial_approval", label: "Kurucu ticari onay akışı", status: "NOT_TESTED",
       detail: "Bu kontrol ticari onay vermez. Özel TEST entegrasyonunun /approve işlemi 501 ile kapalı kalır.",
     },
     {
-      key: "history", label: "Dosyanın görev ve revizyon işlem geçmişi", status: "FAIL",
-      detail: "Genel iletişim notları dosyaya bağlı davet/görev/çıktı sürüm geçmişinin tamamlandığını kanıtlamaz.",
+      key: "history", label: "Dosyanın görev ve revizyon işlem geçmişi", status: "NOT_TESTED",
+      detail: "TEST geçmişi ayrı çalışma alanındadır; genel iletişim notları onun yerine geçmez.",
     },
     {
-      key: "management_summary", label: "Eksik, gecikmiş ve karar bekleyen pilot işleri", status: "FAIL",
-      detail: "Bu liste hazırlık eksiklerini gösterir; kalıcı pilot görevlerinden üretilen canlı yönetim özeti değildir.",
+      key: "management_summary", label: "Eksik, gecikmiş ve karar bekleyen pilot işleri", status: "NOT_TESTED",
+      detail: "Gerçek TEST görev sayıları ayrı TEST çalışma alanında hesaplanır; bu liste görev özeti değildir.",
     },
     {
       key: "geofence", label: "Konum, rota ve sınır doğrulaması", status: "NOT_TESTED",
@@ -69,9 +69,9 @@ export function buildLogisticsPilotReadiness(recordFound: boolean) {
     checkedAt: new Date().toISOString(),
     checks,
     nextActions: [
-      "Önce yalnız TEST dosyasına bağlı davet, sorumlu ve görev teslim akışını tamamlayın.",
-      "Çıktı sürümleri, düzeltme/yeniden teslim ve kullanıcı/zaman içeren geçmişi bağlayın.",
-      "Ardından aynı TEST hesabıyla uçtan uca doğrulayın; gerçek operasyonu ayrı kurucu kararına bırakın.",
+      "Kalıcı pilot için /staff/test-lojistik TEST çalışma alanını açın.",
+      "Davet, sorumlu, teslim ve korunan revizyonları çalışma alanında yürütün.",
+      "Bu eski talep kontrolünü tam kullanıcı yolculuğu veya gerçek operasyon onayı saymayın.",
     ],
   };
 }

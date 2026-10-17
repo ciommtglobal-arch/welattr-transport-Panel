@@ -37,3 +37,14 @@ kontrolünü seçti; otomatik tamamlanmış/onaylanmış kayıt üretmeyi seçme
 **How to apply:** Çalışma alanının hazırlanması ile lojistik dosyasının gerçek
 yaşam döngüsünün tamamlanmasını ayrı raporlayın. Sonraki davet/görev geliştirmesini
 bu salt okunur kontrolün tamamlanmış bir özelliği gibi sunmayın.
+
+Kullanıcı daha sonra mevcut veriler korunarak kalıcı pilot akışının tamamlanması
+için yalnız geliştirmede ek TEST tablolarına açıkça izin verdi. Bu izin mevcut
+hesapları veya personel rollerini değiştirme, ticari onay verme veya yayın yapma
+izni değildir.
+
+**Why:** Kullanıcı “mevcut verileri koruyarak TEST akışını tamamla” seçimini onayladı.
+
+**How to apply:** Salt-okunur kontrolün önceki kapsamını kalıcı TEST geliştirmesini
+engelleyen güncel bir yasak saymayın. TEST değerlendirmesi ile gerçek ticari kurucu
+onayını ayrı tutun; bir TEST sonucunu sevkiyat/ödeme/yayın yetkisine dönüştürmeyin.

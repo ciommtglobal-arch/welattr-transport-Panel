@@ -68,6 +68,11 @@ function SignedOutState() {
       <p className="mt-5 max-w-md leading-7 text-foreground/60">
         Personel veya etkin deneme erişiminizle kendi çalışma alanınıza giriş yapın.
       </p>
+      {import.meta.env.DEV && (
+        <Link href="/staff/test-lojistik" data-testid="link-test-workspace-signedout" className="mt-6 text-xs font-bold uppercase tracking-[0.14em] text-primary">
+          TEST lojistik çalışma alanı (geliştirme)
+        </Link>
+      )}
       <SignInButton mode="modal">
         <button className="mt-8 bg-primary px-7 py-4 text-xs font-bold uppercase tracking-[0.16em] text-white">
           Personel girişi
@@ -96,6 +101,11 @@ function AccessError() {
       >
         Sorumluluk merkezine dön
       </Link>
+      {import.meta.env.DEV && (
+        <Link href="/staff/test-lojistik" data-testid="link-test-workspace-denied" className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-primary">
+          TEST lojistik çalışma alanı (geliştirme)
+        </Link>
+      )}
     </section>
   );
 }

@@ -9,6 +9,150 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Development-only, Clerk-authenticated persistent TEST workspace
+ */
+export const GetLogisticsPilotWorkspaceResponse = zod.object({
+  "reference": zod.string(),
+  "isTest": zod.boolean(),
+  "commercialApproval": zod.boolean(),
+  "actorUserId": zod.string(),
+  "isFounder": zod.boolean(),
+  "role": zod.enum(['owner', 'worker', 'reviewer', 'none']),
+  "inviteToken": zod.string().optional(),
+  "file": zod.union([zod.object({
+  "reference": zod.string(),
+  "ownerUserId": zod.string(),
+  "reviewState": zod.string(),
+  "decisionNote": zod.string().nullish(),
+  "createdAt": zod.coerce.date()
+}),zod.null()]),
+  "invitations": zod.array(zod.object({
+  "id": zod.string(),
+  "targetUserId": zod.string(),
+  "role": zod.string(),
+  "expiresAt": zod.coerce.date(),
+  "acceptedAt": zod.coerce.date().nullish(),
+  "revokedAt": zod.coerce.date().nullish()
+})),
+  "tasks": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "assignedTo": zod.string(),
+  "dueAt": zod.coerce.date(),
+  "status": zod.string(),
+  "revisionNote": zod.string().nullish(),
+  "submissions": zod.array(zod.object({
+  "id": zod.string(),
+  "revision": zod.int(),
+  "content": zod.string(),
+  "createdBy": zod.string(),
+  "createdAt": zod.coerce.date()
+}))
+})),
+  "history": zod.array(zod.object({
+  "id": zod.string(),
+  "actorUserId": zod.string(),
+  "action": zod.string(),
+  "detail": zod.string(),
+  "createdAt": zod.coerce.date()
+})),
+  "summary": zod.object({
+  "missing": zod.int(),
+  "overdue": zod.int(),
+  "awaitingDecision": zod.int()
+})
+})
+
+
+/**
+ * @summary Transactional TEST-only invitations, tasks and revisions; never commercial approval
+ */
+export const mutateLogisticsPilotWorkspaceBodyTargetUserIdMax = 100;
+
+export const mutateLogisticsPilotWorkspaceBodyTokenMin = 32;
+export const mutateLogisticsPilotWorkspaceBodyTokenMax = 128;
+
+export const mutateLogisticsPilotWorkspaceBodyTitleMax = 200;
+
+export const mutateLogisticsPilotWorkspaceBodyAssignedToMax = 100;
+
+export const mutateLogisticsPilotWorkspaceBodyContentMax = 20000;
+
+export const mutateLogisticsPilotWorkspaceBodyNoteMax = 2000;
+
+
+
+export const MutateLogisticsPilotWorkspaceBody = zod.object({
+  "action": zod.enum(['create_file', 'invite', 'revoke_invite', 'accept_invite', 'create_task', 'submit_task', 'request_revision', 'accept_task', 'request_review', 'decide_review']),
+  "reference": zod.enum(['UKR-MERSİN-NARENCİYE-001']).optional(),
+  "targetUserId": zod.string().max(mutateLogisticsPilotWorkspaceBodyTargetUserIdMax).optional(),
+  "role": zod.enum(['worker', 'reviewer']).optional(),
+  "expiresAt": zod.coerce.date().optional(),
+  "inviteId": zod.uuid().optional(),
+  "token": zod.string().min(mutateLogisticsPilotWorkspaceBodyTokenMin).max(mutateLogisticsPilotWorkspaceBodyTokenMax).optional(),
+  "title": zod.string().min(1).max(mutateLogisticsPilotWorkspaceBodyTitleMax).optional(),
+  "assignedTo": zod.string().max(mutateLogisticsPilotWorkspaceBodyAssignedToMax).optional(),
+  "dueAt": zod.coerce.date().optional(),
+  "taskId": zod.uuid().optional(),
+  "content": zod.string().min(1).max(mutateLogisticsPilotWorkspaceBodyContentMax).optional(),
+  "note": zod.string().min(1).max(mutateLogisticsPilotWorkspaceBodyNoteMax).optional(),
+  "decision": zod.enum(['approved_test', 'changes_requested']).optional()
+})
+
+export const MutateLogisticsPilotWorkspaceResponse = zod.object({
+  "reference": zod.string(),
+  "isTest": zod.boolean(),
+  "commercialApproval": zod.boolean(),
+  "actorUserId": zod.string(),
+  "isFounder": zod.boolean(),
+  "role": zod.enum(['owner', 'worker', 'reviewer', 'none']),
+  "inviteToken": zod.string().optional(),
+  "file": zod.union([zod.object({
+  "reference": zod.string(),
+  "ownerUserId": zod.string(),
+  "reviewState": zod.string(),
+  "decisionNote": zod.string().nullish(),
+  "createdAt": zod.coerce.date()
+}),zod.null()]),
+  "invitations": zod.array(zod.object({
+  "id": zod.string(),
+  "targetUserId": zod.string(),
+  "role": zod.string(),
+  "expiresAt": zod.coerce.date(),
+  "acceptedAt": zod.coerce.date().nullish(),
+  "revokedAt": zod.coerce.date().nullish()
+})),
+  "tasks": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "assignedTo": zod.string(),
+  "dueAt": zod.coerce.date(),
+  "status": zod.string(),
+  "revisionNote": zod.string().nullish(),
+  "submissions": zod.array(zod.object({
+  "id": zod.string(),
+  "revision": zod.int(),
+  "content": zod.string(),
+  "createdBy": zod.string(),
+  "createdAt": zod.coerce.date()
+}))
+})),
+  "history": zod.array(zod.object({
+  "id": zod.string(),
+  "actorUserId": zod.string(),
+  "action": zod.string(),
+  "detail": zod.string(),
+  "createdAt": zod.coerce.date()
+})),
+  "summary": zod.object({
+  "missing": zod.int(),
+  "overdue": zod.int(),
+  "awaitingDecision": zod.int()
+})
+})
+
+
+/**
  * @summary Read-only development TEST pilot readiness; never completes or approves a shipment
  */
 export const GetLogisticsTestPilotReadinessResponse = zod.object({

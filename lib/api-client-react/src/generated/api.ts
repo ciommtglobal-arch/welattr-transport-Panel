@@ -137,6 +137,8 @@ import type {
   LogisticsOfferRecord,
   LogisticsOfferRevisionInput,
   LogisticsOperationsResponse,
+  LogisticsPilotAction,
+  LogisticsPilotWorkspace,
   LogisticsRequestInput,
   LogisticsRequestRecord,
   LogisticsRequestStatusUpdate,
@@ -237,6 +239,163 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetLogisticsPilotWorkspaceUrl = () => {
+
+
+
+
+  return `/api/logistics/test-pilot/workspace`
+}
+
+/**
+ * @summary Development-only, Clerk-authenticated persistent TEST workspace
+ */
+export const getLogisticsPilotWorkspace = async ( options?: Parameters<typeof customFetch>[1]): Promise<LogisticsPilotWorkspace> => {
+
+  return customFetch<LogisticsPilotWorkspace>(getGetLogisticsPilotWorkspaceUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLogisticsPilotWorkspaceQueryKey = () => {
+    return [
+    `/api/logistics/test-pilot/workspace`
+    ] as const;
+    }
+
+
+export const getGetLogisticsPilotWorkspaceQueryOptions = <TData = Awaited<ReturnType<typeof getLogisticsPilotWorkspace>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsPilotWorkspace>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLogisticsPilotWorkspaceQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLogisticsPilotWorkspace>>> = ({ signal }) => getLogisticsPilotWorkspace({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLogisticsPilotWorkspace>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLogisticsPilotWorkspaceQueryResult = NonNullable<Awaited<ReturnType<typeof getLogisticsPilotWorkspace>>>
+export type GetLogisticsPilotWorkspaceQueryError = ErrorType<void>
+
+
+/**
+ * @summary Development-only, Clerk-authenticated persistent TEST workspace
+ */
+
+export function useGetLogisticsPilotWorkspace<TData = Awaited<ReturnType<typeof getLogisticsPilotWorkspace>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsPilotWorkspace>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLogisticsPilotWorkspaceQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getMutateLogisticsPilotWorkspaceUrl = () => {
+
+
+
+
+  return `/api/logistics/test-pilot/workspace`
+}
+
+/**
+ * @summary Transactional TEST-only invitations, tasks and revisions; never commercial approval
+ */
+export const mutateLogisticsPilotWorkspace = async (logisticsPilotAction: LogisticsPilotAction, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsPilotWorkspace> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsPilotWorkspace>(getMutateLogisticsPilotWorkspaceUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsPilotAction)
+  }
+);}
+
+
+
+
+
+export const getMutateLogisticsPilotWorkspaceMutationKey = () => ['mutateLogisticsPilotWorkspace'] as const;
+
+export const getMutateLogisticsPilotWorkspaceMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mutateLogisticsPilotWorkspace>>, TError,MutateLogisticsPilotWorkspaceMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof mutateLogisticsPilotWorkspace>>, TError,MutateLogisticsPilotWorkspaceMutationVariables, TContext> => {
+
+const mutationKey = getMutateLogisticsPilotWorkspaceMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof mutateLogisticsPilotWorkspace>>, MutateLogisticsPilotWorkspaceMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  mutateLogisticsPilotWorkspace(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MutateLogisticsPilotWorkspaceMutationResult = NonNullable<Awaited<ReturnType<typeof mutateLogisticsPilotWorkspace>>>
+    export type MutateLogisticsPilotWorkspaceMutationBody = BodyType<LogisticsPilotAction>
+    export type MutateLogisticsPilotWorkspaceMutationError = ErrorType<void>
+    export type MutateLogisticsPilotWorkspaceMutationVariables = {data: BodyType<LogisticsPilotAction>}
+
+    /**
+ * @summary Transactional TEST-only invitations, tasks and revisions; never commercial approval
+ */
+export const useMutateLogisticsPilotWorkspace = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mutateLogisticsPilotWorkspace>>, TError,MutateLogisticsPilotWorkspaceMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof mutateLogisticsPilotWorkspace>>,
+        TError,
+        MutateLogisticsPilotWorkspaceMutationVariables,
+        TContext
+      > => {
+      return useMutation(getMutateLogisticsPilotWorkspaceMutationOptions(options));
+    }
 
 export const getGetLogisticsTestPilotReadinessUrl = () => {
 

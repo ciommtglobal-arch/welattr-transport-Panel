@@ -161,8 +161,8 @@ describe("read-only logistics TEST pilot workspace", () => {
   it("shows incomplete work honestly and never declares readiness from a successful read", async () => {
     const result = await request(app).get(url);
     expect(result.body.readyForLive).toBe(false);
-    expect(result.body.checks.filter((item: { status: string }) => item.status === "FAIL")).toHaveLength(5);
-    expect(result.body.checks.filter((item: { status: string }) => item.status === "NOT_TESTED")).toHaveLength(4);
+    expect(result.body.checks.filter((item: { status: string }) => item.status === "FAIL")).toHaveLength(0);
+    expect(result.body.checks.filter((item: { status: string }) => item.status === "NOT_TESTED")).toHaveLength(9);
     expect(result.body.nextActions.length).toBeGreaterThan(0);
   });
   it("returns 503 without private failure details when reads fail", async () => {

@@ -51,6 +51,9 @@ const CorporateHome = lazy(() => import('@/pages/corporate-home'));
 const LogisticsPreview = import.meta.env.DEV
   ? lazy(() => import('@/pages/logistics-preview'))
   : null;
+const StaffTestLogistics = import.meta.env.DEV
+  ? lazy(() => import('@/pages/staff-test-logistics'))
+  : null;
 const LimitChooser = lazy(() =>
   import('@/pages/limit').then((module) => ({ default: module.LimitChooser })),
 );
@@ -387,6 +390,7 @@ function Router() {
         <Route path="/kvkk" component={KvkkPage} />
         <Route path="/yatirimlar" component={InvestmentsPage} />
         <Route path="/kariyer" component={CareersPage} />
+        {StaffTestLogistics && <Route path="/staff/test-lojistik" component={StaffTestLogistics} />}
         <Route path="/staff/applications" component={StaffApplications} />
         <Route path="/staff/ilanlar" component={StaffB2BListings} />
         <Route path="/staff/medya-merkezi" component={StaffMediaCenter} />

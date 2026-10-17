@@ -364,3 +364,17 @@ mtime_ms = 1791949098493
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/0a406c5d-ae71-4359-a2fb-970ba28cc929/bc364a7a-5ec4-44f8-9cbb-006c2edf6028"
 storage_version_token = "1791949126689834"
 content_type = "text/plain"
+
+[[outputs]]
+id = "T02GAqpP_JMcmjKJm7uGT"
+uri = "file://docs/mmt-logistics-test-workspace.md"
+type = "text"
+title = "MMT Lojistik TEST Kontrol Raporu"
+description = "Tamamlanan TEST modülleri, PASS/NOT TESTED sonuçları, test komutları, dosya listesi ve geliştirme veritabanı değişiklikleri. Canlıya yayın yapılmadı."
+logical_id = "c1877315-d46a-4ca4-993c-91dc35b4a1cc"
+content_hash = "sha256:00f02c50b45c54ae940d927896073e731e4853f4ce605423ac9b0a31967faf28"
+size = 7226
+mtime_ms = 1792276048192
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/c1877315-d46a-4ca4-993c-91dc35b4a1cc/a635058b-43dc-4216-bc72-42454da49c79"
+storage_version_token = "1792276091303086"
+content_type = "text/markdown"

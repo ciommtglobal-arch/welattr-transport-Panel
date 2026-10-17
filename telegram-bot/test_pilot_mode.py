@@ -37,7 +37,7 @@ class PilotTests(unittest.IsolatedAsyncioTestCase):
         await pilot_command(update, context)
         text = update.effective_message.reply_text.await_args.args[0]
         self.assertIn(PILOT_REFERENCE, text)
-        self.assertIn("Lojistik dosyası tamamlandı: HAYIR", text)
+        self.assertIn("Lojistik dosyası tamamlandı: BU KOMUT DOĞRULAMAZ", text)
         self.assertIn("veritabanını okumaz veya değiştirmez", text)
 
     async def test_unlisted_private_user_gets_no_response(self):

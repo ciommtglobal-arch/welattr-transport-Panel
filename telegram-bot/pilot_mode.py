@@ -37,14 +37,15 @@ async def pilot_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         "Bot: özel sohbet TEST modu açık.\n"
         "Gerçek müşteri / sevkiyat / sözleşme / ticari onay: oluşturulmaz.\n"
         "Grup yayını, moderasyon ve ödeme bildirimi: kapalı.\n\n"
-        "Lojistik dosyası tamamlandı: HAYIR.\n"
-        "Dosyaya bağlı davet, görev teslimi, çıktı revizyonu ve "
-        "bunların işlem geçmişi henüz tamamlanmadı.\n"
+        "Lojistik dosyası tamamlandı: BU KOMUT DOĞRULAMAZ.\n"
+        "Dosyaya bağlı TEST daveti, görev teslimi, korunan çıktı "
+        "revizyonları ve işlem geçmişi ayrı TEST çalışma alanındadır.\n"
         "Kalıcı TEST kaydı ve kullanıcı akışı bu komutla doğrulanmaz.\n\n"
         "Bu komut veritabanını okumaz veya değiştirmez. "
         "MMT Connect erişimi ve yetkileri mevcut Clerk oturumuyla "
         "kontrol edilmeye devam eder.\n"
-        "Önizlemede Personel > Operasyon Masası > Lojistik TEST kontrolünü açın."
+        "Önizlemede /staff/test-lojistik çalışma alanını açın. "
+        "Telegram komutu Clerk oturumu veya dosya yetkisi yerine geçmez."
     )
 
 
