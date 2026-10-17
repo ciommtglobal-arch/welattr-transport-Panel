@@ -49,3 +49,16 @@ bağlantısını MMT Global için kullanmaya yetkili olduğunu açıkça onaylad
 sormayın. Bu onayı gerçek tahsilat yapma, Tami/Shopify kaydını ödendi sayma,
 otomatik mutabakatın tamamlandığını iddia etme veya projeyi yayımlama iznine
 dönüştürmeyin. Bağlantı/alıcı değişirse kapsamı yeniden doğrulayın.
+
+Uluslararası tahsilat hedefi, yurt dışındaki Stripe hesabına gelen paranın
+Türkiye'deki banka hesabına ulaşmasını da kapsıyor. Kullanıcı Stripe bakiyesini
+Tami'ye veya bankaya nasıl aktaracağını soruyor; bunu sırf test için para
+dolaştırma talebi gibi yorumlamayın.
+
+**Why:** Kullanıcı, önceki yanıtın sorusunu karşılamadığını belirterek asıl
+konunun yabancı Stripe hesabından Türkiye'ye para çekimi olduğunu açıkladı.
+
+**How to apply:** Ödeme alma/API entegrasyonu ile bankaya payout yolunu ayrı
+çözün. Stripe hesabının ülkesini, kabul edilen banka ve para birimini doğrulayın;
+Türk IBAN desteğini, doğrudan Stripe→Tami aktarımını veya Global Payouts
+uygunluğunu hesaba özel kanıt olmadan vaat etmeyin.
