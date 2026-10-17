@@ -27,10 +27,12 @@ official error-code documentation identifies `4003` as a `PG-Auth-Token` mismatc
 terminal JWK material signs the body. Changing JWK values or replacing the header
 with a generic Bearer secret does not establish correct header authentication.
 
-**How to apply:** On this provider error, first verify that the three header
-credentials belong to the same approved sandbox POS through the secure secrets
-flow. Keep raw provider bodies, computed authentication values and signatures out
-of logs, and keep collection disabled until provider verification succeeds.
+**How to apply:** On this provider error, first establish the credentials' actual
+test/live environment and that the three header credentials belong to the same
+POS, rather than repeatedly requesting replacement secrets. A normal mobile
+account must not be presumed to be a sandbox account. Use the secure secrets flow;
+keep raw provider bodies, computed authentication values and signatures out of
+logs, and keep collection disabled until the required verification succeeds.
 
 The current Tami merchant account supports TRY only. Foreign-currency amounts are converted to TRY by Tami, so MMT must reject USD/EUR live requests instead of presenting them as true multi-currency payments.
 
@@ -44,16 +46,18 @@ Payment integration scope is MMT service invoices only; do not change the constr
 
 **How to apply:** Keep the invoice payment routes separate from Shopify, verify test and production modes independently, and leave live collection disabled until written company/provider authorization is recorded.
 
-A lookup for a deliberately nonexistent sandbox order is not sufficient evidence
-that merchant credentials or signed reconciliation work.
+A lookup for a deliberately nonexistent order is not sufficient evidence that
+checkout, payment reconciliation or refunds work.
 
 **Why:** Such probes can return an unsigned error rather than an authenticated
-business result. Neither a response from the sandbox host nor the presence of
-stored secrets proves the test account is valid.
+business result. A cryptographically verified error from the live endpoint is
+stronger evidence than an unsigned sandbox error, but still is not a completed
+payment, refund, bank approval or settlement.
 
-**How to apply:** Report connectivity, verified signatures, and completed sandbox
-payment/refund evidence separately. Do not approve payment readiness from an
-unsigned error or weaken signature verification to make the probe pass.
+**How to apply:** Report connectivity, verified signatures, provider business
+results and completed payment/refund evidence separately. Do not approve payment
+readiness from an error response, invent an undocumented error code's meaning,
+or weaken signature verification to make the probe pass.
 
 Treat a generic payment callback as an untrusted lookup hint, not as an authenticated Tami notification. Tami's public hosted-payment documentation describes browser redirects and Query reconciliation; it does not establish a signed server-notification contract.
 
