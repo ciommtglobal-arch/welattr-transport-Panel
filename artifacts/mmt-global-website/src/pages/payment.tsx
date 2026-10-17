@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { StripeServicePaymentLink } from "@/components/stripe-payment-link";
+import { TamiHostedPaymentLink } from "@/components/tami-payment-link";
 import {
   useCreatePaymentCheckout,
   getGetPublicServiceInvoiceQueryKey,
@@ -446,7 +447,12 @@ export default function InvoicePaymentPage() {
         </div>
       </section>
 
-      {!lookupRequested && !normalizedReference && <StripeServicePaymentLink />}
+      {!lookupRequested && !normalizedReference && (
+        <>
+          <TamiHostedPaymentLink />
+          <StripeServicePaymentLink />
+        </>
+      )}
 
       <section className="px-6 py-12 md:px-12 md:py-20">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.2fr_0.8fr]">

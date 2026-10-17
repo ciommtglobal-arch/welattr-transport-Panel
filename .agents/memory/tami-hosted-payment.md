@@ -60,6 +60,17 @@ native collection separate from verified MMT API integration and automated
 invoice reconciliation; do not assume a customer-specific or fixed-amount
 payment link can pay every invoice.
 
+Do not infer that a Tami payment link is invalid from an empty automated
+screenshot or an HTTP response containing only the portal's JavaScript shell.
+
+**Why:** Passive inspection could not render checkout details for a link the
+user reports having collected through. Neither that inspection nor the user's
+past collection establishes the present amount, expiry or reusability.
+
+**How to apply:** Report those details as unverified, not failed or confirmed.
+Do not run a real charge to resolve the inspection gap or promote the link as
+a universal invoice checkout.
+
 The current Tami merchant account supports TRY only. Foreign-currency amounts are converted to TRY by Tami, so MMT must reject USD/EUR live requests instead of presenting them as true multi-currency payments.
 
 **Why:** Tami technical support confirmed that the current account has no multi-currency support.

@@ -56,6 +56,23 @@ three-provider settlement report. Do not describe the channels as fully linked
 until connected-account checkout, callbacks, refunds and reconciliation have
 been implemented and tested.
 
+## Existing Tami payment link — development preview only
+
+The founder supplied an existing native Tami payment link and reports previous
+successful collection through it. The `/odeme` development preview includes an
+outbound inspection link only when no invoice reference is being entered or
+looked up. The component renders nothing in a production build.
+
+The external page did not render checkout details during inspection. Its current
+amount, currency, beneficiary, availability and reusability therefore remain
+unverified; do not treat the founder's prior collection as independent evidence
+of the link's present state, foreign-card permission or mandatory 3DS.
+
+No customer/invoice parameters are appended. Opening or returning from the link
+does not mutate records, mark invoices paid, trigger notifications, authorize
+operations, or replace Shopify checkout. Existing Tami API activation gates
+remain unchanged. No real payment or refund was executed to add this preview.
+
 ## Standalone Stripe Payment Link
 
 The founder explicitly authorized the supplied live link displaying the
