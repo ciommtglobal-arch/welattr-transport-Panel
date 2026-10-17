@@ -63,6 +63,18 @@ entitlement and 3DS policy with Tami, and require real provider test evidence.
 The POS's disabled “3D'siz İşlem” option is not proof that 3DS is disabled;
 foreign-card acceptance is another separate permission.
 
+The user reports that they already requested 3DS activation and it remains
+closed.
+
+**Why:** The user corrected a repeated recommendation to submit the same
+activation request.
+
+**How to apply:** Do not keep sending the user back to repeat that request or
+re-enter credentials. Preserve the distinction between the user's reported
+status and independently verified provider capability, and between 3DS,
+the “3D'siz İşlem” toggle and foreign-card permission. Keep existing working
+domestic payments intact; do not present international collection as ready.
+
 Payment integration scope is MMT service invoices only; do not change the construction store's Shopify checkout. Tami sandbox must be explicitly enabled outside production, and live collection must run only in production after all approval, 3D Secure, test-evidence, callback, and verified-credential gates pass.
 
 **Why:** Service billing and physical-product commerce use separate providers and legal/payment controls. A development misconfiguration must not create a real charge.
