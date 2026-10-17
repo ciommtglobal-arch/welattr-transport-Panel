@@ -95,8 +95,9 @@ sunmayın.
 
 Kullanıcı gıda ve kozmetik online mağazalarının MMT Global ekosistemiyle
 entegre olmasını istiyor. İşin dijital ve otomasyonlu yürütülmesini istiyor;
-bu ifadeyi tek başına indirilebilir dijital ürün satışına geçiş kararı olarak
-yorumlamayın.
+dijitalden kastını gıda ve kozmetik ürünlerinin online satışı olarak
+netleştirdi. Danışmanlık ve iş eşleştirmenin de ek hizmet olabileceğini belirtti.
+İndirilebilir dosya/e-kitap satışı seçilmiş gibi davranmayın.
 
 **Why:** Kullanıcı bu iki ürün alanını ve mevcut ekosistemle birlikte çalışma
 hedefini açıkça belirtti.
