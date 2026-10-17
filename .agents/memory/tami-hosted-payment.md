@@ -9,6 +9,17 @@ MMT's hosted payment flow must keep card data on Tami's hosted page. Creating th
 
 **How to apply:** Keep merchant number, terminal number, secret key, JWK kid, and JWK k in workspace Secrets only. Never accept card fields in MMT API requests, and do not mark an order as paid from the browser callback alone; reconcile it with Tami's query response.
 
+Do not infer that every requested secret was replaced, or that JWK values form a
+verified pair, from a secrets-form completion notice alone.
+
+**Why:** The user clarified that only the renewed K value had been supplied after
+a notice named both requested JWK fields. Reporting both as renewed overstated
+what was known.
+
+**How to apply:** Honor the user's clarification, distinguish configured values
+from confirmed replacements, and request only the missing field through the
+secure form. Never describe a K/kid pair as verified without provider evidence.
+
 Diagnose header authentication separately from JWK response verification. Tami's
 official error-code documentation identifies `4003` as a `PG-Auth-Token` mismatch.
 
