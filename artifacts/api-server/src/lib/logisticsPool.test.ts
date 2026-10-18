@@ -23,7 +23,7 @@ const founder = {userId:"pool-TEST-founder",isFounder:true}, operator = {userId:
 const future = () => new Date(Date.now()+7*86400000).toISOString().slice(0,10);
 function person(role: PoolPayload["role"], extra: Partial<PoolPayload> = {}): PoolPayload {
   return {role,name:`TEST ${role}`,location:role === "seller" ? "Mersin" : "Irak",origin:"Mersin",destination:"Irak",products:["narenciye"],transportMode:"road",
-    capacityKg:24000,requiredKg:1000,availableDate:future(),requiredDate:future(),contact:`${role}@example.invalid`,reference:`TEST-${role}`,sourceUrl:null,isTest:true,verified:true,eligible:true,...extra};
+    capacityKg:24000,requiredKg:1000,volumeM3:null,availableDate:future(),requiredDate:future(),contact:`${role}@example.invalid`,reference:`TEST-${role}`,sourceUrl:null,isTest:true,verified:true,eligible:true,...extra};
 }
 function row(id:string, p: PoolPayload): PoolRow {return {id,payload:p,active:true,fingerprint:digest(p),lastSeenAt:new Date()};}
 afterEach(() => {state.tx=null;vi.unstubAllEnvs();});

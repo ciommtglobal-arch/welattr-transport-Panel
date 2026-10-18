@@ -5,7 +5,8 @@ export type PoolPayload = {
   role: "buyer" | "seller" | "carrier" | "load";
   name: string; location: string; origin: string; destination: string;
   products: string[]; transportMode: string; capacityKg: number | null;
-  requiredKg: number | null; availableDate: string | null; requiredDate: string | null;
+  requiredKg: number | null; volumeM3: number | null;
+  availableDate: string | null; requiredDate: string | null;
   contact: string; reference: string; sourceUrl: string | null;
   isTest: boolean; verified: boolean; eligible: boolean;
 };

@@ -81,6 +81,8 @@ export const logisticsRequestsTable = pgTable(
     transportMode: logisticsTransportModeEnum("transport_mode").notNull(),
     loadingDate: date("loading_date").notNull(),
     notes: text("notes"),
+    capturedByClerkUserId: text("captured_by_clerk_user_id"),
+    contactUseConfirmed: boolean("contact_use_confirmed").notNull().default(false),
     isTest: boolean("is_test").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -118,6 +120,8 @@ export const logisticsCarriersTable = pgTable(
     availability: text("availability").notNull(),
     notes: text("notes"),
     status: logisticsCarrierStatusEnum("status").notNull().default("pending"),
+    capturedByClerkUserId: text("captured_by_clerk_user_id"),
+    contactUseConfirmed: boolean("contact_use_confirmed").notNull().default(false),
     isTest: boolean("is_test").notNull().default(false),
     reviewedByClerkUserId: text("reviewed_by_clerk_user_id"),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),

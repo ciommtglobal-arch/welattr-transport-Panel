@@ -74,6 +74,8 @@ export interface LogisticsPoolEntry {
   /** @nullable */
   requiredKg: number | null;
   /** @nullable */
+  volumeM3: number | null;
+  /** @nullable */
   availableDate: string | null;
   /** @nullable */
   requiredDate: string | null;
@@ -2307,6 +2309,148 @@ export interface LogisticsCarrierInput {
   /** @maxLength 2000 */
   notes?: string;
   isTest?: boolean;
+}
+
+export type FieldLoadInputType = typeof FieldLoadInputType[keyof typeof FieldLoadInputType];
+
+
+export const FieldLoadInputType = {
+  load: 'load',
+} as const;
+
+export type FieldLoadInputRegion = typeof FieldLoadInputRegion[keyof typeof FieldLoadInputRegion];
+
+
+export const FieldLoadInputRegion = {
+  Mersin: 'Mersin',
+  İskenderun: 'İskenderun',
+  Gaziantep: 'Gaziantep',
+  Adana: 'Adana',
+} as const;
+
+export interface FieldLoadInput {
+  type: FieldLoadInputType;
+  region: FieldLoadInputRegion;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  requesterName: string;
+  /** @maxLength 200 */
+  organization?: string;
+  email: string;
+  /**
+     * @minLength 5
+     * @maxLength 40
+     */
+  phone: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  destination: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  cargoType: string;
+  /** @exclusiveMinimum 0 */
+  weightKg: number;
+  /**
+     * Sahada hacim ölçülmediyse 0 bırakılır; eşleşme hacim teyidi ister.
+     * @minimum 0
+     */
+  volumeM3: number;
+  transportMode: LogisticsTransportMode;
+  loadingDate: string;
+  /** @maxLength 2000 */
+  notes?: string;
+  contactUseConfirmed: true;
+}
+
+export type FieldEmptyTruckInputType = typeof FieldEmptyTruckInputType[keyof typeof FieldEmptyTruckInputType];
+
+
+export const FieldEmptyTruckInputType = {
+  empty_truck: 'empty_truck',
+} as const;
+
+export type FieldEmptyTruckInputRegion = typeof FieldEmptyTruckInputRegion[keyof typeof FieldEmptyTruckInputRegion];
+
+
+export const FieldEmptyTruckInputRegion = {
+  Mardin: 'Mardin',
+  Şanlıurfa: 'Şanlıurfa',
+} as const;
+
+export type FieldEmptyTruckInputTargetDestination = typeof FieldEmptyTruckInputTargetDestination[keyof typeof FieldEmptyTruckInputTargetDestination];
+
+
+export const FieldEmptyTruckInputTargetDestination = {
+  Mersin: 'Mersin',
+  İskenderun: 'İskenderun',
+  Gaziantep: 'Gaziantep',
+  Adana: 'Adana',
+} as const;
+
+export interface FieldEmptyTruckInput {
+  type: FieldEmptyTruckInputType;
+  region: FieldEmptyTruckInputRegion;
+  targetDestination: FieldEmptyTruckInputTargetDestination;
+  /**
+     * @minLength 2
+     * @maxLength 200
+     */
+  companyName: string;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  contactName: string;
+  email: string;
+  /**
+     * @minLength 5
+     * @maxLength 40
+     */
+  phone: string;
+  transportMode: LogisticsTransportMode;
+  /**
+     * Açık birim yazın; ör. 24 ton
+     * @minLength 1
+     * @maxLength 200
+     */
+  capacity: string;
+  availability: string;
+  /** @maxLength 2000 */
+  notes?: string;
+  contactUseConfirmed: true;
+}
+
+export type LogisticsFieldIntakeInput = FieldLoadInput | FieldEmptyTruckInput;
+
+export type LogisticsFieldIntakeResultRecordType = typeof LogisticsFieldIntakeResultRecordType[keyof typeof LogisticsFieldIntakeResultRecordType];
+
+
+export const LogisticsFieldIntakeResultRecordType = {
+  load: 'load',
+  empty_truck: 'empty_truck',
+} as const;
+
+export type LogisticsFieldIntakeResultStatus = typeof LogisticsFieldIntakeResultStatus[keyof typeof LogisticsFieldIntakeResultStatus];
+
+
+export const LogisticsFieldIntakeResultStatus = {
+  new_request: 'new_request',
+  pending: 'pending',
+} as const;
+
+export interface LogisticsFieldIntakeResult {
+  recordType: LogisticsFieldIntakeResultRecordType;
+  /** @minimum 1 */
+  id: number;
+  referenceCode: string;
+  status: LogisticsFieldIntakeResultStatus;
+  createdAt: string;
 }
 
 export interface LogisticsRequestRecord {

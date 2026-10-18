@@ -4,6 +4,7 @@ import request from "supertest";
 const state = vi.hoisted(() => ({
   userId: "owner", role: "" as string,
   approve: vi.fn(), review: vi.fn(), decide: vi.fn(), sent: vi.fn(), save: vi.fn(), shipment: vi.fn(),
+  ensureAutomation: vi.fn(), inserted: [] as Record<string, unknown>[],
 }));
 vi.mock("@clerk/express", () => ({ getAuth: () => ({ userId: state.userId || null }) }));
 vi.mock("../lib/staffAuth", () => ({
@@ -17,14 +18,27 @@ vi.mock("../lib/staffAuth", () => ({
   },
 }));
 vi.mock("@workspace/db", () => ({
-  db: { select: () => ({ from: () => ({
-    where: () => ({ orderBy: async () => [], limit: async () => [] }),
-    orderBy: async () => [],
-  }) }) },
+  db: {
+    select: () => ({ from: () => ({
+      where: () => ({ orderBy: async () => [], limit: async () => [] }),
+      orderBy: async () => [],
+    }) }),
+    transaction: (fn: any) => fn({ insert: (table: unknown) => insertMock(table) }),
+    insert: (table: unknown) => insertMock(table),
+  },
   staffUsersTable: {}, logisticsListingGrantsTable: {},
   logisticsRequestsTable: {}, logisticsCarriersTable: {}, logisticsOffersTable: {},
   logisticsShipmentsTable: {}, logisticsCommunicationsTable: {},
 }));
+function insertMock(_table: unknown) {
+  return { values: (data: Record<string, unknown>) => {
+    state.inserted.push(data);
+    const now = new Date();
+    const record = { id: state.inserted.length + 40, createdAt: now, updatedAt: now, ...data };
+    return { returning: async () => [record] };
+  } };
+}
+vi.mock("../lib/logisticsAutomation", () => ({ ensureLogisticsAutomation: state.ensureAutomation }));
 vi.mock("../lib/logisticsWorkflow", () => ({
   LogisticsWorkflowError: class extends Error {
     constructor(public status: number, message: string) { super(message); }
@@ -44,7 +58,7 @@ function offer() {
     isTest: false, createdAt: new Date(), updatedAt: new Date() };
 }
 beforeEach(() => {
-  vi.clearAllMocks(); state.userId = "owner"; state.role = "";
+  vi.clearAllMocks(); state.inserted.length = 0; state.userId = "owner"; state.role = "";
   vi.stubEnv("MMT_FOUNDER_REVIEWER_CLERK_USER_ID", "owner");
   state.approve.mockResolvedValue(offer());
 });
@@ -68,6 +82,37 @@ describe("Logistics HTTP permissions and contracts", () => {
     state.userId = "existing-staff"; state.role = "operations";
     const response = await request(app).get("/api/logistics/operations");
     expect(response.status).toBe(200); expect(response.body.canApprove).toBe(false);
+  });
+  it("restricts field capture to the current founder/operations gate", async () => {
+    state.userId = "field-sales"; state.role = "sales";
+    const response = await request(app).post("/api/logistics/field-intake").send({ type: "load" });
+    expect(response.status).toBe(403);
+  });
+  it("records an opt-in load under the field worker, without claiming the worker is the customer", async () => {
+    const response = await request(app).post("/api/logistics/field-intake").send({
+      type: "load",region: "Mersin",requesterName: "TEST contact",organization: "TEST only",
+      email: "field@example.invalid",phone: "+900000000001",destination: "TEST destination",cargoType: "TEST citrus",
+      weightKg: 24000,volumeM3: 0,transportMode: "road",loadingDate: "2027-01-01",
+      notes: "Saha hacim ölçümü yok",contactUseConfirmed: true,
+    });
+    expect(response.status).toBe(201);
+    expect(response.body).toMatchObject({recordType:"load",status:"new_request",referenceCode:"LOAD-2026"});
+    expect(state.inserted[0]).toMatchObject({requesterClerkUserId:null,capturedByClerkUserId:"owner",contactUseConfirmed:true,isTest:false,volumeM3:0});
+    expect(state.ensureAutomation).toHaveBeenCalledWith(expect.anything(),expect.objectContaining({referenceCode:expect.stringMatching(/^LOAD-/)}),{userId:"owner",isFounder:true});
+  });
+  it("keeps field-found empty vehicles in founder review and rejects missing contact consent", async () => {
+    const missingConsent = await request(app).post("/api/logistics/field-intake").send({
+      type:"empty_truck",region:"Mardin",targetDestination:"Mersin",companyName:"TEST carrier",contactName:"TEST contact",
+      email:"carrier@example.invalid",phone:"+900000000001",transportMode:"road",capacity:"24 ton",availability:"2027-01-02",contactUseConfirmed:false,
+    });
+    expect(missingConsent.status).toBe(400);expect(state.inserted).toHaveLength(0);
+    const response = await request(app).post("/api/logistics/field-intake").send({
+      type:"empty_truck",region:"Mardin",targetDestination:"Mersin",companyName:"TEST carrier",contactName:"TEST contact",
+      email:"carrier@example.invalid",phone:"+900000000001",transportMode:"road",capacity:"24 ton",availability:"2027-01-02",contactUseConfirmed:true,
+    });
+    expect(response.status).toBe(201);
+    expect(response.body).toMatchObject({recordType:"empty_truck",status:"pending"});
+    expect(state.inserted[0]).toMatchObject({capturedByClerkUserId:"owner",applicantClerkUserId:null,contactUseConfirmed:true,isTest:false,status:"pending",serviceRoutes:"Mardin → Mersin"});
   });
   it.each(["admin", "finance", "reviewer", "sales", "media", "leader", "assistant"])(
     "denies %s private logistics reads and coordination mutations", async role => {

@@ -29,6 +29,7 @@ export const feedItemSchema = z.object({
   destination: z.string().max(200).default(""), products: z.array(z.string().trim().min(2).max(100)).max(24).default([]),
   transportMode: z.enum(["road","sea","air","rail"]).optional(),
   capacityKg: z.number().positive().max(1e9).optional(), requiredKg: z.number().positive().max(1e9).optional(),
+  volumeM3: z.number().positive().max(1e9).optional(),
   availableDate: day.optional(), requiredDate: day.optional(),
   contact: z.string().max(300).default(""), reference: z.string().max(200).optional(),
   sourceUrl: z.string().refine(s => { try { safeFeedUrl(s); return true; } catch { return false; } }).optional(),

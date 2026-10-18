@@ -12,9 +12,10 @@ import {
   type LogisticsPoolMatch,
   type LogisticsPoolWorkspace,
 } from "@workspace/api-client-react";
-import { AlertTriangle, ChevronLeft, GitMerge, Globe, Layers, Lock, RefreshCw, ShieldAlert, WifiOff } from "lucide-react";
+import { AlertTriangle, ChevronLeft, ClipboardPlus, GitMerge, Globe, Layers, Lock, RefreshCw, ShieldAlert, WifiOff } from "lucide-react";
 import { btnGhost, btnPrimary, classifyError, describeError, inputCls } from "@/components/logistics-ops/shared";
 import { EntryRow, Freshness, MatchDetail, MatchListItem, SourcesPanel, roleLabels } from "@/components/logistics-pool/pool-panels";
+import { FieldCapture } from "@/components/logistics-pool/field-capture";
 
 const noAuthRetry = (count: number, error: unknown) => {
   const kind = classifyError(error);
@@ -89,7 +90,7 @@ export default function StaffLogisticsPool() {
   return <Shell><Workspace data={pool.data} poolKey={poolKey} fetching={pool.isFetching} updatedAt={pool.dataUpdatedAt} pollError={pool.error} refetch={() => void pool.refetch()} /></Shell>;
 }
 
-type Tab = "matches" | "pool" | "sources";
+type Tab = "matches" | "pool" | "field" | "sources";
 const REFRESH_MS = 120_000;
 
 function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
@@ -204,7 +205,7 @@ function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
 
       <div className="mt-6 flex flex-col gap-3 border-b border-border sm:flex-row sm:items-end sm:justify-between">
         <nav className="flex flex-wrap gap-1" role="tablist">
-          {([["matches", "Eşleşmeler", GitMerge], ["pool", "Havuz", Layers], ["sources", "Kaynaklar", Globe]] as const).map(([k, l, Icon]) => (
+          {([["matches", "Eşleşmeler", GitMerge], ["pool", "Havuz", Layers], ["field", "Sahadan topla", ClipboardPlus], ["sources", "Kaynaklar", Globe]] as const).map(([k, l, Icon]) => (
             <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} data-testid={`tab-${k}`}
               className={`relative flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.12em] ${tab === k ? "text-foreground" : "text-foreground/45 hover:text-foreground/75"}`}>
               <Icon size={14} />{l}
@@ -282,6 +283,8 @@ function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
           ) : <ul className="divide-y divide-border border border-border">{filteredEntries.map((e) => <EntryRow key={e.id} entry={e} />)}</ul>}
         </div>
       ) : null}
+
+      {tab === "field" ? <FieldCapture refresh={runRefresh} /> : null}
 
       <div className={tab === "sources" ? "mt-5" : "hidden"}><SourcesPanel data={data} act={act} /></div>
 

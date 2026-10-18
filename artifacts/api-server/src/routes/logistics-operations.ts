@@ -4,6 +4,8 @@ import {
   ApproveLogisticsOfferParams,
   ApproveLogisticsOfferBody,
   CreateLogisticsCarrierBody,
+  CreateLogisticsFieldIntakeBody,
+  CreateLogisticsFieldIntakeResponse,
   CreateLogisticsCommunicationBody,
   CreateLogisticsOfferBody,
   CreateLogisticsRequestBody,
@@ -263,6 +265,100 @@ router.post("/logistics/carriers", async (req, res): Promise<void> => {
     "Logistics carrier application submitted",
   );
   res.status(201).json(serializeCarrier(carrier));
+});
+
+// Field capture is internal: never attribute the customer/carrier to the
+// employee entering the form, and never treat contact consent as permission
+// to send messages or publish their information.
+router.post("/logistics/field-intake", async (req, res): Promise<void> => {
+  const actor = await requireLogisticsOperator(req, res);
+  if (!actor) return;
+  const parsed = CreateLogisticsFieldIntakeBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Saha kaydı geçersiz." });
+    return;
+  }
+  const input = parsed.data;
+  if (input.contactUseConfirmed !== true) {
+    res.status(400).json({ error: "Kişinin MMT içi eşleştirme için iletişim izni teyit edilmelidir." });
+    return;
+  }
+  const requiredValues = input.type === "load"
+    ? [input.requesterName, input.email, input.phone, input.region, input.destination, input.cargoType]
+    : [input.companyName, input.contactName, input.email, input.phone, input.region, input.targetDestination, input.capacity];
+  if (requiredValues.some(value => !value.trim())) {
+    res.status(400).json({ error: "Sahada alınan zorunlu bilgi alanları boş bırakılamaz." });
+    return;
+  }
+  const availableOn = input.type === "load" ? input.loadingDate : input.availability;
+  if (availableOn.toISOString().slice(0, 10) < new Date().toISOString().slice(0, 10)) {
+    res.status(400).json({ error: "Yükleme veya araç müsaitlik tarihi geçmiş olamaz." });
+    return;
+  }
+  try {
+    if (input.type === "load") {
+      const [record] = await db.transaction(async tx => {
+        const reference = referenceCode("LOAD");
+        const [created] = await tx.insert(logisticsRequestsTable).values({
+          referenceCode: reference,
+          requesterClerkUserId: null,
+          capturedByClerkUserId: actor.userId,
+          contactUseConfirmed: true,
+          requesterName: input.requesterName.trim(),
+          organization: input.organization?.trim() || null,
+          email: input.email.trim().toLowerCase(),
+          phone: input.phone.trim(),
+          origin: input.region,
+          destination: input.destination.trim(),
+          cargoType: input.cargoType.trim(),
+          weightKg: input.weightKg,
+          volumeM3: input.volumeM3,
+          transportMode: input.transportMode,
+          loadingDate: input.loadingDate.toISOString().slice(0, 10),
+          notes: input.notes?.trim() || null,
+          isTest: false,
+        }).returning();
+        await tx.insert(logisticsShipmentsTable).values({
+          requestId: created.id,
+          referenceCode: created.referenceCode,
+          status: "new_request",
+        });
+        await ensureLogisticsAutomation(tx, created, actor);
+        return [created] as const;
+      });
+      req.log.info({ requestId: record.id, capturedBy: actor.userId }, "Authorized Mersin field load captured");
+      res.status(201).json(CreateLogisticsFieldIntakeResponse.parse({
+        recordType: "load", id: record.id, referenceCode: record.referenceCode,
+        status: "new_request", createdAt: record.createdAt.toISOString(),
+      }));
+      return;
+    }
+    const [carrier] = await db.insert(logisticsCarriersTable).values({
+      referenceCode: referenceCode("CARRIER"),
+      applicantClerkUserId: null,
+      capturedByClerkUserId: actor.userId,
+      contactUseConfirmed: true,
+      companyName: input.companyName.trim(),
+      contactName: input.contactName.trim(),
+      email: input.email.trim().toLowerCase(),
+      phone: input.phone.trim(),
+      serviceRoutes: `${input.region} → ${input.targetDestination}`,
+      transportMode: input.transportMode,
+      capacity: input.capacity.trim(),
+      availability: input.availability.toISOString().slice(0, 10),
+      notes: input.notes?.trim() || null,
+      status: "pending",
+      isTest: false,
+    }).returning();
+    req.log.info({ carrierId: carrier.id, capturedBy: actor.userId }, "Authorized empty truck field lead captured");
+    res.status(201).json(CreateLogisticsFieldIntakeResponse.parse({
+      recordType: "empty_truck", id: carrier.id, referenceCode: carrier.referenceCode,
+      status: carrier.status, createdAt: carrier.createdAt.toISOString(),
+    }));
+  } catch {
+    req.log?.error({ capturedBy: actor.userId }, "Authorized field intake could not be recorded");
+    res.status(503).json({ error: "Saha kaydı tamamlanamadı. Kaydın oluşup oluşmadığını kontrol edip yeniden deneyin." });
+  }
 });
 
 router.get("/logistics/staff", async (req, res): Promise<void> => {

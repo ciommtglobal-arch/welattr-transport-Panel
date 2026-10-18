@@ -69,7 +69,8 @@ const futureDay = () => new Date(Date.now() + 7 * 86400000).toISOString().slice(
 function fixture() {
   return {
     id: 101, referenceCode: "AUTOMATION-TEST-101", requesterName: "TEST Requester",
-    requesterClerkUserId: null, organization: "TEST ONLY", email: "example@example.com",
+    requesterClerkUserId: null, capturedByClerkUserId: null, contactUseConfirmed: false,
+    organization: "TEST ONLY", email: "example@example.com",
     phone: "+900000000000", origin: "Mersin", destination: "TEST Liman",
     cargoType: "TEST Narenciye", weightKg: 1000, volumeM3: 10,
     transportMode: "road" as const, loadingDate: futureDay(), notes: "PRIVATE TEST NOTE",

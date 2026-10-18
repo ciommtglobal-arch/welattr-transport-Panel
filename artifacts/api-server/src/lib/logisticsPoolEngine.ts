@@ -20,13 +20,14 @@ export function explicitKg(text: string): number | null {
 export function samePlace(a: string, b: string) {
   return Boolean(a.trim() && b.trim() && normalized(a) === normalized(b));
 }
-function carrierFit(origin: string, destination: string, kg: number | null, date: string | null, mode: string, c: PoolPayload) {
+function carrierFit(origin: string, destination: string, kg: number | null, volumeM3: number | null, date: string | null, mode: string, c: PoolPayload) {
   if (!origin || !destination || !samePlace(origin, c.origin) || !samePlace(destination, c.destination)) return null;
   if (mode && c.transportMode && mode !== c.transportMode) return null;
   if (kg !== null && c.capacityKg !== null && c.capacityKg < kg) return null;
   if (date && c.availableDate && c.availableDate > date) return null;
   return [
     ...(kg === null || c.capacityKg === null ? ["Yük miktarı / taşıyıcı kapasitesi teyidi"] : []),
+    ...(volumeM3 === null ? ["Yük hacmi bilgisi teyidi"] : []),
     ...(!date || !c.availableDate ? ["Taşıma tarihi / müsaitlik teyidi"] : []),
     ...(!mode || !c.transportMode ? ["Taşıma türü teyidi"] : []),
   ];
@@ -57,7 +58,7 @@ export function suggestPoolMatches(rows: PoolRow[], today = new Date().toISOStri
   for (const load of byRole("load")) for (const carrier of carriers) {
     const l = load.payload, c = carrier.payload;
     if (l.isTest !== c.isTest) continue;
-    const missing = carrierFit(l.origin, l.destination, l.requiredKg, l.requiredDate, l.transportMode, c);
+    const missing = carrierFit(l.origin, l.destination, l.requiredKg, l.volumeM3, l.requiredDate, l.transportMode, c);
     if (missing) add(`load:${load.id}:${carrier.id}`, [load, carrier], 80 - missing.length * 10, ["Çıkış ve varış eşleşiyor", ...(l.requiredKg !== null && c.capacityKg !== null ? ["Beyan edilen ağırlık kapasiteye uygun"] : [])], missing);
   }
   let commerceCount = 0;
@@ -67,9 +68,9 @@ export function suggestPoolMatches(rows: PoolRow[], today = new Date().toISOStri
     const common = b.products.map(normalized).filter(p => s.products.map(normalized).includes(p));
     if (!common.length || commerceCount++ >= 300) continue;
     const origin = s.origin || s.location, destination = b.destination || b.location;
-    const suitable = carriers.filter(c => c.payload.isTest === b.isTest && carrierFit(origin, destination, b.requiredKg, b.requiredDate, b.transportMode || s.transportMode, c.payload) !== null).slice(0, 3);
+    const suitable = carriers.filter(c => c.payload.isTest === b.isTest && carrierFit(origin, destination, b.requiredKg, b.volumeM3, b.requiredDate, b.transportMode || s.transportMode, c.payload) !== null).slice(0, 3);
     if (!suitable.length) add(`trade:${buyer.id}:${seller.id}`, [buyer, seller], 40, [`Ortak ürün: ${common.join(", ")}`], ["Güzergâha uygun taşıyıcı", "Ürün niteliği ve miktar teyidi"]);
-    for (const carrier of suitable) add(`trade:${buyer.id}:${seller.id}:${carrier.id}`, [buyer, seller, carrier], 75, [`Ortak ürün: ${common.join(", ")}`, "Satıcı → alıcı güzergâhına uygun taşıyıcı"], carrierFit(origin, destination, b.requiredKg, b.requiredDate, b.transportMode || s.transportMode, carrier.payload)!);
+    for (const carrier of suitable) add(`trade:${buyer.id}:${seller.id}:${carrier.id}`, [buyer, seller, carrier], 75, [`Ortak ürün: ${common.join(", ")}`, "Satıcı → alıcı güzergâhına uygun taşıyıcı"], carrierFit(origin, destination, b.requiredKg, b.volumeM3, b.requiredDate, b.transportMode || s.transportMode, carrier.payload)!);
   }
   return suggestions.sort((a,b) => b.score - a.score || a.matchKey.localeCompare(b.matchKey)).slice(0, 1000);
 }

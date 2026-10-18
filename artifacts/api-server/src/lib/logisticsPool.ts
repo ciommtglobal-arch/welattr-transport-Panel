@@ -18,7 +18,7 @@ type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Action = z.infer<typeof ActLogisticsPoolBody>;
 function fail(status: number, text: string): never { throw new AutomationError(status,text); }
 const event = (action: string, note: string, actor?: LogisticsActor) => ({at:new Date().toISOString(),action,note,actorUserId:actor?.userId ?? null});
-const empty = (): PoolPayload => ({role:"load",name:"",location:"",origin:"",destination:"",products:[],transportMode:"",capacityKg:null,requiredKg:null,availableDate:null,requiredDate:null,contact:"",reference:"",sourceUrl:null,isTest:false,verified:false,eligible:true});
+const empty = (): PoolPayload => ({role:"load",name:"",location:"",origin:"",destination:"",products:[],transportMode:"",capacityKg:null,requiredKg:null,volumeM3:null,availableDate:null,requiredDate:null,contact:"",reference:"",sourceUrl:null,isTest:false,verified:false,eligible:true});
 async function lock(tx: Tx) { await tx.execute(sql`SELECT pg_advisory_xact_lock(4135531)`); }
 async function upsert(tx: Tx, originKey: string, sourceKind: string, payload: PoolPayload, sourceId: string | null = null) {
   const data = {originKey,sourceKind,sourceId,payload,fingerprint:digest(payload),active:true,lastSeenAt:new Date()};
@@ -56,7 +56,7 @@ export async function syncInternalPool() {
     await tx.update(entries).set({active:false}).where(sql`${entries.sourceId} IS NULL`);
     for (const {r,s} of loads) await upsert(tx,`load:${r.id}`,"mmt_load",{
       ...empty(),role:"load",name:r.organization || r.requesterName,origin:r.origin,destination:r.destination,
-      location:r.origin,products:productWords(r.cargoType),transportMode:r.transportMode,requiredKg:r.weightKg,
+      location:r.origin,products:productWords(r.cargoType),transportMode:r.transportMode,requiredKg:r.weightKg,volumeM3:r.volumeM3 > 0 ? r.volumeM3 : null,
       requiredDate:r.loadingDate,contact:[r.email,r.phone].filter(Boolean).join(" · "),reference:r.referenceCode,
       isTest:r.isTest,eligible:s !== "delivered",
     });
@@ -84,6 +84,7 @@ export async function syncInternalPool() {
 }
 function payload(item: FeedItem, sourceUrl: string): PoolPayload {
   return {...empty(),...item,transportMode:item.transportMode ?? "",capacityKg:item.capacityKg ?? null,
+    volumeM3:item.volumeM3 ?? null,
     requiredKg:item.requiredKg ?? null,availableDate:item.availableDate ?? null,requiredDate:item.requiredDate ?? null,
     reference:item.reference ?? item.id,sourceUrl:item.sourceUrl ?? sourceUrl,verified:false,eligible:true};
 }

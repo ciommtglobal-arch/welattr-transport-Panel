@@ -22,6 +22,7 @@ export const GetLogisticsPoolResponse = zod.object({
   "transportMode": zod.string(),
   "capacityKg": zod.number().nullable(),
   "requiredKg": zod.number().nullable(),
+  "volumeM3": zod.number().nullable(),
   "availableDate": zod.string().nullable(),
   "requiredDate": zod.string().nullable(),
   "contact": zod.string(),
@@ -107,6 +108,7 @@ export const ActLogisticsPoolResponse = zod.object({
   "transportMode": zod.string(),
   "capacityKg": zod.number().nullable(),
   "requiredKg": zod.number().nullable(),
+  "volumeM3": zod.number().nullable(),
   "availableDate": zod.string().nullable(),
   "requiredDate": zod.string().nullable(),
   "contact": zod.string(),
@@ -3318,6 +3320,86 @@ export const CreateLogisticsCarrierResponse = zod.object({
   "reviewedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Yetkili saha personelinin gerçek yük veya boş araç kaydını mevcut MMT kayıtlarına alır
+ */
+export const createLogisticsFieldIntakeBodyOneRequesterNameMin = 2;
+export const createLogisticsFieldIntakeBodyOneRequesterNameMax = 160;
+
+export const createLogisticsFieldIntakeBodyOneOrganizationMax = 200;
+
+export const createLogisticsFieldIntakeBodyOnePhoneMin = 5;
+export const createLogisticsFieldIntakeBodyOnePhoneMax = 40;
+
+export const createLogisticsFieldIntakeBodyOneDestinationMin = 2;
+export const createLogisticsFieldIntakeBodyOneDestinationMax = 160;
+
+export const createLogisticsFieldIntakeBodyOneCargoTypeMin = 2;
+export const createLogisticsFieldIntakeBodyOneCargoTypeMax = 160;
+
+export const createLogisticsFieldIntakeBodyOneWeightKgExclusiveMin = 0;
+
+export const createLogisticsFieldIntakeBodyOneVolumeM3Min = 0;
+
+export const createLogisticsFieldIntakeBodyOneNotesMax = 2000;
+
+export const createLogisticsFieldIntakeBodyTwoCompanyNameMin = 2;
+export const createLogisticsFieldIntakeBodyTwoCompanyNameMax = 200;
+
+export const createLogisticsFieldIntakeBodyTwoContactNameMin = 2;
+export const createLogisticsFieldIntakeBodyTwoContactNameMax = 160;
+
+export const createLogisticsFieldIntakeBodyTwoPhoneMin = 5;
+export const createLogisticsFieldIntakeBodyTwoPhoneMax = 40;
+
+export const createLogisticsFieldIntakeBodyTwoCapacityMax = 200;
+
+export const createLogisticsFieldIntakeBodyTwoNotesMax = 2000;
+
+
+
+export const CreateLogisticsFieldIntakeBody = zod.union([zod.object({
+  "type": zod.enum(['load']),
+  "region": zod.enum(['Mersin', 'İskenderun', 'Gaziantep', 'Adana']),
+  "requesterName": zod.string().min(createLogisticsFieldIntakeBodyOneRequesterNameMin).max(createLogisticsFieldIntakeBodyOneRequesterNameMax),
+  "organization": zod.string().max(createLogisticsFieldIntakeBodyOneOrganizationMax).optional(),
+  "email": zod.email(),
+  "phone": zod.string().min(createLogisticsFieldIntakeBodyOnePhoneMin).max(createLogisticsFieldIntakeBodyOnePhoneMax),
+  "destination": zod.string().min(createLogisticsFieldIntakeBodyOneDestinationMin).max(createLogisticsFieldIntakeBodyOneDestinationMax),
+  "cargoType": zod.string().min(createLogisticsFieldIntakeBodyOneCargoTypeMin).max(createLogisticsFieldIntakeBodyOneCargoTypeMax),
+  "weightKg": zod.number().gt(createLogisticsFieldIntakeBodyOneWeightKgExclusiveMin),
+  "volumeM3": zod.number().min(createLogisticsFieldIntakeBodyOneVolumeM3Min).describe('Sahada hacim ölçülmediyse 0 bırakılır; eşleşme hacim teyidi ister.'),
+  "transportMode": zod.enum(['road', 'sea', 'air']),
+  "loadingDate": zod.coerce.date(),
+  "notes": zod.string().max(createLogisticsFieldIntakeBodyOneNotesMax).optional(),
+  "contactUseConfirmed": zod.literal(true)
+}),zod.object({
+  "type": zod.enum(['empty_truck']),
+  "region": zod.enum(['Mardin', 'Şanlıurfa']),
+  "targetDestination": zod.enum(['Mersin', 'İskenderun', 'Gaziantep', 'Adana']),
+  "companyName": zod.string().min(createLogisticsFieldIntakeBodyTwoCompanyNameMin).max(createLogisticsFieldIntakeBodyTwoCompanyNameMax),
+  "contactName": zod.string().min(createLogisticsFieldIntakeBodyTwoContactNameMin).max(createLogisticsFieldIntakeBodyTwoContactNameMax),
+  "email": zod.email(),
+  "phone": zod.string().min(createLogisticsFieldIntakeBodyTwoPhoneMin).max(createLogisticsFieldIntakeBodyTwoPhoneMax),
+  "transportMode": zod.enum(['road', 'sea', 'air']),
+  "capacity": zod.string().min(1).max(createLogisticsFieldIntakeBodyTwoCapacityMax).describe('Açık birim yazın; ör. 24 ton'),
+  "availability": zod.coerce.date(),
+  "notes": zod.string().max(createLogisticsFieldIntakeBodyTwoNotesMax).optional(),
+  "contactUseConfirmed": zod.literal(true)
+})])
+
+
+
+
+export const CreateLogisticsFieldIntakeResponse = zod.object({
+  "recordType": zod.enum(['load', 'empty_truck']),
+  "id": zod.int().min(1),
+  "referenceCode": zod.string(),
+  "status": zod.enum(['new_request', 'pending']),
+  "createdAt": zod.coerce.date()
 })
 
 

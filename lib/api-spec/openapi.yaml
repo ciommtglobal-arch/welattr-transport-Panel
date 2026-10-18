@@ -2207,6 +2207,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /logistics/field-intake:
+    post:
+      operationId: createLogisticsFieldIntake
+      tags: [logistics-operations]
+      summary: Yetkili saha personelinin gerçek yük veya boş araç kaydını mevcut MMT kayıtlarına alır
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogisticsFieldIntakeInput"
+      responses:
+        "201":
+          description: Mevcut yük talebi veya bekleyen taşıyıcı başvurusu oluşturuldu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogisticsFieldIntakeResult"
+        "400":
+          description: Geçersiz saha kaydı veya iletişim izni teyit edilmedi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Oturum gerekli
+        "403":
+          description: Mevcut kurucu veya operasyon personeli erişimi gerekli
   /logistics/staff:
     get:
       operationId: getLogisticsStaff
@@ -4374,7 +4402,7 @@ components:
         note: {type: string, minLength: 3, maxLength: 2000}
     LogisticsPoolEntry:
       type: object
-      required: [id, sourceKind, sourceId, role, name, location, origin, destination, products, transportMode, capacityKg, requiredKg, availableDate, requiredDate, contact, reference, sourceUrl, isTest, verified, eligible, active, lastSeenAt]
+      required: [id, sourceKind, sourceId, role, name, location, origin, destination, products, transportMode, capacityKg, requiredKg, volumeM3, availableDate, requiredDate, contact, reference, sourceUrl, isTest, verified, eligible, active, lastSeenAt]
       properties:
         id: {type: string}
         sourceId: {type: [string, 'null']}
@@ -4388,6 +4416,7 @@ components:
         transportMode: {type: string}
         capacityKg: {type: [number, 'null']}
         requiredKg: {type: [number, 'null']}
+        volumeM3: {type: [number, 'null']}
         availableDate: {type: [string, 'null']}
         requiredDate: {type: [string, 'null']}
         contact: {type: string}
@@ -6545,6 +6574,61 @@ components:
           maxLength: 2000
         isTest:
           type: boolean
+    LogisticsFieldIntakeInput:
+      oneOf:
+        - $ref: "#/components/schemas/FieldLoadInput"
+        - $ref: "#/components/schemas/FieldEmptyTruckInput"
+      discriminator:
+        propertyName: type
+        mapping:
+          load: "#/components/schemas/FieldLoadInput"
+          empty_truck: "#/components/schemas/FieldEmptyTruckInput"
+    FieldLoadInput:
+      type: object
+      additionalProperties: false
+      required: [type, region, requesterName, email, phone, destination, cargoType, weightKg, volumeM3, transportMode, loadingDate, contactUseConfirmed]
+      properties:
+        type: {type: string, enum: [load]}
+        region: {type: string, enum: [Mersin, İskenderun, Gaziantep, Adana]}
+        requesterName: {type: string, minLength: 2, maxLength: 160}
+        organization: {type: string, maxLength: 200}
+        email: {type: string, format: email}
+        phone: {type: string, minLength: 5, maxLength: 40}
+        destination: {type: string, minLength: 2, maxLength: 160}
+        cargoType: {type: string, minLength: 2, maxLength: 160}
+        weightKg: {type: number, exclusiveMinimum: 0}
+        volumeM3: {type: number, minimum: 0, description: "Sahada hacim ölçülmediyse 0 bırakılır; eşleşme hacim teyidi ister."}
+        transportMode: {$ref: "#/components/schemas/LogisticsTransportMode"}
+        loadingDate: {type: string, format: date}
+        notes: {type: string, maxLength: 2000}
+        contactUseConfirmed: {type: boolean, enum: [true]}
+    FieldEmptyTruckInput:
+      type: object
+      additionalProperties: false
+      required: [type, region, targetDestination, companyName, contactName, email, phone, transportMode, capacity, availability, contactUseConfirmed]
+      properties:
+        type: {type: string, enum: [empty_truck]}
+        region: {type: string, enum: [Mardin, Şanlıurfa]}
+        targetDestination: {type: string, enum: [Mersin, İskenderun, Gaziantep, Adana]}
+        companyName: {type: string, minLength: 2, maxLength: 200}
+        contactName: {type: string, minLength: 2, maxLength: 160}
+        email: {type: string, format: email}
+        phone: {type: string, minLength: 5, maxLength: 40}
+        transportMode: {$ref: "#/components/schemas/LogisticsTransportMode"}
+        capacity: {type: string, minLength: 1, maxLength: 200, description: "Açık birim yazın; ör. 24 ton"}
+        availability: {type: string, format: date}
+        notes: {type: string, maxLength: 2000}
+        contactUseConfirmed: {type: boolean, enum: [true]}
+    LogisticsFieldIntakeResult:
+      type: object
+      additionalProperties: false
+      required: [recordType, id, referenceCode, status, createdAt]
+      properties:
+        recordType: {type: string, enum: [load, empty_truck]}
+        id: {type: integer, minimum: 1}
+        referenceCode: {type: string}
+        status: {type: string, enum: [new_request, pending]}
+        createdAt: {type: string, format: date-time}
     LogisticsRequestRecord:
       type: object
       required:

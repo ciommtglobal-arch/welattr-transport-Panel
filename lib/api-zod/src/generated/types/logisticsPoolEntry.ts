@@ -24,6 +24,8 @@ export interface LogisticsPoolEntry {
   /** @nullable */
   requiredKg: number | null;
   /** @nullable */
+  volumeM3: number | null;
+  /** @nullable */
   availableDate: string | null;
   /** @nullable */
   requiredDate: string | null;

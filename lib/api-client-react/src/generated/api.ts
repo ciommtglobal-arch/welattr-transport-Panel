@@ -124,6 +124,8 @@ import type {
   LogisticsCarrierReviewInput,
   LogisticsCommunicationInput,
   LogisticsCommunicationRecord,
+  LogisticsFieldIntakeInput,
+  LogisticsFieldIntakeResult,
   LogisticsListingAccess,
   LogisticsListingDraft,
   LogisticsListingDraftInput,
@@ -7804,6 +7806,86 @@ export const useCreateLogisticsCarrier = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getCreateLogisticsCarrierMutationOptions(options));
+    }
+
+export const getCreateLogisticsFieldIntakeUrl = () => {
+
+
+
+
+  return `/api/logistics/field-intake`
+}
+
+/**
+ * @summary Yetkili saha personelinin gerçek yük veya boş araç kaydını mevcut MMT kayıtlarına alır
+ */
+export const createLogisticsFieldIntake = async (logisticsFieldIntakeInput: LogisticsFieldIntakeInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsFieldIntakeResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsFieldIntakeResult>(getCreateLogisticsFieldIntakeUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsFieldIntakeInput)
+  }
+);}
+
+
+
+
+
+export const getCreateLogisticsFieldIntakeMutationKey = () => ['createLogisticsFieldIntake'] as const;
+
+export const getCreateLogisticsFieldIntakeMutationOptions = <TError = ErrorType<ErrorResponse | void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLogisticsFieldIntake>>, TError,CreateLogisticsFieldIntakeMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createLogisticsFieldIntake>>, TError,CreateLogisticsFieldIntakeMutationVariables, TContext> => {
+
+const mutationKey = getCreateLogisticsFieldIntakeMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createLogisticsFieldIntake>>, CreateLogisticsFieldIntakeMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createLogisticsFieldIntake(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateLogisticsFieldIntakeMutationResult = NonNullable<Awaited<ReturnType<typeof createLogisticsFieldIntake>>>
+    export type CreateLogisticsFieldIntakeMutationBody = BodyType<LogisticsFieldIntakeInput>
+    export type CreateLogisticsFieldIntakeMutationError = ErrorType<ErrorResponse | void>
+    export type CreateLogisticsFieldIntakeMutationVariables = {data: BodyType<LogisticsFieldIntakeInput>}
+
+    /**
+ * @summary Yetkili saha personelinin gerçek yük veya boş araç kaydını mevcut MMT kayıtlarına alır
+ */
+export const useCreateLogisticsFieldIntake = <TError = ErrorType<ErrorResponse | void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLogisticsFieldIntake>>, TError,CreateLogisticsFieldIntakeMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createLogisticsFieldIntake>>,
+        TError,
+        CreateLogisticsFieldIntakeMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateLogisticsFieldIntakeMutationOptions(options));
     }
 
 export const getGetLogisticsStaffUrl = () => {
