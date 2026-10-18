@@ -16,3 +16,18 @@ Belgenin bulunması içeriğin doğruluğu değildir. Açıkça tanımlanmış v
 onaylanmış bir karar politikası olmadan kurucu doğrulamasını/son kararını kaldırma.
 İlan yayın kararı ödeme, sözleşme veya gerçek sevkiyat onayı sayılmaz.
 Hazırlığın onaylanması, Agent'ın kendi başına Publish yapma yetkisi değildir.
+
+## Beklenen otomasyonun kapsamı
+
+Kullanıcı sistemin “kendisi bulup kendisi havuz oluşturup alıcı nakliyat ve
+satıcıyı bir araya” getirmesini bekliyor; yalnızca elle girilen talebin ilan
+taslağına çevrilmesi bu beklentiyi karşılamaz.
+
+**Why:** Kullanıcı otomasyonun fırsat bulma, havuz oluşturma ve tarafları
+eşleştirmeyi kapsadığını özellikle açıkladı.
+
+**How to apply:** Talep kaydı/ilan hazırlığı ile proaktif fırsat keşfi ve
+alıcı–satıcı–nakliyeci eşleştirmesini birbirine eşitleme. Tam otomasyon
+iddiası için gerçek ve kullanılmasına izin verilen kaynaklardan veri gelişi,
+havuzun güncellenmesi ve eşleştirme davranışı ayrı ayrı doğrulanmalı.
+Bu kapsam, kurucuda kalan son karar sınırını kendiliğinden kaldırmaz.
