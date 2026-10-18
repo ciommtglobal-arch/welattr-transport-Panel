@@ -31,6 +31,31 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /logistics/pool:
+    get:
+      operationId: getLogisticsPool
+      tags: [logistics-operations]
+      responses:
+        '200':
+          description: Authorized real pool, suggestions and source history
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/LogisticsPoolWorkspace'}
+  /logistics/pool/actions:
+    post:
+      operationId: actLogisticsPool
+      tags: [logistics-operations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/LogisticsPoolAction'}
+      responses:
+        '200':
+          description: Persisted workspace after action
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/LogisticsPoolWorkspace'}
   /logistics/requests/{id}/automation:
     get:
       operationId: getLogisticsAutomation
@@ -4332,6 +4357,94 @@ components:
       name: pageSize
       schema: { type: integer, minimum: 1, maximum: 50, default: 25 }
   schemas:
+    LogisticsPoolAction:
+      type: object
+      additionalProperties: false
+      required: [action]
+      properties:
+        action: {type: string, enum: [refresh, source_create, source_update, source_sync, review]}
+        id: {type: string, format: uuid}
+        expectedVersion: {type: integer, minimum: 1}
+        name: {type: string, minLength: 2, maxLength: 160}
+        url: {type: string, maxLength: 2000}
+        enabled: {type: boolean}
+        consentConfirmed: {type: boolean}
+        informationConfirmed: {type: boolean}
+        decision: {type: string, enum: [approved, rejected]}
+        note: {type: string, minLength: 3, maxLength: 2000}
+    LogisticsPoolEntry:
+      type: object
+      required: [id, sourceKind, sourceId, role, name, location, origin, destination, products, transportMode, capacityKg, requiredKg, availableDate, requiredDate, contact, reference, sourceUrl, isTest, verified, eligible, active, lastSeenAt]
+      properties:
+        id: {type: string}
+        sourceId: {type: [string, 'null']}
+        sourceKind: {type: string}
+        role: {type: string, enum: [buyer, seller, carrier, load]}
+        name: {type: string}
+        location: {type: string}
+        origin: {type: string}
+        destination: {type: string}
+        products: {type: array, items: {type: string}}
+        transportMode: {type: string}
+        capacityKg: {type: [number, 'null']}
+        requiredKg: {type: [number, 'null']}
+        availableDate: {type: [string, 'null']}
+        requiredDate: {type: [string, 'null']}
+        contact: {type: string}
+        reference: {type: string}
+        sourceUrl: {type: [string, 'null']}
+        isTest: {type: boolean}
+        verified: {type: boolean}
+        eligible: {type: boolean}
+        active: {type: boolean}
+        lastSeenAt: {type: string, format: date-time}
+    LogisticsPoolMatch:
+      type: object
+      required: [id, entryIds, status, version, score, reasons, missing, introduction, reviewedBy, reviewedAt, events, updatedAt]
+      properties:
+        id: {type: string}
+        entryIds: {type: array, items: {type: string}}
+        status: {type: string, enum: [pending, approved, rejected, stale]}
+        version: {type: integer}
+        score: {type: integer}
+        reasons: {type: array, items: {type: string}}
+        missing: {type: array, items: {type: string}}
+        introduction: {type: string}
+        reviewedBy: {type: [string, 'null']}
+        reviewedAt: {type: [string, 'null'], format: date-time}
+        updatedAt: {type: string, format: date-time}
+        events: {type: array, items: {$ref: '#/components/schemas/LogisticsPoolEvent'}}
+    LogisticsPoolEvent:
+      type: object
+      required: [at, action, actorUserId, note]
+      properties:
+        at: {type: string}
+        action: {type: string}
+        actorUserId: {type: [string, 'null']}
+        note: {type: string}
+    LogisticsPoolSource:
+      type: object
+      required: [id, name, url, enabled, version, lastAttemptAt, lastSuccessAt, lastError]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        url: {type: string}
+        enabled: {type: boolean}
+        version: {type: integer}
+        lastAttemptAt: {type: [string, 'null'], format: date-time}
+        lastSuccessAt: {type: [string, 'null'], format: date-time}
+        lastError: {type: [string, 'null']}
+    LogisticsPoolWorkspace:
+      type: object
+      required: [entries, matches, sources, canApprove, externalDiscoveryConfigured, automaticSchedule, limits]
+      properties:
+        entries: {type: array, items: {$ref: '#/components/schemas/LogisticsPoolEntry'}}
+        matches: {type: array, items: {$ref: '#/components/schemas/LogisticsPoolMatch'}}
+        sources: {type: array, items: {$ref: '#/components/schemas/LogisticsPoolSource'}}
+        canApprove: {type: boolean}
+        externalDiscoveryConfigured: {type: boolean}
+        automaticSchedule: {type: string}
+        limits: {type: array, items: {type: string}}
     LogisticsAutomationAction:
       type: object
       required: [action]

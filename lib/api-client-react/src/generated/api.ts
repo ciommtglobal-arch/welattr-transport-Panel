@@ -141,6 +141,8 @@ import type {
   LogisticsOperationsResponse,
   LogisticsPilotAction,
   LogisticsPilotWorkspace,
+  LogisticsPoolAction,
+  LogisticsPoolWorkspace,
   LogisticsRequestInput,
   LogisticsRequestRecord,
   LogisticsRequestStatusUpdate,
@@ -241,6 +243,151 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetLogisticsPoolUrl = () => {
+
+
+
+
+  return `/api/logistics/pool`
+}
+
+export const getLogisticsPool = async ( options?: Parameters<typeof customFetch>[1]): Promise<LogisticsPoolWorkspace> => {
+
+  return customFetch<LogisticsPoolWorkspace>(getGetLogisticsPoolUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLogisticsPoolQueryKey = () => {
+    return [
+    `/api/logistics/pool`
+    ] as const;
+    }
+
+
+export const getGetLogisticsPoolQueryOptions = <TData = Awaited<ReturnType<typeof getLogisticsPool>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsPool>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLogisticsPoolQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLogisticsPool>>> = ({ signal }) => getLogisticsPool({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLogisticsPool>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLogisticsPoolQueryResult = NonNullable<Awaited<ReturnType<typeof getLogisticsPool>>>
+export type GetLogisticsPoolQueryError = ErrorType<unknown>
+
+
+
+export function useGetLogisticsPool<TData = Awaited<ReturnType<typeof getLogisticsPool>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLogisticsPool>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLogisticsPoolQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getActLogisticsPoolUrl = () => {
+
+
+
+
+  return `/api/logistics/pool/actions`
+}
+
+export const actLogisticsPool = async (logisticsPoolAction: LogisticsPoolAction, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsPoolWorkspace> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsPoolWorkspace>(getActLogisticsPoolUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsPoolAction)
+  }
+);}
+
+
+
+
+
+export const getActLogisticsPoolMutationKey = () => ['actLogisticsPool'] as const;
+
+export const getActLogisticsPoolMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actLogisticsPool>>, TError,ActLogisticsPoolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof actLogisticsPool>>, TError,ActLogisticsPoolMutationVariables, TContext> => {
+
+const mutationKey = getActLogisticsPoolMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof actLogisticsPool>>, ActLogisticsPoolMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  actLogisticsPool(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ActLogisticsPoolMutationResult = NonNullable<Awaited<ReturnType<typeof actLogisticsPool>>>
+    export type ActLogisticsPoolMutationBody = BodyType<LogisticsPoolAction>
+    export type ActLogisticsPoolMutationError = ErrorType<unknown>
+    export type ActLogisticsPoolMutationVariables = {data: BodyType<LogisticsPoolAction>}
+
+    export const useActLogisticsPool = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actLogisticsPool>>, TError,ActLogisticsPoolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof actLogisticsPool>>,
+        TError,
+        ActLogisticsPoolMutationVariables,
+        TContext
+      > => {
+      return useMutation(getActLogisticsPoolMutationOptions(options));
+    }
 
 export const getGetLogisticsAutomationUrl = (id: number,) => {
 

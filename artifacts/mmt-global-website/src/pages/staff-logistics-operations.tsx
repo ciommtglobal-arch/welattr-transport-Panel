@@ -150,9 +150,12 @@ function Workspace({ data, fetching, updatedAt, refetch }: { data: LogisticsOper
           <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">Yük, taşıyıcı ve teklif masası</h1>
           <p className="mt-2 max-w-2xl text-sm text-foreground/55">Kendi müşterilerinizden aldığınız talepleri ve taşıyıcı başvurularını elle kaydedin, değerlendirin ve sevkiyatı adım adım izleyin.</p>
         </div>
+        <div className="flex flex-wrap items-center gap-4 self-start md:self-auto">
+        <Link href="/staff/lojistik-havuzu" className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary hover:underline" data-testid="link-logistics-pool">Fırsat havuzu ve eşleşmeler</Link>
         <button type="button" onClick={refetch} className="flex items-center gap-2 self-start font-mono text-[10px] uppercase tracking-[0.14em] text-foreground/45 hover:text-primary md:self-auto" data-testid="button-refresh">
           <RefreshCw size={12} className={fetching ? "animate-spin" : ""} />{fetching ? "Yenileniyor" : `Son güncelleme ${new Date(updatedAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`}
         </button>
+        </div>
       </div>
 
       <section className="mt-5 grid grid-cols-2 gap-px border border-border bg-border md:grid-cols-5" aria-label="Kayıt özeti">

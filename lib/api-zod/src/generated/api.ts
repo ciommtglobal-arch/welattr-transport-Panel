@@ -8,6 +8,152 @@
 import * as zod from 'zod';
 
 
+export const GetLogisticsPoolResponse = zod.object({
+  "entries": zod.array(zod.object({
+  "id": zod.string(),
+  "sourceId": zod.string().nullable(),
+  "sourceKind": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'carrier', 'load']),
+  "name": zod.string(),
+  "location": zod.string(),
+  "origin": zod.string(),
+  "destination": zod.string(),
+  "products": zod.array(zod.string()),
+  "transportMode": zod.string(),
+  "capacityKg": zod.number().nullable(),
+  "requiredKg": zod.number().nullable(),
+  "availableDate": zod.string().nullable(),
+  "requiredDate": zod.string().nullable(),
+  "contact": zod.string(),
+  "reference": zod.string(),
+  "sourceUrl": zod.string().nullable(),
+  "isTest": zod.boolean(),
+  "verified": zod.boolean(),
+  "eligible": zod.boolean(),
+  "active": zod.boolean(),
+  "lastSeenAt": zod.coerce.date()
+})),
+  "matches": zod.array(zod.object({
+  "id": zod.string(),
+  "entryIds": zod.array(zod.string()),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'stale']),
+  "version": zod.int(),
+  "score": zod.int(),
+  "reasons": zod.array(zod.string()),
+  "missing": zod.array(zod.string()),
+  "introduction": zod.string(),
+  "reviewedBy": zod.string().nullable(),
+  "reviewedAt": zod.coerce.date().nullable(),
+  "updatedAt": zod.coerce.date(),
+  "events": zod.array(zod.object({
+  "at": zod.string(),
+  "action": zod.string(),
+  "actorUserId": zod.string().nullable(),
+  "note": zod.string()
+}))
+})),
+  "sources": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "url": zod.string(),
+  "enabled": zod.boolean(),
+  "version": zod.int(),
+  "lastAttemptAt": zod.coerce.date().nullable(),
+  "lastSuccessAt": zod.coerce.date().nullable(),
+  "lastError": zod.string().nullable()
+})),
+  "canApprove": zod.boolean(),
+  "externalDiscoveryConfigured": zod.boolean(),
+  "automaticSchedule": zod.string(),
+  "limits": zod.array(zod.string())
+})
+
+
+
+export const actLogisticsPoolBodyNameMin = 2;
+export const actLogisticsPoolBodyNameMax = 160;
+
+export const actLogisticsPoolBodyUrlMax = 2000;
+
+export const actLogisticsPoolBodyNoteMin = 3;
+export const actLogisticsPoolBodyNoteMax = 2000;
+
+
+
+export const ActLogisticsPoolBody = zod.object({
+  "action": zod.enum(['refresh', 'source_create', 'source_update', 'source_sync', 'review']),
+  "id": zod.uuid().optional(),
+  "expectedVersion": zod.int().min(1).optional(),
+  "name": zod.string().min(actLogisticsPoolBodyNameMin).max(actLogisticsPoolBodyNameMax).optional(),
+  "url": zod.string().max(actLogisticsPoolBodyUrlMax).optional(),
+  "enabled": zod.boolean().optional(),
+  "consentConfirmed": zod.boolean().optional(),
+  "informationConfirmed": zod.boolean().optional(),
+  "decision": zod.enum(['approved', 'rejected']).optional(),
+  "note": zod.string().min(actLogisticsPoolBodyNoteMin).max(actLogisticsPoolBodyNoteMax).optional()
+})
+
+export const ActLogisticsPoolResponse = zod.object({
+  "entries": zod.array(zod.object({
+  "id": zod.string(),
+  "sourceId": zod.string().nullable(),
+  "sourceKind": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'carrier', 'load']),
+  "name": zod.string(),
+  "location": zod.string(),
+  "origin": zod.string(),
+  "destination": zod.string(),
+  "products": zod.array(zod.string()),
+  "transportMode": zod.string(),
+  "capacityKg": zod.number().nullable(),
+  "requiredKg": zod.number().nullable(),
+  "availableDate": zod.string().nullable(),
+  "requiredDate": zod.string().nullable(),
+  "contact": zod.string(),
+  "reference": zod.string(),
+  "sourceUrl": zod.string().nullable(),
+  "isTest": zod.boolean(),
+  "verified": zod.boolean(),
+  "eligible": zod.boolean(),
+  "active": zod.boolean(),
+  "lastSeenAt": zod.coerce.date()
+})),
+  "matches": zod.array(zod.object({
+  "id": zod.string(),
+  "entryIds": zod.array(zod.string()),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'stale']),
+  "version": zod.int(),
+  "score": zod.int(),
+  "reasons": zod.array(zod.string()),
+  "missing": zod.array(zod.string()),
+  "introduction": zod.string(),
+  "reviewedBy": zod.string().nullable(),
+  "reviewedAt": zod.coerce.date().nullable(),
+  "updatedAt": zod.coerce.date(),
+  "events": zod.array(zod.object({
+  "at": zod.string(),
+  "action": zod.string(),
+  "actorUserId": zod.string().nullable(),
+  "note": zod.string()
+}))
+})),
+  "sources": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "url": zod.string(),
+  "enabled": zod.boolean(),
+  "version": zod.int(),
+  "lastAttemptAt": zod.coerce.date().nullable(),
+  "lastSuccessAt": zod.coerce.date().nullable(),
+  "lastError": zod.string().nullable()
+})),
+  "canApprove": zod.boolean(),
+  "externalDiscoveryConfigured": zod.boolean(),
+  "automaticSchedule": zod.string(),
+  "limits": zod.array(zod.string())
+})
+
+
 
 
 

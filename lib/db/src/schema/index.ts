@@ -21,3 +21,4 @@ export * from "./logistics-whatsapp-intake";
 export * from "./nexus-shopify";
 export * from "./logistics-pilot";
 export * from "./logistics-automation";
+export * from "./logistics-pool";

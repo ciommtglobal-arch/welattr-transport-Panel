@@ -4,6 +4,7 @@ import { pool } from "@workspace/db";
 import { cleanupOrphanUploads } from "./routes/storage";
 import { startOrphanUploadCleanupScheduler } from "./lib/orphanUploadCleanupScheduler";
 import { startLogisticsAutomationWorker } from "./lib/logisticsAutomationWorker";
+import { startLogisticsPoolWorker } from "./lib/logisticsPoolWorker";
 
 const rawPort = process.env["PORT"];
 const ORPHAN_UPLOAD_CLEANUP_LOCK_ID = 4811021014;
@@ -28,6 +29,7 @@ app.listen(port, (err) => {
 
   logger.info({ port }, "Server listening");
   startLogisticsAutomationWorker();
+  startLogisticsPoolWorker();
   startOrphanUploadCleanupScheduler({
     logger,
     runCleanup: async () => {

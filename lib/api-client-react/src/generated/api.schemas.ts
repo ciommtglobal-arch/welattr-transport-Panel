@@ -5,6 +5,148 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type LogisticsPoolActionAction = typeof LogisticsPoolActionAction[keyof typeof LogisticsPoolActionAction];
+
+
+export const LogisticsPoolActionAction = {
+  refresh: 'refresh',
+  source_create: 'source_create',
+  source_update: 'source_update',
+  source_sync: 'source_sync',
+  review: 'review',
+} as const;
+
+export type LogisticsPoolActionDecision = typeof LogisticsPoolActionDecision[keyof typeof LogisticsPoolActionDecision];
+
+
+export const LogisticsPoolActionDecision = {
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface LogisticsPoolAction {
+  action: LogisticsPoolActionAction;
+  id?: string;
+  /** @minimum 1 */
+  expectedVersion?: number;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  name?: string;
+  /** @maxLength 2000 */
+  url?: string;
+  enabled?: boolean;
+  consentConfirmed?: boolean;
+  informationConfirmed?: boolean;
+  decision?: LogisticsPoolActionDecision;
+  /**
+     * @minLength 3
+     * @maxLength 2000
+     */
+  note?: string;
+}
+
+export type LogisticsPoolEntryRole = typeof LogisticsPoolEntryRole[keyof typeof LogisticsPoolEntryRole];
+
+
+export const LogisticsPoolEntryRole = {
+  buyer: 'buyer',
+  seller: 'seller',
+  carrier: 'carrier',
+  load: 'load',
+} as const;
+
+export interface LogisticsPoolEntry {
+  id: string;
+  /** @nullable */
+  sourceId: string | null;
+  sourceKind: string;
+  role: LogisticsPoolEntryRole;
+  name: string;
+  location: string;
+  origin: string;
+  destination: string;
+  products: string[];
+  transportMode: string;
+  /** @nullable */
+  capacityKg: number | null;
+  /** @nullable */
+  requiredKg: number | null;
+  /** @nullable */
+  availableDate: string | null;
+  /** @nullable */
+  requiredDate: string | null;
+  contact: string;
+  reference: string;
+  /** @nullable */
+  sourceUrl: string | null;
+  isTest: boolean;
+  verified: boolean;
+  eligible: boolean;
+  active: boolean;
+  lastSeenAt: string;
+}
+
+export type LogisticsPoolMatchStatus = typeof LogisticsPoolMatchStatus[keyof typeof LogisticsPoolMatchStatus];
+
+
+export const LogisticsPoolMatchStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+  stale: 'stale',
+} as const;
+
+export interface LogisticsPoolEvent {
+  at: string;
+  action: string;
+  /** @nullable */
+  actorUserId: string | null;
+  note: string;
+}
+
+export interface LogisticsPoolMatch {
+  id: string;
+  entryIds: string[];
+  status: LogisticsPoolMatchStatus;
+  version: number;
+  score: number;
+  reasons: string[];
+  missing: string[];
+  introduction: string;
+  /** @nullable */
+  reviewedBy: string | null;
+  /** @nullable */
+  reviewedAt: string | null;
+  updatedAt: string;
+  events: LogisticsPoolEvent[];
+}
+
+export interface LogisticsPoolSource {
+  id: string;
+  name: string;
+  url: string;
+  enabled: boolean;
+  version: number;
+  /** @nullable */
+  lastAttemptAt: string | null;
+  /** @nullable */
+  lastSuccessAt: string | null;
+  /** @nullable */
+  lastError: string | null;
+}
+
+export interface LogisticsPoolWorkspace {
+  entries: LogisticsPoolEntry[];
+  matches: LogisticsPoolMatch[];
+  sources: LogisticsPoolSource[];
+  canApprove: boolean;
+  externalDiscoveryConfigured: boolean;
+  automaticSchedule: string;
+  limits: string[];
+}
+
 export type LogisticsAutomationActionAction = typeof LogisticsAutomationActionAction[keyof typeof LogisticsAutomationActionAction];
 
 
