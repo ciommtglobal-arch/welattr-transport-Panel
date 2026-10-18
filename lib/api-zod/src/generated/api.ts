@@ -3346,6 +3346,9 @@ export const createLogisticsFieldIntakeBodyOneVolumeM3Min = 0;
 
 export const createLogisticsFieldIntakeBodyOneNotesMax = 2000;
 
+export const createLogisticsFieldIntakeBodyTwoTargetDestinationMin = 2;
+export const createLogisticsFieldIntakeBodyTwoTargetDestinationMax = 160;
+
 export const createLogisticsFieldIntakeBodyTwoCompanyNameMin = 2;
 export const createLogisticsFieldIntakeBodyTwoCompanyNameMax = 200;
 
@@ -3379,7 +3382,7 @@ export const CreateLogisticsFieldIntakeBody = zod.union([zod.object({
 }),zod.object({
   "type": zod.enum(['empty_truck']),
   "region": zod.enum(['Mardin', 'Şanlıurfa']),
-  "targetDestination": zod.enum(['Mersin', 'İskenderun', 'Gaziantep', 'Adana']),
+  "targetDestination": zod.string().min(createLogisticsFieldIntakeBodyTwoTargetDestinationMin).max(createLogisticsFieldIntakeBodyTwoTargetDestinationMax),
   "companyName": zod.string().min(createLogisticsFieldIntakeBodyTwoCompanyNameMin).max(createLogisticsFieldIntakeBodyTwoCompanyNameMax),
   "contactName": zod.string().min(createLogisticsFieldIntakeBodyTwoContactNameMin).max(createLogisticsFieldIntakeBodyTwoContactNameMax),
   "email": zod.email(),

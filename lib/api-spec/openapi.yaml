@@ -6609,7 +6609,7 @@ components:
       properties:
         type: {type: string, enum: [empty_truck]}
         region: {type: string, enum: [Mardin, Şanlıurfa]}
-        targetDestination: {type: string, enum: [Mersin, İskenderun, Gaziantep, Adana]}
+        targetDestination: {type: string, minLength: 2, maxLength: 160}
         companyName: {type: string, minLength: 2, maxLength: 200}
         contactName: {type: string, minLength: 2, maxLength: 160}
         email: {type: string, format: email}

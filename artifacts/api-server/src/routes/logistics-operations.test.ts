@@ -96,7 +96,8 @@ describe("Logistics HTTP permissions and contracts", () => {
       notes: "Saha hacim ölçümü yok",contactUseConfirmed: true,
     });
     expect(response.status).toBe(201);
-    expect(response.body).toMatchObject({recordType:"load",status:"new_request",referenceCode:"LOAD-2026"});
+    expect(response.body).toMatchObject({recordType:"load",status:"new_request"});
+    expect(response.body.referenceCode).toMatch(/^LOAD-2026-/);
     expect(state.inserted[0]).toMatchObject({requesterClerkUserId:null,capturedByClerkUserId:"owner",contactUseConfirmed:true,isTest:false,volumeM3:0});
     expect(state.ensureAutomation).toHaveBeenCalledWith(expect.anything(),expect.objectContaining({referenceCode:expect.stringMatching(/^LOAD-/)}),{userId:"owner",isFounder:true});
   });

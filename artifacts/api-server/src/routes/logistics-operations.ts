@@ -326,7 +326,7 @@ router.post("/logistics/field-intake", async (req, res): Promise<void> => {
         await ensureLogisticsAutomation(tx, created, actor);
         return [created] as const;
       });
-      req.log.info({ requestId: record.id, capturedBy: actor.userId }, "Authorized Mersin field load captured");
+      req.log?.info({ requestId: record.id, capturedBy: actor.userId }, "Authorized Mersin field load captured");
       res.status(201).json(CreateLogisticsFieldIntakeResponse.parse({
         recordType: "load", id: record.id, referenceCode: record.referenceCode,
         status: "new_request", createdAt: record.createdAt.toISOString(),
@@ -350,7 +350,7 @@ router.post("/logistics/field-intake", async (req, res): Promise<void> => {
       status: "pending",
       isTest: false,
     }).returning();
-    req.log.info({ carrierId: carrier.id, capturedBy: actor.userId }, "Authorized empty truck field lead captured");
+    req.log?.info({ carrierId: carrier.id, capturedBy: actor.userId }, "Authorized empty truck field lead captured");
     res.status(201).json(CreateLogisticsFieldIntakeResponse.parse({
       recordType: "empty_truck", id: carrier.id, referenceCode: carrier.referenceCode,
       status: carrier.status, createdAt: carrier.createdAt.toISOString(),

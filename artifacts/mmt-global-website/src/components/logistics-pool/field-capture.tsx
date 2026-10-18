@@ -8,17 +8,17 @@ type FieldKind = "load" | "empty_truck";
 type Values = Record<string, string>;
 const LOAD_REGIONS = ["Mersin", "İskenderun", "Gaziantep", "Adana"] as const;
 const EMPTY_ORIGINS = ["Mardin", "Şanlıurfa"] as const;
-const EMPTY_DESTINATIONS = LOAD_REGIONS;
+const DESTINATION_SUGGESTIONS = ["Mersin", "İskenderun", "Gaziantep", "Adana", "Irak", "Rusya"];
 const modes = [{ value: "road", label: "Karayolu" }, { value: "sea", label: "Denizyolu" }, { value: "air", label: "Havayolu" }] as const;
 
-function Input({ label, name, values, set, type = "text", required = true, step, min, hint }: {
+function Input({ label, name, values, set, type = "text", required = true, step, min, hint, list }: {
   label: string; name: string; values: Values; set: (k: string, v: string) => void;
-  type?: string; required?: boolean; step?: string; min?: string; hint?: string;
+  type?: string; required?: boolean; step?: string; min?: string; hint?: string; list?: string;
 }) {
   return <label className="block min-w-0 space-y-1.5 text-xs font-medium text-foreground/75">
     <span>{label}</span>
     <input className={`${inputCls} w-full`} name={name} type={type} required={required} step={step} min={min} value={values[name] ?? ""}
-      onChange={e => set(name,e.target.value)} />
+      onChange={e => set(name,e.target.value)} list={list} />
     {hint ? <span className="block text-[11px] font-normal leading-5 text-foreground/50">{hint}</span> : null}
   </label>;
 }
@@ -54,7 +54,7 @@ export function FieldCapture({ refresh }: { refresh: () => Promise<unknown> }) {
           [values.notes?.trim(),...(volume===0?["Saha kaydı: hacim ölçülmedi; teyit gerekli."]:[])].filter(Boolean).join(" · "),
         contactUseConfirmed:true};
     } else {
-      body={type:"empty_truck",region:region as typeof EMPTY_ORIGINS[number],targetDestination:destination as typeof EMPTY_DESTINATIONS[number],
+      body={type:"empty_truck",region:region as typeof EMPTY_ORIGINS[number],targetDestination:destination.trim(),
         companyName:values.companyName??"",contactName:values.contactName??"",email:values.email??"",phone:values.phone??"",
         transportMode:mode,capacity:values.capacity??"",availability:values.availability??"",notes:values.notes,contactUseConfirmed:true};
     }
@@ -79,7 +79,8 @@ export function FieldCapture({ refresh }: { refresh: () => Promise<unknown> }) {
       {kind==="load" ? <>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block space-y-1.5 text-xs text-foreground/75"><span>Yükün bulunduğu bölge</span><select className={`${inputCls} w-full`} value={region} onChange={e=>setRegion(e.target.value)}>{LOAD_REGIONS.map(x=><option key={x}>{x}</option>)}</select></label>
-          <Input label="Varış noktası" name="destination" values={{...values,destination}} set={(_k,v)=>setDestination(v)} required />
+          <Input label="Varış noktası" name="destination" values={{...values,destination}} set={(_k,v)=>setDestination(v)} required list="mmt-load-destinations" />
+          <datalist id="mmt-load-destinations">{DESTINATION_SUGGESTIONS.map(item=><option key={item} value={item}/>)}</datalist>
           <Input label="Yük sahibi / saha irtibatı" name="requesterName" values={values} set={change} />
           <Input label="Firma (varsa)" name="organization" values={values} set={change} required={false} />
           <Input label="E-posta" name="email" values={values} set={change} type="email" />
@@ -93,7 +94,8 @@ export function FieldCapture({ refresh }: { refresh: () => Promise<unknown> }) {
       </> : <>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block space-y-1.5 text-xs text-foreground/75"><span>Boş aracın bulunduğu il</span><select className={`${inputCls} w-full`} value={region} onChange={e=>setRegion(e.target.value)}>{EMPTY_ORIGINS.map(x=><option key={x}>{x}</option>)}</select></label>
-          <label className="block space-y-1.5 text-xs text-foreground/75"><span>Gitmek istediği bölge</span><select className={`${inputCls} w-full`} value={destination} onChange={e=>setDestination(e.target.value)}>{EMPTY_DESTINATIONS.map(x=><option key={x}>{x}</option>)}</select></label>
+          <Input label="Gitmek istediği varış noktası" name="targetDestination" values={{...values,targetDestination:destination}} set={(_k,v)=>setDestination(v)} required list="mmt-empty-destinations" />
+          <datalist id="mmt-empty-destinations">{DESTINATION_SUGGESTIONS.map(item=><option key={item} value={item}/>)}</datalist>
           <Input label="Taşıyıcı firma" name="companyName" values={values} set={change} />
           <Input label="Yetkili irtibat" name="contactName" values={values} set={change} />
           <Input label="E-posta" name="email" values={values} set={change} type="email" />

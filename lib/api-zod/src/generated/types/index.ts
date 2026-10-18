@@ -101,7 +101,6 @@ export * from './exportKasaSummaryFormat';
 export * from './exportKasaSummaryParams';
 export * from './fieldEmptyTruckInput';
 export * from './fieldEmptyTruckInputRegion';
-export * from './fieldEmptyTruckInputTargetDestination';
 export * from './fieldEmptyTruckInputType';
 export * from './fieldLoadInput';
 export * from './fieldLoadInputRegion';

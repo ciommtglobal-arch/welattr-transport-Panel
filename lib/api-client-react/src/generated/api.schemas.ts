@@ -2383,20 +2383,14 @@ export const FieldEmptyTruckInputRegion = {
   Şanlıurfa: 'Şanlıurfa',
 } as const;
 
-export type FieldEmptyTruckInputTargetDestination = typeof FieldEmptyTruckInputTargetDestination[keyof typeof FieldEmptyTruckInputTargetDestination];
-
-
-export const FieldEmptyTruckInputTargetDestination = {
-  Mersin: 'Mersin',
-  İskenderun: 'İskenderun',
-  Gaziantep: 'Gaziantep',
-  Adana: 'Adana',
-} as const;
-
 export interface FieldEmptyTruckInput {
   type: FieldEmptyTruckInputType;
   region: FieldEmptyTruckInputRegion;
-  targetDestination: FieldEmptyTruckInputTargetDestination;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  targetDestination: string;
   /**
      * @minLength 2
      * @maxLength 200

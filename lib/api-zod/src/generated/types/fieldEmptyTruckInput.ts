@@ -6,14 +6,17 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { FieldEmptyTruckInputRegion } from './fieldEmptyTruckInputRegion';
-import type { FieldEmptyTruckInputTargetDestination } from './fieldEmptyTruckInputTargetDestination';
 import type { FieldEmptyTruckInputType } from './fieldEmptyTruckInputType';
 import type { LogisticsTransportMode } from './logisticsTransportMode';
 
 export interface FieldEmptyTruckInput {
   type: FieldEmptyTruckInputType;
   region: FieldEmptyTruckInputRegion;
-  targetDestination: FieldEmptyTruckInputTargetDestination;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  targetDestination: string;
   /**
      * @minLength 2
      * @maxLength 200
