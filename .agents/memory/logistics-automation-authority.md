@@ -31,3 +31,16 @@ alıcı–satıcı–nakliyeci eşleştirmesini birbirine eşitleme. Tam otomasy
 iddiası için gerçek ve kullanılmasına izin verilen kaynaklardan veri gelişi,
 havuzun güncellenmesi ve eşleştirme davranışı ayrı ayrı doğrulanmalı.
 Bu kapsam, kurucuda kalan son karar sınırını kendiliğinden kaldırmaz.
+
+## Dış kaynaktan fırsat keşfi
+
+Kullanıcı genel internet taramasından uydurulmuş alıcı, satıcı veya taşıyıcı
+kaydı değil, doğrulanabilir ve kullanımına izin verilen dış kaynaklardan gerçek
+veri bekliyor. İzinli, güncel bir kaynak bağlı değilse dış keşif yapılmış gibi
+gösterme; dış kaynak ile mevcut sistemdeki kayıtları ayrı belirt.
+
+**Why:** Eşleştirme havuzunun gerçek iş bulması, kurulmuş bir veri bağlantısı
+gerektirir; boş bir entegrasyon veya eşleşme önerisi gerçek bir karşı taraf değildir.
+
+**How to apply:** Dış kaynağı çalışıyor olarak raporlamadan önce açık izin,
+güncel veri aktarımı, hata davranışı ve bulunan kayıtların niteliğini doğrula.
