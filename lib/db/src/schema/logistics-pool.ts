@@ -1,4 +1,5 @@
-import { pgTable, uuid, text, boolean, integer, jsonb, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, integer, jsonb, timestamp, uniqueIndex, check } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 
 export type PoolPayload = {
@@ -61,7 +62,19 @@ export const logisticsPoolAiDraftsTable = pgTable("logistics_pool_ai_drafts", {
   status: text("status").notNull().default("pending_review"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, t => [uniqueIndex("logistics_pool_ai_draft_match_version_unique").on(t.matchId, t.matchVersion)]);
+export const logisticsPoolDraftNotificationsTable = pgTable("logistics_pool_draft_notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  draftId: uuid("draft_id").notNull().references(() => logisticsPoolAiDraftsTable.id, { onDelete: "cascade" }),
+  channel: text("channel").notNull().default("telegram"),
+  status: text("status").notNull().default("dry_run"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, t => [
+  uniqueIndex("logistics_pool_draft_notification_unique").on(t.draftId, t.channel),
+  check("logistics_pool_draft_notifications_telegram_only", sql`${t.channel} = 'telegram'`),
+  check("logistics_pool_draft_notifications_dry_run_only", sql`${t.status} = 'dry_run'`),
+]);
 export const insertLogisticsPoolSourceSchema = createInsertSchema(logisticsPoolSourcesTable);
 export const insertLogisticsPoolEntrySchema = createInsertSchema(logisticsPoolEntriesTable);
 export const insertLogisticsPoolMatchSchema = createInsertSchema(logisticsPoolMatchesTable);
 export const insertLogisticsPoolAiDraftSchema = createInsertSchema(logisticsPoolAiDraftsTable);
+export const insertLogisticsPoolDraftNotificationSchema = createInsertSchema(logisticsPoolDraftNotificationsTable);

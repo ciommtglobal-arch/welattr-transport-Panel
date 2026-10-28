@@ -101,6 +101,7 @@ function toApiDraft(draft: typeof aiDrafts.$inferSelect) {
     introductionDraft: draft.introductionDraft,
     missingChecks: draft.missingChecks,
     generatedAt: draft.createdAt.toISOString(),
+    telegramNotificationStatus: null,
     saved: true,
     sent: false,
     decisionMade: false,

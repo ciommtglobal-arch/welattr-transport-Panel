@@ -68,6 +68,7 @@ export const GetLogisticsPoolResponse = zod.object({
   "introductionDraft": zod.string().min(1).max(getLogisticsPoolResponseMatchesItemAiDraftOneIntroductionDraftMax),
   "missingChecks": zod.array(zod.string()).max(getLogisticsPoolResponseMatchesItemAiDraftOneMissingChecksMax),
   "generatedAt": zod.coerce.date(),
+  "telegramNotificationStatus": zod.union([zod.literal('dry_run'),zod.literal(null)]).nullable(),
   "saved": zod.boolean(),
   "sent": zod.literal(false),
   "decisionMade": zod.literal(false)
@@ -175,6 +176,7 @@ export const ActLogisticsPoolResponse = zod.object({
   "introductionDraft": zod.string().min(1).max(actLogisticsPoolResponseMatchesItemAiDraftOneIntroductionDraftMax),
   "missingChecks": zod.array(zod.string()).max(actLogisticsPoolResponseMatchesItemAiDraftOneMissingChecksMax),
   "generatedAt": zod.coerce.date(),
+  "telegramNotificationStatus": zod.union([zod.literal('dry_run'),zod.literal(null)]).nullable(),
   "saved": zod.boolean(),
   "sent": zod.literal(false),
   "decisionMade": zod.literal(false)
@@ -222,6 +224,7 @@ export const GenerateLogisticsPoolMatchAiDraftResponse = zod.object({
   "introductionDraft": zod.string().min(1).max(generateLogisticsPoolMatchAiDraftResponseIntroductionDraftMax),
   "missingChecks": zod.array(zod.string()).max(generateLogisticsPoolMatchAiDraftResponseMissingChecksMax),
   "generatedAt": zod.coerce.date(),
+  "telegramNotificationStatus": zod.union([zod.literal('dry_run'),zod.literal(null)]).nullable(),
   "saved": zod.boolean(),
   "sent": zod.literal(false),
   "decisionMade": zod.literal(false)

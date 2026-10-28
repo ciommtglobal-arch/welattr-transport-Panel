@@ -4433,7 +4433,7 @@ components:
     LogisticsPoolMatchAiDraft:
       type: object
       additionalProperties: false
-      required: [matchId, matchVersion, summary, introductionDraft, missingChecks, generatedAt, saved, sent, decisionMade]
+      required: [matchId, matchVersion, summary, introductionDraft, missingChecks, generatedAt, telegramNotificationStatus, saved, sent, decisionMade]
       properties:
         matchId: {type: string, format: uuid}
         matchVersion: {type: integer, minimum: 1}
@@ -4441,6 +4441,7 @@ components:
         introductionDraft: {type: string, minLength: 1, maxLength: 1800}
         missingChecks: {type: array, items: {type: string}, maxItems: 8}
         generatedAt: {type: string, format: date-time}
+        telegramNotificationStatus: {type: [string, 'null'], enum: [dry_run, null]}
         saved: {type: boolean}
         sent: {type: boolean, enum: [false]}
         decisionMade: {type: boolean, enum: [false]}

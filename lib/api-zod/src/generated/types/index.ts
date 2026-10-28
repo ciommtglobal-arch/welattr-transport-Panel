@@ -232,6 +232,7 @@ export * from './logisticsPoolEvent';
 export * from './logisticsPoolMatch';
 export * from './logisticsPoolMatchAiDraft';
 export * from './logisticsPoolMatchAiDraftInput';
+export * from './logisticsPoolMatchAiDraftTelegramNotificationStatus';
 export * from './logisticsPoolMatchStatus';
 export * from './logisticsPoolSource';
 export * from './logisticsPoolWorkspace';

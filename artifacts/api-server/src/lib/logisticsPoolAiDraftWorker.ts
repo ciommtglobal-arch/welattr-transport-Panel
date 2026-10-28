@@ -2,6 +2,7 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 import {
   db,
   logisticsPoolAiDraftsTable as drafts,
+  logisticsPoolDraftNotificationsTable as notifications,
   logisticsPoolEntriesTable as entries,
   logisticsPoolMatchesTable as matches,
 } from "@workspace/db";
@@ -15,6 +16,15 @@ import {
 
 const INTERVAL_MS = 120_000;
 const MAX_MATCHES_TO_CHECK = 100;
+
+async function recordDryRunTelegramNotification(draftId: string): Promise<boolean> {
+  const inserted = await db.insert(notifications).values({
+    draftId,
+    channel: "telegram",
+    status: "dry_run",
+  }).onConflictDoNothing().returning({ id: notifications.id });
+  return inserted.length > 0;
+}
 
 async function generateOneTestDraft(): Promise<void> {
   const candidates = await db.select().from(matches)
@@ -39,6 +49,11 @@ async function generateOneTestDraft(): Promise<void> {
       eq(drafts.matchVersion, match.version),
     )).limit(1);
     if (existing?.snapshotHash === match.snapshotHash && existing.status === "pending_review") {
+      const recorded = await recordDryRunTelegramNotification(existing.id);
+      if (recorded) {
+        logger.info("Gönderimsiz Telegram TEST bildirimi kuyruğa kaydedildi; dış mesaj gönderilmedi.");
+        return;
+      }
       continue;
     }
 
@@ -47,7 +62,16 @@ async function generateOneTestDraft(): Promise<void> {
         { matchId: match.id, expectedVersion: match.version },
         LOGISTICS_POOL_AI_DRAFT_WORKER_ACTOR,
       );
-      logger.info("Gemini sentetik TEST taslağı kurucu inceleme kuyruğuna alındı.");
+      const [savedDraft] = await db.select().from(drafts).where(and(
+        eq(drafts.matchId, match.id),
+        eq(drafts.matchVersion, match.version),
+      )).limit(1);
+      if (savedDraft?.snapshotHash === match.snapshotHash && savedDraft.status === "pending_review") {
+        const recorded = await recordDryRunTelegramNotification(savedDraft.id);
+        if (recorded) {
+          logger.info("Gemini TEST taslağı ve gönderimsiz Telegram TEST kaydı kurucu kuyruğuna alındı; dış mesaj gönderilmedi.");
+        }
+      }
       return;
     } catch (error) {
       if (error instanceof LogisticsPoolAiDraftError) {

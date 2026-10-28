@@ -99,8 +99,8 @@ export function MatchDetail({ match, latest, entries, canApprove, canGenerateAiD
     parts.some((part) => part.e?.role === "carrier");
 
   useEffect(() => {
-    setAiDraft(match.aiDraft);
-  }, [match.id, match.version, match.aiDraft]);
+    setAiDraft(latest?.version === match.version ? latest.aiDraft : match.aiDraft);
+  }, [match.id, match.version, match.aiDraft, latest?.id, latest?.version, latest?.aiDraft]);
 
   async function generateAiDraft() {
     setAiDraftError(null);
@@ -208,6 +208,11 @@ export function MatchDetail({ match, latest, entries, canApprove, canGenerateAiD
           {aiDraft ? (
             <div className="space-y-3 border-t border-border pt-3" data-testid="panel-gemini-draft">
               <p className="text-[11px] text-foreground/45">Taslak zamanı: {new Date(aiDraft.generatedAt).toLocaleString("tr-TR")}</p>
+              <p className="text-xs text-foreground/55" data-testid="text-telegram-dry-run-status">
+                {aiDraft.telegramNotificationStatus === "dry_run"
+                  ? "Telegram TEST bildirimi kuyruğa kaydedildi; hiçbir mesaj gönderilmedi."
+                  : "Telegram mesaj gönderimi kapalı; gönderimsiz TEST kaydı bekleniyor."}
+              </p>
               <div>
                 <h4 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/55">Eşleşme açıklaması · AI önerisi</h4>
                 <p className="mt-1 whitespace-pre-wrap text-sm leading-6">{aiDraft.summary}</p>

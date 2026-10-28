@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { LogisticsPoolMatchAiDraftTelegramNotificationStatus } from './logisticsPoolMatchAiDraftTelegramNotificationStatus';
 
 export interface LogisticsPoolMatchAiDraft {
   matchId: string;
@@ -23,6 +24,8 @@ export interface LogisticsPoolMatchAiDraft {
   /** @maxItems 8 */
   missingChecks: string[];
   generatedAt: Date;
+  /** @nullable */
+  telegramNotificationStatus: LogisticsPoolMatchAiDraftTelegramNotificationStatus;
   saved: boolean;
   sent: false;
   decisionMade: false;

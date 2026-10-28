@@ -16,6 +16,7 @@ vi.mock("@workspace/db", async original => {
 import {
   logisticsPoolSourcesTable as sources, logisticsPoolEntriesTable as entries,
   logisticsPoolMatchesTable as matches, logisticsRequestsTable as requests,
+  logisticsPoolAiDraftsTable as aiDrafts, logisticsPoolDraftNotificationsTable as draftNotifications,
   logisticsCarriersTable as carriers, logisticsShipmentsTable as shipments,
 } from "@workspace/db";
 import { actOnPool, getPoolWorkspace, syncInternalPool, syncPoolSource } from "./logisticsPool";
@@ -88,7 +89,7 @@ dbDescribe("Isolated PostgreSQL pool persistence", () => {
   async function isolated(fn:()=>Promise<void>) {
     const rollback = new Error("ROLLBACK ONLY TEST");
     try {await real.db.transaction(async tx => {
-      for(const name of ["logistics_pool_sources","logistics_pool_entries","logistics_pool_matches","logistics_requests","logistics_shipments","logistics_carriers","b2b_listings","b2b_business_profiles"]) {
+      for(const name of ["logistics_pool_sources","logistics_pool_entries","logistics_pool_matches","logistics_pool_ai_drafts","logistics_pool_draft_notifications","logistics_requests","logistics_shipments","logistics_carriers","b2b_listings","b2b_business_profiles"]) {
         await tx.execute(sql.raw(`CREATE TEMP TABLE "${name}" (LIKE public."${name}" INCLUDING DEFAULTS INCLUDING CONSTRAINTS INCLUDING INDEXES) ON COMMIT DROP`));
       }
       state.tx=tx; await fn(); throw rollback;
@@ -107,6 +108,23 @@ dbDescribe("Isolated PostgreSQL pool persistence", () => {
     expect(first.entries).toHaveLength(2); expect(next.matches).toHaveLength(1);
     expect(next.matches[0]).toMatchObject({id:first.matches[0].id,version:1,status:"pending"});
     const [r] = await state.tx.select().from(requests); expect(r).toMatchObject({isTest:true,referenceCode:"POOL-TEST-901"});
+  }));
+  it("shows the no-send Telegram TEST record only to the founder", async () => isolated(async () => {
+    await seed();
+    const [match] = await state.tx.select().from(matches);
+    await state.tx.insert(aiDrafts).values({
+      matchId:match.id,matchVersion:match.version,snapshotHash:match.snapshotHash,
+      summary:"TEST draft summary",introductionDraft:"TEST introduction",missingChecks:[],
+    });
+    const [draft] = await state.tx.select().from(aiDrafts);
+    await state.tx.insert(draftNotifications).values({draftId:draft.id,channel:"telegram",status:"dry_run"});
+
+    const founderView = await getPoolWorkspace(founder);
+    const operatorView = await getPoolWorkspace(operator);
+    expect(founderView.matches[0]?.aiDraft?.telegramNotificationStatus).toBe("dry_run");
+    expect(operatorView.matches[0]?.aiDraft).toBeNull();
+    const [notification] = await state.tx.select().from(draftNotifications);
+    expect(notification.status).toBe("dry_run");
   }));
   it("binds actual founder review to the version, persists it and rejects stale repeat decisions", async () => isolated(async () => {
     await seed(); const m = (await getPoolWorkspace(founder)).matches[0];

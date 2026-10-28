@@ -53,6 +53,16 @@ export interface LogisticsPoolMatchAiDraftInput {
   expectedVersion: number;
 }
 
+/**
+ * @nullable
+ */
+export type LogisticsPoolMatchAiDraftTelegramNotificationStatus = typeof LogisticsPoolMatchAiDraftTelegramNotificationStatus[keyof typeof LogisticsPoolMatchAiDraftTelegramNotificationStatus] | null;
+
+
+export const LogisticsPoolMatchAiDraftTelegramNotificationStatus = {
+  dry_run: 'dry_run',
+} as const;
+
 export interface LogisticsPoolMatchAiDraft {
   matchId: string;
   /** @minimum 1 */
@@ -70,6 +80,8 @@ export interface LogisticsPoolMatchAiDraft {
   /** @maxItems 8 */
   missingChecks: string[];
   generatedAt: string;
+  /** @nullable */
+  telegramNotificationStatus: LogisticsPoolMatchAiDraftTelegramNotificationStatus;
   saved: boolean;
   sent: false;
   decisionMade: false;
