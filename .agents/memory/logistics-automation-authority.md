@@ -47,8 +47,8 @@ güncel veri aktarımı, hata davranışı ve bulunan kayıtların niteliğini d
 
 ## Gemini'nin kurucuyla iletişimi
 
-Kullanıcı, Gemini'nin yalnız taslak üreten bir arka plan görevi değil, kendisiyle iletişimde kalan ve lojistik işlerini ilerleten dijital yardımcısı olmasını istiyor. Kullanıcı ile Replit Agent onu yönlendirecek; ilk hedef sistemi başlatıp çalışan lojistik döngüsünü büyütmek.
+Kullanıcı, Gemini'nin yalnız taslak üreten bir arka plan görevi değil, kendisiyle iletişimde kalan ve lojistik işlerini ilerleten dijital yardımcısı olmasını istiyor. İş bölümünü “dijitaldaki arabuluculuğu Gemini takip edecek, sen kodlama, ben talimat” olarak belirledi: kullanıcı talimatları verir, Replit Agent kodlama ve entegrasyonu yapar, Gemini dijital ticari eşleştirme ve takibi yürütür. İlk hedef sistemi başlatıp çalışan lojistik döngüsünü büyütmek.
 
-**Why:** Kullanıcı, projenin hızlanması için Gemini'nin kendisiyle iletişimde kalması ve beklediği desteği sağladığından emin olması gerektiğini özellikle söyledi.
+**Why:** Kullanıcı, projenin hızlanması için Gemini'nin kendisiyle iletişimde kalması gerektiğini söyledi ve talimat, kodlama, dijital takip iş bölümünü açıkça teyit etti.
 
 **How to apply:** Talimat, ilerleme, engel ve sonuç raporlarının kurucuya ulaşmasını kapsamın parçası say. Ayrı Gemini sohbetinin proje geçmişini otomatik bildiğini veya yalnız taslak üretilmesinin bu iletişim beklentisini karşıladığını iddia etme. Bu hedef mevcut ticari karar ve yayın sınırlarını kaldırmaz.
