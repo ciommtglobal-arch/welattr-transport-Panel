@@ -50,3 +50,9 @@ Kullanıcı sahada çalışırken Gemini ve ChatGPT'nin Köylüm Gıda markası 
 **Why:** Kullanıcı paralel dijital hazırlık ve kendi saha çalışması arasındaki iş bölümünü bu şekilde açıkladı.
 
 **How to apply:** Bu iş bölümünü hazırlık kapsamı olarak koru. Ayrı Gemini ve ChatGPT sohbetlerinin otomatik bağlı olduğunu, arka planda görevlerin başladığını veya markanın hukuki tescilinin doğrulandığını varsayma. Gerçek bağlantı ve çıktı kanıtı olmadan tamamlanmış otomasyon iddiasında bulunma.
+
+Kullanıcı Meta yapay zekâ gözlüklerini şoför, gümrük, tur/turizm ve lojistik çalışmalarında konum, çeviri ve buluşturma desteğiyle vizyona dahil etmek istiyor.
+
+**Why:** Kullanıcı gözlüklerle sahadaki bu kullanım alanlarını açıkça belirtti.
+
+**How to apply:** Bu hedefi saha desteği olarak değerlendir; mevcut lojistik önceliğini değiştirme. Belirli bir gözlük modeli veya erişilebilir API doğrulanmadan doğrudan kamera, konum, çeviri ya da Gemini entegrasyonunun çalıştığını iddia etme.
