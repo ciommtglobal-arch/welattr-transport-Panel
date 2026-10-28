@@ -23,6 +23,12 @@ Kullanıcının genel yaklaşımı: iş ortakları ve projeyi temsil eden insanl
 
 **How to apply:** Proje önerilerini ortaklıklar, insanlarla bağ kurma ve vizyonu birlikte gerçekleştirme odağında değerlendir; para kazanmayı ana hedef olarak sunma.
 
+Kullanıcı vizyonun uluslararası olmasını; halkı fırsatçı aracılardan korumayı, hırsızlık ve dolandırıcılığın önünü kapatmayı ve her şeyin devlet nezdinde şeffaf olmasını istiyor. Avrupa, Afganistan, Irak, Amerika, Dubai, Azerbaycan ve Pakistan'ı örnek verdi; kapsam bunlarla sınırlı değil.
+
+**Why:** Kullanıcı sosyal fayda ve şeffaflık hedefini bu ifadelerle açıkça belirtti.
+
+**How to apply:** Açık ücretler, taraf doğrulaması, izlenebilir işlem geçmişi ve ilgili ülkenin kurallarına uygunluk bu vizyonun uygulama ölçütleri olsun. Bunları uygulanmış özellik, resmî kurum bağlantısı, tüm ülkelerde faaliyet yetkisi veya dolandırıcılığı tamamen önleme garantisi olarak sunma. Şeffaflığı kişisel verileri herkese açmakla karıştırma.
+
 **Why:** When explicitly offered a choice between MMT's own commercial transport work and commissions on MMT Connect matching, with the change to the free-matching policy explained, the user selected MMT Connect matching.
 
 **How to apply:** Keep registration and listings free; prioritize verified profiles, safe matching, multilingual communication, and practical support. Do not describe all matching as free after this decision. Distinguish a platform matching commission from MMT's own transport sales margin. Apply the confirmed 50/50 payment split. The four corridor rates are approved for drafts only; confirm live calculation terms and the event that creates the fee before activation. Draft tariff approval is not approval to publish, enable collection, or modify production records; obtain separate approval for live changes.
