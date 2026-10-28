@@ -273,6 +273,7 @@ function SignInPage() {
           companyPanel
         />
       ) : <SignIn
+        oauthFlow="redirect"
         routing="path"
         path={`${basePath}${standardPath}`}
         signUpUrl={getInviteAwareAuthUrl(`${basePath}/sign-up`)}
@@ -295,6 +296,7 @@ function StaffSignInPage() {
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10">
       {standardSignIn ? (
         <SignIn
+          oauthFlow="redirect"
           routing="path"
           path={`${basePath}/staff/giris/standart`}
           signUpUrl={`${basePath}${navigation.signUpUrl}`}

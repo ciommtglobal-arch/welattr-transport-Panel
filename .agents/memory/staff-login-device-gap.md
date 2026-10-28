@@ -20,3 +20,9 @@ Keep browser-only simulated password submissions and programmatic test authentic
 **Why:** A simulated submission can confirm autofill handling and visible errors, and programmatic sign-in can confirm the destination, without exercising the user's actual password, additional verification, or mobile production cookies. The reported device-specific failure remains unverified by those checks.
 
 **How to apply:** State exactly which parts were checked, require publishing before claiming a live fix, and never treat a simulated sign-in, programmatic sign-in, or successful website-server startup as proof that the affected real account can log in. Hosting configuration and account access are separate checks.
+
+Prefer same-tab Google OAuth on the staff and company sign-in screens rather than relying on a popup.
+
+**Why:** The user reported an inert Google button on mobile. A controlled browser opened a separate Google popup while the original form waited; that waiting state alone was not proof of a broken request. Same-tab handoff removes the separate-window dependency without changing accounts, passwords, or roles.
+
+**How to apply:** Preserve the existing callback and destination routes. Report reaching Google's credential screen separately from completing authentication, and do not equate a mobile viewport in a non-WebKit browser with verification on the user's iPhone.
