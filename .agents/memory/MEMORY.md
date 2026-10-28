@@ -50,3 +50,4 @@
 - [Telegram pilot sınırı](telegram-pilot-boundary.md) — TEST isteği grup yayını değildir; Telegram kimliği MMT yetkisi sayılmaz, webhook sahipliğini bot bazında doğrula.
 - [Lojistik otomasyon yetkisi](logistics-automation-authority.md) — Hazırlık ve takip otomatik; evrakın varlığı doğruluk değildir, son karar açık politika olmadan kaldırılmaz.
 - [Environment presence audits](environment-presence-audits.md) — A false secret entry is not absence when the key exists as a normal environment variable.
+- [Background worker proof](background-worker-proof.md) — Observe a separate worker with committed synthetic dev fixtures; rollback-only service tests cannot prove scheduled execution.
