@@ -35,6 +35,12 @@ Kullanıcı vizyonun uluslararası olmasını; halkı fırsatçı aracılardan k
 
 İlk çalışan ticari döngünün önceliği lojistik komisyonculuğudur. Online mağaza, ürün tedariki ve fason üretimin faaliyete geçmesi ikinci aşamadadır; ancak kullanıcı bu alanların hazırlık ve taslaklarının lojistik çalışmalarıyla paralel ilerlemesini istiyor.
 
+Kullanıcının ilk aşama hedefi gerçek veritabanı kayıtlarıyla lojistik işini yürütmek, komisyon geliri ve faturalı işlem döngüsüyle şirketi güçlendirmek, ardından kredi imkânlarını ve saha faaliyetlerini geliştirmektir.
+
+**Why:** Kullanıcı öncelik sırasını gerçek lojistik iş, komisyon, fatura ve sistem döngüsü olarak açıkça belirtti.
+
+**How to apply:** Yalnız TEST taslağı üretimini ticari döngünün tamamlanması sayma. Kredi veya finansmana erişimi gerçekleşmiş ya da garantili sonuç olarak sunma.
+
 **Why:** Kullanıcı, yeni alanlara geçilmesinin kendisini ilk hedeften uzaklaştırdığını belirtti ve önce mevcut sistemi başlatıp lojistik döngüsünü kurmaya öncelik verdi.
 
 **How to apply:** Lojistik döngüsü ve Gemini desteği birinci öncelik olarak kalsın. İkinci aşamanın taslak hazırlığını tümüyle erteleme; hazırlığı gerçek stok, satış, finansman, yayın veya ticari taahhüt başlatılmasıyla karıştırma.
