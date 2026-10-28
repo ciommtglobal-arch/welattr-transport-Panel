@@ -52,3 +52,9 @@ Kullanıcı, Gemini'nin yalnız taslak üreten bir arka plan görevi değil, ken
 **Why:** Kullanıcı, projenin hızlanması için Gemini'nin kendisiyle iletişimde kalması gerektiğini söyledi ve talimat, kodlama, dijital takip iş bölümünü açıkça teyit etti.
 
 **How to apply:** Talimat, ilerleme, engel ve sonuç raporlarının kurucuya ulaşmasını kapsamın parçası say. Ayrı Gemini sohbetinin proje geçmişini otomatik bildiğini veya yalnız taslak üretilmesinin bu iletişim beklentisini karşıladığını iddia etme. Bu hedef mevcut ticari karar ve yayın sınırlarını kaldırmaz.
+
+Kullanıcı önce sistemin ve kendisi–Gemini–Replit Agent arasındaki iletişimin hazır olmasını, herkesin yerini almasını istiyor. Gerçek ticari dosya, komisyon, fatura ve büyüme sonuçlarının çalışmalarla zaman içinde oluşacağını özellikle düzeltti.
+
+**Why:** Kullanıcı iletişim hazırlığı beklerken odağın tekrar ticari dosyaya kaydırılmasını düzeltti.
+
+**How to apply:** İlk hazır oluş ölçütünü talimatın alınması, görev durumunun ve engellerin görünmesi, Gemini yanıtının kullanıcıya ulaşması ve kurucu kararının korunması olarak ele al. Kullanıcının bu önceliğini yeniden müşteri, teklif, gelir veya kredi hazırlığına yönlendirme. Mevcut taslak worker'ını tamamlanmış karşılıklı iletişim olarak sunma.
