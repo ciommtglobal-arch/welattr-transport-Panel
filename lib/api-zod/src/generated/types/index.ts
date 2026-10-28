@@ -230,6 +230,8 @@ export * from './logisticsPoolEntry';
 export * from './logisticsPoolEntryRole';
 export * from './logisticsPoolEvent';
 export * from './logisticsPoolMatch';
+export * from './logisticsPoolMatchAiDraft';
+export * from './logisticsPoolMatchAiDraftInput';
 export * from './logisticsPoolMatchStatus';
 export * from './logisticsPoolSource';
 export * from './logisticsPoolWorkspace';

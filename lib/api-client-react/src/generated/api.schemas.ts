@@ -47,6 +47,33 @@ export interface LogisticsPoolAction {
   note?: string;
 }
 
+export interface LogisticsPoolMatchAiDraftInput {
+  matchId: string;
+  /** @minimum 1 */
+  expectedVersion: number;
+}
+
+export interface LogisticsPoolMatchAiDraft {
+  matchId: string;
+  /** @minimum 1 */
+  matchVersion: number;
+  /**
+     * @minLength 1
+     * @maxLength 800
+     */
+  summary: string;
+  /**
+     * @minLength 1
+     * @maxLength 1800
+     */
+  introductionDraft: string;
+  /** @maxItems 8 */
+  missingChecks: string[];
+  saved: false;
+  sent: false;
+  decisionMade: false;
+}
+
 export type LogisticsPoolEntryRole = typeof LogisticsPoolEntryRole[keyof typeof LogisticsPoolEntryRole];
 
 
@@ -144,6 +171,7 @@ export interface LogisticsPoolWorkspace {
   matches: LogisticsPoolMatch[];
   sources: LogisticsPoolSource[];
   canApprove: boolean;
+  aiDraftEnabled: boolean;
   externalDiscoveryConfigured: boolean;
   automaticSchedule: string;
   limits: string[];

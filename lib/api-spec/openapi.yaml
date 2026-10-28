@@ -56,6 +56,29 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/LogisticsPoolWorkspace'}
+  /logistics/pool/matches/ai-draft:
+    post:
+      operationId: generateLogisticsPoolMatchAiDraft
+      tags: [logistics-operations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/LogisticsPoolMatchAiDraftInput'}
+      responses:
+        '200':
+          description: Ephemeral AI draft; no decision, persistence or external message
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/LogisticsPoolMatchAiDraft'}
+        '400': {description: Invalid request or unsupported match type}
+        '401': {description: Clerk session required}
+        '403': {description: Founder-only draft generation}
+        '404': {description: Preview disabled or match not found}
+        '409': {description: Match or source changed}
+        '429': {description: Draft cooldown}
+        '502': {description: Invalid provider response}
+        '503': {description: Provider unavailable}
   /logistics/requests/{id}/automation:
     get:
       operationId: getLogisticsAutomation
@@ -4400,6 +4423,26 @@ components:
         informationConfirmed: {type: boolean}
         decision: {type: string, enum: [approved, rejected]}
         note: {type: string, minLength: 3, maxLength: 2000}
+    LogisticsPoolMatchAiDraftInput:
+      type: object
+      additionalProperties: false
+      required: [matchId, expectedVersion]
+      properties:
+        matchId: {type: string, format: uuid}
+        expectedVersion: {type: integer, minimum: 1}
+    LogisticsPoolMatchAiDraft:
+      type: object
+      additionalProperties: false
+      required: [matchId, matchVersion, summary, introductionDraft, missingChecks, saved, sent, decisionMade]
+      properties:
+        matchId: {type: string, format: uuid}
+        matchVersion: {type: integer, minimum: 1}
+        summary: {type: string, minLength: 1, maxLength: 800}
+        introductionDraft: {type: string, minLength: 1, maxLength: 1800}
+        missingChecks: {type: array, items: {type: string}, maxItems: 8}
+        saved: {type: boolean, enum: [false]}
+        sent: {type: boolean, enum: [false]}
+        decisionMade: {type: boolean, enum: [false]}
     LogisticsPoolEntry:
       type: object
       required: [id, sourceKind, sourceId, role, name, location, origin, destination, products, transportMode, capacityKg, requiredKg, volumeM3, availableDate, requiredDate, contact, reference, sourceUrl, isTest, verified, eligible, active, lastSeenAt]
@@ -4465,12 +4508,13 @@ components:
         lastError: {type: [string, 'null']}
     LogisticsPoolWorkspace:
       type: object
-      required: [entries, matches, sources, canApprove, externalDiscoveryConfigured, automaticSchedule, limits]
+      required: [entries, matches, sources, canApprove, aiDraftEnabled, externalDiscoveryConfigured, automaticSchedule, limits]
       properties:
         entries: {type: array, items: {$ref: '#/components/schemas/LogisticsPoolEntry'}}
         matches: {type: array, items: {$ref: '#/components/schemas/LogisticsPoolMatch'}}
         sources: {type: array, items: {$ref: '#/components/schemas/LogisticsPoolSource'}}
         canApprove: {type: boolean}
+        aiDraftEnabled: {type: boolean}
         externalDiscoveryConfigured: {type: boolean}
         automaticSchedule: {type: string}
         limits: {type: array, items: {type: string}}

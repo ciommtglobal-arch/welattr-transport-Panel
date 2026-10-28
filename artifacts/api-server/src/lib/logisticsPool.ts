@@ -13,6 +13,7 @@ import { readPublicFeed, safeFeedUrl, feedSchema, type FeedItem } from "./logist
 import type { LogisticsActor } from "./logisticsWorkflowAuth";
 import { isLogisticsFounder } from "./logisticsListingAuth";
 import { AutomationError } from "./logisticsAutomation";
+import { isLogisticsPoolAiDraftPreviewEnabled } from "./logisticsPoolAiDraft";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Action = z.infer<typeof ActLogisticsPoolBody>;
@@ -139,7 +140,9 @@ export async function getPoolWorkspace(actor: LogisticsActor) {
     return [pool,suggestions,feeds] as const;
   },{isolationLevel:"repeatable read",accessMode:"read only"});
   return {
-    canApprove:isLogisticsFounder(actor.userId),externalDiscoveryConfigured:feeds.some(s => s.enabled),
+    canApprove:isLogisticsFounder(actor.userId),
+    aiDraftEnabled:actor.isFounder && isLogisticsPoolAiDraftPreviewEnabled(),
+    externalDiscoveryConfigured:feeds.some(s => s.enabled),
     automaticSchedule:"Canlı sunucu aktifken iç havuz 2 dakikada, izinli dış kaynaklar en erken 15 dakikada taranır. Panel açıkken de yenilenir; kesintisiz 7/24 worker garantisi değildir.",
     limits:["Her iç kaynakta en çok 1.000, dış beslemede 1.000 kayıt; havuzda 10.000 kayıt.", "Rol başına en çok 200 taraf, 300 alıcı–satıcı çifti ve 1.000 güncel öneri değerlendirilir; benzerlik puanı garanti değildir.",
       ...(suggestions.length > 1000 ? ["Geçmiş dahil sonuçlar ilk 1.000 kayıtla sınırlı."] : []),

@@ -1,7 +1,12 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "wouter";
-import type { LogisticsPoolAction, LogisticsPoolEntry, LogisticsPoolMatch, LogisticsPoolSource, LogisticsPoolWorkspace } from "@workspace/api-client-react";
-import { AlertTriangle, ArrowUpRight, CheckCircle2, Clock, Database, Globe, History, Link2, Lock, Mail, RefreshCw, XCircle } from "lucide-react";
+import {
+  useGenerateLogisticsPoolMatchAiDraft,
+  type LogisticsPoolAction, type LogisticsPoolMatchAiDraft,
+  type LogisticsPoolEntry, type LogisticsPoolMatch,
+  type LogisticsPoolSource, type LogisticsPoolWorkspace,
+} from "@workspace/api-client-react";
+import { AlertTriangle, ArrowUpRight, CheckCircle2, Clock, Database, Globe, History, Link2, Lock, Mail, RefreshCw, Sparkles, XCircle } from "lucide-react";
 import { Feedback, Field, Pill, btnGhost, btnPrimary, describeError, fmtDateTime, inputCls } from "@/components/logistics-ops/shared";
 
 export type Act = (data: LogisticsPoolAction) => Promise<LogisticsPoolWorkspace>;
@@ -75,16 +80,35 @@ export function MatchListItem({ match, entries, selected, onSelect }: { match: L
   );
 }
 
-export function MatchDetail({ match, latest, entries, canApprove, note, setNote, act, onReload, onClose }: {
-  match: LogisticsPoolMatch; latest: LogisticsPoolMatch | undefined; entries: Map<string, LogisticsPoolEntry>; canApprove: boolean;
+export function MatchDetail({ match, latest, entries, canApprove, canGenerateAiDraft, note, setNote, act, onReload, onClose }: {
+  match: LogisticsPoolMatch; latest: LogisticsPoolMatch | undefined; entries: Map<string, LogisticsPoolEntry>; canApprove: boolean; canGenerateAiDraft: boolean;
   note: string; setNote: (v: string) => void; act: Act; onReload: () => void; onClose: () => void;
 }) {
   const [confirmed, setConfirmed] = useState(false);
   const [busy, setBusy] = useState<"approved" | "rejected" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
+  const [aiDraft, setAiDraft] = useState<LogisticsPoolMatchAiDraft | null>(null);
+  const [aiDraftError, setAiDraftError] = useState<string | null>(null);
+  const aiDraftMutation = useGenerateLogisticsPoolMatchAiDraft();
   const changed = !latest || latest.version !== match.version || latest.status !== match.status;
   const parts = match.entryIds.map((id) => ({ id, e: entries.get(id) }));
+  const isLoadCarrierMatch = parts.length === 2 &&
+    parts.some((part) => part.e?.role === "load") &&
+    parts.some((part) => part.e?.role === "carrier");
+
+  async function generateAiDraft() {
+    setAiDraftError(null);
+    setAiDraft(null);
+    try {
+      const result = await aiDraftMutation.mutateAsync({
+        data: { matchId: match.id, expectedVersion: match.version },
+      });
+      setAiDraft(result);
+    } catch (err) {
+      setAiDraftError(describeError(err));
+    }
+  }
 
   async function review(decision: "approved" | "rejected") {
     setError(null); setOk(null);
@@ -161,6 +185,40 @@ export function MatchDetail({ match, latest, entries, canApprove, note, setNote,
         <pre className="mt-2 whitespace-pre-wrap break-words border border-border bg-background/50 p-3 font-sans text-sm leading-6" data-testid="text-introduction">{match.introduction || "Taslak yok."}</pre>
         <p className="mt-1 text-[11px] text-foreground/45">Bu yalnız bir metin taslağıdır. Sistem e-posta veya mesaj göndermez; teklif, sözleşme, ödeme veya sevkiyat oluşturmaz.</p>
       </section>
+
+      {canGenerateAiDraft && isLoadCarrierMatch && match.status === "pending" && !changed ? (
+        <section className="space-y-3 border border-primary/30 bg-primary/5 p-4" data-testid="section-gemini-draft">
+          <div>
+            <h3 className="flex items-center gap-2 text-sm font-semibold"><Sparkles size={14} />Gemini ile öneri taslağı</h3>
+            <p className="mt-1 text-xs leading-5 text-foreground/55">Yalnızca anonimleştirilmiş rota ve yük bilgileri kullanılır. Yanıt geçicidir; eşleşme kararını değiştirmez, kaydedilmez ve gönderilmez.</p>
+          </div>
+          <button type="button" className={btnGhost} disabled={aiDraftMutation.isPending} onClick={() => void generateAiDraft()} data-testid="button-generate-gemini-draft">
+            <Sparkles size={13} />{aiDraftMutation.isPending ? "Taslak hazırlanıyor…" : "Gemini taslağı hazırla"}
+          </button>
+          {aiDraftError ? <Feedback kind="error">{aiDraftError}</Feedback> : null}
+          {aiDraft ? (
+            <div className="space-y-3 border-t border-border pt-3" data-testid="panel-gemini-draft">
+              <div>
+                <h4 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/55">Eşleşme açıklaması · AI önerisi</h4>
+                <p className="mt-1 whitespace-pre-wrap text-sm leading-6">{aiDraft.summary}</p>
+              </div>
+              <div>
+                <h4 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/55">Tanıştırma metni · gönderilmedi</h4>
+                <pre className="mt-1 whitespace-pre-wrap break-words border border-border bg-background/50 p-3 font-sans text-sm leading-6">{aiDraft.introductionDraft}</pre>
+              </div>
+              {aiDraft.missingChecks.length ? (
+                <div>
+                  <h4 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/55">Ayrıca doğrulanması gerekenler</h4>
+                  <ul className="mt-1 list-disc space-y-1 pl-5 text-xs leading-5 text-foreground/65">
+                    {aiDraft.missingChecks.map((check, index) => <li key={index}>{check}</li>)}
+                  </ul>
+                </div>
+              ) : null}
+              <p className="text-[11px] text-foreground/45">İnsan incelemesi gerekir. Bu öneri doğrulama, fiyat, sözleşme, ödeme, sevkiyat veya dış iletişim başlatmaz.</p>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       {canApprove ? (
         match.status === "pending" && !changed ? (

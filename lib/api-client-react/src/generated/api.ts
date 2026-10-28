@@ -144,6 +144,8 @@ import type {
   LogisticsPilotAction,
   LogisticsPilotWorkspace,
   LogisticsPoolAction,
+  LogisticsPoolMatchAiDraft,
+  LogisticsPoolMatchAiDraftInput,
   LogisticsPoolWorkspace,
   LogisticsRequestInput,
   LogisticsRequestRecord,
@@ -389,6 +391,80 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getActLogisticsPoolMutationOptions(options));
+    }
+
+export const getGenerateLogisticsPoolMatchAiDraftUrl = () => {
+
+
+
+
+  return `/api/logistics/pool/matches/ai-draft`
+}
+
+export const generateLogisticsPoolMatchAiDraft = async (logisticsPoolMatchAiDraftInput: LogisticsPoolMatchAiDraftInput, options?: Parameters<typeof customFetch>[1]): Promise<LogisticsPoolMatchAiDraft> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<LogisticsPoolMatchAiDraft>(getGenerateLogisticsPoolMatchAiDraftUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsPoolMatchAiDraftInput)
+  }
+);}
+
+
+
+
+
+export const getGenerateLogisticsPoolMatchAiDraftMutationKey = () => ['generateLogisticsPoolMatchAiDraft'] as const;
+
+export const getGenerateLogisticsPoolMatchAiDraftMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateLogisticsPoolMatchAiDraft>>, TError,GenerateLogisticsPoolMatchAiDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof generateLogisticsPoolMatchAiDraft>>, TError,GenerateLogisticsPoolMatchAiDraftMutationVariables, TContext> => {
+
+const mutationKey = getGenerateLogisticsPoolMatchAiDraftMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generateLogisticsPoolMatchAiDraft>>, GenerateLogisticsPoolMatchAiDraftMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  generateLogisticsPoolMatchAiDraft(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GenerateLogisticsPoolMatchAiDraftMutationResult = NonNullable<Awaited<ReturnType<typeof generateLogisticsPoolMatchAiDraft>>>
+    export type GenerateLogisticsPoolMatchAiDraftMutationBody = BodyType<LogisticsPoolMatchAiDraftInput>
+    export type GenerateLogisticsPoolMatchAiDraftMutationError = ErrorType<void>
+    export type GenerateLogisticsPoolMatchAiDraftMutationVariables = {data: BodyType<LogisticsPoolMatchAiDraftInput>}
+
+    export const useGenerateLogisticsPoolMatchAiDraft = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateLogisticsPoolMatchAiDraft>>, TError,GenerateLogisticsPoolMatchAiDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof generateLogisticsPoolMatchAiDraft>>,
+        TError,
+        GenerateLogisticsPoolMatchAiDraftMutationVariables,
+        TContext
+      > => {
+      return useMutation(getGenerateLogisticsPoolMatchAiDraftMutationOptions(options));
     }
 
 export const getGetLogisticsAutomationUrl = (id: number,) => {

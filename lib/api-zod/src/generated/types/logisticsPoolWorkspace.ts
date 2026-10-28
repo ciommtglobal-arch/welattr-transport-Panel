@@ -14,6 +14,7 @@ export interface LogisticsPoolWorkspace {
   matches: LogisticsPoolMatch[];
   sources: LogisticsPoolSource[];
   canApprove: boolean;
+  aiDraftEnabled: boolean;
   externalDiscoveryConfigured: boolean;
   automaticSchedule: string;
   limits: string[];

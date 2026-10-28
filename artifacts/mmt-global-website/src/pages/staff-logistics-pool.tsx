@@ -249,6 +249,7 @@ function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
           <section className={`${pinned ? "" : "hidden lg:block"} min-w-0 border border-border bg-card/60 p-4 md:p-6`}>
             {pinned ? (
               <MatchDetail key={`${pinned.id}-${pinned.version}`} match={pinned} latest={latest} entries={entries} canApprove={data.canApprove}
+                canGenerateAiDraft={data.aiDraftEnabled}
                 note={notes[pinned.id] ?? ""} setNote={(v) => setNotes((n) => ({ ...n, [pinned.id]: v }))} act={act}
                 onReload={() => {
                   const fresh = qc.getQueryData<LogisticsPoolWorkspace>(poolKey)?.matches.find((m) => m.id === pinned.id);

@@ -64,6 +64,7 @@ export const GetLogisticsPoolResponse = zod.object({
   "lastError": zod.string().nullable()
 })),
   "canApprove": zod.boolean(),
+  "aiDraftEnabled": zod.boolean(),
   "externalDiscoveryConfigured": zod.boolean(),
   "automaticSchedule": zod.string(),
   "limits": zod.array(zod.string())
@@ -150,9 +151,39 @@ export const ActLogisticsPoolResponse = zod.object({
   "lastError": zod.string().nullable()
 })),
   "canApprove": zod.boolean(),
+  "aiDraftEnabled": zod.boolean(),
   "externalDiscoveryConfigured": zod.boolean(),
   "automaticSchedule": zod.string(),
   "limits": zod.array(zod.string())
+})
+
+
+
+
+
+export const GenerateLogisticsPoolMatchAiDraftBody = zod.object({
+  "matchId": zod.uuid(),
+  "expectedVersion": zod.int().min(1)
+})
+
+
+export const generateLogisticsPoolMatchAiDraftResponseSummaryMax = 800;
+
+export const generateLogisticsPoolMatchAiDraftResponseIntroductionDraftMax = 1800;
+
+export const generateLogisticsPoolMatchAiDraftResponseMissingChecksMax = 8;
+
+
+
+export const GenerateLogisticsPoolMatchAiDraftResponse = zod.object({
+  "matchId": zod.uuid(),
+  "matchVersion": zod.int().min(1),
+  "summary": zod.string().min(1).max(generateLogisticsPoolMatchAiDraftResponseSummaryMax),
+  "introductionDraft": zod.string().min(1).max(generateLogisticsPoolMatchAiDraftResponseIntroductionDraftMax),
+  "missingChecks": zod.array(zod.string()).max(generateLogisticsPoolMatchAiDraftResponseMissingChecksMax),
+  "saved": zod.literal(false),
+  "sent": zod.literal(false),
+  "decisionMade": zod.literal(false)
 })
 
 
