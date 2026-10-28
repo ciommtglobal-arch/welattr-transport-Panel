@@ -17,11 +17,11 @@ Yalnızca taslak tarife olarak onaylanan toplam komisyon oranları: Irak Hattı 
 
 **How to apply:** Bu oranları planlama/taslak hesaplarda açıkça taslak etiketiyle kullanın. Canlı tarife veya tahsilat onayı olarak yorumlamayın; gerçek giderlerin karşılanacağını işlem hacmi ve gider verileri olmadan iddia etmeyin.
 
-Kullanıcının genel yaklaşımı: iş ortakları ve projeyi temsil eden insanlarla bağ kurmak; amaç para kazanmak değil, vizyonunu insanlarla birlikte gerçekleştirmek.
+Kullanıcının genel yaklaşımı: iş ortakları ve projeyi temsil eden insanlarla bağ kurmak; amaç para kazanmak değil, vizyonu ve markayı büyütmek, halka ve insanlara kolaylık sağlamak. Kazanç emeğin hakkıdır; kullanıcı bunun devlet güvencesiyle alınmasını ve maliyetlerin düşürülmesini istiyor. “Yakıt maliyeti düşürsek bile yetiyor” diyerek somut faydaya öncelik verdi.
 
-**Why:** Kullanıcı projenin amacını bu şekilde ifade etti.
+**Why:** Kullanıcı projenin amacını bu şekilde ifade etti ve para kazanmayı ana hedef olarak sunmamayı tekrar vurguladı.
 
-**How to apply:** Proje önerilerini ortaklıklar, insanlarla bağ kurma ve vizyonu birlikte gerçekleştirme odağında değerlendir; para kazanmayı ana hedef olarak sunma.
+**How to apply:** Proje önerilerini ortaklıklar, insanlarla bağ kurma, maliyet azaltma ve vizyonu birlikte gerçekleştirme odağında değerlendir; para kazanmayı ana hedef olarak sunma. Yakıt veya boş kilometre azalmasını ölçmeden tasarruf gerçekleştiğini iddia etme. Devlet güvencesi isteğini mevcut bir ödeme garantisi olarak sunma; hukuki kayıt ve sözleşmeyi garantili tahsilattan ayır.
 
 Kullanıcı vizyonun uluslararası olmasını; halkı fırsatçı aracılardan korumayı, hırsızlık ve dolandırıcılığın önünü kapatmayı ve her şeyin devlet nezdinde şeffaf olmasını istiyor. Avrupa, Afganistan, Irak, Amerika, Dubai, Azerbaycan ve Pakistan'ı örnek verdi; kapsam bunlarla sınırlı değil.
 
