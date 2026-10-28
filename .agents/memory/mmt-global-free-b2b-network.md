@@ -27,11 +27,11 @@ Kullanıcının genel yaklaşımı: iş ortakları ve projeyi temsil eden insanl
 
 **How to apply:** Keep registration and listings free; prioritize verified profiles, safe matching, multilingual communication, and practical support. Do not describe all matching as free after this decision. Distinguish a platform matching commission from MMT's own transport sales margin. Apply the confirmed 50/50 payment split. The four corridor rates are approved for drafts only; confirm live calculation terms and the event that creates the fee before activation. Draft tariff approval is not approval to publish, enable collection, or modify production records; obtain separate approval for live changes.
 
-İlk aşama lojistik komisyonculuğudur. Online mağaza, ürün tedariki ve fason üretim ikinci aşamada kalacak; diğer alanlar, sosyal ve canlı medya dahil, sistem oturduktan sonra yavaş yavaş ilerleyecek.
+İlk çalışan ticari döngünün önceliği lojistik komisyonculuğudur. Online mağaza, ürün tedariki ve fason üretimin faaliyete geçmesi ikinci aşamadadır; ancak kullanıcı bu alanların hazırlık ve taslaklarının lojistik çalışmalarıyla paralel ilerlemesini istiyor.
 
 **Why:** Kullanıcı, yeni alanlara geçilmesinin kendisini ilk hedeften uzaklaştırdığını belirtti ve önce mevcut sistemi başlatıp lojistik döngüsünü kurmaya öncelik verdi.
 
-**How to apply:** Yeni mağaza veya ürün modülleriyle mevcut işi genişletme. Önce lojistik döngüsünü ve Gemini desteğini tamamlamaya odaklan; ikinci aşamayı yeniden açıkça istenene kadar uygulama kapsamına alma.
+**How to apply:** Lojistik döngüsü ve Gemini desteği birinci öncelik olarak kalsın. İkinci aşamanın taslak hazırlığını tümüyle erteleme; hazırlığı gerçek stok, satış, finansman, yayın veya ticari taahhüt başlatılmasıyla karıştırma.
 
 İkinci aşama vizyonunda kullanıcı, online sanal mağazalar kurmayı, toptan alıcılar bulmayı ve bunları mevcut projeye entegre ederek uluslararası otomasyon olarak çalışmayı istiyor. Ürün ve fason üretim örnekleri bu bütünün parçasıdır.
 
@@ -44,3 +44,9 @@ Kullanıcı, toptan sipariş aldığında ürünü üreticiden alıp kendi marka
 **Why:** Kullanıcı kendi markasıyla tedarik ve satış modelini açıkça tarif etti.
 
 **How to apply:** MMT'nin kendi markalı ürün satışını platformun eşleştirme komisyonundan ayrı ele al. Marka kullanım hakkını, üretici anlaşmasını veya ürünlerin satışa hazır olduğunu bu vizyondan varsayma.
+
+Kullanıcı sahada çalışırken Gemini ve ChatGPT'nin Köylüm Gıda markası için online mağaza ve hazırlıkları paralel ilerletmesini, Replit Agent'ın bunları projeye entegre etmesini istiyor. Örnekleri çiftçiden/bahçeden zeytin, buğday ve yağ; pamuk ve tekstil; inşaat malzemeleri, arsa/yapsat, taksit imkânı ve uluslararası turizmdir. Amaç bunları kendi markalarına dönüştürmek, insanlara kolaylık sağlamak ve maliyeti düşürmektir.
+
+**Why:** Kullanıcı paralel dijital hazırlık ve kendi saha çalışması arasındaki iş bölümünü bu şekilde açıkladı.
+
+**How to apply:** Bu iş bölümünü hazırlık kapsamı olarak koru. Ayrı Gemini ve ChatGPT sohbetlerinin otomatik bağlı olduğunu, arka planda görevlerin başladığını veya markanın hukuki tescilinin doğrulandığını varsayma. Gerçek bağlantı ve çıktı kanıtı olmadan tamamlanmış otomasyon iddiasında bulunma.
