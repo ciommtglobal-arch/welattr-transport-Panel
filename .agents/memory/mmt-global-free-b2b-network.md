@@ -27,11 +27,17 @@ Kullanıcının genel yaklaşımı: iş ortakları ve projeyi temsil eden insanl
 
 **How to apply:** Keep registration and listings free; prioritize verified profiles, safe matching, multilingual communication, and practical support. Do not describe all matching as free after this decision. Distinguish a platform matching commission from MMT's own transport sales margin. Apply the confirmed 50/50 payment split. The four corridor rates are approved for drafts only; confirm live calculation terms and the event that creates the fee before activation. Draft tariff approval is not approval to publish, enable collection, or modify production records; obtain separate approval for live changes.
 
-Kullanıcı, online sanal mağazalar kurmayı, toptan alıcılar bulmayı ve bunları mevcut projeye entegre ederek uluslararası otomasyon olarak çalışmayı istiyor. Ürün ve fason üretim örnekleri yalnız lojistik demosu olarak değil, bu bütünün parçası olarak ele alınmalı.
+İlk aşama lojistik komisyonculuğudur. Online mağaza, ürün tedariki ve fason üretim ikinci aşamada kalacak; diğer alanlar, sosyal ve canlı medya dahil, sistem oturduktan sonra yavaş yavaş ilerleyecek.
+
+**Why:** Kullanıcı, yeni alanlara geçilmesinin kendisini ilk hedeften uzaklaştırdığını belirtti ve önce mevcut sistemi başlatıp lojistik döngüsünü kurmaya öncelik verdi.
+
+**How to apply:** Yeni mağaza veya ürün modülleriyle mevcut işi genişletme. Önce lojistik döngüsünü ve Gemini desteğini tamamlamaya odaklan; ikinci aşamayı yeniden açıkça istenene kadar uygulama kapsamına alma.
+
+İkinci aşama vizyonunda kullanıcı, online sanal mağazalar kurmayı, toptan alıcılar bulmayı ve bunları mevcut projeye entegre ederek uluslararası otomasyon olarak çalışmayı istiyor. Ürün ve fason üretim örnekleri bu bütünün parçasıdır.
 
 **Why:** Kullanıcı vizyonunu bu şekilde açıkladı.
 
-**How to apply:** Mağaza, üretici/ürün, toptan talep ve lojistik akışlarını birlikte değerlendir. Bu hedefi tamamlanmış entegrasyon veya canlı yayın izni olarak yorumlama.
+**How to apply:** İkinci aşama ele alındığında mağaza, üretici/ürün, toptan talep ve lojistik akışlarını birlikte değerlendir. Bu hedefi tamamlanmış entegrasyon veya canlı yayın izni olarak yorumlama.
 
 Kullanıcı, toptan sipariş aldığında ürünü üreticiden alıp kendi markasıyla alıcıya satabilecek bir yapının hazır olmasını istiyor. Gıda alanını örnek verdi; bu istek yalnız alıcı–üretici aracılığı değildir.
 

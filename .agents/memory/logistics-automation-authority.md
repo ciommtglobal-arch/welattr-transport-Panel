@@ -44,3 +44,11 @@ gerektirir; boş bir entegrasyon veya eşleşme önerisi gerçek bir karşı tar
 
 **How to apply:** Dış kaynağı çalışıyor olarak raporlamadan önce açık izin,
 güncel veri aktarımı, hata davranışı ve bulunan kayıtların niteliğini doğrula.
+
+## Gemini'nin kurucuyla iletişimi
+
+Kullanıcı, Gemini'nin yalnız taslak üreten bir arka plan görevi değil, kendisiyle iletişimde kalan ve lojistik işlerini ilerleten dijital yardımcısı olmasını istiyor. Kullanıcı ile Replit Agent onu yönlendirecek; ilk hedef sistemi başlatıp çalışan lojistik döngüsünü büyütmek.
+
+**Why:** Kullanıcı, projenin hızlanması için Gemini'nin kendisiyle iletişimde kalması ve beklediği desteği sağladığından emin olması gerektiğini özellikle söyledi.
+
+**How to apply:** Talimat, ilerleme, engel ve sonuç raporlarının kurucuya ulaşmasını kapsamın parçası say. Ayrı Gemini sohbetinin proje geçmişini otomatik bildiğini veya yalnız taslak üretilmesinin bu iletişim beklentisini karşıladığını iddia etme. Bu hedef mevcut ticari karar ve yayın sınırlarını kaldırmaz.
