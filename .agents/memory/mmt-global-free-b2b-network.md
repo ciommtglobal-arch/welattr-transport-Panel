@@ -26,3 +26,9 @@ Kullanıcının genel yaklaşımı: iş ortakları ve projeyi temsil eden insanl
 **Why:** When explicitly offered a choice between MMT's own commercial transport work and commissions on MMT Connect matching, with the change to the free-matching policy explained, the user selected MMT Connect matching.
 
 **How to apply:** Keep registration and listings free; prioritize verified profiles, safe matching, multilingual communication, and practical support. Do not describe all matching as free after this decision. Distinguish a platform matching commission from MMT's own transport sales margin. Apply the confirmed 50/50 payment split. The four corridor rates are approved for drafts only; confirm live calculation terms and the event that creates the fee before activation. Draft tariff approval is not approval to publish, enable collection, or modify production records; obtain separate approval for live changes.
+
+Kullanıcı, online sanal mağazalar kurmayı, toptan alıcılar bulmayı ve bunları mevcut projeye entegre ederek uluslararası otomasyon olarak çalışmayı istiyor. Ürün ve fason üretim örnekleri yalnız lojistik demosu olarak değil, bu bütünün parçası olarak ele alınmalı.
+
+**Why:** Kullanıcı vizyonunu bu şekilde açıkladı.
+
+**How to apply:** Mağaza, üretici/ürün, toptan talep ve lojistik akışlarını birlikte değerlendir. Bu hedefi tamamlanmış entegrasyon veya canlı yayın izni olarak yorumlama.
