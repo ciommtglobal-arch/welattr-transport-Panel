@@ -32,3 +32,9 @@ Kullanıcı, online sanal mağazalar kurmayı, toptan alıcılar bulmayı ve bun
 **Why:** Kullanıcı vizyonunu bu şekilde açıkladı.
 
 **How to apply:** Mağaza, üretici/ürün, toptan talep ve lojistik akışlarını birlikte değerlendir. Bu hedefi tamamlanmış entegrasyon veya canlı yayın izni olarak yorumlama.
+
+Kullanıcı, toptan sipariş aldığında ürünü üreticiden alıp kendi markasıyla alıcıya satabilecek bir yapının hazır olmasını istiyor. Gıda alanını örnek verdi; bu istek yalnız alıcı–üretici aracılığı değildir.
+
+**Why:** Kullanıcı kendi markasıyla tedarik ve satış modelini açıkça tarif etti.
+
+**How to apply:** MMT'nin kendi markalı ürün satışını platformun eşleştirme komisyonundan ayrı ele al. Marka kullanım hakkını, üretici anlaşmasını veya ürünlerin satışa hazır olduğunu bu vizyondan varsayma.
