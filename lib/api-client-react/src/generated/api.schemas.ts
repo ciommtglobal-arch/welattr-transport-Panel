@@ -69,7 +69,8 @@ export interface LogisticsPoolMatchAiDraft {
   introductionDraft: string;
   /** @maxItems 8 */
   missingChecks: string[];
-  saved: false;
+  generatedAt: string;
+  saved: boolean;
   sent: false;
   decisionMade: false;
 }
@@ -150,6 +151,7 @@ export interface LogisticsPoolMatch {
   reviewedAt: string | null;
   updatedAt: string;
   events: LogisticsPoolEvent[];
+  aiDraft: LogisticsPoolMatchAiDraft | null;
 }
 
 export interface LogisticsPoolSource {

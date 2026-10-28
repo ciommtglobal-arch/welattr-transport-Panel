@@ -1,9 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod/v4";
 import {
   db, logisticsPoolEntriesTable as entries,
   logisticsPoolMatchesTable as matches, logisticsPoolSourcesTable as sources,
+  logisticsPoolAiDraftsTable as aiDrafts,
 } from "@workspace/db";
 
 export class LogisticsPoolAiDraftError extends Error {
@@ -23,6 +24,7 @@ const ROLE_LABEL: Record<string, string> = {
 };
 const userCooldown = new Map<string, number>();
 const COOLDOWN_MS = 30_000;
+export const LOGISTICS_POOL_AI_DRAFT_WORKER_ACTOR = "mmt-gemini-test-worker";
 let cachedAi: GoogleGenAI | undefined;
 
 export function isLogisticsPoolAiDraftPreviewEnabled(): boolean {
@@ -91,15 +93,25 @@ function publicDescriptor(role: "load" | "carrier", payload: any) {
   };
 }
 
+function toApiDraft(draft: typeof aiDrafts.$inferSelect) {
+  return {
+    matchId: draft.matchId,
+    matchVersion: draft.matchVersion,
+    summary: draft.summary,
+    introductionDraft: draft.introductionDraft,
+    missingChecks: draft.missingChecks,
+    generatedAt: draft.createdAt.toISOString(),
+    saved: true,
+    sent: false,
+    decisionMade: false,
+  };
+}
+
 export async function createLogisticsPoolMatchAiDraft(
   input: { matchId: string; expectedVersion: number },
   actorUserId: string,
 ) {
   const now = Date.now();
-  const lastRequest = userCooldown.get(actorUserId) ?? 0;
-  if (now - lastRequest < COOLDOWN_MS) {
-    throw new LogisticsPoolAiDraftError(429, "Yeni Gemini taslağı için kısa süre bekleyin.");
-  }
 
   const [match] = await db.select().from(matches)
     .where(eq(matches.id, input.matchId)).limit(1);
@@ -136,6 +148,16 @@ export async function createLogisticsPoolMatchAiDraft(
       source.lastSuccessAt.getTime() < now - 15 * 60_000)) {
       throw new LogisticsPoolAiDraftError(409, "Dış kaynak eski veya doğrulanmamış; önce kaynağı yenileyin.");
     }
+  }
+
+  const [reusableDraft] = await db.select().from(aiDrafts)
+    .where(and(eq(aiDrafts.matchId, match.id), eq(aiDrafts.matchVersion, match.version))).limit(1);
+  const reusable = reusableDraft &&
+    reusableDraft.snapshotHash === match.snapshotHash && reusableDraft.status === "pending_review";
+  if (reusable) return toApiDraft(reusableDraft);
+  const lastRequest = userCooldown.get(actorUserId) ?? 0;
+  if (now - lastRequest < COOLDOWN_MS) {
+    throw new LogisticsPoolAiDraftError(429, "Yeni Gemini taslağı için kısa süre bekleyin.");
   }
 
   const load = loadEntry.payload;
@@ -185,14 +207,45 @@ export async function createLogisticsPoolMatchAiDraft(
     throw new LogisticsPoolAiDraftError(502, "Gemini yanıtı beklenen taslak biçiminde değil.");
   }
 
-  return {
+  // The source version must still be current after the model call. Drafts are
+  // durable only in the founder queue; they never change the match decision.
+  const [latestMatch] = await db.select().from(matches)
+    .where(eq(matches.id, match.id)).limit(1);
+  const latestParticipants = latestMatch
+    ? await db.select().from(entries).where(inArray(entries.id, latestMatch.entryIds))
+    : [];
+  if (!latestMatch || latestMatch.status !== "pending" ||
+      latestMatch.version !== match.version ||
+      latestMatch.snapshotHash !== match.snapshotHash ||
+      latestParticipants.length !== 2 ||
+      latestParticipants.some((entry) =>
+        !entry.active ||
+        !entry.payload.eligible ||
+        entry.lastSeenAt.getTime() < Date.now() - 7 * 86400000 ||
+        participants.find((original) => original.id === entry.id)?.fingerprint !== entry.fingerprint) ||
+      latestParticipants.some((entry) => entry.payload.isTest !== latestParticipants[0]?.payload.isTest)) {
+    throw new LogisticsPoolAiDraftError(409, "Eşleşme üretim sırasında değişti; taslak kuyruğa alınmadı.");
+  }
+
+  const origin = actorUserId === LOGISTICS_POOL_AI_DRAFT_WORKER_ACTOR
+    ? "background_worker"
+    : "founder_request";
+  await db.insert(aiDrafts).values({
     matchId: match.id,
     matchVersion: match.version,
+    snapshotHash: match.snapshotHash,
     summary: parsed.data.summary,
     introductionDraft: parsed.data.introductionDraft,
     missingChecks: checks,
-    saved: false,
-    sent: false,
-    decisionMade: false,
-  };
+    origin,
+  }).onConflictDoNothing();
+
+  const [savedDraft] = await db.select().from(aiDrafts)
+    .where(and(eq(aiDrafts.matchId, match.id), eq(aiDrafts.matchVersion, match.version))).limit(1);
+  if (!savedDraft ||
+      savedDraft.snapshotHash !== match.snapshotHash ||
+      savedDraft.status !== "pending_review") {
+    throw new LogisticsPoolAiDraftError(409, "Taslak sürümü değişti; kurucu kuyruğuna alınamadı.");
+  }
+  return toApiDraft(savedDraft);
 }

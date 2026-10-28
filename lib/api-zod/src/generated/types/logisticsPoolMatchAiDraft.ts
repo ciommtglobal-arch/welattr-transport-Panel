@@ -22,7 +22,8 @@ export interface LogisticsPoolMatchAiDraft {
   introductionDraft: string;
   /** @maxItems 8 */
   missingChecks: string[];
-  saved: false;
+  generatedAt: Date;
+  saved: boolean;
   sent: false;
   decisionMade: false;
 }

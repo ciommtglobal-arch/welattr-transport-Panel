@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "wouter";
 import {
   useGenerateLogisticsPoolMatchAiDraft,
@@ -74,6 +74,7 @@ export function MatchListItem({ match, entries, selected, onSelect }: { match: L
         </div>
         <div className="mt-1.5 flex flex-wrap gap-1">{parts.map((p, i) => p ? <RoleBadge key={i} role={p.role} /> : null)}{isTest ? <TestBadge /> : null}</div>
         <p className="mt-1 truncate text-sm font-semibold">{parts.map((p) => p?.name ?? "Kayıt bulunamadı").join(" + ")}</p>
+        {match.aiDraft ? <p className="mt-1 flex items-center gap-1 text-xs text-primary"><Sparkles size={11} />Gemini taslağı kurucu kuyruğunda</p> : null}
         {match.missing.length ? <p className="mt-0.5 text-xs text-[#f08a8a]">{match.missing.length} eksik bilgi</p> : null}
       </button>
     </li>
@@ -88,7 +89,7 @@ export function MatchDetail({ match, latest, entries, canApprove, canGenerateAiD
   const [busy, setBusy] = useState<"approved" | "rejected" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
-  const [aiDraft, setAiDraft] = useState<LogisticsPoolMatchAiDraft | null>(null);
+  const [aiDraft, setAiDraft] = useState<LogisticsPoolMatchAiDraft | null>(match.aiDraft);
   const [aiDraftError, setAiDraftError] = useState<string | null>(null);
   const aiDraftMutation = useGenerateLogisticsPoolMatchAiDraft();
   const changed = !latest || latest.version !== match.version || latest.status !== match.status;
@@ -96,6 +97,10 @@ export function MatchDetail({ match, latest, entries, canApprove, canGenerateAiD
   const isLoadCarrierMatch = parts.length === 2 &&
     parts.some((part) => part.e?.role === "load") &&
     parts.some((part) => part.e?.role === "carrier");
+
+  useEffect(() => {
+    setAiDraft(match.aiDraft);
+  }, [match.id, match.version, match.aiDraft]);
 
   async function generateAiDraft() {
     setAiDraftError(null);
@@ -190,14 +195,19 @@ export function MatchDetail({ match, latest, entries, canApprove, canGenerateAiD
         <section className="space-y-3 border border-primary/30 bg-primary/5 p-4" data-testid="section-gemini-draft">
           <div>
             <h3 className="flex items-center gap-2 text-sm font-semibold"><Sparkles size={14} />Gemini ile öneri taslağı</h3>
-            <p className="mt-1 text-xs leading-5 text-foreground/55">Yalnızca anonimleştirilmiş rota ve yük bilgileri kullanılır. Yanıt geçicidir; eşleşme kararını değiştirmez, kaydedilmez ve gönderilmez.</p>
+            <p className="mt-1 text-xs leading-5 text-foreground/55">Yalnızca anonimleştirilmiş rota ve yük bilgileri kullanılır. Taslak kurucu inceleme kuyruğunda saklanır; eşleşme kararını değiştirmez ve gönderilmez.</p>
           </div>
-          <button type="button" className={btnGhost} disabled={aiDraftMutation.isPending} onClick={() => void generateAiDraft()} data-testid="button-generate-gemini-draft">
-            <Sparkles size={13} />{aiDraftMutation.isPending ? "Taslak hazırlanıyor…" : "Gemini taslağı hazırla"}
-          </button>
+          {aiDraft ? (
+            <Pill className="w-fit border-primary/40 text-primary">Kurucu inceleme kuyruğunda</Pill>
+          ) : (
+            <button type="button" className={btnGhost} disabled={aiDraftMutation.isPending} onClick={() => void generateAiDraft()} data-testid="button-generate-gemini-draft">
+              <Sparkles size={13} />{aiDraftMutation.isPending ? "Taslak hazırlanıyor…" : "Gemini taslağı hazırla"}
+            </button>
+          )}
           {aiDraftError ? <Feedback kind="error">{aiDraftError}</Feedback> : null}
           {aiDraft ? (
             <div className="space-y-3 border-t border-border pt-3" data-testid="panel-gemini-draft">
+              <p className="text-[11px] text-foreground/45">Taslak zamanı: {new Date(aiDraft.generatedAt).toLocaleString("tr-TR")}</p>
               <div>
                 <h4 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/55">Eşleşme açıklaması · AI önerisi</h4>
                 <p className="mt-1 whitespace-pre-wrap text-sm leading-6">{aiDraft.summary}</p>

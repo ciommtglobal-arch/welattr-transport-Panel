@@ -12,9 +12,11 @@ const state = vi.hoisted(() => ({
     ],
     status: "pending",
     version: 1,
+    snapshotHash: "snapshot-1",
   } as Record<string, any>,
   entries: [] as Array<Record<string, any>>,
   sources: [] as Array<Record<string, any>>,
+  drafts: [] as Array<Record<string, any>>,
   generatedText: JSON.stringify({
     summary: "Beyan edilen rota ve taşıma türü örtüşüyor; bilgilerin ayrıca teyidi gerekir.",
     introductionDraft: "Merhaba, MMT Global üzerinden olası bir lojistik iş birliğini değerlendirmek ister misiniz?",
@@ -29,10 +31,12 @@ vi.mock("@workspace/db", () => {
   const matches = table("logistics_pool_matches");
   const entries = table("logistics_pool_entries");
   const sources = table("logistics_pool_sources");
+  const drafts = table("logistics_pool_ai_drafts");
   const rowsFor = (source: { name: string }) =>
     source.name === matches.name ? [state.match]
       : source.name === entries.name ? state.entries
-        : source.name === sources.name ? state.sources : [];
+        : source.name === sources.name ? state.sources
+          : source.name === drafts.name ? state.drafts : [];
   const select = () => ({
     from: (source: { name: string }) => {
       const chain: any = {
@@ -47,17 +51,34 @@ vi.mock("@workspace/db", () => {
   return {
     db: {
       select,
-      insert: () => { state.databaseWrites++; throw new Error("Writes are forbidden in this test"); },
+      insert: (source: { name: string }) => ({
+        values: (value: Record<string, any>) => ({
+          onConflictDoNothing: async () => {
+            state.databaseWrites++;
+            if (source.name === drafts.name && !state.drafts.some((draft) =>
+              draft.matchId === value.matchId && draft.matchVersion === value.matchVersion)) {
+              state.drafts.push({
+                ...value,
+                id: "44444444-4444-4444-8444-444444444444",
+                createdAt: new Date(),
+                status: "pending_review",
+              });
+            }
+          },
+        }),
+      }),
       update: () => { state.databaseWrites++; throw new Error("Writes are forbidden in this test"); },
       delete: () => { state.databaseWrites++; throw new Error("Writes are forbidden in this test"); },
     },
     logisticsPoolMatchesTable: matches,
     logisticsPoolEntriesTable: entries,
     logisticsPoolSourcesTable: sources,
+    logisticsPoolAiDraftsTable: drafts,
   };
 });
 
 vi.mock("drizzle-orm", () => ({
+  and: () => ({}),
   eq: () => ({}),
   inArray: () => ({}),
 }));
@@ -129,12 +150,14 @@ beforeEach(() => {
     entryIds: [loadId, carrierId],
     status: "pending",
     version: 1,
+    snapshotHash: "snapshot-1",
   };
   state.entries = [
     { id: loadId, sourceId: null, active: true, lastSeenAt: new Date(), payload: payload("load") },
     { id: carrierId, sourceId: null, active: true, lastSeenAt: new Date(), payload: payload("carrier") },
   ];
   state.sources = [];
+  state.drafts = [];
   state.generatedText = JSON.stringify({
     summary: "Beyan edilen rota ve taşıma türü örtüşüyor; bilgilerin ayrıca teyidi gerekir.",
     introductionDraft: "Merhaba, MMT Global üzerinden olası bir lojistik iş birliğini değerlendirmek ister misiniz?",
@@ -146,17 +169,18 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllEnvs());
 
-describe("Gemini logistics match draft preview", () => {
-  it("returns a temporary, validated draft without sending identifying data or writing the database", async () => {
+describe("Gemini logistics match draft queue", () => {
+  it("stores a validated founder-review draft without sending identifying data or making a decision", async () => {
     const response = await request(app).post("/api/logistics/pool/matches/ai-draft").send(body).expect(200);
 
     expect(response.body).toMatchObject({
       matchId: body.matchId,
       matchVersion: 1,
-      saved: false,
+      saved: true,
       sent: false,
       decisionMade: false,
     });
+    expect(response.body.generatedAt).toBeTruthy();
     expect(response.body.missingChecks).toContain("Fiyat, sigorta, sözleşme, izinler ve ticari koşullar bu taslakta doğrulanmadı.");
     expect(state.prompt).toContain("Mersin");
     expect(state.prompt).toContain("Erbil");
@@ -169,7 +193,24 @@ describe("Gemini logistics match draft preview", () => {
       "private.example.invalid",
     ]) expect(state.prompt).not.toContain(privateValue);
     expect(state.generateCalls).toBe(1);
-    expect(state.databaseWrites).toBe(0);
+    expect(state.databaseWrites).toBe(1);
+    expect(state.drafts).toHaveLength(1);
+    expect(state.drafts[0]).toMatchObject({
+      matchId: body.matchId,
+      matchVersion: 1,
+      snapshotHash: "snapshot-1",
+      status: "pending_review",
+      origin: "founder_request",
+    });
+  });
+
+  it("reuses the saved draft for the same match version", async () => {
+    const first = await request(app).post("/api/logistics/pool/matches/ai-draft").send(body).expect(200);
+    const second = await request(app).post("/api/logistics/pool/matches/ai-draft").send(body).expect(200);
+
+    expect(second.body).toEqual(first.body);
+    expect(state.generateCalls).toBe(1);
+    expect(state.databaseWrites).toBe(1);
   });
 
   it("is disabled on production and published runtimes", async () => {

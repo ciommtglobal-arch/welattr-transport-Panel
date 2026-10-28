@@ -183,7 +183,7 @@ function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
 
       <div className="mt-4 space-y-2">
         <p className="border-l-2 border-border bg-card px-3 py-2 text-xs leading-5 text-foreground/60" data-testid="text-schedule">
-          {data.automaticSchedule} Bu sayfa açıkken ve görünürken her 2 dakikada bir tarama ister, görünümü 30 saniyede bir yeniler. Kesintisiz 7/24 tarama garantisi yoktur.
+          {data.automaticSchedule} Panel görünümü 30 saniyede bir yenilenir. Worker yalnız API süreci çalışırken aktiftir; canlı Gemini worker'ı ve kesintisiz 7/24 çalışma bu önizlemede etkin değildir.
         </p>
         {!data.externalDiscoveryConfigured ? (
           <p className="flex items-start gap-2 border-l-2 border-primary bg-primary/10 px-3 py-2 text-xs leading-5" role="status" data-testid="text-no-external">

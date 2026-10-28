@@ -1,6 +1,7 @@
 import {
   db, logisticsPoolSourcesTable as sources, logisticsPoolEntriesTable as entries,
   logisticsPoolMatchesTable as matches, logisticsRequestsTable as requests,
+  logisticsPoolAiDraftsTable as aiDrafts,
   logisticsShipmentsTable as shipments, logisticsCarriersTable as carriers,
   b2bListingsTable as listings, b2bBusinessProfilesTable as profiles,
   type PoolPayload,
@@ -133,22 +134,37 @@ export async function refreshPool(includeSources = true) {
   }
 }
 export async function getPoolWorkspace(actor: LogisticsActor) {
-  const [pool, suggestions, feeds] = await db.transaction(async tx => {
+  const [pool, suggestions, feeds, drafts] = await db.transaction(async tx => {
     const pool = await tx.select().from(entries).orderBy(desc(entries.lastSeenAt)).limit(10001);
     const suggestions = await tx.select().from(matches).orderBy(desc(matches.updatedAt)).limit(1001);
     const feeds = await tx.select().from(sources).orderBy(sources.createdAt);
-    return [pool,suggestions,feeds] as const;
+    const drafts = actor.isFounder
+      ? await tx.select().from(aiDrafts).orderBy(desc(aiDrafts.createdAt)).limit(1000)
+      : [];
+    return [pool,suggestions,feeds,drafts] as const;
   },{isolationLevel:"repeatable read",accessMode:"read only"});
+  const draftByVersion = new Map(drafts.map(draft => [`${draft.matchId}:${draft.matchVersion}`, draft]));
   return {
     canApprove:isLogisticsFounder(actor.userId),
     aiDraftEnabled:actor.isFounder && isLogisticsPoolAiDraftPreviewEnabled(),
     externalDiscoveryConfigured:feeds.some(s => s.enabled),
-    automaticSchedule:"Canlı sunucu aktifken iç havuz 2 dakikada, izinli dış kaynaklar en erken 15 dakikada taranır. Panel açıkken de yenilenir; kesintisiz 7/24 worker garantisi değildir.",
+    automaticSchedule:"Geliştirme/TEST API süreci çalışırken worker mevcut havuzdaki sentetik TEST eşleşmelerini 2 dakikada bir kontrol eder ve en çok bir gönderilmemiş taslak kuyruğa alır. Yeni dış fırsat keşfetmez.",
     limits:["Her iç kaynakta en çok 1.000, dış beslemede 1.000 kayıt; havuzda 10.000 kayıt.", "Rol başına en çok 200 taraf, 300 alıcı–satıcı çifti ve 1.000 güncel öneri değerlendirilir; benzerlik puanı garanti değildir.",
       ...(suggestions.length > 1000 ? ["Geçmiş dahil sonuçlar ilk 1.000 kayıtla sınırlı."] : []),
       ...(!feeds.some(s => s.enabled) ? ["Dış kaynak bağlı değil: internetten yeni müşteri bulunduğu iddia edilmez."] : [])],
     entries:pool.slice(0,10000).map(e => ({...e.payload,id:e.id,sourceId:e.sourceId,sourceKind:e.sourceKind,active:e.active && e.lastSeenAt.getTime() >= Date.now()-7*86400000,lastSeenAt:e.lastSeenAt.toISOString()})),
-    matches:suggestions.slice(0,1000).map(m => ({...m,updatedAt:m.updatedAt.toISOString(),reviewedAt:m.reviewedAt?.toISOString() ?? null})),
+     matches:suggestions.slice(0,1000).map(m => {
+       const draft = actor.isFounder ? draftByVersion.get(`${m.id}:${m.version}`) : undefined;
+       return {
+         ...m,
+         updatedAt:m.updatedAt.toISOString(),
+         reviewedAt:m.reviewedAt?.toISOString() ?? null,
+         aiDraft:draft && draft.snapshotHash === m.snapshotHash && m.status === "pending" && draft.status === "pending_review"
+           ? {matchId:draft.matchId,matchVersion:draft.matchVersion,summary:draft.summary,introductionDraft:draft.introductionDraft,
+             missingChecks:draft.missingChecks,generatedAt:draft.createdAt.toISOString(),saved:true,sent:false,decisionMade:false}
+           : null,
+       };
+     }),
     sources:feeds.map(s => ({id:s.id,name:s.name,url:s.url,enabled:s.enabled,version:s.version,lastAttemptAt:s.lastAttemptAt?.toISOString() ?? null,lastSuccessAt:s.lastSuccessAt?.toISOString() ?? null,lastError:s.lastError})),
   };
 }

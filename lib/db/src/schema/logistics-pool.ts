@@ -49,6 +49,19 @@ export const logisticsPoolMatchesTable = pgTable("logistics_pool_matches", {
   events: jsonb("events").$type<PoolReviewEvent[]>().notNull().default([]),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, t => [uniqueIndex("logistics_pool_match_unique").on(t.matchKey)]);
+export const logisticsPoolAiDraftsTable = pgTable("logistics_pool_ai_drafts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  matchId: uuid("match_id").notNull().references(() => logisticsPoolMatchesTable.id, { onDelete: "cascade" }),
+  matchVersion: integer("match_version").notNull(),
+  snapshotHash: text("snapshot_hash").notNull(),
+  summary: text("summary").notNull(),
+  introductionDraft: text("introduction_draft").notNull(),
+  missingChecks: text("missing_checks").array().notNull().default([]),
+  origin: text("origin").notNull().default("background_worker"),
+  status: text("status").notNull().default("pending_review"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, t => [uniqueIndex("logistics_pool_ai_draft_match_version_unique").on(t.matchId, t.matchVersion)]);
 export const insertLogisticsPoolSourceSchema = createInsertSchema(logisticsPoolSourcesTable);
 export const insertLogisticsPoolEntrySchema = createInsertSchema(logisticsPoolEntriesTable);
 export const insertLogisticsPoolMatchSchema = createInsertSchema(logisticsPoolMatchesTable);
+export const insertLogisticsPoolAiDraftSchema = createInsertSchema(logisticsPoolAiDraftsTable);

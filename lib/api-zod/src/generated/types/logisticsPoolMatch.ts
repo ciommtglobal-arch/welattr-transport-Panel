@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { LogisticsPoolEvent } from './logisticsPoolEvent';
+import type { LogisticsPoolMatchAiDraft } from './logisticsPoolMatchAiDraft';
 import type { LogisticsPoolMatchStatus } from './logisticsPoolMatchStatus';
 
 export interface LogisticsPoolMatch {
@@ -23,4 +24,5 @@ export interface LogisticsPoolMatch {
   reviewedAt: Date | null;
   updatedAt: Date;
   events: LogisticsPoolEvent[];
+  aiDraft: LogisticsPoolMatchAiDraft | null;
 }

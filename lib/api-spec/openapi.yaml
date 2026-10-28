@@ -67,7 +67,7 @@ paths:
             schema: {$ref: '#/components/schemas/LogisticsPoolMatchAiDraftInput'}
       responses:
         '200':
-          description: Ephemeral AI draft; no decision, persistence or external message
+          description: Saved founder-review draft; no decision or external message
           content:
             application/json:
               schema: {$ref: '#/components/schemas/LogisticsPoolMatchAiDraft'}
@@ -4433,14 +4433,15 @@ components:
     LogisticsPoolMatchAiDraft:
       type: object
       additionalProperties: false
-      required: [matchId, matchVersion, summary, introductionDraft, missingChecks, saved, sent, decisionMade]
+      required: [matchId, matchVersion, summary, introductionDraft, missingChecks, generatedAt, saved, sent, decisionMade]
       properties:
         matchId: {type: string, format: uuid}
         matchVersion: {type: integer, minimum: 1}
         summary: {type: string, minLength: 1, maxLength: 800}
         introductionDraft: {type: string, minLength: 1, maxLength: 1800}
         missingChecks: {type: array, items: {type: string}, maxItems: 8}
-        saved: {type: boolean, enum: [false]}
+        generatedAt: {type: string, format: date-time}
+        saved: {type: boolean}
         sent: {type: boolean, enum: [false]}
         decisionMade: {type: boolean, enum: [false]}
     LogisticsPoolEntry:
@@ -4472,7 +4473,7 @@ components:
         lastSeenAt: {type: string, format: date-time}
     LogisticsPoolMatch:
       type: object
-      required: [id, entryIds, status, version, score, reasons, missing, introduction, reviewedBy, reviewedAt, events, updatedAt]
+      required: [id, entryIds, status, version, score, reasons, missing, introduction, reviewedBy, reviewedAt, events, updatedAt, aiDraft]
       properties:
         id: {type: string}
         entryIds: {type: array, items: {type: string}}
@@ -4486,6 +4487,7 @@ components:
         reviewedAt: {type: [string, 'null'], format: date-time}
         updatedAt: {type: string, format: date-time}
         events: {type: array, items: {$ref: '#/components/schemas/LogisticsPoolEvent'}}
+        aiDraft: {oneOf: [{$ref: '#/components/schemas/LogisticsPoolMatchAiDraft'}, {type: 'null'}]}
     LogisticsPoolEvent:
       type: object
       required: [at, action, actorUserId, note]

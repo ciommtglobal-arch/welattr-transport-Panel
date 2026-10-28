@@ -8,6 +8,15 @@
 import * as zod from 'zod';
 
 
+
+export const getLogisticsPoolResponseMatchesItemAiDraftOneSummaryMax = 800;
+
+export const getLogisticsPoolResponseMatchesItemAiDraftOneIntroductionDraftMax = 1800;
+
+export const getLogisticsPoolResponseMatchesItemAiDraftOneMissingChecksMax = 8;
+
+
+
 export const GetLogisticsPoolResponse = zod.object({
   "entries": zod.array(zod.object({
   "id": zod.string(),
@@ -51,7 +60,18 @@ export const GetLogisticsPoolResponse = zod.object({
   "action": zod.string(),
   "actorUserId": zod.string().nullable(),
   "note": zod.string()
-}))
+})),
+  "aiDraft": zod.union([zod.object({
+  "matchId": zod.uuid(),
+  "matchVersion": zod.int().min(1),
+  "summary": zod.string().min(1).max(getLogisticsPoolResponseMatchesItemAiDraftOneSummaryMax),
+  "introductionDraft": zod.string().min(1).max(getLogisticsPoolResponseMatchesItemAiDraftOneIntroductionDraftMax),
+  "missingChecks": zod.array(zod.string()).max(getLogisticsPoolResponseMatchesItemAiDraftOneMissingChecksMax),
+  "generatedAt": zod.coerce.date(),
+  "saved": zod.boolean(),
+  "sent": zod.literal(false),
+  "decisionMade": zod.literal(false)
+}),zod.null()])
 })),
   "sources": zod.array(zod.object({
   "id": zod.string(),
@@ -94,6 +114,15 @@ export const ActLogisticsPoolBody = zod.object({
   "decision": zod.enum(['approved', 'rejected']).optional(),
   "note": zod.string().min(actLogisticsPoolBodyNoteMin).max(actLogisticsPoolBodyNoteMax).optional()
 })
+
+
+export const actLogisticsPoolResponseMatchesItemAiDraftOneSummaryMax = 800;
+
+export const actLogisticsPoolResponseMatchesItemAiDraftOneIntroductionDraftMax = 1800;
+
+export const actLogisticsPoolResponseMatchesItemAiDraftOneMissingChecksMax = 8;
+
+
 
 export const ActLogisticsPoolResponse = zod.object({
   "entries": zod.array(zod.object({
@@ -138,7 +167,18 @@ export const ActLogisticsPoolResponse = zod.object({
   "action": zod.string(),
   "actorUserId": zod.string().nullable(),
   "note": zod.string()
-}))
+})),
+  "aiDraft": zod.union([zod.object({
+  "matchId": zod.uuid(),
+  "matchVersion": zod.int().min(1),
+  "summary": zod.string().min(1).max(actLogisticsPoolResponseMatchesItemAiDraftOneSummaryMax),
+  "introductionDraft": zod.string().min(1).max(actLogisticsPoolResponseMatchesItemAiDraftOneIntroductionDraftMax),
+  "missingChecks": zod.array(zod.string()).max(actLogisticsPoolResponseMatchesItemAiDraftOneMissingChecksMax),
+  "generatedAt": zod.coerce.date(),
+  "saved": zod.boolean(),
+  "sent": zod.literal(false),
+  "decisionMade": zod.literal(false)
+}),zod.null()])
 })),
   "sources": zod.array(zod.object({
   "id": zod.string(),
@@ -181,7 +221,8 @@ export const GenerateLogisticsPoolMatchAiDraftResponse = zod.object({
   "summary": zod.string().min(1).max(generateLogisticsPoolMatchAiDraftResponseSummaryMax),
   "introductionDraft": zod.string().min(1).max(generateLogisticsPoolMatchAiDraftResponseIntroductionDraftMax),
   "missingChecks": zod.array(zod.string()).max(generateLogisticsPoolMatchAiDraftResponseMissingChecksMax),
-  "saved": zod.literal(false),
+  "generatedAt": zod.coerce.date(),
+  "saved": zod.boolean(),
   "sent": zod.literal(false),
   "decisionMade": zod.literal(false)
 })
