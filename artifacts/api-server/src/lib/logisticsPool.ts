@@ -16,6 +16,7 @@ import type { LogisticsActor } from "./logisticsWorkflowAuth";
 import { isLogisticsFounder } from "./logisticsListingAuth";
 import { AutomationError } from "./logisticsAutomation";
 import { isLogisticsPoolAiDraftPreviewEnabled } from "./logisticsPoolAiDraft";
+import { logisticsDraftScheduleDescription } from "./logisticsPoolDraftPolicy";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Action = z.infer<typeof ActLogisticsPoolBody>;
@@ -153,7 +154,7 @@ export async function getPoolWorkspace(actor: LogisticsActor) {
     canApprove:isLogisticsFounder(actor.userId),
     aiDraftEnabled:actor.isFounder && isLogisticsPoolAiDraftPreviewEnabled(),
     externalDiscoveryConfigured:feeds.some(s => s.enabled),
-    automaticSchedule:"Geliştirme/TEST API süreci çalışırken worker 2 dakikada bir mevcut sentetik TEST eşleşmelerini kontrol eder; uygun taslak için Telegram'a gönderilmeyen bir TEST bildirimi kaydeder. Yeni dış fırsat keşfetmez.",
+    automaticSchedule:logisticsDraftScheduleDescription(),
     limits:["Her iç kaynakta en çok 1.000, dış beslemede 1.000 kayıt; havuzda 10.000 kayıt.", "Rol başına en çok 200 taraf, 300 alıcı–satıcı çifti ve 1.000 güncel öneri değerlendirilir; benzerlik puanı garanti değildir.",
       ...(suggestions.length > 1000 ? ["Geçmiş dahil sonuçlar ilk 1.000 kayıtla sınırlı."] : []),
       ...(!feeds.some(s => s.enabled) ? ["Dış kaynak bağlı değil: internetten yeni müşteri bulunduğu iddia edilmez."] : [])],

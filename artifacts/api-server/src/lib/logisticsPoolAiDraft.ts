@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod/v4";
+import { logisticsDraftMode } from "./logisticsPoolDraftPolicy";
 import {
   db, logisticsPoolEntriesTable as entries,
   logisticsPoolMatchesTable as matches, logisticsPoolSourcesTable as sources,
@@ -28,10 +29,7 @@ export const LOGISTICS_POOL_AI_DRAFT_WORKER_ACTOR = "mmt-gemini-test-worker";
 let cachedAi: GoogleGenAI | undefined;
 
 export function isLogisticsPoolAiDraftPreviewEnabled(): boolean {
-  return ["development", "test"].includes(process.env.NODE_ENV ?? "") &&
-    !process.env.REPLIT_DEPLOYMENT &&
-    Boolean(process.env.AI_INTEGRATIONS_GEMINI_BASE_URL?.trim()) &&
-    Boolean(process.env.AI_INTEGRATIONS_GEMINI_API_KEY?.trim());
+  return logisticsDraftMode() !== "disabled";
 }
 
 function getAiClient(): GoogleGenAI {
@@ -42,7 +40,7 @@ function getAiClient(): GoogleGenAI {
   }
   cachedAi ??= new GoogleGenAI({
     apiKey,
-    httpOptions: { apiVersion: "", baseUrl },
+    httpOptions: { apiVersion: "", baseUrl, timeout: 45_000 },
   });
   return cachedAi;
 }
