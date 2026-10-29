@@ -58,3 +58,9 @@ Kullanıcı önce sistemin ve kendisi–Gemini–Replit Agent arasındaki ileti�
 **Why:** Kullanıcı iletişim hazırlığı beklerken odağın tekrar ticari dosyaya kaydırılmasını düzeltti.
 
 **How to apply:** İlk hazır oluş ölçütünü talimatın alınması, görev durumunun ve engellerin görünmesi, Gemini yanıtının kullanıcıya ulaşması ve kurucu kararının korunması olarak ele al. Kullanıcının bu önceliğini yeniden müşteri, teklif, gelir veya kredi hazırlığına yönlendirme. Mevcut taslak worker'ını tamamlanmış karşılıklı iletişim olarak sunma.
+
+Kullanıcı Gemini ile de bu sohbet gibi kaldığı yerden devam etmek istiyor; her defasında başa dönmek zorunda kaldığını ve bu yüzden yönetemediğini belirtti.
+
+**Why:** Kullanıcı konuşma ve iş bağlamının sürekliliğini tekrar tekrar talep etti.
+
+**How to apply:** Kayıtlı geçmişin korunması ile modelin yanıt verirken hangi geçmişi gördüğünü ayrı doğrula. Sınırlı son mesaj bağlamını sınırsız hafıza olarak sunma. Oturum erişimi doğrulanmadıysa geçmişin kaydedilmesini kesintisiz mobil erişimle eşitleme.

@@ -5,6 +5,49 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface GeminiInstructionInput {
+  requestId: string;
+  /**
+     * @minLength 1
+     * @maxLength 3000
+     */
+  instruction: string;
+}
+
+export type GeminiWorkspaceTurnStatus = typeof GeminiWorkspaceTurnStatus[keyof typeof GeminiWorkspaceTurnStatus];
+
+
+export const GeminiWorkspaceTurnStatus = {
+  pending: 'pending',
+  answered: 'answered',
+  failed: 'failed',
+} as const;
+
+export interface GeminiWorkspaceTurn {
+  id: string;
+  instruction: string;
+  /** @nullable */
+  reply: string | null;
+  status: GeminiWorkspaceTurnStatus;
+  /** @nullable */
+  failureMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type GeminiWorkspaceMode = typeof GeminiWorkspaceMode[keyof typeof GeminiWorkspaceMode];
+
+
+export const GeminiWorkspaceMode = {
+  preview_drafts_only: 'preview_drafts_only',
+} as const;
+
+export interface GeminiWorkspace {
+  mode: GeminiWorkspaceMode;
+  model: string;
+  turns: GeminiWorkspaceTurn[];
+}
+
 export type LogisticsPoolActionAction = typeof LogisticsPoolActionAction[keyof typeof LogisticsPoolActionAction];
 
 

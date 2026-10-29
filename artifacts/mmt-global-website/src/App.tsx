@@ -119,6 +119,7 @@ const StaffLogisticsListings = lazy(() => import('@/pages/staff-logistics-listin
 
 const StaffLogisticsOperations = lazy(() => import('@/pages/staff-logistics-operations'));
 const StaffLogisticsPool = lazy(() => import('@/pages/staff-logistics-pool'));
+const StaffGemini = lazy(() => import('@/pages/staff-gemini'));
 const AboutPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.AboutPage })));
 const CareersPage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.CareersPage })));
 const CookiePage = lazy(() => import('@/pages/site-pages').then((module) => ({ default: module.CookiePage })));
@@ -409,6 +410,7 @@ function Router() {
         <Route path="/staff/lojistik-ilanlari" component={StaffLogisticsListings} />
         <Route path="/staff/lojistik-operasyon" component={StaffLogisticsOperations} />
         <Route path="/staff/lojistik-havuzu" component={StaffLogisticsPool} />
+        <Route path="/staff/gemini" component={StaffGemini} />
         <Route path="/staff/operasyon-masasi" component={StaffOperationsDesk} />
         <Route path="/staff/giris/*?" component={StaffSignInPage} />
         <Route path="/staff/kayit/*?" component={StaffSignUpPage} />

@@ -8,6 +8,41 @@
 import * as zod from 'zod';
 
 
+export const GetGeminiWorkspaceResponse = zod.object({
+  "mode": zod.enum(['preview_drafts_only']),
+  "model": zod.string(),
+  "turns": zod.array(zod.object({
+  "id": zod.uuid(),
+  "instruction": zod.string(),
+  "reply": zod.string().nullable(),
+  "status": zod.enum(['pending', 'answered', 'failed']),
+  "failureMessage": zod.string().nullable(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+}))
+})
+
+
+export const sendGeminiInstructionBodyInstructionMax = 3000;
+
+
+
+export const SendGeminiInstructionBody = zod.object({
+  "requestId": zod.uuid(),
+  "instruction": zod.string().min(1).max(sendGeminiInstructionBodyInstructionMax)
+})
+
+export const SendGeminiInstructionResponse = zod.object({
+  "id": zod.uuid(),
+  "instruction": zod.string(),
+  "reply": zod.string().nullable(),
+  "status": zod.enum(['pending', 'answered', 'failed']),
+  "failureMessage": zod.string().nullable(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
 
 export const getLogisticsPoolResponseMatchesItemAiDraftOneSummaryMax = 800;
 

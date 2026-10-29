@@ -177,6 +177,7 @@ function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
           <button type="button" onClick={() => void runRefresh()} disabled={refreshState.running} className="flex items-center gap-2 hover:text-primary" data-testid="button-refresh-pool">
             <RefreshCw size={12} className={refreshState.running ? "animate-spin" : ""} />{refreshState.running ? "Havuz taranıyor" : "Şimdi tara ve eşleştir"}
           </button>
+          {data.canApprove ? <Link href="/staff/gemini" className="flex items-center gap-2 hover:text-primary" data-testid="link-gemini">Gemini talimat defteri (önizleme)</Link> : null}
           <span>Son tarama <Freshness at={refreshState.at} /> · görünüm <Freshness at={updatedAt} />{fetching ? " · yenileniyor" : ""}</span>
         </div>
       </div>

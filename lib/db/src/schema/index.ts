@@ -22,3 +22,4 @@ export * from "./nexus-shopify";
 export * from "./logistics-pilot";
 export * from "./logistics-automation";
 export * from "./logistics-pool";
+export * from "./gemini-workspace";

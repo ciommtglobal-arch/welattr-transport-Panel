@@ -31,6 +31,30 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /gemini/workspace:
+    get:
+      operationId: getGeminiWorkspace
+      tags: [logistics-operations]
+      responses:
+        '200':
+          description: Founder-owned preview instruction history; no operational execution
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/GeminiWorkspace'}
+    post:
+      operationId: sendGeminiInstruction
+      tags: [logistics-operations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/GeminiInstructionInput'}
+      responses:
+        '200':
+          description: Persisted instruction and response or existing idempotent turn
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/GeminiWorkspaceTurn'}
   /logistics/pool:
     get:
       operationId: getLogisticsPool
@@ -4408,6 +4432,33 @@ components:
       name: pageSize
       schema: { type: integer, minimum: 1, maximum: 50, default: 25 }
   schemas:
+    GeminiInstructionInput:
+      type: object
+      additionalProperties: false
+      required: [requestId, instruction]
+      properties:
+        requestId: {type: string, format: uuid}
+        instruction: {type: string, minLength: 1, maxLength: 3000}
+    GeminiWorkspaceTurn:
+      type: object
+      required: [id, instruction, reply, status, failureMessage, createdAt, updatedAt]
+      properties:
+        id: {type: string, format: uuid}
+        instruction: {type: string}
+        reply: {type: [string, 'null']}
+        status: {type: string, enum: [pending, answered, failed]}
+        failureMessage: {type: [string, 'null']}
+        createdAt: {type: string}
+        updatedAt: {type: string}
+    GeminiWorkspace:
+      type: object
+      required: [mode, turns, model]
+      properties:
+        mode: {type: string, enum: [preview_drafts_only]}
+        model: {type: string}
+        turns:
+          type: array
+          items: {$ref: '#/components/schemas/GeminiWorkspaceTurn'}
     LogisticsPoolAction:
       type: object
       additionalProperties: false

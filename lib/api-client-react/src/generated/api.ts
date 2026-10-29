@@ -77,6 +77,9 @@ import type {
   ErrorResponse,
   ExportCompanyRecordsParams,
   ExportKasaSummaryParams,
+  GeminiInstructionInput,
+  GeminiWorkspace,
+  GeminiWorkspaceTurn,
   GetB2BBusinessProfileReviewQueueParams,
   GetB2BCompanyTaskReportsParams,
   GetB2BListingReviewQueueParams,
@@ -247,6 +250,151 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetGeminiWorkspaceUrl = () => {
+
+
+
+
+  return `/api/gemini/workspace`
+}
+
+export const getGeminiWorkspace = async ( options?: Parameters<typeof customFetch>[1]): Promise<GeminiWorkspace> => {
+
+  return customFetch<GeminiWorkspace>(getGetGeminiWorkspaceUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetGeminiWorkspaceQueryKey = () => {
+    return [
+    `/api/gemini/workspace`
+    ] as const;
+    }
+
+
+export const getGetGeminiWorkspaceQueryOptions = <TData = Awaited<ReturnType<typeof getGeminiWorkspace>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getGeminiWorkspace>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetGeminiWorkspaceQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getGeminiWorkspace>>> = ({ signal }) => getGeminiWorkspace({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getGeminiWorkspace>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetGeminiWorkspaceQueryResult = NonNullable<Awaited<ReturnType<typeof getGeminiWorkspace>>>
+export type GetGeminiWorkspaceQueryError = ErrorType<unknown>
+
+
+
+export function useGetGeminiWorkspace<TData = Awaited<ReturnType<typeof getGeminiWorkspace>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getGeminiWorkspace>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetGeminiWorkspaceQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSendGeminiInstructionUrl = () => {
+
+
+
+
+  return `/api/gemini/workspace`
+}
+
+export const sendGeminiInstruction = async (geminiInstructionInput: GeminiInstructionInput, options?: Parameters<typeof customFetch>[1]): Promise<GeminiWorkspaceTurn> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<GeminiWorkspaceTurn>(getSendGeminiInstructionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(geminiInstructionInput)
+  }
+);}
+
+
+
+
+
+export const getSendGeminiInstructionMutationKey = () => ['sendGeminiInstruction'] as const;
+
+export const getSendGeminiInstructionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendGeminiInstruction>>, TError,SendGeminiInstructionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendGeminiInstruction>>, TError,SendGeminiInstructionMutationVariables, TContext> => {
+
+const mutationKey = getSendGeminiInstructionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendGeminiInstruction>>, SendGeminiInstructionMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  sendGeminiInstruction(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendGeminiInstructionMutationResult = NonNullable<Awaited<ReturnType<typeof sendGeminiInstruction>>>
+    export type SendGeminiInstructionMutationBody = BodyType<GeminiInstructionInput>
+    export type SendGeminiInstructionMutationError = ErrorType<unknown>
+    export type SendGeminiInstructionMutationVariables = {data: BodyType<GeminiInstructionInput>}
+
+    export const useSendGeminiInstruction = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendGeminiInstruction>>, TError,SendGeminiInstructionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendGeminiInstruction>>,
+        TError,
+        SendGeminiInstructionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSendGeminiInstructionMutationOptions(options));
+    }
 
 export const getGetLogisticsPoolUrl = () => {
 
