@@ -23,11 +23,11 @@ Kullanıcının genel yaklaşımı: iş ortakları ve projeyi temsil eden insanl
 
 **How to apply:** Proje önerilerini ortaklıklar, insanlarla bağ kurma, maliyet azaltma ve vizyonu birlikte gerçekleştirme odağında değerlendir; para kazanmayı ana hedef olarak sunma. Yakıt veya boş kilometre azalmasını ölçmeden tasarruf gerçekleştiğini iddia etme. Devlet güvencesi isteğini mevcut bir ödeme garantisi olarak sunma; hukuki kayıt ve sözleşmeyi garantili tahsilattan ayır.
 
-Kullanıcı vizyonun uluslararası olmasını; halkı fırsatçı aracılardan korumayı, hırsızlık ve dolandırıcılığın önünü kapatmayı ve her şeyin devlet nezdinde şeffaf olmasını istiyor. Avrupa, Afganistan, Irak, Amerika, Dubai, Azerbaycan ve Pakistan'ı örnek verdi; kapsam bunlarla sınırlı değil.
+Kullanıcı vizyonun uluslararası olmasını; halkı fırsatçı aracılardan korumayı, hırsızlık ve dolandırıcılığın önünü kapatmayı ve her şeyin devlet nezdinde şeffaf olmasını istiyor. Avrupa, Afganistan, Irak, Amerika, Dubai, Azerbaycan ve Pakistan'ı örnek verdi; kapsam bunlarla sınırlı değil. Kamu ihalelerine katılarak da halka fayda sağlanmasını vizyonun bir parçası olarak görüyor.
 
 **Why:** Kullanıcı sosyal fayda ve şeffaflık hedefini bu ifadelerle açıkça belirtti.
 
-**How to apply:** Açık ücretler, taraf doğrulaması, izlenebilir işlem geçmişi ve ilgili ülkenin kurallarına uygunluk bu vizyonun uygulama ölçütleri olsun. Bunları uygulanmış özellik, resmî kurum bağlantısı, tüm ülkelerde faaliyet yetkisi veya dolandırıcılığı tamamen önleme garantisi olarak sunma. Şeffaflığı kişisel verileri herkese açmakla karıştırma.
+**How to apply:** Açık ücretler, taraf doğrulaması, izlenebilir işlem geçmişi ve ilgili ülkenin kurallarına uygunluk bu vizyonun uygulama ölçütleri olsun. Bunları uygulanmış özellik, resmî kurum bağlantısı, tüm ülkelerde faaliyet yetkisi veya dolandırıcılığı tamamen önleme garantisi olarak sunma. Kamu ihalesi hedefini kazanılmış ihale veya mevcut yeterlilik olarak sunma; bu hedef mevcut iletişim ve lojistik önceliğini değiştirmez. Şeffaflığı kişisel verileri herkese açmakla karıştırma.
 
 **Why:** When explicitly offered a choice between MMT's own commercial transport work and commissions on MMT Connect matching, with the change to the free-matching policy explained, the user selected MMT Connect matching.
 
