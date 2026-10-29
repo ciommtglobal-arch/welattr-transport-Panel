@@ -26,3 +26,9 @@ Prefer same-tab Google OAuth on the staff and company sign-in screens rather tha
 **Why:** The user reported an inert Google button on mobile. A controlled browser opened a separate Google popup while the original form waited; that waiting state alone was not proof of a broken request. Same-tab handoff removes the separate-window dependency without changing accounts, passwords, or roles.
 
 **How to apply:** Preserve the existing callback and destination routes. Report reaching Google's credential screen separately from completing authentication, and do not equate a mobile viewport in a non-WebKit browser with verification on the user's iPhone.
+
+The user confirmed on 2026-10-29 that the development panel opened successfully after the reported authenticated 403, checking the exact verified founder mapping, restarting preview services, and guidance to open directly in Safari.
+
+**Why:** This is user-confirmed preview access, not proof of which step resolved the denial or proof of production access and complete automation.
+
+**How to apply:** Do not describe this specific preview denial as still unresolved. Preserve exact-identity authorization; do not infer that roles need widening or that deployment, commercial approval, or Telegram delivery has been verified.
