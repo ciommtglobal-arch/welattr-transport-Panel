@@ -1,6 +1,6 @@
 ---
 name: Entegrasyon kontrolü
-description: MMT Nexus ve Shopify çalışmalarında kullanıcının kontrol sınırı.
+description: MMT Global entegrasyon kontrolü ve ticari sırların paylaşılmasına ilişkin sınırlar.
 ---
 
 MMT Nexus ve Shopify kontrolleri bağlamında kullanıcı: “Kontrol bizde kalacak şekilde olsun.”
@@ -20,3 +20,9 @@ Kullanıcı şimdilik kimseyi istemiyor: “herşey sistemsel olarak olacak diye
 **Why:** Kullanıcı şimdilik sistemsel ilerlemek istediğini belirtti.
 
 **How to apply:** Bu aşamada kişi daveti veya görevlendirme başlatma; gerçek kişi davet doğrulamasını yapılmış sayma. Kullanıcı görevlendirme aşamasını açana kadar mevcut hesapları ve rolleri koru.
+
+Kullanıcı proje kodlarını ticari sır olarak korumamızı, önemli kodları kopyalayıp paylaşmaya yönlendirmememizi istedi. Projesiyle Türkiye, Avrupa ve ABD pazarlarında liderliği hedeflediğini belirtti.
+
+**Why:** Kullanıcı “sonuçta ticaret sırdır” diyerek gizlilik sınırını açıkça koydu.
+
+**How to apply:** Hassas proje kodlarını veya erişim bilgilerini sohbetlere ve üçüncü taraflara kopyalamasını isteme. İnceleme için mümkünse mevcut çalışma alanını kullan; kullanıcıdan içerik gerektiğinde hassas alanları çıkarılmış asgari örneği iste ve paylaşım öncesi uyar. Cihazındaki panoyu veya kopyalamayı teknik olarak engelleyebildiğini iddia etme. Bu kuralı mevcut entegrasyonların kapatılması veya kullanıcı cihazında yeni bir engelleme özelliği oluşturma izni sayma.
