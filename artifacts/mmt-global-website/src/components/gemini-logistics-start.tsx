@@ -27,6 +27,7 @@ export function GeminiLogisticsStart({ userId, busy, onPrepare }: {
   return (
     <section className="mt-5 border border-border bg-card p-4" aria-labelledby="logistics-start-title" data-testid="gemini-logistics-start">
       <h2 id="logistics-start-title" className="font-semibold">Lojistik çalışma başlangıcı</h2>
+      <p className="mt-2 text-xs leading-5 text-foreground/70">Her gönderdiğiniz talimata sunucudan güncel, anonim yük ve taşıyıcı sayıları eklenir. Gemini geçmiş tarih, izin ve kaynak eksiklerini bu özetle değerlendirir; üretim verisi, internet taraması veya araç müsaitliği doğrulaması değildir.</p>
       <p className="mt-1 text-xs leading-5 text-foreground/60">Mevcut havuzun salt okunur özeti; API'nin döndürdüğü kayıtlarla sınırlıdır. Bu alan açılınca tarama, kayıt değişikliği veya Gemini çağrısı yapılmaz.</p>
       {pool.isPending ? <p className="mt-3 text-sm" role="status">Havuz özeti yükleniyor…</p>
         : pool.isError ? <p className="mt-3 text-sm text-red-300" role="alert">Havuz doğrulanamadı; bunu sıfır kayıt olarak göstermiyoruz. Yenileyin veya mevcut havuz ekranına geçin.</p>

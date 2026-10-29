@@ -3,6 +3,14 @@ const state = vi.hoisted(() => ({
   selects: [] as any[][], inserted: [] as any[], returned: [] as any[],
   writes: [] as any[], calls: 0, reply: "TEST yanıt", providerFails: false,
 }));
+const operational = vi.hoisted(() => ({ fail: false, calls: 0, config: "" }));
+vi.mock("./geminiOperationalContext", () => ({
+  getGeminiOperationalContext: async () => {
+    operational.calls++;
+    if (operational.fail) throw new Error("PRIVATE_DB_ERROR");
+    return '{"counts":{"real_loads":1,"real_carriers":0}}';
+  },
+}));
 vi.mock("@workspace/db", async original => {
   const actual = await original<typeof import("@workspace/db")>();
   function selectChain(): any {
@@ -23,7 +31,8 @@ vi.mock("@workspace/db", async original => {
 });
 vi.mock("@google/genai", () => ({
   GoogleGenAI: class {
-    models = { generateContent: async () => {
+    models = { generateContent: async (input: any) => {
+      operational.config = input.config.systemInstruction;
       state.calls++;
       if (state.providerFails) throw new Error("DO_NOT_LEAK_PROVIDER_SECRET");
       return { text: state.reply };
@@ -44,6 +53,7 @@ beforeEach(() => {
   vi.stubEnv("AI_INTEGRATIONS_GEMINI_BASE_URL", "https://example.invalid");
   state.selects = []; state.inserted = [row()]; state.returned = [];
   state.writes = []; state.calls = 0; state.reply = "TEST yanıt"; state.providerFails = false;
+  operational.fail = false; operational.calls = 0; operational.config = "";
 });
 afterEach(() => vi.unstubAllEnvs());
 describe("Gemini workspace persistence boundaries", () => {
@@ -79,6 +89,16 @@ describe("Gemini workspace persistence boundaries", () => {
     expect(result.status).toBe("answered"); expect(result.reply).toBe(state.reply);
     expect(state.calls).toBe(1);
     expect(state.writes.at(-1)).toMatchObject({ status: "answered", reply: state.reply });
+    expect(operational.config).toContain('"real_carriers":0');
+    expect(operational.config).toContain("Kurucudan gereken tek karar");
+  });
+  it("does not call Gemini or invent zero counts when operational context fails", async () => {
+    operational.fail = true;
+    state.selects = [[], [], [{ ...row(), status: "failed", failureMessage: "Talimat korundu." }]];
+    const result = await sendGeminiInstruction("TEST_OWNER", input);
+    expect(result.status).toBe("failed");
+    expect(state.calls).toBe(0);
+    expect(JSON.stringify(result)).not.toContain("PRIVATE_DB_ERROR");
   });
   it.each(["", "x".repeat(16_001)])("does not label invalid model output answered", async reply => {
     state.reply = reply; state.selects = [[], [], [{ ...row(), status: "failed", failureMessage: "Güvenli hata" }]];

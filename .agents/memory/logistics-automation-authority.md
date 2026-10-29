@@ -33,6 +33,14 @@ operasyon, kesin fiyat veya sevkiyat sonucu çıkarma.
 
 ## Beklenen otomasyonun kapsamı
 
+Kurucu, talep yoğunluğunun kendisinin elle kaldıracağı bir iş yüküne dönüşmemesini
+istiyor; sistemin kapasitesine güvenmek onun için başlangıç koşulu.
+
+**Why:** Kullanıcı “ne kadar yoğun ... kaldırabilecek miyiz ... benim yapıp kaldıracağım şeyler değil” dedi.
+
+**How to apply:** Model yanıt testlerini kapasite kanıtı sayma. İş kabul sınırı,
+kuyruk ve hata görünürlüğünü değerlendir; önerilen sınırı uygulanmış gibi anlatma.
+
 Kullanıcı sistemin “kendisi bulup kendisi havuz oluşturup alıcı nakliyat ve
 satıcıyı bir araya” getirmesini bekliyor; yalnızca elle girilen talebin ilan
 taslağına çevrilmesi bu beklentiyi karşılamaz.
