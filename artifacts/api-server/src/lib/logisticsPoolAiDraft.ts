@@ -1,3 +1,4 @@
+import { isTestMarketSource } from "./marketSourcePolicy";
 import { GoogleGenAI } from "@google/genai";
 import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod/v4";
@@ -127,7 +128,7 @@ export async function createLogisticsPoolMatchAiDraft(
   if (participants.length !== 2 ||
       participants.some((entry) =>
         !entry.active ||
-        !entry.payload.eligible ||
+        isTestMarketSource(entry.payload.sourceUrl) || !entry.payload.eligible ||
         entry.lastSeenAt.getTime() < now - 7 * 86400000)) {
     throw new LogisticsPoolAiDraftError(409, "Eşleşme kaynağı eksik, pasif veya eski.");
   }
@@ -224,7 +225,7 @@ export async function createLogisticsPoolMatchAiDraft(
       latestParticipants.length !== 2 ||
       latestParticipants.some((entry) =>
         !entry.active ||
-        !entry.payload.eligible ||
+        isTestMarketSource(entry.payload.sourceUrl) || !entry.payload.eligible ||
         entry.lastSeenAt.getTime() < Date.now() - 7 * 86400000 ||
         participants.find((original) => original.id === entry.id)?.fingerprint !== entry.fingerprint) ||
       latestParticipants.some((entry) => entry.payload.isTest !== latestParticipants[0]?.payload.isTest)) {

@@ -16,3 +16,13 @@ on redelivery, creating a different commercial meaning without a new advertiseme
 
 **How to apply:** Pass Telegram message.date / feed occurredAt through all parsing
 paths; preserve ambiguous dates for review rather than guessing.
+
+WelatTR Core is a TEST source, not a real market supply source, until the founder
+explicitly changes that designation.
+
+**Why:** The user identified its advertisements as tests and requested existing
+and future test advertisements be marked TEST or isolated from the market pool.
+
+**How to apply:** Do not enable real matching or model-generated commercial
+drafts for that source simply because its message parses successfully. Preserve
+the source boundary for previously stored entries too.

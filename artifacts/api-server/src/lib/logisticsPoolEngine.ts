@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import type { PoolPayload } from "@workspace/db";
+import { isTestMarketSource } from "./marketSourcePolicy";
 
 export type PoolRow = { id: string; payload: PoolPayload; fingerprint: string; active: boolean; lastSeenAt: Date };
 export type PoolSuggestion = { matchKey: string; entryIds: string[]; snapshotHash: string; score: number; reasons: string[]; missing: string[]; introduction: string };
@@ -35,6 +36,7 @@ function carrierFit(origin: string, destination: string, kg: number | null, volu
 export function suggestPoolMatches(rows: PoolRow[], today = new Date().toISOString().slice(0, 10)) {
   const dedup = new Set<string>();
   const active = rows.filter(r => {
+    if (isTestMarketSource(r.payload.sourceUrl)) return false;
     if (!r.active || !r.payload.eligible || (r.payload.requiredDate && r.payload.requiredDate < today)) return false;
     // Source IDs are durable; cross-source identity is only deduplicated with
     // a matching explicit contact, never guessed from a similar company name.

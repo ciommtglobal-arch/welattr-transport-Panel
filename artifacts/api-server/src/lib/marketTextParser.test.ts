@@ -10,6 +10,10 @@ describe("conservative Turkish market parsing", () => {
     expect(r.item.quotedPriceMinor).toBeUndefined();
   });
   it.each([
+    ["TEST ilanı: İstanbul Tuzlaʼdan Ankara Ostimʼe 20 ton paletli yük, tenteli bugün", "İstanbul Tuzla", "Ankara Ostim", "2026-10-30"],
+    ["İstanbul Tuzla ’ dan Ankara Ostim ’ e, 20 ton paletli yük, tenteli bugün", "İstanbul Tuzla", "Ankara Ostim", "2026-10-30"],
+    ["İstanbul\u00a0Tuzla\u200b'dan Ankara\u00a0Ostim'e 20 ton paletli yük, tenteli bugün", "İstanbul Tuzla", "Ankara Ostim", "2026-10-30"],
+    ["Tuzla / İstanbul'dan Ostim / Ankara'ya 20 ton paletli yük, tenteli bugün", "Tuzla / İstanbul", "Ostim / Ankara", "2026-10-30"],
     ["Mersin'den Adana'ya 24 ton dökme yük, damper, yarın", "Mersin", "Adana", "2026-10-31"],
     ["İstanbul’dan Ankara’ya 20 ton paletli yük, tenteli, bugün", "İstanbul", "Ankara", "2026-10-30"],
     ["Mersinden Ankaraya 24 ton komple yük, tente, 31.10.2026", "Mersin", "Ankara", "2026-10-31"],

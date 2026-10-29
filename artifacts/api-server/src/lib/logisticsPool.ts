@@ -18,6 +18,7 @@ import { AutomationError } from "./logisticsAutomation";
 import { isLogisticsPoolAiDraftPreviewEnabled } from "./logisticsPoolAiDraft";
 import { logisticsDraftScheduleDescription, permittedCarrierCandidate, permittedInternalLogisticsRecord } from "./logisticsPoolDraftPolicy";
 import { describeWorkerEvidence } from "./logisticsWorkerEvidence";
+import { isolateTestMarketPayload, isTestMarketSource } from "./marketSourcePolicy";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Action = z.infer<typeof ActLogisticsPoolBody>;
@@ -32,6 +33,16 @@ async function upsert(tx: Tx, originKey: string, sourceKind: string, payload: Po
 async function rebuild(tx: Tx) {
   const rows = await tx.select().from(entries).orderBy(entries.originKey);
   if (rows.length > 10000) fail(413,"Havuz 10.000 kayıt sınırında; kaynak kapsamını daraltın.");
+  // Apply the founder's source quarantine to existing rows as well as new intake.
+  // This is normal pool reconciliation under the existing transaction lock.
+  for (const row of rows) {
+    const corrected = isolateTestMarketPayload(row.payload);
+    if (corrected !== row.payload && (!row.payload.isTest || row.payload.eligible)) {
+      row.payload = corrected;
+      row.fingerprint = digest(corrected);
+      await tx.update(entries).set({payload:corrected,fingerprint:row.fingerprint}).where(eq(entries.id,row.id));
+    }
+  }
   const eligible = rows.filter(r => r.lastSeenAt.getTime() >= Date.now()-7*86400000);
   const generated = suggestPoolMatches(eligible);
   const existing = await tx.select().from(matches);
@@ -120,7 +131,7 @@ export async function ingestTelegramMarketItem(source: typeof sources.$inferSele
     const [current] = await tx.select().from(sources).where(eq(sources.id, source.id)).for("update");
     if (!current?.enabled || current.version !== source.version || current.url !== source.url) fail(409,"Kaynak izni değişti.");
     const originKey = `${source.url.startsWith("telegram:") ? "telegram" : "market"}:${source.id}:${messageId}`;
-    const data = {...payload(item, source.url), ...metadata, is_market_feed:true};
+    const data = isolateTestMarketPayload({...payload(item, source.url), ...metadata, sourceUrl:source.url, is_market_feed:true});
     const added = await tx.insert(entries).values({
       originKey, sourceKind:"telegram_market", sourceId:source.id,
       payload:data, fingerprint:digest(data), active:true,
@@ -199,8 +210,8 @@ export async function getPoolWorkspace(actor: LogisticsActor) {
     limits:["Her iç kaynakta en çok 1.000, dış beslemede 1.000 kayıt; havuzda 10.000 kayıt.", "Rol başına en çok 200 taraf, 300 alıcı–satıcı çifti ve 1.000 güncel öneri değerlendirilir; benzerlik puanı garanti değildir.",
       ...(suggestions.length > 1000 ? ["Geçmiş dahil sonuçlar ilk 1.000 kayıtla sınırlı."] : []),
       ...(!feeds.some(s => s.enabled) ? ["Dış kaynak bağlı değil: internetten yeni müşteri bulunduğu iddia edilmez."] : [])],
-    entries:pool.slice(0,10000).map(e => ({...e.payload,id:e.id,sourceId:e.sourceId,sourceKind:e.sourceKind,active:e.active && e.lastSeenAt.getTime() >= Date.now()-7*86400000,lastSeenAt:e.lastSeenAt.toISOString()})),
-     matches:suggestions.slice(0,1000).map(m => {
+    entries:pool.slice(0,10000).map(e => ({...isolateTestMarketPayload(e.payload),id:e.id,sourceId:e.sourceId,sourceKind:e.sourceKind,active:e.active && e.lastSeenAt.getTime() >= Date.now()-7*86400000,lastSeenAt:e.lastSeenAt.toISOString()})),
+     matches:suggestions.filter(m => !m.entryIds.some(id => pool.some(e => e.id === id && isTestMarketSource(e.payload.sourceUrl)))).slice(0,1000).map(m => {
        const draft = actor.isFounder ? draftByVersion.get(`${m.id}:${m.version}`) : undefined;
        return {
          ...m,
@@ -261,7 +272,7 @@ export async function actOnPool(input: Action, actor: LogisticsActor) {
       const [m] = await tx.select().from(matches).where(eq(matches.id,input.id!)).for("update");
       if (!m || m.version !== input.expectedVersion || m.status !== "pending") fail(409,"Öneri değişmiş, karara bağlanmış veya geçersiz. Yeni sürümü inceleyin.");
       const p = await tx.select().from(entries).where(inArray(entries.id,m.entryIds));
-      if (p.length !== m.entryIds.length || p.some(e => !e.active || !e.payload.eligible || e.payload.isTest !== p[0].payload.isTest || e.lastSeenAt.getTime()<Date.now()-7*86400000) ||
+      if (p.length !== m.entryIds.length || p.some(e => isTestMarketSource(e.payload.sourceUrl) || !e.active || !e.payload.eligible || e.payload.isTest !== p[0].payload.isTest || e.lastSeenAt.getTime()<Date.now()-7*86400000) ||
           digest(m.entryIds.map(id => {const e = p.find(r => r.id === id)!; return [id,e.fingerprint];})) !== m.snapshotHash) fail(409,"Taraflar değişti; eski sürüm onaylanamaz.");
       await tx.update(matches).set({status:input.decision,version:m.version+1,reviewedBy:actor.userId,reviewedAt:new Date(),updatedAt:new Date(),
         events:[...m.events,event(input.decision!,input.note!,actor)]}).where(eq(matches.id,m.id));

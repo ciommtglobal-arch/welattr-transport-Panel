@@ -2,11 +2,17 @@ import { fold } from "./logisticsPoolEngine";
 
 const place = "[\\p{L}][\\p{L} /-]{1,70}?";
 export function marketRoute(text: string): [string, string] {
+  // Mobile keyboards use several apostrophes and invisible formatting marks.
+  text = text.normalize("NFC")
+    .replace(/[\u200B-\u200F\u202A-\u202E\u2060\uFEFF]/g, "")
+    .replace(/[\u00A0\u202F]/g, " ")
+    .replace(/[’‘ʼ`´]/g, "'")
+    .replace(/\s*'\s*/g, "'");
   const pairs: [string, string][] = [];
   const add = (a: string, b: string) => pairs.push([a.trim(), b.trim()]);
   for (const m of text.matchAll(new RegExp(`(?:^|[;\\n.!])\\s*(${place})\\s*(?:→|->)\\s*(${place})(?=$|[;\\n.!\\d])`, "gu"))) add(m[1], m[2]);
   // Explicit Turkish directional suffixes, with or without apostrophes.
-  for (const m of text.matchAll(new RegExp(`(?:^|[;\\n.!])\\s*(${place})['’]?(?:dan|den|tan|ten)\\s+(${place})['’]?(?:ya|ye|a|e)(?=\\s+(?:\\d|yük|yuk|boş|bos|araç|arac|tır|tir)|[;\\n.!]|$)`, "giu"))) add(m[1], m[2]);
+  for (const m of text.matchAll(new RegExp(`(?:^|[:;\\n.!])\\s*(${place})'?(?:dan|den|tan|ten)\\s+(${place})'?(?:ya|ye|a|e)(?=\\s+(?:\\d|yük|yuk|boş|bos|araç|arac|tır|tir)|[,;\\n.!]|$)`, "giu"))) add(m[1], m[2]);
   const from = /(?:çıkış|cikis|yükleme yeri|yukleme yeri)\s*:\s*([^\n;]+)/iu.exec(text);
   const to = /(?:varış|varis|teslim yeri)\s*:\s*([^\n;]+)/iu.exec(text);
   if (from && to && /^[\p{L} /-]{2,70}$/u.test(from[1].trim()) && /^[\p{L} /-]{2,70}$/u.test(to[1].trim())) add(from[1], to[1]);

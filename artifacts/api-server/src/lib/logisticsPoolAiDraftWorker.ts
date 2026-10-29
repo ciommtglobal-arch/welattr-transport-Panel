@@ -8,6 +8,7 @@ import {
   logisticsPoolMatchesTable as matches,
 } from "@workspace/db";
 import { logger } from "./logger";
+import { isTestMarketSource } from "./marketSourcePolicy";
 import {
   createLogisticsPoolMatchAiDraft,
   isLogisticsPoolAiDraftPreviewEnabled,
@@ -58,7 +59,7 @@ async function generateOneDraft(testOnly: boolean): Promise<DraftWorkerResult> {
     const participants = await db.select().from(entries)
       .where(inArray(entries.id, match.entryIds));
     if (participants.length !== 2 ||
-        participants.some((entry) => !entry.active || entry.payload.isTest !== testOnly) ||
+        participants.some((entry) => isTestMarketSource(entry.payload.sourceUrl) || !entry.active || entry.payload.isTest !== testOnly) ||
         participants[0]!.payload.isTest !== participants[1]!.payload.isTest ||
         !participants.some((entry) => entry.payload.role === "load") ||
         !participants.some((entry) => entry.payload.role === "carrier")) {

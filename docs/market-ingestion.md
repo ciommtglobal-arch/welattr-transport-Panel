@@ -106,3 +106,19 @@ collapsed to one body type. The carrier must have exactly one compatible declare
 body. Negated/uncertain body descriptions are held for review. This deterministic
 parser is not a universal language model; unsupported prose remains ignored or
 ineligible rather than fabricating route, date, capacity, price or authority.
+
+### Founder-designated TEST source quarantine
+
+WelatTR Core is explicitly designated TEST. Intake forces `isTest: true` and
+`eligible: false` from its immutable source identity, regardless of submitted
+flags. Existing entries are excluded by the matching engine, review handlers,
+and AI draft guards even before persisted reconciliation. The workspace projects
+the TEST flags immediately. The next normal pool rebuild persists corrected
+flags/fingerprints under the existing pool transaction lock and stales prior
+matches; no custom production migration or startup DDL is used.
+
+Natural route handling also normalizes mobile apostrophes, nonbreaking spaces
+and invisible direction marks. Tests cover a TEST-label prefix, spaced suffixes,
+İstanbul Tuzla → Ankara Ostim and district / province order. Previously ignored
+messages cannot be reconstructed without their original text; no historical
+route or consent is invented.
