@@ -127,6 +127,7 @@ import type {
   LogisticsCarrierReviewInput,
   LogisticsCommunicationInput,
   LogisticsCommunicationRecord,
+  LogisticsEmailEvent,
   LogisticsFieldIntakeInput,
   LogisticsFieldIntakeResult,
   LogisticsListingAccess,
@@ -332,6 +333,86 @@ export const useReceiveAutoTelegramMarketUpdate = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getReceiveAutoTelegramMarketUpdateMutationOptions(options));
+    }
+
+export const getReceiveLogisticsEmailUrl = () => {
+
+
+
+
+  return `/api/webhook/email`
+}
+
+/**
+ * @summary Receive signed AgentMail inbound logistics email without sending replies
+ */
+export const receiveLogisticsEmail = async (logisticsEmailEvent: LogisticsEmailEvent, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<void>(getReceiveLogisticsEmailUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(logisticsEmailEvent)
+  }
+);}
+
+
+
+
+
+export const getReceiveLogisticsEmailMutationKey = () => ['receiveLogisticsEmail'] as const;
+
+export const getReceiveLogisticsEmailMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveLogisticsEmail>>, TError,ReceiveLogisticsEmailMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof receiveLogisticsEmail>>, TError,ReceiveLogisticsEmailMutationVariables, TContext> => {
+
+const mutationKey = getReceiveLogisticsEmailMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof receiveLogisticsEmail>>, ReceiveLogisticsEmailMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  receiveLogisticsEmail(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReceiveLogisticsEmailMutationResult = NonNullable<Awaited<ReturnType<typeof receiveLogisticsEmail>>>
+    export type ReceiveLogisticsEmailMutationBody = BodyType<LogisticsEmailEvent>
+    export type ReceiveLogisticsEmailMutationError = ErrorType<void>
+    export type ReceiveLogisticsEmailMutationVariables = {data: BodyType<LogisticsEmailEvent>}
+
+    /**
+ * @summary Receive signed AgentMail inbound logistics email without sending replies
+ */
+export const useReceiveLogisticsEmail = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveLogisticsEmail>>, TError,ReceiveLogisticsEmailMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof receiveLogisticsEmail>>,
+        TError,
+        ReceiveLogisticsEmailMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReceiveLogisticsEmailMutationOptions(options));
     }
 
 export const getReceiveMarketTextUrl = () => {

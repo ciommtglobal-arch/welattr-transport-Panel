@@ -18,7 +18,7 @@ import { AutomationError } from "./logisticsAutomation";
 import { isLogisticsPoolAiDraftPreviewEnabled } from "./logisticsPoolAiDraft";
 import { logisticsDraftScheduleDescription, permittedCarrierCandidate, permittedInternalLogisticsRecord } from "./logisticsPoolDraftPolicy";
 import { describeWorkerEvidence } from "./logisticsWorkerEvidence";
-import { isolateTestMarketPayload, isTestMarketSource } from "./marketSourcePolicy";
+import { isolateTestMarketPayload, isQuarantinedMarketPayload } from "./marketSourcePolicy";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Action = z.infer<typeof ActLogisticsPoolBody>;
@@ -125,7 +125,7 @@ export async function enrollTelegramMarketSource(chatId: number) {
   });
 }
 export async function ingestTelegramMarketItem(source: typeof sources.$inferSelect, messageId: number | string, item: FeedItem,
-  metadata: { is_market_feed?: boolean; vehicleType?: string; vehicleTypes?: string[]; cargoType?: string; parserMissing?: string[]; eligible?: boolean } = {}) {
+  metadata: { is_market_feed?: boolean; vehicleType?: string; vehicleTypes?: string[]; cargoType?: string; parserMissing?: string[]; eligible?: boolean; marketOccurredAt?: string } = {}) {
   return db.transaction(async tx => {
     await lock(tx);
     const [current] = await tx.select().from(sources).where(eq(sources.id, source.id)).for("update");
@@ -211,7 +211,7 @@ export async function getPoolWorkspace(actor: LogisticsActor) {
       ...(suggestions.length > 1000 ? ["Geçmiş dahil sonuçlar ilk 1.000 kayıtla sınırlı."] : []),
       ...(!feeds.some(s => s.enabled) ? ["Dış kaynak bağlı değil: internetten yeni müşteri bulunduğu iddia edilmez."] : [])],
     entries:pool.slice(0,10000).map(e => ({...isolateTestMarketPayload(e.payload),id:e.id,sourceId:e.sourceId,sourceKind:e.sourceKind,active:e.active && e.lastSeenAt.getTime() >= Date.now()-7*86400000,lastSeenAt:e.lastSeenAt.toISOString()})),
-     matches:suggestions.filter(m => !m.entryIds.some(id => pool.some(e => e.id === id && isTestMarketSource(e.payload.sourceUrl)))).slice(0,1000).map(m => {
+     matches:suggestions.filter(m => !m.entryIds.some(id => pool.some(e => e.id === id && isQuarantinedMarketPayload(e.payload)))).slice(0,1000).map(m => {
        const draft = actor.isFounder ? draftByVersion.get(`${m.id}:${m.version}`) : undefined;
        return {
          ...m,
@@ -272,7 +272,7 @@ export async function actOnPool(input: Action, actor: LogisticsActor) {
       const [m] = await tx.select().from(matches).where(eq(matches.id,input.id!)).for("update");
       if (!m || m.version !== input.expectedVersion || m.status !== "pending") fail(409,"Öneri değişmiş, karara bağlanmış veya geçersiz. Yeni sürümü inceleyin.");
       const p = await tx.select().from(entries).where(inArray(entries.id,m.entryIds));
-      if (p.length !== m.entryIds.length || p.some(e => isTestMarketSource(e.payload.sourceUrl) || !e.active || !e.payload.eligible || e.payload.isTest !== p[0].payload.isTest || e.lastSeenAt.getTime()<Date.now()-7*86400000) ||
+      if (p.length !== m.entryIds.length || p.some(e => isQuarantinedMarketPayload(e.payload) || !e.active || !e.payload.eligible || e.payload.isTest !== p[0].payload.isTest || e.lastSeenAt.getTime()<Date.now()-7*86400000) ||
           digest(m.entryIds.map(id => {const e = p.find(r => r.id === id)!; return [id,e.fingerprint];})) !== m.snapshotHash) fail(409,"Taraflar değişti; eski sürüm onaylanamaz.");
       await tx.update(matches).set({status:input.decision,version:m.version+1,reviewedBy:actor.userId,reviewedAt:new Date(),updatedAt:new Date(),
         events:[...m.events,event(input.decision!,input.note!,actor)]}).where(eq(matches.id,m.id));

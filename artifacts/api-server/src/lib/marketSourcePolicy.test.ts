@@ -1,9 +1,19 @@
 import { describe, it, expect } from "vitest";
-import { WELATTR_TEST_SOURCE, isolateTestMarketPayload } from "./marketSourcePolicy";
+import { WELATTR_TEST_SOURCE, WELATTR_LIVE_FROM, isolateTestMarketPayload } from "./marketSourcePolicy";
 import { suggestPoolMatches } from "./logisticsPoolEngine";
 import type { PoolPayload } from "@workspace/db";
 
 describe("founder-designated Telegram TEST source", () => {
+  it("permits only new non-TEST events after founder live-intake authorization", () => {
+    const live = {sourceUrl:WELATTR_TEST_SOURCE,isTest:false,eligible:true,marketOccurredAt:WELATTR_LIVE_FROM};
+    expect(isolateTestMarketPayload(live)).toBe(live);
+    expect(isolateTestMarketPayload({...live,eligible:false}).eligible).toBe(false);
+    for (const p of [
+      {...live,isTest:true},
+      {...live,marketOccurredAt:"2026-10-29T23:16:48Z"},
+      {...live,marketOccurredAt:"invalid"},
+    ]) expect(isolateTestMarketPayload(p)).toMatchObject({isTest:true,eligible:false});
+  });
   it("overrides a false TEST flag and eligibility without mutating other fields", () => {
     const old = {sourceUrl:WELATTR_TEST_SOURCE,isTest:false,eligible:true,origin:"İstanbul Tuzla"};
     expect(isolateTestMarketPayload(old)).toEqual({...old,isTest:true,eligible:false});

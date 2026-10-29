@@ -22,6 +22,20 @@ export const ReceiveAutoTelegramMarketUpdateResponse = zod.unknown()
 
 
 /**
+ * @summary Receive signed AgentMail inbound logistics email without sending replies
+ */
+export const ReceiveLogisticsEmailHeader = zod.object({
+  "svix-id": zod.string(),
+  "svix-timestamp": zod.string(),
+  "svix-signature": zod.string()
+})
+
+export const ReceiveLogisticsEmailBody = zod.record(zod.string(), zod.unknown()).describe('AgentMail message.received event; verified using the original raw bytes')
+
+export const ReceiveLogisticsEmailResponse = zod.unknown()
+
+
+/**
  * @summary Parse one consented free-text load or carrier advertisement
  */
 export const ReceiveMarketTextHeader = zod.object({

@@ -36,7 +36,7 @@ export function parseMarketText(text: string, id: string, occurredAt = new Date(
   const item: FeedItem = {
     id, role: isLoad ? "load" : "carrier", name: isLoad ? "Piyasa yük adayı" : "Piyasa taşıyıcı adayı",
     origin, destination, location: origin, transportMode: "road", products: cargoType ? [cargoType] : [],
-    contact: phone, reference: id, isTest: false,
+    contact: phone, reference: id, isTest: /\b(test|deneme|ornek|sentetik)\b/.test(plain),
     ...(kg > 0 && kg <= 1e9 ? (isLoad ? { requiredKg: kg } : { capacityKg: kg }) : {}),
     ...(date ? (isLoad ? { requiredDate: date } : { availableDate: date }) : {}),
   };

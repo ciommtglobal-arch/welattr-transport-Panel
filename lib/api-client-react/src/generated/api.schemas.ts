@@ -5,6 +5,11 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+/**
+ * AgentMail message.received event; verified using the original raw bytes
+ */
+export interface LogisticsEmailEvent { [key: string]: unknown }
+
 export interface MarketTextEnvelope {
   sourceId: string;
   /** @pattern ^[a-zA-Z0-9_-]{1,160}$ */

@@ -36,7 +36,7 @@ router.post("/logistics/market/telegram/:sourceId", async (req, res): Promise<vo
       res.status(200).json({ status: "ignored", reason: "unclassified_text" }); return;
     }
     try {
-      const inserted = await ingestTelegramMarketItem(source, update.message.message_id, extraction.item, extraction.metadata);
+      const inserted = await ingestTelegramMarketItem(source, update.message.message_id, extraction.item, {...extraction.metadata,marketOccurredAt:new Date(update.message.date * 1000).toISOString()});
       res.status(200).json({ status: !inserted ? "duplicate" : extraction.metadata.eligible ? "accepted" : "needs_review",
         missing: extraction.metadata.parserMissing, messagesSent: false });
     } catch {
@@ -52,7 +52,7 @@ router.post("/logistics/market/telegram/:sourceId", async (req, res): Promise<vo
   try {
     const inserted = await ingestTelegramMarketItem(source, update.message.message_id, {
       ...item.data, id: String(update.message.message_id), isTest: false,
-    }, { vehicleType: item.data.vehicleType });
+    }, { vehicleType: item.data.vehicleType, marketOccurredAt:new Date(update.message.date * 1000).toISOString() });
     res.status(200).json({ status: inserted ? "accepted" : "duplicate", messagesSent: false });
   } catch {
     req.log.warn("Piyasa kaydı saklanamadı; Telegram tekrar deneyebilir.");

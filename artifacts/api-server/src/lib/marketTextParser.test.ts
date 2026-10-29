@@ -2,6 +2,10 @@ import { describe, it, expect } from "vitest";
 import { parseMarketText } from "./marketTextParser";
 describe("conservative Turkish market parsing", () => {
   const sentAt = new Date("2026-10-30T08:00:00Z");
+  it("preserves explicit TEST labels after real source activation", () => {
+    const text="TEST: İstanbul Tuzla'dan Ankara Ostim'e 20 ton paletli yük tenteli bugün";
+    expect(parseMarketText(text,"test",sentAt)?.item.isTest).toBe(true);
+  });
   it("parses the actual Tuzla to Ostim advertisement, preserving allowed bodies", () => {
     const r = parseMarketText("İstanbul Tuzla'dan Ankara Ostim'e 20 ton paletli kuru yük. Tır (Tenteli/Kapalı Kasa). Hemen yükleme", "natural", sentAt)!;
     expect(r.item).toMatchObject({ role: "load", origin: "İstanbul Tuzla", destination: "Ankara Ostim",

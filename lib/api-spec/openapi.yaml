@@ -54,6 +54,40 @@ paths:
           description: Invalid or missing webhook secret
         '503':
           description: Telegram verification or storage unavailable; retry
+  /webhook/email:
+    post:
+      operationId: receiveLogisticsEmail
+      summary: Receive signed AgentMail inbound logistics email without sending replies
+      parameters:
+        - in: header
+          name: svix-id
+          required: true
+          schema: {type: string}
+        - in: header
+          name: svix-timestamp
+          required: true
+          schema: {type: string}
+        - in: header
+          name: svix-signature
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogisticsEmailEvent'
+      responses:
+        '200':
+          description: Recorded, duplicate, needs review, or unsupported event ignored
+        '400':
+          description: Invalid event or stale message
+        '401':
+          description: Invalid signature
+        '403':
+          description: Inbox or consented source mismatch
+        '503':
+          description: Not configured, body unavailable, or persistence failed
   /ingest/market-feed:
     post:
       operationId: receiveMarketText
@@ -4514,6 +4548,10 @@ components:
       name: pageSize
       schema: { type: integer, minimum: 1, maximum: 50, default: 25 }
   schemas:
+    LogisticsEmailEvent:
+      type: object
+      additionalProperties: true
+      description: AgentMail message.received event; verified using the original raw bytes
     MarketTextEnvelope:
       type: object
       additionalProperties: false

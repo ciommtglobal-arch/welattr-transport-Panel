@@ -109,12 +109,14 @@ ineligible rather than fabricating route, date, capacity, price or authority.
 
 ### Founder-designated TEST source quarantine
 
-WelatTR Core is explicitly designated TEST. Intake forces `isTest: true` and
-`eligible: false` from its immutable source identity, regardless of submitted
-flags. Existing entries are excluded by the matching engine, review handlers,
-and AI draft guards even before persisted reconciliation. The workspace projects
-the TEST flags immediately. The next normal pool rebuild persists corrected
-flags/fingerprints under the existing pool transaction lock and stales prior
+WelatTR Core now allows new real intake after the founder-authorized activation
+boundary in marketSourcePolicy. The original event timestamp is persisted as JSON
+metadata, with no physical schema migration. Missing/invalid/older timestamps and
+explicit TEST flags keep historical advertisements quarantined. Old TEST flags
+are never cleared. New real advertisements still need valid extraction and a
+compatible carrier; `eligible` is not forced true for incomplete messages.
+Matching, review and AI draft guards apply the same quarantine policy. Normal
+pool reconciliation persists corrected flags/fingerprints and stales prior
 matches; no custom production migration or startup DDL is used.
 
 Natural route handling also normalizes mobile apostrophes, nonbreaking spaces
@@ -122,3 +124,28 @@ and invisible direction marks. Tests cover a TEST-label prefix, spaced suffixes,
 İstanbul Tuzla → Ankara Ostim and district / province order. Previously ignored
 messages cannot be reconstructed without their original text; no historical
 route or consent is invented.
+
+### AgentMail receive-only email bridge
+
+`POST /api/webhook/email` verifies Svix signatures over raw bytes (256KB limit)
+and accepts only `message.received`. It never sends replies, downloads attachments,
+executes HTML, fetches message URLs, approves trades or triggers payments.
+
+Activation prerequisites (not automatically provisioned):
+- A verified AgentMail inbox on `welattr.com` (existing agentmail.to inbox is not it).
+- `MMT_EMAIL_INBOX`: exact receiving email address.
+- Founder-consented enabled source `market://source/welattr-email` and its UUID
+  in `MMT_EMAIL_SOURCE_ID`.
+- Provider webhook signing secret in `AGENTMAIL_WEBHOOK_SECRET` via Secrets.
+- Provider webhook pointing to the published `/api/webhook/email`, subscribing
+  only to that inbox and `message.received`. Do not change MX/DNS until existing
+  mail routing and domain ownership are reviewed.
+
+Until these prerequisites are supplied, the route returns 503. It checks exact
+inbox and source consent, ignores other event types, rejects old message dates,
+and uses stable inbox/message identity for duplicate suppression. The same
+market parser handles subject plus plain/extracted body. Body-less or HTML-only
+events fail explicitly with 503: full-message retrieval is not implemented yet.
+The signing timestamp does not replace original message time. Signature validity
+authenticates provider delivery, not the sender's commercial identity or consent
+to a deal; pool records remain unverified.

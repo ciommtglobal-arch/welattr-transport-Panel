@@ -193,6 +193,7 @@ export * from './logisticsCommunicationChannel';
 export * from './logisticsCommunicationDirection';
 export * from './logisticsCommunicationInput';
 export * from './logisticsCommunicationRecord';
+export * from './logisticsEmailEvent';
 export * from './logisticsFieldIntakeInput';
 export * from './logisticsFieldIntakeResult';
 export * from './logisticsFieldIntakeResultRecordType';

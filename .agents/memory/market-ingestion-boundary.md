@@ -17,12 +17,14 @@ on redelivery, creating a different commercial meaning without a new advertiseme
 **How to apply:** Pass Telegram message.date / feed occurredAt through all parsing
 paths; preserve ambiguous dates for review rather than guessing.
 
-WelatTR Core is a TEST source, not a real market supply source, until the founder
-explicitly changes that designation.
+The founder subsequently authorized new real market advertisements from WelatTR
+Core. Historical test advertisements must remain TEST; do not bulk-convert them
+into real commercial loads.
 
-**Why:** The user identified its advertisements as tests and requested existing
-and future test advertisements be marked TEST or isolated from the market pool.
+**Why:** Real-intake permission followed a successful TEST, not verification that
+the earlier synthetic loads were real shipments.
 
-**How to apply:** Do not enable real matching or model-generated commercial
-drafts for that source simply because its message parses successfully. Preserve
-the source boundary for previously stored entries too.
+**How to apply:** Respect original event time at activation and explicit TEST
+labels. Newly eligible real messages may enter matching, but Gemini only prepares
+founder-review drafts; automatic approval, payment and outbound dispatch remain
+outside this authorization.

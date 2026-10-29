@@ -35,9 +35,11 @@ import shopifyLogisticsRouter from "./shopify-logistics";
 
 import marketIngestionRouter from "./market-ingestion";
 import telegramMarketWebhookRouter from "./telegram-market-webhook";
+import emailMarketWebhookRouter from "./email-market-webhook";
 
 const router: IRouter = Router();
 router.use(marketIngestionRouter);
+router.use(emailMarketWebhookRouter);
 router.use(telegramMarketWebhookRouter);
 router.use(shopifyLogisticsRouter);
 router.use(kasaRouter);

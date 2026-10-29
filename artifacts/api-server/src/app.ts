@@ -50,6 +50,7 @@ app.use(
   express.raw({ type: "application/json", limit: "256kb" }),
 );
 app.use("/api/webhook/shopify/nexus", express.raw({ type: "application/json", limit: "1mb" }));
+app.use("/api/webhook/email", express.raw({ type: "application/json", limit: "256kb" }));
 app.use("/api/mmt/secure-sync", createShopifyLogisticsRawParser());
 app.use("/api/mmt/test-integration", requireMmtTestEnvironment, createMmtTestRawParser());
 app.use(express.json());
