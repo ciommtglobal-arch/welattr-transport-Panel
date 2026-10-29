@@ -23,6 +23,8 @@ Kullanıcı şimdilik kimseyi istemiyor: “herşey sistemsel olarak olacak diye
 
 Kullanıcı proje kodlarını ticari sır olarak korumamızı, önemli kodları kopyalayıp paylaşmaya yönlendirmememizi istedi. Projesiyle Türkiye, Avrupa ve ABD pazarlarında liderliği hedeflediğini belirtti.
 
+Kullanıcı detay öğrenmek amacıyla bazen kendiliğinden paylaşım yaptığını belirtti ve proje bilgilerinin dışarıya gitmemesi konusunda uyarılmak istedi.
+
 **Why:** Kullanıcı “sonuçta ticaret sırdır” diyerek gizlilik sınırını açıkça koydu.
 
-**How to apply:** Hassas proje kodlarını veya erişim bilgilerini sohbetlere ve üçüncü taraflara kopyalamasını isteme. İnceleme için mümkünse mevcut çalışma alanını kullan; kullanıcıdan içerik gerektiğinde hassas alanları çıkarılmış asgari örneği iste ve paylaşım öncesi uyar. Cihazındaki panoyu veya kopyalamayı teknik olarak engelleyebildiğini iddia etme. Bu kuralı mevcut entegrasyonların kapatılması veya kullanıcı cihazında yeni bir engelleme özelliği oluşturma izni sayma.
+**How to apply:** Hassas proje kodlarını veya erişim bilgilerini sohbetlere ve üçüncü taraflara kopyalamasını isteme. İnceleme için mümkünse mevcut çalışma alanını kullan; kullanıcıdan içerik gerektiğinde hassas alanları çıkarılmış asgari örneği iste ve paylaşım öncesi uyar. Kullanıcı kendiliğinden kod veya ekran paylaştığında hassas bilgi fark edersen dış paylaşım riski konusunda uyar; hassas değerleri yanıtta tekrar etme. Cihazındaki panoyu veya kopyalamayı teknik olarak engelleyebildiğini ya da sohbet bilgilerinin hiçbir koşulda dışarı çıkmayacağını iddia etme. Bu kuralı mevcut entegrasyonların kapatılması veya kullanıcı cihazında yeni bir engelleme özelliği oluşturma izni sayma.
