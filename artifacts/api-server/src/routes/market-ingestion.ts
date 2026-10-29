@@ -3,6 +3,7 @@ import { db, logisticsPoolSourcesTable as sources } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod/v4";
 import { ingestTelegramMarketItem } from "../lib/logisticsPool";
+import { parseMarketText } from "../lib/marketTextParser";
 import { marketItemSchema, telegramMarketUpdateSchema, telegramSourceUrl, webhookSecretMatches } from "../lib/marketIngestion";
 
 const router: IRouter = Router();
@@ -29,7 +30,19 @@ router.post("/logistics/market/telegram/:sourceId", async (req, res): Promise<vo
   }
   let body: unknown;
   try { body = JSON.parse(update.message.text); } catch {
-    res.status(200).json({ status: "ignored", reason: "structured_json_required" }); return;
+    const extraction = parseMarketText(update.message.text, String(update.message.message_id));
+    if (!extraction) {
+      res.status(200).json({ status: "ignored", reason: "unclassified_text" }); return;
+    }
+    try {
+      const inserted = await ingestTelegramMarketItem(source, update.message.message_id, extraction.item, extraction.metadata);
+      res.status(200).json({ status: !inserted ? "duplicate" : extraction.metadata.eligible ? "accepted" : "needs_review",
+        missing: extraction.metadata.parserMissing, messagesSent: false });
+    } catch {
+      req.log.warn("Piyasa metni kaydedilemedi.");
+      res.status(503).json({ error: "Kayıt tamamlanamadı." });
+    }
+    return;
   }
   const item = marketItemSchema.safeParse(body);
   if (!item.success) {
@@ -38,10 +51,44 @@ router.post("/logistics/market/telegram/:sourceId", async (req, res): Promise<vo
   try {
     const inserted = await ingestTelegramMarketItem(source, update.message.message_id, {
       ...item.data, id: String(update.message.message_id), isTest: false,
-    });
+    }, { vehicleType: item.data.vehicleType });
     res.status(200).json({ status: inserted ? "accepted" : "duplicate", messagesSent: false });
   } catch {
     req.log.warn("Piyasa kaydı saklanamadı; Telegram tekrar deneyebilir.");
+    res.status(503).json({ error: "Kayıt tamamlanamadı." });
+  }
+});
+const marketEnvelope = z.object({
+  sourceId: z.string().uuid(),
+  eventId: z.string().regex(/^[a-zA-Z0-9_-]{1,160}$/),
+  occurredAt: z.string().datetime({ offset: true }),
+  text: z.string().trim().min(1).max(8192),
+}).strict();
+router.post("/ingest/market-feed", async (req, res): Promise<void> => {
+  const parsed = marketEnvelope.safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ error: "Geçersiz olay." }); return; }
+  const { sourceId, eventId, occurredAt, text } = parsed.data;
+  const key = `MMT_MARKET_FEED_SECRET_${sourceId.replaceAll("-", "_").toUpperCase()}`;
+  if (!webhookSecretMatches(req.get("X-MMT-Market-Secret"), process.env[key])) {
+    res.status(401).json({ error: "Kaynak doğrulanamadı." }); return;
+  }
+  const [source] = await db.select().from(sources).where(eq(sources.id, sourceId));
+  if (!source?.enabled || !source.consentBy || !source.consentAt ||
+      !/^market:\/\/source\/[a-z0-9-]{3,64}$/.test(source.url)) {
+    res.status(403).json({ error: "İzinli piyasa kaynağı gerekli." }); return;
+  }
+  const age = Date.now() - Date.parse(occurredAt);
+  if (age > 86400000 || age < -300000) {
+    res.status(400).json({ error: "Olay tarihi geçersiz veya eski." }); return;
+  }
+  const extraction = parseMarketText(text, eventId);
+  if (!extraction) { res.status(422).json({ error: "Tek yük veya taşıyıcı ilanı belirlenemedi." }); return; }
+  try {
+    const inserted = await ingestTelegramMarketItem(source, eventId, extraction.item, extraction.metadata);
+    res.status(200).json({ status: !inserted ? "duplicate" : extraction.metadata.eligible ? "accepted" : "needs_review",
+      missing: extraction.metadata.parserMissing, messagesSent: false });
+  } catch {
+    req.log.warn("Piyasa kaydı saklanamadı.");
     res.status(503).json({ error: "Kayıt tamamlanamadı." });
   }
 });

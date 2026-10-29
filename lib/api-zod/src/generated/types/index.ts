@@ -251,6 +251,7 @@ export * from './logisticsTestPilotCheck';
 export * from './logisticsTestPilotCheckStatus';
 export * from './logisticsTestPilotReadiness';
 export * from './logisticsTransportMode';
+export * from './marketTextEnvelope';
 export * from './mediaDecision';
 export * from './mediaDecisionDecision';
 export * from './mediaDelivery';

@@ -148,7 +148,7 @@ export async function createLogisticsPoolMatchAiDraft(
     const currentSources = await db.select().from(sources).where(inArray(sources.id, sourceIds));
     if (currentSources.length !== sourceIds.length || currentSources.some((source) =>
       !source.enabled || !source.lastSuccessAt || source.lastError ||
-      source.lastSuccessAt.getTime() < now - (source.url.startsWith("telegram:") ? 86400000 : 15 * 60_000))) {
+      source.lastSuccessAt.getTime() < now - (/^(telegram|market):/.test(source.url) ? 86400000 : 15 * 60_000))) {
       throw new LogisticsPoolAiDraftError(409, "Dış kaynak eski veya doğrulanmamış; önce kaynağı yenileyin.");
     }
   }

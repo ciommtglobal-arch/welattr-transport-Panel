@@ -14,8 +14,8 @@ Use a dedicated bot or explicitly coordinate polling/webhook ownership before ac
    setWebhook to the published route with the matching secret_token.
    Group administrator permission and bot visibility/privacy settings must permit messages.
 
-This skeleton accepts structured JSON text messages only, not arbitrary free-text ads,
-attachments, edited posts or private chats. Unsupported messages return an explicit ignored
+This module accepts structured JSON and a conservative Turkish free-text subset.
+It does not accept attachments, edited posts or private chats. Unsupported messages return an explicit ignored
 reason. Bot membership alone does not establish permission to store participant data.
 
 Example message (illustrative, never seeded):
@@ -42,5 +42,31 @@ No payment, external notification, commercial approval, worker enablement, produ
 migration or publication is performed by installing this module.
 
 Operational limits: existing 10,000-entry pool ceiling; body parser limit; only allowlisted
-authenticated messages can write. Free-text extraction, message deletion/retraction,
+authenticated messages can write. Broad multilingual extraction, message deletion/retraction,
 durable rejection monitoring and production delivery verification remain outside this skeleton.
+
+## Free-text market feed
+POST `/api/ingest/market-feed` with `X-MMT-Market-Secret` and JSON:
+`{sourceId,eventId,occurredAt,text}`. Founder must first consent to a source URL
+`market://source/provider-name`; configure its separate
+`MMT_MARKET_FEED_SECRET_<SOURCE_UUID_UPPERCASE_WITH_UNDERSCORES>` in Secrets.
+No secret was created automatically.
+
+Supported example text:
+```
+Yük var
+Mersin -> Adana
+24 ton tenteli komple
+2026-12-01
+Fiyat: 12000 TL
+```
+Carrier example uses "Boş araç", declared capacity, trailer type and ISO date.
+The direction must be a separate line or semicolon-delimited field with -> or →.
+Ambiguous/missing fields save an ineligible pool record with parserMissing and
+status needs_review in the API response, not an AI-approved match.
+Unclassifiable/mixed messages are rejected. Original raw messages are not stored.
+Only explicit Turkish mobile numbers are extracted; the source/event reference remains
+available when no contact is given. Relative dates and unlabelled prices are not inferred.
+is_market_feed is a payload tag in the existing JSONB pool, so no physical migration or
+parallel loads/carriers tables are introduced. Vehicle compatibility is mandatory for
+market matches; no declared commission means no invented commission amount.

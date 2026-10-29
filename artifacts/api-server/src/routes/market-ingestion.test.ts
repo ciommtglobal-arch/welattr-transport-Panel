@@ -40,7 +40,7 @@ describe("market webhook", () => {
   it("ignores free text without claiming ingestion", async () => {
     const body = update(); body.message.text = "Find me a truck";
     const res = await request(app).post(path).set("X-Telegram-Bot-Api-Secret-Token", secret).send(body);
-    expect(res.body.reason).toBe("structured_json_required");
+    expect(res.body.reason).toBe("unclassified_text");
     expect(mocks.ingest).not.toHaveBeenCalled();
   });
   it("passes validated data and reports duplicates distinctly", async () => {
@@ -49,5 +49,27 @@ describe("market webhook", () => {
     expect(mocks.ingest.mock.calls[0][2]).toMatchObject({ role: "carrier", id: "7", isTest: false });
     mocks.ingest.mockResolvedValue(false);
     expect((await post()).body.status).toBe("duplicate");
+  });
+  it("stores incomplete free text as ineligible rather than a verified match", async () => {
+    const body = update(); body.message.text = "Yük var Mersin Adana";
+    const res = await request(app).post(path).set("X-Telegram-Bot-Api-Secret-Token", secret).send(body);
+    expect(res.body.status).toBe("needs_review");
+    expect(mocks.ingest.mock.calls[0][3]).toMatchObject({ eligible: false, is_market_feed: true });
+  });
+  it("authenticates the generic source independently and rejects stale events", async () => {
+    const genericKey = `MMT_MARKET_FEED_SECRET_${id.replaceAll("-", "_")}`;
+    vi.stubEnv(genericKey, secret);
+    mocks.select.mockReturnValue({ from: () => ({ where: async () => [{
+      id, url: "market://source/test-provider", enabled: true, consentBy: "founder", consentAt: new Date(),
+    }] }) });
+    const body = { sourceId: id, eventId: "external-1", occurredAt: new Date().toISOString(),
+      text: "Boş araç\nMersin -> Adana\n24 ton tenteli\n2026-12-01" };
+    expect((await request(app).post("/ingest/market-feed").send(body)).status).toBe(401);
+    const accepted = await request(app).post("/ingest/market-feed").set("X-MMT-Market-Secret", secret).send(body);
+    expect(accepted.body.status).toBe("accepted");
+    const old = await request(app).post("/ingest/market-feed").set("X-MMT-Market-Secret", secret)
+      .send({ ...body, occurredAt: "2020-01-01T00:00:00Z" });
+    expect(old.status).toBe(400);
+    expect(mocks.ingest).toHaveBeenCalledTimes(1);
   });
 });

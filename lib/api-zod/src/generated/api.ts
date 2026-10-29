@@ -9,6 +9,28 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Parse one consented free-text load or carrier advertisement
+ */
+export const ReceiveMarketTextHeader = zod.object({
+  "X-MMT-Market-Secret": zod.string()
+})
+
+export const receiveMarketTextBodyEventIdRegExp = new RegExp('^[a-zA-Z0-9_-]{1,160}$');
+export const receiveMarketTextBodyTextMax = 8192;
+
+
+
+export const ReceiveMarketTextBody = zod.object({
+  "sourceId": zod.uuid(),
+  "eventId": zod.string().regex(receiveMarketTextBodyEventIdRegExp),
+  "occurredAt": zod.coerce.date(),
+  "text": zod.string().min(1).max(receiveMarketTextBodyTextMax)
+})
+
+export const ReceiveMarketTextResponse = zod.unknown()
+
+
+/**
  * Requires source-specific Telegram secret header. No outbound actions. Unsupported updates are acknowledged as ignored.
  * @summary Receive consented structured Telegram group market messages
  */

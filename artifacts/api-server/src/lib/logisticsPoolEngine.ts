@@ -57,6 +57,8 @@ export function suggestPoolMatches(rows: PoolRow[], today = new Date().toISOStri
   }
   for (const load of byRole("load")) for (const carrier of carriers) {
     const l = load.payload, c = carrier.payload;
+    if ((l.is_market_feed || c.is_market_feed) &&
+        (!l.vehicleType || !c.vehicleType || l.vehicleType !== c.vehicleType)) continue;
     if (l.isTest !== c.isTest) continue;
     const missing = carrierFit(l.origin, l.destination, l.requiredKg, l.volumeM3, l.requiredDate, l.transportMode, c);
     if (missing) add(`load:${load.id}:${carrier.id}`, [load, carrier], 80 - missing.length * 10, ["Çıkış ve varış eşleşiyor", ...(l.requiredKg !== null && c.capacityKg !== null ? ["Beyan edilen ağırlık kapasiteye uygun"] : [])], missing);

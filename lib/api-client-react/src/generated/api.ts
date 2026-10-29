@@ -156,6 +156,7 @@ import type {
   LogisticsShipmentRecord,
   LogisticsStaffMember,
   LogisticsTestPilotReadiness,
+  MarketTextEnvelope,
   MediaDecision,
   MediaItem,
   MediaItemInput,
@@ -251,6 +252,86 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getReceiveMarketTextUrl = () => {
+
+
+
+
+  return `/api/ingest/market-feed`
+}
+
+/**
+ * @summary Parse one consented free-text load or carrier advertisement
+ */
+export const receiveMarketText = async (marketTextEnvelope: MarketTextEnvelope, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<void>(getReceiveMarketTextUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(marketTextEnvelope)
+  }
+);}
+
+
+
+
+
+export const getReceiveMarketTextMutationKey = () => ['receiveMarketText'] as const;
+
+export const getReceiveMarketTextMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveMarketText>>, TError,ReceiveMarketTextMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof receiveMarketText>>, TError,ReceiveMarketTextMutationVariables, TContext> => {
+
+const mutationKey = getReceiveMarketTextMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof receiveMarketText>>, ReceiveMarketTextMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  receiveMarketText(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReceiveMarketTextMutationResult = NonNullable<Awaited<ReturnType<typeof receiveMarketText>>>
+    export type ReceiveMarketTextMutationBody = BodyType<MarketTextEnvelope>
+    export type ReceiveMarketTextMutationError = ErrorType<void>
+    export type ReceiveMarketTextMutationVariables = {data: BodyType<MarketTextEnvelope>}
+
+    /**
+ * @summary Parse one consented free-text load or carrier advertisement
+ */
+export const useReceiveMarketText = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveMarketText>>, TError,ReceiveMarketTextMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof receiveMarketText>>,
+        TError,
+        ReceiveMarketTextMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReceiveMarketTextMutationOptions(options));
+    }
 
 export const getReceiveTelegramMarketUpdateUrl = (sourceId: string,) => {
 

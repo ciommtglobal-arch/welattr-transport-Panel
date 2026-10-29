@@ -23,6 +23,7 @@ export const telegramMarketUpdateSchema = z.object({
 // from free text, or execute instructions embedded in market announcements.
 export const marketItemSchema = feedItemSchema.omit({ id: true, sourceUrl: true, isTest: true })
   .extend({
+    vehicleType: z.enum(["tenteli", "acik", "damper", "frigo", "sasi"]).optional(),
     role: z.enum(["load", "carrier"]),
     origin: z.string().trim().min(2).max(200),
     destination: z.string().trim().min(2).max(200),

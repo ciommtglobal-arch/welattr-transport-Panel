@@ -5,6 +5,18 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface MarketTextEnvelope {
+  sourceId: string;
+  /** @pattern ^[a-zA-Z0-9_-]{1,160}$ */
+  eventId: string;
+  occurredAt: string;
+  /**
+     * @minLength 1
+     * @maxLength 8192
+     */
+  text: string;
+}
+
 /**
  * Telegram Bot API update envelope; only original group text messages containing validated market JSON are ingested.
  */

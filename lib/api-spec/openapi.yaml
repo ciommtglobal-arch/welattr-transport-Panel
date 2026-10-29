@@ -31,6 +31,34 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /ingest/market-feed:
+    post:
+      operationId: receiveMarketText
+      summary: Parse one consented free-text load or carrier advertisement
+      parameters:
+        - in: header
+          name: X-MMT-Market-Secret
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarketTextEnvelope'
+      responses:
+        '200':
+          description: accepted, duplicate or needs_review; no external actions
+        '400':
+          description: Invalid or stale event
+        '401':
+          description: Invalid source secret
+        '403':
+          description: Source not consented or enabled
+        '422':
+          description: Cannot classify a single load or carrier
+        '503':
+          description: Persistence failed; retry with same eventId
   /logistics/market/telegram/{sourceId}:
     post:
       operationId: receiveTelegramMarketUpdate
@@ -4463,6 +4491,15 @@ components:
       name: pageSize
       schema: { type: integer, minimum: 1, maximum: 50, default: 25 }
   schemas:
+    MarketTextEnvelope:
+      type: object
+      additionalProperties: false
+      required: [sourceId, eventId, occurredAt, text]
+      properties:
+        sourceId: { type: string, format: uuid }
+        eventId: { type: string, pattern: '^[a-zA-Z0-9_-]{1,160}$' }
+        occurredAt: { type: string, format: date-time }
+        text: { type: string, minLength: 1, maxLength: 8192 }
     TelegramMarketEnvelope:
       type: object
       description: Telegram Bot API update envelope; only original group text messages containing validated market JSON are ingested.
