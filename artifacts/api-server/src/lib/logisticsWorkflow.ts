@@ -100,6 +100,9 @@ export async function reviewLogisticsCarrier(id: number, status: "approved" | "r
 }
 
 export async function saveLogisticsOffer(input: OfferInput | Revision, actor: LogisticsActor, revisionId?: number) {
+  if (revisionId !== undefined) founder(actor);
+  if ("revisionNote" in input && input.revisionNote !== undefined &&
+      (input.revisionNote.trim().length < 3 || input.revisionNote.length > 1000)) fail(400, "Revizyon gerekçesi 3–1000 karakter olmalıdır.");
   validateLogisticsOffer(input);
   return db.transaction(async tx => {
     let existing: LogisticsOffer | undefined;
@@ -122,15 +125,27 @@ export async function saveLogisticsOffer(input: OfferInput | Revision, actor: Lo
       customerPriceAmount: input.customerPriceAmount, currency: input.currency.trim().toUpperCase(),
       includedServices: input.includedServices.trim(), validUntil: input.validUntil,
     };
-    const [saved] = existing
-      ? await tx.update(offers).set({ ...values, updatedAt: nextVersion(existing) }).where(and(eq(offers.id, existing.id), eq(offers.status, "pending_approval"))).returning()
-      : await tx.insert(offers).values({
+    if (existing) {
+      const [retired] = await tx.update(offers).set({
+        status: "revised", updatedAt: nextVersion(existing),
+      }).where(and(eq(offers.id, existing.id), eq(offers.status, "pending_approval"))).returning();
+      if (!retired) fail(409, "Teklif başka oturumda değişmiş.");
+    }
+    const [saved] = await tx.insert(offers).values({
         ...values, requestId: request.id, createdByClerkUserId: actor.userId,
         isTest: request.isTest, status: "pending_approval",
+        approvedAt: null, approvedByClerkUserId: null, sentAt: null,
       }).returning();
     if (!saved) fail(409, "Teklif başka oturumda değişmiş.");
     await tx.update(shipments).set({ status: "quote_approval", updatedAt: nextVersion(shipment) }).where(eq(shipments.id, shipment.id));
-    await audit(tx, request.id, actor, `Teklif #${saved.id}: ${existing ? "taslak revize edildi" : "taslak oluşturuldu"}; kurucu onayı bekliyor.`, request.isTest);
+    await audit(tx, request.id, actor, existing
+      ? `Teklif #${existing.id} → #${saved.id}: revizyon; kurucu onayı bekliyor.\n` +
+        `Gerekçe: ${("revisionNote" in input && input.revisionNote?.trim()) || "Eski istemci: gerekçe belirtilmedi"}.\n` +
+        `Eski sürüm: ${existing.updatedAt.toISOString()}; yeni sürüm: ${saved.updatedAt.toISOString()}.\n` +
+        `Taşıyıcı maliyeti: ${existing.carrierCostAmount} ${existing.currency} → ${saved.carrierCostAmount} ${saved.currency}.\n` +
+        `Müşteri fiyatı: ${existing.customerPriceAmount} ${existing.currency} → ${saved.customerPriceAmount} ${saved.currency}.\n` +
+        `Eski şartlar: ${existing.includedServices}\nYeni şartlar: ${saved.includedServices}`
+      : `Teklif #${saved.id}: taslak oluşturuldu; kurucu onayı bekliyor.`, request.isTest);
     return saved;
   });
 }

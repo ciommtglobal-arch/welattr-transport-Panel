@@ -6577,7 +6577,7 @@ components:
       enum: [pending, approved, rejected]
     LogisticsOfferStatus:
       type: string
-      enum: [pending_approval, approved, sent, accepted, rejected, expired]
+      enum: [pending_approval, approved, sent, accepted, rejected, expired, revised]
     LogisticsCommunicationChannel:
       type: string
       enum: [phone, email, whatsapp, note]
@@ -7043,6 +7043,7 @@ components:
       additionalProperties: false
       required: [carrierId, carrierCostAmount, customerPriceAmount, currency, includedServices, validUntil, expectedUpdatedAt]
       properties:
+        revisionNote: { type: string, minLength: 3, maxLength: 1000 }
         expectedUpdatedAt: { type: string, format: date-time }
         carrierId: { type: integer, minimum: 1 }
         carrierCostAmount: { type: number, exclusiveMinimum: 0, maximum: 9999999999999.99 }

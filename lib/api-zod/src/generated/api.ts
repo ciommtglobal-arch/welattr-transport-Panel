@@ -3604,7 +3604,7 @@ export const GetLogisticsOperationsResponse = zod.object({
   "currency": zod.string(),
   "includedServices": zod.string(),
   "validUntil": zod.coerce.date(),
-  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired']),
+  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired', 'revised']),
   "createdByClerkUserId": zod.string(),
   "approvedByClerkUserId": zod.string().nullable(),
   "approvedAt": zod.coerce.date().nullable(),
@@ -3710,7 +3710,7 @@ export const CreateLogisticsOfferResponse = zod.object({
   "currency": zod.string(),
   "includedServices": zod.string(),
   "validUntil": zod.coerce.date(),
-  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired']),
+  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired', 'revised']),
   "createdByClerkUserId": zod.string(),
   "approvedByClerkUserId": zod.string().nullable(),
   "approvedAt": zod.coerce.date().nullable(),
@@ -3744,7 +3744,7 @@ export const ApproveLogisticsOfferResponse = zod.object({
   "currency": zod.string(),
   "includedServices": zod.string(),
   "validUntil": zod.coerce.date(),
-  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired']),
+  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired', 'revised']),
   "createdByClerkUserId": zod.string(),
   "approvedByClerkUserId": zod.string().nullable(),
   "approvedAt": zod.coerce.date().nullable(),
@@ -3786,7 +3786,7 @@ export const MarkLogisticsOfferSentResponse = zod.object({
   "currency": zod.string(),
   "includedServices": zod.string(),
   "validUntil": zod.coerce.date(),
-  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired']),
+  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired', 'revised']),
   "createdByClerkUserId": zod.string(),
   "approvedByClerkUserId": zod.string().nullable(),
   "approvedAt": zod.coerce.date().nullable(),
@@ -3847,6 +3847,9 @@ export const ReviseLogisticsOfferParams = zod.object({
   "id": zod.coerce.number().int().min(1)
 })
 
+export const reviseLogisticsOfferBodyRevisionNoteMin = 3;
+export const reviseLogisticsOfferBodyRevisionNoteMax = 1000;
+
 
 export const reviseLogisticsOfferBodyCarrierCostAmountExclusiveMin = 0;
 export const reviseLogisticsOfferBodyCarrierCostAmountMax = 9999999999999.99;
@@ -3863,6 +3866,7 @@ export const reviseLogisticsOfferBodyIncludedServicesMax = 2000;
 
 
 export const ReviseLogisticsOfferBody = zod.object({
+  "revisionNote": zod.string().min(reviseLogisticsOfferBodyRevisionNoteMin).max(reviseLogisticsOfferBodyRevisionNoteMax).optional(),
   "expectedUpdatedAt": zod.coerce.date(),
   "carrierId": zod.int().min(1),
   "carrierCostAmount": zod.number().gt(reviseLogisticsOfferBodyCarrierCostAmountExclusiveMin).max(reviseLogisticsOfferBodyCarrierCostAmountMax),
@@ -3881,7 +3885,7 @@ export const ReviseLogisticsOfferResponse = zod.object({
   "currency": zod.string(),
   "includedServices": zod.string(),
   "validUntil": zod.coerce.date(),
-  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired']),
+  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired', 'revised']),
   "createdByClerkUserId": zod.string(),
   "approvedByClerkUserId": zod.string().nullable(),
   "approvedAt": zod.coerce.date().nullable(),
@@ -3923,7 +3927,7 @@ export const DecideLogisticsOfferResponse = zod.object({
   "currency": zod.string(),
   "includedServices": zod.string(),
   "validUntil": zod.coerce.date(),
-  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired']),
+  "status": zod.enum(['pending_approval', 'approved', 'sent', 'accepted', 'rejected', 'expired', 'revised']),
   "createdByClerkUserId": zod.string(),
   "approvedByClerkUserId": zod.string().nullable(),
   "approvedAt": zod.coerce.date().nullable(),

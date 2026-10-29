@@ -36,6 +36,7 @@ export const statusTone: Record<LogisticsShipmentStatus, string> = {
 };
 
 export const offerLabels: Record<LogisticsOfferStatus, string> = {
+  revised: "Revize edildi · eski sürüm",
   pending_approval: "Kurucu onayı bekliyor",
   approved: "Onaylandı, iletilmedi",
   sent: "Müşteriye iletildi (manuel)",
@@ -45,6 +46,7 @@ export const offerLabels: Record<LogisticsOfferStatus, string> = {
 };
 
 export const offerTone: Record<LogisticsOfferStatus, string> = {
+  revised: "border-foreground/20 text-foreground/45",
   pending_approval: "border-[#e0a43a]/45 text-[#f0c06a]",
   approved: "border-[#7aa2c8]/45 text-[#9fc0de]",
   sent: "border-[#ea580c]/50 text-[#fb8a4c]",

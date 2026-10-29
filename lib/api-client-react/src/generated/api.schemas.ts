@@ -2298,6 +2298,7 @@ export const LogisticsOfferStatus = {
   accepted: 'accepted',
   rejected: 'rejected',
   expired: 'expired',
+  revised: 'revised',
 } as const;
 
 export type LogisticsCommunicationChannel = typeof LogisticsCommunicationChannel[keyof typeof LogisticsCommunicationChannel];
@@ -2738,6 +2739,11 @@ export interface LogisticsCarrierReviewInput {
 }
 
 export interface LogisticsOfferRevisionInput {
+  /**
+     * @minLength 3
+     * @maxLength 1000
+     */
+  revisionNote?: string;
   expectedUpdatedAt: string;
   /** @minimum 1 */
   carrierId: number;

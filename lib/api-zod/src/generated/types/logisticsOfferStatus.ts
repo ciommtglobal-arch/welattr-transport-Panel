@@ -16,4 +16,5 @@ export const LogisticsOfferStatus = {
   accepted: 'accepted',
   rejected: 'rejected',
   expired: 'expired',
+  revised: 'revised',
 } as const;

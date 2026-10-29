@@ -206,6 +206,7 @@ export function OfferForm({ requestId, carriers, offer, onDone }: {
   // Draft and its version baseline are captured once; polling never rewrites them.
   const [v, setV] = useState(() => offerDraft(offer, approved));
   const [baseline, setBaseline] = useState(() => offer?.updatedAt ?? "");
+  const [revisionNote, setRevisionNote] = useState("");
   const [conflict, setConflict] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [error, setError] = useState<string | null>(null);
@@ -245,7 +246,10 @@ export function OfferForm({ requestId, carriers, offer, onDone }: {
       validUntil: new Date(v.validUntil).toISOString(),
     };
     try {
-      if (offer) await revise.mutateAsync({ id: offer.id, data: { ...body, expectedUpdatedAt: baseline } });
+      if (offer) {
+        if (revisionNote.trim().length < 3) { setError("Revizyon gerekçesi en az 3 karakter olmalıdır."); return; }
+        await revise.mutateAsync({ id: offer.id, data: { ...body, expectedUpdatedAt: baseline, revisionNote: revisionNote.trim() } });
+      }
       else await create.mutateAsync({ data: { ...body, requestId } });
       onDone();
     } catch (err) {
@@ -283,7 +287,10 @@ export function OfferForm({ requestId, carriers, offer, onDone }: {
           Brüt ticari satış farkı: <strong className="font-mono">{fmtMoney(diff, v.currency)}</strong> — net kâr veya platform komisyonu değildir.
         </p>
       ) : null}
-      {offer ? <p className="text-[11px] text-foreground/45">Revizyon teklifi yeniden kurucu onayına düşürür; eski sürüm onaylanamaz.</p> : <p className="text-[11px] text-foreground/45">Kayıt, sevkiyatı teklif onayı adımına taşır. Müşteriye hiçbir mesaj gönderilmez.</p>}
+      {offer ? <>
+        <Field label="Revizyon gerekçesi *"><textarea required minLength={3} maxLength={1000} className={inputCls} value={revisionNote} onChange={e => setRevisionNote(e.target.value)} data-testid="input-offer-revision-note" /></Field>
+        <p className="text-[11px] text-foreground/45">Yeni teklif kurucu incelemesine düşer. Eski fiyat ve şartlar eski teklif kartında, karşılaştırma ve gerekçe iletişim geçmişinde korunur.</p>
+      </> : <p className="text-[11px] text-foreground/45">Kayıt, sevkiyatı teklif onayı adımına taşır. Müşteriye hiçbir mesaj gönderilmez.</p>}
       {error ? <Feedback kind="error">{error}{conflict ? " Düzenlemeleriniz korunuyor; güncel kaydı yükleyip yeniden kontrol edin." : ""}</Feedback> : null}
       <div className="flex flex-wrap gap-2">
         {conflict ? <button type="button" className={btnGhost} onClick={reloadCurrent} data-testid="button-reload-offer">Güncel kaydı yükle</button> : null}

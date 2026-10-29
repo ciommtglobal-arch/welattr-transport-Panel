@@ -154,11 +154,12 @@ describe("Founder-controlled logistics workflow", () => {
   it("allows draft revision but does not let a stale editor alter approved terms", async () => {
     const offer = await pendingOffer();
     const { requestId: _id, ...revision } = draft();
-    await saveLogisticsOffer({ ...revision, customerPriceAmount: 3100 }, owner, offer.id);
-    expect(fixture.state.data.offers[0].customerPriceAmount).toBe(3100);
-    await approveLogisticsOffer(offer.id, owner);
+    const replacement = await saveLogisticsOffer({ ...revision, customerPriceAmount: 3100 }, owner, offer.id);
+    expect(fixture.state.data.offers[0]).toMatchObject({ status: "revised", customerPriceAmount: 3000 });
+    expect(replacement).toMatchObject({ status: "pending_approval", customerPriceAmount: 3100, approvedAt: null, approvedByClerkUserId: null });
+    await approveLogisticsOffer(replacement.id, owner);
     await expect(saveLogisticsOffer({ ...revision, customerPriceAmount: 3200 }, owner, offer.id)).rejects.toMatchObject({ status: 409 });
-    expect(fixture.state.data.offers[0].customerPriceAmount).toBe(3100);
+    expect(fixture.state.data.offers[0].customerPriceAmount).toBe(3000);
   });
   it("rejects stale founder approval after draft amounts have changed", async () => {
     const offer = await pendingOffer();
@@ -166,7 +167,8 @@ describe("Founder-controlled logistics workflow", () => {
     const { requestId: _id, ...revision } = draft();
     await saveLogisticsOffer({ ...revision, customerPriceAmount: 3100 }, owner, offer.id);
     await expect(actualApprove(offer.id, owner, oldVersion)).rejects.toMatchObject({ status: 409 });
-    expect(fixture.state.data.offers[0]).toMatchObject({ status: "pending_approval", customerPriceAmount: 3100 });
+    expect(fixture.state.data.offers[0]).toMatchObject({ status: "revised", customerPriceAmount: 3000 });
+    expect(fixture.state.data.offers[1]).toMatchObject({ status: "pending_approval", customerPriceAmount: 3100 });
   });
   it("rejects stale plan updates without losing newer notes", async () => {
     const previous = shipmentVersion();
@@ -202,6 +204,25 @@ describe("Founder-controlled logistics workflow", () => {
     await expect(approveLogisticsOffer(offer.id, owner)).rejects.toThrow("audit unavailable");
     expect(fixture.state.data.offers[0].status).toBe("pending_approval");
     expect(fixture.state.data.shipments[0].status).toBe("quote_approval");
+  });
+  it("rolls back the retired offer and replacement together when revision audit fails", async () => {
+    const offer = await pendingOffer();
+    const before = structuredClone(fixture.state.data);
+    fixture.state.auditFail = true;
+    await expect(actualSave({ ...draft(), expectedUpdatedAt: offer.updatedAt }, owner, offer.id)).rejects.toThrow("audit unavailable");
+    expect(fixture.state.data).toEqual(before);
+  });
+  it("rejects a second revision of the retired offer without inserting a third record", async () => {
+    const offer = await pendingOffer();
+    const input = { ...draft(), expectedUpdatedAt: offer.updatedAt };
+    await actualSave(input, owner, offer.id);
+    await expect(actualSave(input, owner, offer.id)).rejects.toMatchObject({ status: 409 });
+    expect(fixture.state.data.offers).toHaveLength(2);
+  });
+  it("requires actual founder identity even when the actor claims founder status", async () => {
+    const offer = await pendingOffer();
+    await expect(actualSave({ ...draft(), expectedUpdatedAt: offer.updatedAt }, { userId: "operator", isFounder: true }, offer.id))
+      .rejects.toMatchObject({ status: 403 });
   });
   it("returns to quoting after the founder rejects the last approved offer", async () => {
     const offer = await sentOffer();

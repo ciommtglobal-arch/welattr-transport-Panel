@@ -569,7 +569,7 @@ router.post("/logistics/carriers/:id/review", async (req, res): Promise<void> =>
 });
 
 router.patch("/logistics/offers/:id", async (req, res): Promise<void> => {
-  const actor = await requireLogisticsOperator(req, res);
+  const actor = requireLogisticsFounder(req, res);
   if (!actor) return;
   const params = ReviseLogisticsOfferParams.safeParse(req.params);
   const body = ReviseLogisticsOfferBody.safeParse(req.body);

@@ -9,6 +9,14 @@ Kurucu onayı, yalnız doğru kişinin oturumuna değil, kişinin incelediği ka
 
 **How to apply:** Onay ve düzenleme akışlarında incelenen sürümü doğrula; değişmiş kayıtta işlemi durdur, girilen taslağı koru ve kullanıcıya güncel kaydı açıkça yeniden yükleme seçeneği ver. Zaman damgası sürüm olarak kullanılıyorsa aynı milisaniyedeki değişikliklerin ayırt edilmesini sağla.
 
+## Teklif revizyonunun korunması
+
+Kullanıcı teklif revizyonunda eski fiyat ve şartların korunmasını, yeni taslağın onaysız olarak yeniden kurucu incelemesine gelmesini istiyor. Revizyon yapan kişi onaylayan kişi olarak kaydedilmemeli.
+
+**Why:** Kullanıcı revizyonun ticari onayla karışmaması ve eski geçmişin bozulmaması sınırını açıkça onayladı.
+
+**How to apply:** Eski/yeni sürüm bağlantısı ve revizyon denetimi aynı atomik işleme dahil olmalı. Örnek kodlardaki adları mevcut çalışan sözleşmenin yerine körlemesine koyma; dış bildirim ve ödeme ayrı yetki gerektirir.
+
 ## MMT Nexus / Shopify yayın kararı
 
 Kurucu onayı tek başına halka yayın değildir. Kullanıcı, “Ayrı Yayımla kararıyla halka açık sayfa” seçeneğini seçti. Açık gösterime müşteri veya siparişin özel bilgileri taşınmamalıdır.

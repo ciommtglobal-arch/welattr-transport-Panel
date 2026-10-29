@@ -38,6 +38,7 @@ export const logisticsCarrierStatusEnum = pgEnum("logistics_carrier_status", [
 
 export const logisticsOfferStatusEnum = pgEnum("logistics_offer_status", [
   "pending_approval",
+  "revised",
   "approved",
   "sent",
   "accepted",

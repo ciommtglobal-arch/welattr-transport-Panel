@@ -248,7 +248,7 @@ function OfferCard({ offer, carrier, canApprove, shipmentStatus, otherAccepted, 
         onClick={async () => { setApproveError(null); try { await approve.mutateAsync({ id: offer.id, data: { expectedUpdatedAt: version } }); } catch (e) { setApproveError(describeError(e)); } }}>
         {approve.isPending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}Kurucu onayı
       </button>);
-    if (quoting) actions.push(
+    if (canApprove && quoting) actions.push(
       <button key="rv" type="button" className={btnGhost} onClick={() => setRevising(true)} data-testid={`button-revise-offer-${offer.id}`}>Revize et</button>);
   }
   if (canApprove && offer.status === "approved" && !expired && preLoading && founderApproved) actions.push(

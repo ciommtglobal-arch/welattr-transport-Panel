@@ -7,6 +7,11 @@
  */
 
 export interface LogisticsOfferRevisionInput {
+  /**
+     * @minLength 3
+     * @maxLength 1000
+     */
+  revisionNote?: string;
   expectedUpdatedAt: Date;
   /** @minimum 1 */
   carrierId: number;
