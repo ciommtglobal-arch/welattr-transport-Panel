@@ -132,7 +132,10 @@ and accepts only `message.received`. It never sends replies, downloads attachmen
 executes HTML, fetches message URLs, approves trades or triggers payments.
 
 Activation prerequisites (not automatically provisioned):
-- A verified AgentMail inbox on `welattr.com` (existing agentmail.to inbox is not it).
+- An existing AgentMail hosted inbox on `agentmail.to`, or a verified custom inbox
+  on `welattr.com`. The founder chose the existing hosted inbox initially; no
+  domain purchase or DNS change is required for this option. Acceptance always
+  checks the exact configured mailbox, not every address on either domain.
 - `MMT_EMAIL_INBOX`: exact receiving email address.
 - Founder-consented enabled source `market://source/welattr-email` and its UUID
   in `MMT_EMAIL_SOURCE_ID`.

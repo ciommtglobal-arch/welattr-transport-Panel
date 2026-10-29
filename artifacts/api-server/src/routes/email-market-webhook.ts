@@ -21,9 +21,11 @@ router.post("/webhook/email", async (req,res): Promise<void> => {
   const secret = process.env.AGENTMAIL_WEBHOOK_SECRET;
   const inbox = process.env.MMT_EMAIL_INBOX?.trim().toLowerCase();
   const sourceId = process.env.MMT_EMAIL_SOURCE_ID;
-  // Domain verification and mailbox creation are external prerequisites.
-  // This route never registers domains, changes DNS or sends email.
-  if (!secret || !inbox || !/^[^\s@]+@welattr\.com$/.test(inbox) ||
+  // Only the explicitly configured mailbox is accepted (checked again below).
+  // AgentMail's hosted domain needs no custom DNS; welattr.com still requires
+  // ownership verification. This route never creates mailboxes or sends email.
+  if (!secret || !inbox || !z.email().safeParse(inbox).success ||
+      !["agentmail.to", "welattr.com"].includes(inbox.split("@")[1]) ||
       !z.string().uuid().safeParse(sourceId).success) {
     res.status(503).json({error:"E-posta kaynağı yapılandırılmadı."}); return;
   }

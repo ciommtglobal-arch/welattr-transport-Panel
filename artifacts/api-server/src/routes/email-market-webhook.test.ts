@@ -31,6 +31,23 @@ describe("signed, receive-only logistics email bridge", () => {
     mocks.process.mockReset().mockResolvedValue({status:"accepted",messagesSent:false});
   });
   afterEach(()=>vi.unstubAllEnvs());
+  it("accepts only the exact configured hosted AgentMail inbox",async()=>{
+    vi.stubEnv("MMT_EMAIL_INBOX","mmtglobal-6213@agentmail.to");
+    const body=event();body.message.inbox_id="mmtglobal-6213@agentmail.to";
+    expect((await send(body)).body.status).toBe("accepted");
+    mocks.process.mockClear();
+    body.message.inbox_id="another@agentmail.to";
+    expect((await send(body)).status).toBe(403);
+    body.message.inbox_id="lojistik@welattr.com";
+    expect((await send(body)).status).toBe(403);
+    expect(mocks.process).not.toHaveBeenCalled();
+  });
+  it.each(["not-an-email","x@agentmail.to.attacker.invalid","x@welattr.com.attacker.invalid",""])(
+    "fails closed for invalid or unsupported configured mailbox %s",async(inbox)=>{
+      vi.stubEnv("MMT_EMAIL_INBOX",inbox);
+      expect((await send(event())).status).toBe(503);
+      expect(mocks.process).not.toHaveBeenCalled();
+    });
   it("fails closed until configured",async()=>{
     vi.stubEnv("AGENTMAIL_WEBHOOK_SECRET","");
     expect((await send(event())).status).toBe(503);

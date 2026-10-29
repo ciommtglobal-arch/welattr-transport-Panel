@@ -28,3 +28,13 @@ the earlier synthetic loads were real shipments.
 labels. Newly eligible real messages may enter matching, but Gemini only prepares
 founder-review drafts; automatic approval, payment and outbound dispatch remain
 outside this authorization.
+
+Start inbound email with the existing AgentMail-hosted inbox rather than requiring
+a welattr.com mailbox.
+
+**Why:** The user said welattr.com has not been purchased and approved the small
+code change needed to use the existing hosted inbox instead.
+
+**How to apply:** Do not buy a domain or change DNS as a prerequisite. Keep exact
+mailbox binding and signed webhook verification; do not confuse the connected
+mailbox-management tools with permission to administer provider webhooks.
