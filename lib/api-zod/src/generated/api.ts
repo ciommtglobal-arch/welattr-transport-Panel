@@ -8,6 +8,23 @@
 import * as zod from 'zod';
 
 
+/**
+ * Requires source-specific Telegram secret header. No outbound actions. Unsupported updates are acknowledged as ignored.
+ * @summary Receive consented structured Telegram group market messages
+ */
+export const ReceiveTelegramMarketUpdateParams = zod.object({
+  "sourceId": zod.uuid()
+})
+
+export const ReceiveTelegramMarketUpdateHeader = zod.object({
+  "X-Telegram-Bot-Api-Secret-Token": zod.string()
+})
+
+export const ReceiveTelegramMarketUpdateBody = zod.record(zod.string(), zod.unknown()).describe('Telegram Bot API update envelope; only original group text messages containing validated market JSON are ingested.')
+
+export const ReceiveTelegramMarketUpdateResponse = zod.unknown()
+
+
 export const GetGeminiWorkspaceResponse = zod.object({
   "mode": zod.enum(['preview_drafts_only']),
   "model": zod.string(),

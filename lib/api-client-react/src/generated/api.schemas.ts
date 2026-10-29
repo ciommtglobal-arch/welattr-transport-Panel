@@ -5,6 +5,11 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+/**
+ * Telegram Bot API update envelope; only original group text messages containing validated market JSON are ingested.
+ */
+export interface TelegramMarketEnvelope { [key: string]: unknown }
+
 export interface GeminiInstructionInput {
   requestId: string;
   /**

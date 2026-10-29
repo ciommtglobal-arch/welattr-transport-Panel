@@ -346,6 +346,7 @@ export * from './systemHealthStatusCode';
 export * from './systemHealthStatusStatus';
 export * from './tamiPaymentStatus';
 export * from './tamiPaymentStatusValue';
+export * from './telegramMarketEnvelope';
 export * from './trialPageParameter';
 export * from './trialPageSizeParameter';
 export * from './uploadUrlRequest';

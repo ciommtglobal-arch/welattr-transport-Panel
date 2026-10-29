@@ -97,11 +97,29 @@ function payload(item: FeedItem, sourceUrl: string): PoolPayload {
     requiredKg:item.requiredKg ?? null,availableDate:item.availableDate ?? null,requiredDate:item.requiredDate ?? null,
     reference:item.reference ?? item.id,sourceUrl:item.sourceUrl ?? sourceUrl,verified:false,eligible:true};
 }
+export async function ingestTelegramMarketItem(source: typeof sources.$inferSelect, messageId: number, item: FeedItem) {
+  return db.transaction(async tx => {
+    await lock(tx);
+    const [current] = await tx.select().from(sources).where(eq(sources.id, source.id)).for("update");
+    if (!current?.enabled || current.version !== source.version || current.url !== source.url) fail(409,"Kaynak izni değişti.");
+    const originKey = `telegram:${source.id}:${messageId}`;
+    const data = payload(item, source.url);
+    const added = await tx.insert(entries).values({
+      originKey, sourceKind:"telegram_market", sourceId:source.id,
+      payload:data, fingerprint:digest(data), active:true,
+    }).onConflictDoNothing({target:entries.originKey}).returning({id:entries.id});
+    if (!added.length) return false;
+    await tx.update(sources).set({lastSuccessAt:new Date(),lastError:null}).where(eq(sources.id,source.id));
+    await rebuild(tx);
+    return true;
+  });
+}
 export async function syncPoolSource(id: string, read: typeof readPublicFeed = readPublicFeed) {
   const capture = await db.transaction(async tx => {
     await lock(tx);
     const [s] = await tx.select().from(sources).where(eq(sources.id,id)).for("update");
     if (!s || !s.enabled) fail(409,"Kaynak kapalı veya bulunamadı.");
+    if (s.url.startsWith("telegram:")) fail(409,"Telegram kaynağı webhook üzerinden beslenir.");
     if (s.lastAttemptAt && Date.now()-s.lastAttemptAt.getTime() < 30000) fail(409,"Kaynak kısa süre önce tarandı; tarama bitince yenileyin.");
     const attempt = new Date();
     await tx.update(sources).set({lastAttemptAt:attempt}).where(eq(sources.id,id));
@@ -135,6 +153,7 @@ export async function refreshPool(includeSources = true) {
   if (includeSources) {
     const configured = await db.select().from(sources).where(eq(sources.enabled,true));
     for (const source of configured) {
+      if (source.url.startsWith("telegram:")) continue;
       if (source.lastAttemptAt && Date.now()-source.lastAttemptAt.getTime() < 15*60000) continue;
       try { await syncPoolSource(source.id); } catch (error) { if (!(error instanceof AutomationError)) throw error; }
     }
@@ -189,7 +208,7 @@ export async function actOnPool(input: Action, actor: LogisticsActor) {
   if (input.action === "source_create") {
     if (!input.name || input.name.trim().length < 2 || !input.url || input.consentConfirmed !== true) fail(400,"Gerçek kaynak adı/adresi ve veriyi kullanma yetkisi teyidi gerekli.");
     const name = input.name.trim();
-    let url: string; try { url = safeFeedUrl(input.url); } catch { fail(400,"Kaynak genel HTTPS JSON adresi olmalı; gizli anahtar/sorgu parametresi kullanmayın."); }
+    let url: string; try { url = /^telegram:\/\/group\/(-[1-9]\d{0,18})$/.test(input.url) ? input.url : safeFeedUrl(input.url); } catch { fail(400,"İzinli HTTPS JSON veya telegram://group/GRUP_KIMLIGI adresi gerekli."); }
     await db.transaction(async tx => {
       await lock(tx);
       const all = await tx.select().from(sources);

@@ -31,6 +31,37 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /logistics/market/telegram/{sourceId}:
+    post:
+      operationId: receiveTelegramMarketUpdate
+      summary: Receive consented structured Telegram group market messages
+      description: Requires source-specific Telegram secret header. No outbound actions. Unsupported updates are acknowledged as ignored.
+      parameters:
+        - in: path
+          name: sourceId
+          required: true
+          schema: { type: string, format: uuid }
+        - in: header
+          name: X-Telegram-Bot-Api-Secret-Token
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramMarketEnvelope'
+      responses:
+        '200':
+          description: Accepted, duplicate, or explicitly ignored update
+        '400':
+          description: Invalid source identifier or JSON
+        '401':
+          description: Missing or invalid secret
+        '403':
+          description: Source/group not permitted
+        '503':
+          description: Persistence failed; provider may retry
   /gemini/workspace:
     get:
       operationId: getGeminiWorkspace
@@ -4432,6 +4463,10 @@ components:
       name: pageSize
       schema: { type: integer, minimum: 1, maximum: 50, default: 25 }
   schemas:
+    TelegramMarketEnvelope:
+      type: object
+      description: Telegram Bot API update envelope; only original group text messages containing validated market JSON are ingested.
+      additionalProperties: true
     GeminiInstructionInput:
       type: object
       additionalProperties: false

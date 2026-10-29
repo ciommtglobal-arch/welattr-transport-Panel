@@ -213,6 +213,7 @@ import type {
   StaffTrialTaskUpdate,
   SystemHealthStatus,
   TamiPaymentStatus,
+  TelegramMarketEnvelope,
   UploadUrlRequest,
   UploadUrlResponse,
   WorkflowApproval,
@@ -250,6 +251,88 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getReceiveTelegramMarketUpdateUrl = (sourceId: string,) => {
+
+
+
+
+  return `/api/logistics/market/telegram/${sourceId}`
+}
+
+/**
+ * Requires source-specific Telegram secret header. No outbound actions. Unsupported updates are acknowledged as ignored.
+ * @summary Receive consented structured Telegram group market messages
+ */
+export const receiveTelegramMarketUpdate = async (sourceId: string,
+    telegramMarketEnvelope: TelegramMarketEnvelope, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<void>(getReceiveTelegramMarketUpdateUrl(sourceId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(telegramMarketEnvelope)
+  }
+);}
+
+
+
+
+
+export const getReceiveTelegramMarketUpdateMutationKey = () => ['receiveTelegramMarketUpdate'] as const;
+
+export const getReceiveTelegramMarketUpdateMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveTelegramMarketUpdate>>, TError,ReceiveTelegramMarketUpdateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof receiveTelegramMarketUpdate>>, TError,ReceiveTelegramMarketUpdateMutationVariables, TContext> => {
+
+const mutationKey = getReceiveTelegramMarketUpdateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof receiveTelegramMarketUpdate>>, ReceiveTelegramMarketUpdateMutationVariables> = (props) => {
+          const {sourceId,data} = props ?? {};
+
+          return  receiveTelegramMarketUpdate(sourceId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReceiveTelegramMarketUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof receiveTelegramMarketUpdate>>>
+    export type ReceiveTelegramMarketUpdateMutationBody = BodyType<TelegramMarketEnvelope>
+    export type ReceiveTelegramMarketUpdateMutationError = ErrorType<void>
+    export type ReceiveTelegramMarketUpdateMutationVariables = {sourceId: string;data: BodyType<TelegramMarketEnvelope>}
+
+    /**
+ * @summary Receive consented structured Telegram group market messages
+ */
+export const useReceiveTelegramMarketUpdate = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveTelegramMarketUpdate>>, TError,ReceiveTelegramMarketUpdateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof receiveTelegramMarketUpdate>>,
+        TError,
+        ReceiveTelegramMarketUpdateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReceiveTelegramMarketUpdateMutationOptions(options));
+    }
 
 export const getGetGeminiWorkspaceUrl = () => {
 

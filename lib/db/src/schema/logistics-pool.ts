@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 
 export type PoolPayload = {
+  quotedPriceMinor?: number; currency?: string; commissionBps?: number;
   role: "buyer" | "seller" | "carrier" | "load";
   name: string; location: string; origin: string; destination: string;
   products: string[]; transportMode: string; capacityKg: number | null;

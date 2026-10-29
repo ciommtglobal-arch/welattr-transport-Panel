@@ -53,3 +53,4 @@
 - [Background worker proof](background-worker-proof.md) — Observe a separate worker with committed synthetic dev fixtures; rollback-only service tests cannot prove scheduled execution.
 - [Standalone JSX tests](standalone-jsx-tests.md) — Independent tsx rendering does not inherit Vite’s JSX transform; distinguish test-runtime errors from app failures.
 - [Otomasyon bütçesi](logistics-automation-budget.md) — Kullanıcı lojistik otomasyonu için aylık 40 USD seviyesini kabul etti; uygulanmış harcama limiti değildir.
+- [Market ingestion scope](market-ingestion-boundary.md) — Consent-controlled structured ingestion first; installing a route does not activate a market source.

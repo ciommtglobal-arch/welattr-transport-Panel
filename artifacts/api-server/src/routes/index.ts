@@ -33,7 +33,10 @@ import whatsappLogisticsWebhookRouter from "./whatsapp-logistics-webhook";
 import nexusShopifyRouter from "./nexus-shopify";
 import shopifyLogisticsRouter from "./shopify-logistics";
 
+import marketIngestionRouter from "./market-ingestion";
+
 const router: IRouter = Router();
+router.use(marketIngestionRouter);
 router.use(shopifyLogisticsRouter);
 router.use(kasaRouter);
 router.use(healthRouter);

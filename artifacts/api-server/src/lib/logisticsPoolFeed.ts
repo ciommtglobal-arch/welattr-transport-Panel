@@ -23,6 +23,9 @@ const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(s => {
   const d = new Date(s); return !Number.isNaN(d.getTime()) && d.toISOString().slice(0,10) === s;
 });
 export const feedItemSchema = z.object({
+  quotedPriceMinor: z.number().int().positive().max(1e12).optional(),
+  currency: z.enum(["TRY", "USD", "EUR"]).optional(),
+  commissionBps: z.number().int().min(0).max(9500).optional(),
   id: z.string().trim().min(1).max(160), role: z.enum(["buyer","seller","carrier","load"]),
   name: z.string().trim().min(2).max(200),
   location: z.string().max(200).default(""), origin: z.string().max(200).default(""),
