@@ -43,7 +43,7 @@ describe("auto Telegram market intake", () => {
     expect((await post()).body.status).toBe("needs_review");
     expect(mocks.verify).toHaveBeenCalledWith(-100123);
     expect(mocks.enroll).toHaveBeenCalledWith(-100123);
-    expect(mocks.process).toHaveBeenCalledWith({ id: "source-1", enabled: true }, "5", "Yük var");
+    expect(mocks.process).toHaveBeenCalledWith({ id: "source-1", enabled: true }, "5", "Yük var", expect.any(Date));
   });
   it("does not reactivate a disabled source", async () => {
     mocks.enroll.mockResolvedValue({ id: "source-1", enabled: false });

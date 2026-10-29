@@ -85,12 +85,24 @@ Mersin -> Adana
 Fiyat: 12000 TL
 ```
 Carrier example uses "Boş araç", declared capacity, trailer type and ISO date.
-The direction must be a separate line or semicolon-delimited field with -> or →.
+Direction supports -> / →, explicit Çıkış/Varış labels, and Turkish directional
+suffixes such as İstanbul Tuzla'dan Ankara Ostim'e (including curly apostrophes).
 Ambiguous/missing fields save an ineligible pool record with parserMissing and
 status needs_review in the API response, not an AI-approved match.
 Unclassifiable/mixed messages are rejected. Original raw messages are not stored.
 Only explicit Turkish mobile numbers are extracted; the source/event reference remains
-available when no contact is given. Relative dates and unlabelled prices are not inferred.
+available when no contact is given. Bugün, yarın and hemen yükleme are resolved
+against the original message timestamp in Europe/Istanbul (UTC+3), not retry time.
+Conflicting dates stay missing. ISO and DD.MM.YYYY / DD/MM/YYYY dates are supported.
+Unlabelled prices are not inferred.
 is_market_feed is a payload tag in the existing JSONB pool, so no physical migration or
 parallel loads/carriers tables are introduced. Vehicle compatibility is mandatory for
 market matches; no declared commission means no invented commission amount.
+
+Natural-ad example accepted by the regression tests:
+`İstanbul Tuzla'dan Ankara Ostim'e 20 ton paletli kuru yük. Tır (Tenteli/Kapalı Kasa). Hemen yükleme`
+Tenteli and kapalı kasa are preserved as alternatives for a load, not silently
+collapsed to one body type. The carrier must have exactly one compatible declared
+body. Negated/uncertain body descriptions are held for review. This deterministic
+parser is not a universal language model; unsupported prose remains ignored or
+ineligible rather than fabricating route, date, capacity, price or authority.

@@ -26,7 +26,7 @@ router.post("/telegram/webhook", async (req, res): Promise<void> => {
     if (!source.enabled) {
       res.status(200).json({ status: "ignored", reason: "source_disabled" }); return;
     }
-    res.status(200).json(await processMarketFeedText(source, String(message.message_id), message.text));
+    res.status(200).json(await processMarketFeedText(source, String(message.message_id), message.text, new Date(message.date * 1000)));
   } catch {
     req.log.warn("Telegram piyasa doğrulaması veya kaydı tamamlanamadı; yeniden deneme gerekli.");
     res.status(503).json({ error: "Webhook işlenemedi." });

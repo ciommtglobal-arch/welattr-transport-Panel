@@ -6,9 +6,9 @@ import { logisticsPoolSourcesTable } from "@workspace/db";
  * No loopback HTTP request or bypass of source-secret checks is required.
  */
 export async function processMarketFeedText(
-  source: typeof logisticsPoolSourcesTable.$inferSelect, eventId: string, text: string,
+  source: typeof logisticsPoolSourcesTable.$inferSelect, eventId: string, text: string, occurredAt = new Date(),
 ) {
-  const extraction = parseMarketText(text, eventId);
+  const extraction = parseMarketText(text, eventId, occurredAt);
   if (!extraction) return { status: "ignored" as const, reason: "unclassified_text", messagesSent: false as const };
   const inserted = await ingestTelegramMarketItem(source, eventId, extraction.item, extraction.metadata);
   return {

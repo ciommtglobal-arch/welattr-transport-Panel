@@ -7,3 +7,12 @@ Market ingestion uses consented sources, not arbitrary group scraping or guessed
 **Why:** Market text may contain instructions and incomplete commercial terms; false prices or implied consent would contaminate founder decisions.
 
 **How to apply:** Free-text extraction must keep uncertain records ineligible with missing-field evidence. Keep bot receiver ownership separate from route installation. Do not claim source activation or real load discovery from implementing a webhook.
+
+Relative market dates must use the original event timestamp in Turkey's local day,
+not the time the webhook happens to process or retry the message.
+
+**Why:** “Hemen yükleme” and “yarın” can otherwise shift dates across midnight or
+on redelivery, creating a different commercial meaning without a new advertisement.
+
+**How to apply:** Pass Telegram message.date / feed occurredAt through all parsing
+paths; preserve ambiguous dates for review rather than guessing.

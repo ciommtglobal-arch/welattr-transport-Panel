@@ -31,7 +31,7 @@ router.post("/logistics/market/telegram/:sourceId", async (req, res): Promise<vo
   }
   let body: unknown;
   try { body = JSON.parse(update.message.text); } catch {
-    const extraction = parseMarketText(update.message.text, String(update.message.message_id));
+    const extraction = parseMarketText(update.message.text, String(update.message.message_id), new Date(update.message.date * 1000));
     if (!extraction) {
       res.status(200).json({ status: "ignored", reason: "unclassified_text" }); return;
     }
@@ -83,7 +83,7 @@ router.post("/ingest/market-feed", async (req, res): Promise<void> => {
     res.status(400).json({ error: "Olay tarihi geçersiz veya eski." }); return;
   }
   try {
-    const result = await processMarketFeedText(source, eventId, text);
+    const result = await processMarketFeedText(source, eventId, text, new Date(occurredAt));
     res.status(result.status === "ignored" ? 422 : 200).json(result);
   } catch {
     req.log.warn("Piyasa kaydı saklanamadı.");

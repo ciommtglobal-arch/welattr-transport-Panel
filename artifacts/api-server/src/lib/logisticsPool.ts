@@ -114,7 +114,7 @@ export async function enrollTelegramMarketSource(chatId: number) {
   });
 }
 export async function ingestTelegramMarketItem(source: typeof sources.$inferSelect, messageId: number | string, item: FeedItem,
-  metadata: { is_market_feed?: boolean; vehicleType?: string; cargoType?: string; parserMissing?: string[]; eligible?: boolean } = {}) {
+  metadata: { is_market_feed?: boolean; vehicleType?: string; vehicleTypes?: string[]; cargoType?: string; parserMissing?: string[]; eligible?: boolean } = {}) {
   return db.transaction(async tx => {
     await lock(tx);
     const [current] = await tx.select().from(sources).where(eq(sources.id, source.id)).for("update");
