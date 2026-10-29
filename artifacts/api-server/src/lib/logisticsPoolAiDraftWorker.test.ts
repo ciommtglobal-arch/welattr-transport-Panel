@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const state = vi.hoisted(() => ({
   locked: true, releases: [] as boolean[], queries: [] as string[], connections: 0,
   candidates: [] as any[], participants: [] as any[], saved: [] as any[],
-  queued: false, inserts: 0,
+  queued: false, inserts: 0, pendingReview: [] as any[],
 }));
 const generate = vi.hoisted(() => vi.fn());
 vi.mock("@workspace/db", async (original) => {
@@ -21,6 +21,9 @@ vi.mock("@workspace/db", async (original) => {
         const rows = table === actual.logisticsPoolMatchesTable ? state.candidates :
           table === actual.logisticsPoolEntriesTable ? state.participants : state.saved;
         const chain = {
+          innerJoin: () => ({
+            where: () => ({ limit: async () => state.pendingReview }),
+          }),
           where: () => chain, orderBy: () => chain, limit: () => Promise.resolve(rows),
           then: (resolve: (rows: any[]) => unknown) => Promise.resolve(rows).then(resolve),
         };
@@ -58,6 +61,7 @@ beforeEach(() => {
   vi.stubEnv("MMT_LOGISTICS_POOL_WORKER_ROLE", "");
   state.locked = true; state.releases = []; state.queries = []; state.connections = 0;
   state.queued = false; state.inserts = 0;
+  state.pendingReview = [];
   state.candidates = [{ id: "TEST-MATCH", entryIds: ["TEST-LOAD", "TEST-CARRIER"], version: 1, snapshotHash: "TEST-HASH" }];
   state.participants = ["load", "carrier"].map((role) => ({ active: true, payload: { role, isTest: true } }));
   state.saved = [{ id: "TEST-DRAFT", snapshotHash: "TEST-HASH", status: "pending_review" }];
@@ -66,6 +70,16 @@ beforeEach(() => {
 afterEach(() => { vi.unstubAllEnvs(); vi.restoreAllMocks(); });
 
 describe("distributed sendless draft worker", () => {
+  it("makes no model call when three current drafts await founder review", async () => {
+    vi.stubEnv("NODE_ENV", "production"); vi.stubEnv("REPLIT_DEPLOYMENT", "1");
+    vi.stubEnv("MMT_LOGISTICS_POOL_AI_DRAFTS_ENABLED", "true");
+    vi.stubEnv("MMT_LOGISTICS_POOL_WORKER_ROLE", "dedicated");
+    state.pendingReview = [{ id: "1" }, { id: "2" }, { id: "3" }];
+    expect(await runLogisticsPoolAiDraftWorkerOnce()).toBe("idle");
+    expect(generate).not.toHaveBeenCalled();
+    expect(state.inserts).toBe(0);
+    expect(state.queries.at(-1)).toContain("pg_advisory_unlock");
+  });
   it("does not schedule the embedded TEST worker without explicit activation", () => {
     vi.stubEnv("MMT_LOGISTICS_POOL_AI_DRAFTS_ENABLED", "false");
     const schedule = vi.spyOn(globalThis, "setInterval");

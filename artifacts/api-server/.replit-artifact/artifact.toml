@@ -26,7 +26,7 @@ args = ["node", "artifacts/api-server/scripts/start-logistics-services.mjs"]
 [services.production.run.env]
 PORT = "8080"
 NODE_ENV = "production"
-MMT_LOGISTICS_POOL_AI_DRAFTS_ENABLED = "false"
+MMT_LOGISTICS_POOL_AI_DRAFTS_ENABLED = "true"
 
 [services.production.health.startup]
 path = "/api/healthz"

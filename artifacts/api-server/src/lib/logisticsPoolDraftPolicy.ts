@@ -1,4 +1,6 @@
 export type LogisticsDraftMode = "disabled" | "test_drafts" | "production_drafts";
+export const PRODUCTION_DRAFT_INTERVAL_MS = 30 * 60_000;
+export const MAX_PENDING_BACKGROUND_DRAFTS = 3;
 
 /** A founder click is independent of the background-worker activation switch. */
 export function manualLogisticsDraftEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
@@ -35,7 +37,7 @@ export function logisticsDraftMode(env: NodeJS.ProcessEnv = process.env): Logist
 
 export function logisticsDraftScheduleDescription(): string {
   if (logisticsDraftMode() === "production_drafts") {
-    return "Üretim taslak izni yapılandırılmış. Ayrı lojistik worker süreci 2 dakikada bir uygun gerçek eşleşmeleri inceleyebilir; bu bilgi worker'ın çalıştığının kanıtı değildir. Telegram gönderimi ve otomatik ticari onay kapalıdır.";
+    return "Üretim taslak izni yapılandırılmış. Ayrı worker 30 dakikada bir uygun gerçek eşleşmeleri inceleyebilir; 3 güncel taslak inceleme beklerken arka plan üretimi durur. Bu bilgi worker'ın çalıştığının kanıtı değildir. Telegram gönderimi ve otomatik ticari onay kapalıdır.";
   }
   if (logisticsDraftMode() === "test_drafts") {
     if (process.env.MMT_LOGISTICS_POOL_AI_DRAFTS_ENABLED !== "true") {

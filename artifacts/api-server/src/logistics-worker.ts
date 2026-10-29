@@ -1,7 +1,7 @@
 import { pool } from "@workspace/db";
 import { logger } from "./lib/logger";
 import { checkLogisticsSchema } from "./lib/logisticsLaunchReadiness";
-import { logisticsDraftMode } from "./lib/logisticsPoolDraftPolicy";
+import { logisticsDraftMode, PRODUCTION_DRAFT_INTERVAL_MS } from "./lib/logisticsPoolDraftPolicy";
 import { runLogisticsPoolAiDraftWorkerOnce } from "./lib/logisticsPoolAiDraftWorker";
 import { refreshPool } from "./lib/logisticsPool";
 import { writeWorkerEvidence } from "./lib/logisticsWorkerEvidence";
@@ -53,7 +53,7 @@ async function main() {
       }
       if (process.argv.includes("--once")) break;
       await new Promise<void>((resolve) => {
-        const timer = setTimeout(resolve, 120_000);
+        const timer = setTimeout(resolve, mode === "production_drafts" ? PRODUCTION_DRAFT_INTERVAL_MS : 120_000);
         wake = () => { clearTimeout(timer); resolve(); };
         if (stopping) wake();
       });

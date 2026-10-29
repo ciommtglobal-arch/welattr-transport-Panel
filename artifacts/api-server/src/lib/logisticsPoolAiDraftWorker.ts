@@ -14,7 +14,7 @@ import {
   LOGISTICS_POOL_AI_DRAFT_WORKER_ACTOR,
   LogisticsPoolAiDraftError,
 } from "./logisticsPoolAiDraft";
-import { logisticsDraftMode } from "./logisticsPoolDraftPolicy";
+import { logisticsDraftMode, MAX_PENDING_BACKGROUND_DRAFTS } from "./logisticsPoolDraftPolicy";
 
 const INTERVAL_MS = 120_000;
 const MAX_MATCHES_TO_CHECK = 100;
@@ -32,6 +32,22 @@ async function recordDryRunTelegramNotification(draftId: string): Promise<boolea
 }
 
 async function generateOneDraft(testOnly: boolean): Promise<DraftWorkerResult> {
+  if (!testOnly) {
+    // Only current pending matches consume review capacity. Old revisions and
+    // decided matches must not permanently block the founder's queue.
+    const waiting = await db.select({ id: drafts.id }).from(drafts)
+      .innerJoin(matches, and(
+        eq(matches.id, drafts.matchId),
+        eq(matches.version, drafts.matchVersion),
+        eq(matches.snapshotHash, drafts.snapshotHash),
+      ))
+      .where(and(eq(drafts.status, "pending_review"), eq(matches.status, "pending")))
+      .limit(MAX_PENDING_BACKGROUND_DRAFTS);
+    if (waiting.length >= MAX_PENDING_BACKGROUND_DRAFTS) {
+      logger.info("Kurucu inceleme kuyruğu sınırında; yeni arka plan Gemini çağrısı yapılmadı.");
+      return "idle";
+    }
+  }
   const candidates = await db.select().from(matches)
     .where(eq(matches.status, "pending"))
     .orderBy(desc(matches.updatedAt))

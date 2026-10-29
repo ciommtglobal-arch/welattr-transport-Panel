@@ -21,7 +21,8 @@ describe("worker evidence is factual and fail-closed", () => {
     const now = Date.now();
     await writeWorkerEvidence({ at: new Date(now).toISOString(), mode: "production_drafts", result: "idle" });
     expect(await describeWorkerEvidence(now)).toContain("sonuç: idle");
-    expect(await describeWorkerEvidence(now + 180_001)).toContain("eskimiş");
+    expect(await describeWorkerEvidence(now + 30 * 60_000)).toContain("sonuç: idle");
+    expect(await describeWorkerEvidence(now + 33 * 60_000 + 1)).toContain("eskimiş");
     expect(await describeWorkerEvidence(now - 1000)).toContain("eskimiş");
   });
   it("does not label an unreadable heartbeat as running", async () => {
