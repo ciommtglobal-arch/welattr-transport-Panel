@@ -16,6 +16,7 @@ import { AlertTriangle, ChevronLeft, ClipboardPlus, GitMerge, Globe, Layers, Loc
 import { btnGhost, btnPrimary, classifyError, describeError, inputCls } from "@/components/logistics-ops/shared";
 import { EntryRow, Freshness, MatchDetail, MatchListItem, SourcesPanel, roleLabels } from "@/components/logistics-pool/pool-panels";
 import { FieldCapture } from "@/components/logistics-pool/field-capture";
+import { LogisticsEvidenceTable } from "@/components/logistics-pool/evidence-table";
 
 const noAuthRetry = (count: number, error: unknown) => {
   const kind = classifyError(error);
@@ -184,7 +185,7 @@ function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
 
       <div className="mt-4 space-y-2">
         <p className="border-l-2 border-border bg-card px-3 py-2 text-xs leading-5 text-foreground/60" data-testid="text-schedule">
-          {data.automaticSchedule} Panel görünümü 30 saniyede bir yenilenir. Worker yalnız API süreci çalışırken aktiftir; canlı Gemini worker'ı ve kesintisiz 7/24 çalışma bu önizlemede etkin değildir.
+          {data.automaticSchedule} Panel görünümü 30 saniyede bir yenilenir. Sayfanın açık olması bağımsız worker veya kesintisiz çalışma kanıtı değildir.
         </p>
         {!data.externalDiscoveryConfigured ? (
           <p className="flex items-start gap-2 border-l-2 border-primary bg-primary/10 px-3 py-2 text-xs leading-5" role="status" data-testid="text-no-external">
@@ -195,6 +196,7 @@ function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
         {pollError ? <p className="flex items-start gap-2 border-l-2 border-red-400 bg-red-400/10 px-3 py-2 text-xs text-red-200" role="alert"><WifiOff size={14} className="mt-0.5 shrink-0" />Son yenileme başarısız: {describeError(pollError)}. Gösterilen veriler eskimiş olabilir.</p> : null}
       </div>
 
+      <LogisticsEvidenceTable data={data} />
       <section className="mt-5 grid grid-cols-2 gap-px border border-border bg-border md:grid-cols-5" aria-label="Havuz özeti">
         {metrics.map((m) => (
           <div key={m.label} className="bg-card px-4 py-3" data-testid={`metric-${m.label}`}>

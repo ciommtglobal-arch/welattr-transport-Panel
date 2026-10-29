@@ -1,5 +1,12 @@
 export type LogisticsDraftMode = "disabled" | "test_drafts" | "production_drafts";
 
+/** TEST fixtures stay isolated; real internal records require attributable consent. */
+export function permittedInternalLogisticsRecord(record: {
+  isTest: boolean; contactUseConfirmed: boolean; capturedByClerkUserId: string | null;
+}): boolean {
+  return record.isTest || (record.contactUseConfirmed && Boolean(record.capturedByClerkUserId?.trim()));
+}
+
 /** Production activation is explicit; neither mode can send messages or approve. */
 export function logisticsDraftMode(env: NodeJS.ProcessEnv = process.env): LogisticsDraftMode {
   if (!env.AI_INTEGRATIONS_GEMINI_BASE_URL?.trim() || !env.AI_INTEGRATIONS_GEMINI_API_KEY?.trim()) return "disabled";

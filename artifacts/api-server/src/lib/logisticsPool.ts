@@ -16,7 +16,8 @@ import type { LogisticsActor } from "./logisticsWorkflowAuth";
 import { isLogisticsFounder } from "./logisticsListingAuth";
 import { AutomationError } from "./logisticsAutomation";
 import { isLogisticsPoolAiDraftPreviewEnabled } from "./logisticsPoolAiDraft";
-import { logisticsDraftScheduleDescription } from "./logisticsPoolDraftPolicy";
+import { logisticsDraftScheduleDescription, permittedInternalLogisticsRecord } from "./logisticsPoolDraftPolicy";
+import { describeWorkerEvidence } from "./logisticsWorkerEvidence";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Action = z.infer<typeof ActLogisticsPoolBody>;
@@ -58,13 +59,17 @@ export async function syncInternalPool() {
     const offers = await tx.select({l:listings,p:profiles.status}).from(listings).leftJoin(profiles,eq(listings.businessProfileId,profiles.id)).limit(1001);
     if ([loads,fleet,offers].some(rows => rows.length > 1000)) fail(413,"İç kaynak başına 1.000 kayıt sınırı aşıldı; tarama kapsamını daraltın.");
     await tx.update(entries).set({active:false}).where(sql`${entries.sourceId} IS NULL`);
-    for (const {r,s} of loads) await upsert(tx,`load:${r.id}`,"mmt_load",{
+    for (const {r,s} of loads) {
+      if (!permittedInternalLogisticsRecord(r)) continue;
+      await upsert(tx,`load:${r.id}`,"mmt_load",{
       ...empty(),role:"load",name:r.organization || r.requesterName,origin:r.origin,destination:r.destination,
       location:r.origin,products:productWords(r.cargoType),transportMode:r.transportMode,requiredKg:r.weightKg,volumeM3:r.volumeM3 > 0 ? r.volumeM3 : null,
       requiredDate:r.loadingDate,contact:[r.email,r.phone].filter(Boolean).join(" · "),reference:r.referenceCode,
       isTest:r.isTest,eligible:s !== "delivered",
     });
+    }
     for (const c of fleet) {
+      if (!permittedInternalLogisticsRecord(c)) continue;
       // Free text is not GPS or capacity verification. Only one explicitly
       // directed route and an unambiguous unit can support a route suggestion.
       const route = c.serviceRoutes.split(/\s*(?:→|->)\s*/);
@@ -154,7 +159,7 @@ export async function getPoolWorkspace(actor: LogisticsActor) {
     canApprove:isLogisticsFounder(actor.userId),
     aiDraftEnabled:actor.isFounder && isLogisticsPoolAiDraftPreviewEnabled(),
     externalDiscoveryConfigured:feeds.some(s => s.enabled),
-    automaticSchedule:logisticsDraftScheduleDescription(),
+    automaticSchedule:`${logisticsDraftScheduleDescription()} ${await describeWorkerEvidence()}`,
     limits:["Her iç kaynakta en çok 1.000, dış beslemede 1.000 kayıt; havuzda 10.000 kayıt.", "Rol başına en çok 200 taraf, 300 alıcı–satıcı çifti ve 1.000 güncel öneri değerlendirilir; benzerlik puanı garanti değildir.",
       ...(suggestions.length > 1000 ? ["Geçmiş dahil sonuçlar ilk 1.000 kayıtla sınırlı."] : []),
       ...(!feeds.some(s => s.enabled) ? ["Dış kaynak bağlı değil: internetten yeni müşteri bulunduğu iddia edilmez."] : [])],

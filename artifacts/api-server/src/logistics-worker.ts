@@ -4,6 +4,7 @@ import { checkLogisticsSchema } from "./lib/logisticsLaunchReadiness";
 import { logisticsDraftMode } from "./lib/logisticsPoolDraftPolicy";
 import { runLogisticsPoolAiDraftWorkerOnce } from "./lib/logisticsPoolAiDraftWorker";
 import { refreshPool } from "./lib/logisticsPool";
+import { writeWorkerEvidence } from "./lib/logisticsWorkerEvidence";
 
 /** Standalone, no HTTP listener; no Telegram sender is imported or invoked. */
 async function main() {
@@ -31,6 +32,7 @@ async function main() {
       process.exitCode = 2;
       return;
     }
+    await writeWorkerEvidence({ at: new Date().toISOString(), mode, result: "starting" });
     while (!stopping) {
       try {
         // Only after separately approved production activation: refresh existing
@@ -38,12 +40,16 @@ async function main() {
         if (mode === "production_drafts") await refreshPool();
         if (stopping) break;
         const result = await runLogisticsPoolAiDraftWorkerOnce();
+        if (result === "disabled") throw new Error("Worker activation was lost.");
+        await writeWorkerEvidence({ at: new Date().toISOString(), mode, result });
         logger.info({ result, mode, messagesSent: false }, "Lojistik taslak worker turu.");
         if (process.argv.includes("--once") && ["error", "blocked", "busy", "disabled"].includes(result)) {
           process.exitCode = result === "error" || result === "blocked" ? 1 : 2;
         }
       } catch {
+        await writeWorkerEvidence({ at: new Date().toISOString(), mode, result: "error" });
         logger.warn("Lojistik worker turu başarısız; başarı veya gönderim kaydedilmedi.");
+        if (process.argv.includes("--once")) process.exitCode = 1;
       }
       if (process.argv.includes("--once")) break;
       await new Promise<void>((resolve) => {

@@ -51,3 +51,4 @@
 - [Lojistik otomasyon yetkisi](logistics-automation-authority.md) — Hazırlık ve takip otomatik; evrakın varlığı doğruluk değildir, son karar açık politika olmadan kaldırılmaz.
 - [Environment presence audits](environment-presence-audits.md) — A false secret entry is not absence when the key exists as a normal environment variable.
 - [Background worker proof](background-worker-proof.md) — Observe a separate worker with committed synthetic dev fixtures; rollback-only service tests cannot prove scheduled execution.
+- [Standalone JSX tests](standalone-jsx-tests.md) — Independent tsx rendering does not inherit Vite’s JSX transform; distinguish test-runtime errors from app failures.
