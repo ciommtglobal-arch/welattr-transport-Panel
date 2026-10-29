@@ -8,10 +8,13 @@ import {
   useGetGeminiWorkspace,
   useGetStaffAccess,
   useSendGeminiInstruction,
+  type GeminiWorkspace,
   type GeminiWorkspaceTurn,
 } from "@workspace/api-client-react";
 import { AlertTriangle, ChevronLeft, Clock, Lock, MessageSquareText, RefreshCw, Send, ShieldAlert, ShieldCheck, WifiOff } from "lucide-react";
 import { btnGhost, btnPrimary, classifyError, errorStatus, fmtDateTime } from "@/components/logistics-ops/shared";
+import { canClearGeminiInput, createGeminiSubmissionController, mergeGeminiTurn } from "@/lib/gemini-submission";
+import { GeminiLogisticsStart } from "@/components/gemini-logistics-start";
 
 const MAX = 3000;
 const noAuthRetry = (count: number, error: unknown) => {
@@ -96,8 +99,8 @@ function sendErrorText(error: unknown): { text: string; ambiguous: boolean } {
   if (s === 429) return { text: "Çok sık istek gönderildi (429). Biraz bekleyip yeniden deneyin; metniniz korunuyor.", ambiguous: false };
   if (s === 503) return { text: "Gemini şu an kullanılamıyor (503). Metniniz korunuyor.", ambiguous: true };
   if (kind === "validation") return { text: "Sunucu talimatı kabul etmedi. Uzunluğu (1-3000 karakter) kontrol edin.", ambiguous: false };
-  if (kind === "network" || kind === "schema") return { text: "Yanıt alınamadı; talimat sunucuya ulaşmış olabilir. Geçmiş yenilendi. Aynı metinle yeniden denerseniz aynı istek kimliği kullanılır ve çift kayıt oluşmaz.", ambiguous: true };
-  return { text: "Sunucu hatası. Sonuç belirsiz; geçmiş yenilendi. Aynı metinle yeniden deneyebilirsiniz.", ambiguous: true };
+  if (kind === "network" || kind === "schema") return { text: "Yanıt alınamadı; talimat sunucuya ulaşmış olabilir. Geçmiş yeniden kontrol ediliyor. Aynı metinle yeniden denerseniz aynı istek kimliği kullanılır ve çift kayıt oluşmaz.", ambiguous: true };
+  return { text: "Sunucu hatası. Sonuç belirsiz; geçmiş yeniden kontrol ediliyor. Aynı metinle yeniden deneyebilirsiniz.", ambiguous: true };
 }
 
 function Workspace({ userId }: { userId: string }) {
@@ -119,7 +122,8 @@ function Workspace({ userId }: { userId: string }) {
   const [text, setText] = useState("");
   const textRef = useRef(text);
   textRef.current = text;
-  const attempt = useRef<{ requestId: string; instruction: string } | null>(null);
+  const submission = useRef(createGeminiSubmissionController());
+  const editRevision = useRef(0);
   const [sending, setSending] = useState(false);
   const [feedback, setFeedback] = useState<{ kind: "error" | "ok"; text: string } | null>(null);
 
@@ -134,28 +138,34 @@ function Workspace({ userId }: { userId: string }) {
 
   const trimmed = text.trim();
   const tooLong = text.length > MAX;
-  const disabled = sending || hasPending || !trimmed || tooLong;
+  const disabled = sending || hasPending || ws.isError || !trimmed || tooLong;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (disabled) return;
-    const instruction = trimmed;
-    if (!attempt.current || attempt.current.instruction !== instruction) {
-      attempt.current = { requestId: crypto.randomUUID(), instruction };
-    }
-    const { requestId } = attempt.current;
+    const started = submission.current.begin(textRef.current);
+    if (!started) return;
+    const { requestId, instruction } = started;
+    const submittedRevision = editRevision.current;
+    let keepForRetry = false;
     setSending(true);
     setFeedback(null);
     try {
       const turn = await mutateRef.current({ data: { requestId, instruction } });
-      attempt.current = null;
-      if (textRef.current.trim() === instruction) setText("");
-      setFeedback({ kind: "ok", text: turn.status === "pending" ? "Talimat kaydedildi; yanıt hazırlanıyor." : turn.status === "failed" ? "Talimat kaydedildi ancak yanıt üretilemedi." : "Yanıt kaydedildi." });
+      qc.setQueryData<GeminiWorkspace>(key, (current) =>
+        current ? { ...current, turns: mergeGeminiTurn(current.turns, turn) } : current,
+      );
+      if (canClearGeminiInput(submittedRevision, editRevision.current, textRef.current, instruction)) {
+        textRef.current = "";
+        setText("");
+      }
+      setFeedback({ kind: turn.status === "failed" ? "error" : "ok", text: turn.status === "pending" ? "Talimat kaydedildi; yanıt hazırlanıyor." : turn.status === "failed" ? "Talimat kaydedildi ancak yanıt üretilemedi." : "Yanıt kaydedildi." });
     } catch (err) {
       const r = sendErrorText(err);
-      if (!r.ambiguous) attempt.current = null;
+      keepForRetry = r.ambiguous;
       setFeedback({ kind: "error", text: r.text });
     } finally {
+      submission.current.finish(keepForRetry);
       setSending(false);
       void qc.invalidateQueries({ queryKey: key });
     }
@@ -180,6 +190,19 @@ function Workspace({ userId }: { userId: string }) {
         </div>
       </section>
 
+      <GeminiLogisticsStart userId={userId} busy={sending || hasPending || ws.isError} onPrepare={(instruction) => {
+        const combined = textRef.current.trim() ? `${textRef.current}\n\n${instruction}` : instruction;
+        if (combined.length > MAX) {
+          setFeedback({ kind: "error", text: "Lojistik özetiyle birlikte 3000 karakter sınırı aşılacak. Mevcut metniniz korundu; önce kısaltın." });
+          return;
+        }
+        editRevision.current += 1;
+        textRef.current = combined;
+        setText(combined);
+        setFeedback({ kind: "ok", text: "Lojistik özeti talimata eklendi; henüz gönderilmedi. Metni kontrol edip Gönder düğmesini kullanın." });
+        document.getElementById("gemini-instruction")?.focus();
+      }} />
+
       {ws.isError ? <p className="mt-3 flex items-start gap-2 border-l-2 border-red-400 bg-red-400/10 px-3 py-2 text-xs text-red-200" role="alert"><WifiOff size={14} className="mt-0.5 shrink-0" />Son yenileme başarısız. Gösterilen geçmiş eskimiş olabilir.<button type="button" className="ml-auto underline" onClick={() => void ws.refetch()} data-testid="button-refetch">Yenile</button></p> : null}
 
       <section className="mt-6" aria-label="Talimat geçmişi" aria-live="polite">
@@ -201,7 +224,11 @@ function Workspace({ userId }: { userId: string }) {
       <form onSubmit={onSubmit} className="sticky bottom-0 mt-6 border-t border-border bg-background/95 pb-4 pt-4 backdrop-blur">
         <label htmlFor="gemini-instruction" className="text-xs font-semibold uppercase tracking-[0.12em] text-foreground/70">Talimat</label>
         <p id="gemini-warning" className="mt-1 flex items-start gap-2 text-xs leading-5 text-foreground/55"><AlertTriangle size={13} className="mt-0.5 shrink-0 text-primary" />Şifre, erişim anahtarı/token, kart bilgisi veya müşteri kişisel verisi yazmayın.</p>
-        <textarea id="gemini-instruction" value={text} onChange={(e) => setText(e.target.value)} rows={4} aria-describedby="gemini-warning gemini-count"
+        <textarea id="gemini-instruction" value={text} onChange={(e) => {
+          editRevision.current += 1;
+          textRef.current = e.target.value;
+          setText(e.target.value);
+        }} rows={4} aria-describedby="gemini-warning gemini-count"
           className="mt-2 w-full resize-y border border-border bg-card px-3 py-2 text-sm leading-6 text-foreground placeholder:text-foreground/35 focus:border-primary focus:outline-none"
           placeholder="Örnek: Mersin narenciye koridoru için taşıyıcı seçiminde kontrol listesini taslak olarak hazırla." data-testid="input-instruction" />
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
@@ -213,6 +240,7 @@ function Workspace({ userId }: { userId: string }) {
         </div>
         <div role="status" aria-live="polite" className="mt-2 text-xs">
           {hasPending && !sending ? <p className="text-foreground/60">Bekleyen bir yanıt var; tamamlanınca yeni talimat gönderebilirsiniz. Yazmaya devam edebilirsiniz.</p> : null}
+          {sending ? <p className="text-foreground/60">Yeni talimatınızı yazabilirsiniz; bekleyen yanıt yazdığınız yeni metni silmez.</p> : null}
           {feedback ? <p className={feedback.kind === "error" ? "text-red-300" : "text-primary"} data-testid="status-send">{feedback.text}</p> : null}
         </div>
       </form>

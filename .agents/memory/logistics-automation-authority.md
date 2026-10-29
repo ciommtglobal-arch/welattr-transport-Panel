@@ -64,3 +64,9 @@ Kullanıcı Gemini ile de bu sohbet gibi kaldığı yerden devam etmek istiyor; 
 **Why:** Kullanıcı konuşma ve iş bağlamının sürekliliğini tekrar tekrar talep etti.
 
 **How to apply:** Kayıtlı geçmişin korunması ile modelin yanıt verirken hangi geçmişi gördüğünü ayrı doğrula. Sınırlı son mesaj bağlamını sınırsız hafıza olarak sunma. Oturum erişimi doğrulanmadıysa geçmişin kaydedilmesini kesintisiz mobil erişimle eşitleme.
+
+Kullanıcı iletişim ekranındaki iyileştirmelerin ardından “entegrasyon ve çalışmalara başlayacağımız şekilde ayarla, gerilemeyelim, lojistikten başlayalım” dedi.
+
+**Why:** Genel sohbet hazırlığında kalmak yerine mevcut lojistik işleriyle bağlantılı bir başlangıç istiyor.
+
+**How to apply:** Gemini iletişimini mevcut havuz, eksik kontroller, eşleştirme ve kurucu incelemesine bağla; yeni bağımsız sistem veya baştan kurulum önerme. Bu ilerleme talebini kendiliğinden yayın, müşteri iletişimi veya ticari onay izni sayma.
