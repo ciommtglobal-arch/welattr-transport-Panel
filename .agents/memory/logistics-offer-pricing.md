@@ -20,3 +20,11 @@ Taşıyıcının toplam platform komisyonundaki %50 payı, brüt hakedişinden d
 **Why:** Kullanıcı iki ödeme yöntemi arasında açıkça “Hakedişinden düşülsün” seçeneğini seçti.
 
 **How to apply:** Brüt taşıyıcı hakedişini, platform komisyonu kesintisini ve net hakedişi ayrı gösterin. Ticari satış farkını taşıyıcıdan ayrıca kesilecek ikinci bir komisyon gibi yorumlamayın. Bu karar yalnız taslak hesap kuralıdır; gerçek kesinti, tahsilat veya aktarımı etkinleştirme izni değildir.
+
+## Taraflara mali şeffaflık
+
+Kullanıcı yük, kira ve masrafların araç sahibinden yük alıcısına ve tarla işçisine kadar tarafların kendilerinin görebileceği, devlet kontrolünde görülebilecek şekilde şeffaf olmasını istiyor.
+
+**Why:** Kullanıcının belirttiği ürün vizyonu.
+
+**How to apply:** Görünürlük kapsamını taraf ve yetki bazında tasarlayın; bu istek kişisel verileri herkese açma izni değildir. Denetlenebilir kayıt ile fiilen kurulmuş resmî kurum entegrasyonunu ayırın; devlet erişimi veya güvencesi mevcutmuş gibi sunmayın.
