@@ -7,7 +7,7 @@ import type { Act } from "./pool-panels";
 type FieldKind = "load" | "empty_truck";
 type Values = Record<string, string>;
 const LOAD_REGIONS = ["Mersin", "İskenderun", "Gaziantep", "Adana"] as const;
-const EMPTY_ORIGINS = ["Mardin", "Şanlıurfa"] as const;
+const EMPTY_ORIGINS = ["Mersin", "İskenderun", "Gaziantep", "Adana", "Mardin", "Şanlıurfa"] as const;
 const DESTINATION_SUGGESTIONS = ["Mersin", "İskenderun", "Gaziantep", "Adana", "Irak", "Rusya"];
 const modes = [{ value: "road", label: "Karayolu" }, { value: "sea", label: "Denizyolu" }, { value: "air", label: "Havayolu" }] as const;
 
@@ -26,7 +26,7 @@ function Input({ label, name, values, set, type = "text", required = true, step,
 export function FieldCapture({ refresh }: { refresh: () => Promise<unknown> }) {
   const [kind,setKind] = useState<FieldKind>("load");
   const [region,setRegion] = useState<string>("Mersin");
-  const [destination,setDestination] = useState<string>("Mersin");
+  const [destination,setDestination] = useState<string>("");
   const [mode,setMode] = useState<"road"|"sea"|"air">("road");
   const [values,setValues] = useState<Values>({});
   const [consent,setConsent] = useState(false);
@@ -37,12 +37,13 @@ export function FieldCapture({ refresh }: { refresh: () => Promise<unknown> }) {
 
   function selectKind(value:FieldKind) {
     setKind(value);setValues({});setConsent(false);setError(null);setResult(null);
-    setRegion(value==="load"?"Mersin":"Mardin");setDestination("Mersin");
+    setRegion("Mersin");setDestination("");
   }
 
   async function submit(e:FormEvent<HTMLFormElement>) {
     e.preventDefault();setError(null);setResult(null);
     if(!consent){setError("Kişinin MMT içi eşleştirme için iletişim iznini teyit edin.");return;}
+    if ((values.notes?.trim().length ?? 0) < 10) {setError("Kaynağı ve kayıt/eşleştirme iznini nasıl teyit ettiğinizi açıklayın.");return;}
     let body:LogisticsFieldIntakeInput;
     if(kind==="load") {
       const tons=Number(values.weightTon);
@@ -58,8 +59,10 @@ export function FieldCapture({ refresh }: { refresh: () => Promise<unknown> }) {
         companyName:values.companyName??"",contactName:values.contactName??"",email:values.email??"",phone:values.phone??"",
         transportMode:mode,capacity:values.capacity??"",availability:values.availability??"",notes:values.notes,contactUseConfirmed:true};
     }
-    try {const saved=await mutation.mutateAsync({data:body});setResult(saved);setValues({});setConsent(false);await refresh();}
-    catch(err){setError(describeError(err));}
+    try {
+      const saved=await mutation.mutateAsync({data:body});setResult(saved);setValues({});setConsent(false);
+      try {await refresh();} catch {setError("Kayıt saklandı; havuz yenilenemedi. Yeniden kayıt girmeden iç kayıtları eşleştirin.");}
+    } catch(err){setError(describeError(err));}
   }
 
   return <section className="mt-5 max-w-3xl border border-border bg-card p-4 sm:p-6" data-testid="panel-field-capture">
@@ -105,7 +108,7 @@ export function FieldCapture({ refresh }: { refresh: () => Promise<unknown> }) {
           <label className="block space-y-1.5 text-xs text-foreground/75"><span>Araç türü</span><select className={`${inputCls} w-full`} value={mode} onChange={e=>setMode(e.target.value as typeof mode)}>{modes.map(x=><option value={x.value} key={x.value}>{x.label}</option>)}</select></label>
         </div>
       </>}
-      <label className="block space-y-1.5 text-xs text-foreground/75"><span>Saha notu (isteğe bağlı)</span><textarea className={`${inputCls} min-h-20 w-full`} maxLength={2000} value={values.notes??""} onChange={e=>change("notes",e.target.value)}/></label>
+      <label className="block space-y-1.5 text-xs text-foreground/75"><span>İzinli kaynak ve teyit açıklaması (zorunlu)</span><textarea className={`${inputCls} min-h-20 w-full`} required minLength={10} maxLength={1800} placeholder="Kaydı hangi izinli kaynaktan aldınız? Kim, ne zaman ve hangi yöntemle MMT içi kayıt/eşleştirme izni verdi? Gizli belge veya anahtar girmeyin." value={values.notes??""} onChange={e=>change("notes",e.target.value)}/></label>
       <label className="flex items-start gap-3 border border-border bg-background p-3 text-xs leading-5 text-foreground/70">
         <input type="checkbox" className="mt-1 accent-primary" checked={consent} onChange={e=>setConsent(e.target.checked)} required/>
         <span>Kişinin iletişim bilgilerinin MMT içinde bu talep veya taşıyıcı eşleştirmesi için kaydedilmesine izin verdiğini doğruladım. Bu izin dışarıya mesaj göndermek veya bilgiyi yayımlamak için değildir.</span>

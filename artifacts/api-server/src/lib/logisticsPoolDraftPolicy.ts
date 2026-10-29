@@ -1,5 +1,22 @@
 export type LogisticsDraftMode = "disabled" | "test_drafts" | "production_drafts";
 
+/** A founder click is independent of the background-worker activation switch. */
+export function manualLogisticsDraftEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  const configured = Boolean(env.AI_INTEGRATIONS_GEMINI_BASE_URL?.trim() && env.AI_INTEGRATIONS_GEMINI_API_KEY?.trim());
+  return configured && (
+    (["development", "test"].includes(env.NODE_ENV ?? "") && !env.REPLIT_DEPLOYMENT) ||
+    (env.NODE_ENV === "production" && Boolean(env.REPLIT_DEPLOYMENT))
+  );
+}
+
+/** Candidate eligibility is not carrier verification or commercial approval. */
+export function permittedCarrierCandidate(record: {
+  status: string; isTest: boolean; contactUseConfirmed: boolean; capturedByClerkUserId: string | null;
+}): boolean {
+  return permittedInternalLogisticsRecord(record) &&
+    (record.status === "approved" || record.status === "pending");
+}
+
 /** TEST fixtures stay isolated; real internal records require attributable consent. */
 export function permittedInternalLogisticsRecord(record: {
   isTest: boolean; contactUseConfirmed: boolean; capturedByClerkUserId: string | null;
@@ -21,6 +38,9 @@ export function logisticsDraftScheduleDescription(): string {
     return "Üretim taslak izni yapılandırılmış. Ayrı lojistik worker süreci 2 dakikada bir uygun gerçek eşleşmeleri inceleyebilir; bu bilgi worker'ın çalıştığının kanıtı değildir. Telegram gönderimi ve otomatik ticari onay kapalıdır.";
   }
   if (logisticsDraftMode() === "test_drafts") {
+    if (process.env.MMT_LOGISTICS_POOL_AI_DRAFTS_ENABLED !== "true") {
+      return "Arka plan TEST worker'ı kapalı; yalnız yetkili kullanıcının açıkça başlattığı manuel taslak hazırlanabilir. Dış bildirim ve otomatik ticari karar yoktur.";
+    }
     return "Geliştirme/TEST API süreci çalışırken worker 2 dakikada bir mevcut sentetik TEST eşleşmelerini kontrol eder; uygun taslak için Telegram'a gönderilmeyen bir TEST bildirimi kaydeder. Yeni dış fırsat keşfetmez.";
   }
   return "Gemini taslak otomasyonu bu ortamda kapalı. Kuyruktaki kayıtlar canlı gönderim veya ticari onay anlamına gelmez.";

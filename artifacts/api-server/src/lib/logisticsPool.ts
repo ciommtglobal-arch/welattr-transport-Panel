@@ -16,7 +16,7 @@ import type { LogisticsActor } from "./logisticsWorkflowAuth";
 import { isLogisticsFounder } from "./logisticsListingAuth";
 import { AutomationError } from "./logisticsAutomation";
 import { isLogisticsPoolAiDraftPreviewEnabled } from "./logisticsPoolAiDraft";
-import { logisticsDraftScheduleDescription, permittedInternalLogisticsRecord } from "./logisticsPoolDraftPolicy";
+import { logisticsDraftScheduleDescription, permittedCarrierCandidate, permittedInternalLogisticsRecord } from "./logisticsPoolDraftPolicy";
 import { describeWorkerEvidence } from "./logisticsWorkerEvidence";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -77,7 +77,7 @@ export async function syncInternalPool() {
         origin:route.length === 2 ? route[0] : "",destination:route.length === 2 ? route[1] : "",
         location:c.serviceRoutes,transportMode:c.transportMode,capacityKg:explicitKg(c.capacity),
         contact:[c.email,c.phone].filter(Boolean).join(" · "),reference:c.referenceCode,
-        isTest:c.isTest,verified:c.status === "approved",eligible:c.status === "approved",
+        isTest:c.isTest,verified:c.status === "approved",eligible:permittedCarrierCandidate(c),
         availableDate:/^\d{4}-\d{2}-\d{2}$/.test(c.availability) ? c.availability : null,
       });
     }
@@ -182,6 +182,7 @@ export async function getPoolWorkspace(actor: LogisticsActor) {
   };
 }
 export async function actOnPool(input: Action, actor: LogisticsActor) {
+  if (input.action === "refresh_internal") { await syncInternalPool(); return getPoolWorkspace(actor); }
   if (input.action === "refresh") { await refreshPool(); return getPoolWorkspace(actor); }
   if (input.action === "source_sync") { if (!input.id) fail(400,"Kaynak kimliği gerekli."); await syncPoolSource(input.id); return getPoolWorkspace(actor); }
   if (!isLogisticsFounder(actor.userId)) fail(403,"Kaynak izni ve son eşleştirme kararı yalnız kurucuya aittir.");

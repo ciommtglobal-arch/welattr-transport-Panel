@@ -110,7 +110,9 @@ export async function runLogisticsPoolAiDraftWorkerOnce(): Promise<DraftWorkerRe
 
 export function startLogisticsPoolAiDraftWorker(): void {
   // Production uses the separate entry point, never an autoscaling API timer.
-  if (process.env.NODE_ENV === "production" || !isLogisticsPoolAiDraftPreviewEnabled() || timer) return;
+  if (process.env.NODE_ENV === "production" ||
+      process.env.MMT_LOGISTICS_POOL_AI_DRAFTS_ENABLED !== "true" ||
+      !isLogisticsPoolAiDraftPreviewEnabled() || timer) return;
 
   let busy = false;
   const run = async () => {

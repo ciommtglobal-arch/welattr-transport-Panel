@@ -139,7 +139,7 @@ export const actLogisticsPoolBodyNoteMax = 2000;
 
 
 export const ActLogisticsPoolBody = zod.object({
-  "action": zod.enum(['refresh', 'source_create', 'source_update', 'source_sync', 'review']),
+  "action": zod.enum(['refresh', 'refresh_internal', 'source_create', 'source_update', 'source_sync', 'review']),
   "id": zod.uuid().optional(),
   "expectedVersion": zod.int().min(1).optional(),
   "name": zod.string().min(actLogisticsPoolBodyNameMin).max(actLogisticsPoolBodyNameMax).optional(),
@@ -3454,6 +3454,7 @@ export const createLogisticsFieldIntakeBodyOneWeightKgExclusiveMin = 0;
 
 export const createLogisticsFieldIntakeBodyOneVolumeM3Min = 0;
 
+export const createLogisticsFieldIntakeBodyOneNotesMin = 10;
 export const createLogisticsFieldIntakeBodyOneNotesMax = 2000;
 
 export const createLogisticsFieldIntakeBodyTwoTargetDestinationMin = 2;
@@ -3470,6 +3471,7 @@ export const createLogisticsFieldIntakeBodyTwoPhoneMax = 40;
 
 export const createLogisticsFieldIntakeBodyTwoCapacityMax = 200;
 
+export const createLogisticsFieldIntakeBodyTwoNotesMin = 10;
 export const createLogisticsFieldIntakeBodyTwoNotesMax = 2000;
 
 
@@ -3487,11 +3489,11 @@ export const CreateLogisticsFieldIntakeBody = zod.union([zod.object({
   "volumeM3": zod.number().min(createLogisticsFieldIntakeBodyOneVolumeM3Min).describe('Sahada hacim ölçülmediyse 0 bırakılır; eşleşme hacim teyidi ister.'),
   "transportMode": zod.enum(['road', 'sea', 'air']),
   "loadingDate": zod.coerce.date(),
-  "notes": zod.string().max(createLogisticsFieldIntakeBodyOneNotesMax).optional(),
+  "notes": zod.string().min(createLogisticsFieldIntakeBodyOneNotesMin).max(createLogisticsFieldIntakeBodyOneNotesMax).describe('Kaynağın ve MMT içi kayıt\/eşleştirme izninin nasıl teyit edildiği; gizli belge veya anahtar içermez.'),
   "contactUseConfirmed": zod.literal(true)
 }),zod.object({
   "type": zod.enum(['empty_truck']),
-  "region": zod.enum(['Mardin', 'Şanlıurfa']),
+  "region": zod.enum(['Mersin', 'İskenderun', 'Gaziantep', 'Adana', 'Mardin', 'Şanlıurfa']),
   "targetDestination": zod.string().min(createLogisticsFieldIntakeBodyTwoTargetDestinationMin).max(createLogisticsFieldIntakeBodyTwoTargetDestinationMax),
   "companyName": zod.string().min(createLogisticsFieldIntakeBodyTwoCompanyNameMin).max(createLogisticsFieldIntakeBodyTwoCompanyNameMax),
   "contactName": zod.string().min(createLogisticsFieldIntakeBodyTwoContactNameMin).max(createLogisticsFieldIntakeBodyTwoContactNameMax),
@@ -3500,7 +3502,7 @@ export const CreateLogisticsFieldIntakeBody = zod.union([zod.object({
   "transportMode": zod.enum(['road', 'sea', 'air']),
   "capacity": zod.string().min(1).max(createLogisticsFieldIntakeBodyTwoCapacityMax).describe('Açık birim yazın; ör. 24 ton'),
   "availability": zod.coerce.date(),
-  "notes": zod.string().max(createLogisticsFieldIntakeBodyTwoNotesMax).optional(),
+  "notes": zod.string().min(createLogisticsFieldIntakeBodyTwoNotesMin).max(createLogisticsFieldIntakeBodyTwoNotesMax).describe('Kaynağın ve MMT içi kayıt\/eşleştirme izninin nasıl teyit edildiği; gizli belge veya anahtar içermez.'),
   "contactUseConfirmed": zod.literal(true)
 })])
 

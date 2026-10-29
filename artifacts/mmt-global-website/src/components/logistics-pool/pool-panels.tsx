@@ -110,6 +110,7 @@ export function MatchDetail({ match, latest, entries, canApprove, canGenerateAiD
         data: { matchId: match.id, expectedVersion: match.version },
       });
       setAiDraft(result);
+      onReload();
     } catch (err) {
       setAiDraftError(describeError(err));
     }
@@ -201,7 +202,7 @@ export function MatchDetail({ match, latest, entries, canApprove, canGenerateAiD
             <Pill className="w-fit border-primary/40 text-primary">Kurucu inceleme kuyruğunda</Pill>
           ) : (
             <button type="button" className={btnGhost} disabled={aiDraftMutation.isPending} onClick={() => void generateAiDraft()} data-testid="button-generate-gemini-draft">
-              <Sparkles size={13} />{aiDraftMutation.isPending ? "Taslak hazırlanıyor…" : "Gemini taslağı hazırla"}
+              <Sparkles size={13} />{aiDraftMutation.isPending ? "Taslak hazırlanıyor…" : "Bir kez kurucu taslağı hazırla"}
             </button>
           )}
           {aiDraftError ? <Feedback kind="error">{aiDraftError}</Feedback> : null}
@@ -211,7 +212,7 @@ export function MatchDetail({ match, latest, entries, canApprove, canGenerateAiD
               <p className="text-xs text-foreground/55" data-testid="text-telegram-dry-run-status">
                 {aiDraft.telegramNotificationStatus === "dry_run"
                   ? "Telegram TEST bildirimi kuyruğa kaydedildi; hiçbir mesaj gönderilmedi."
-                  : "Telegram mesaj gönderimi kapalı; gönderimsiz TEST kaydı bekleniyor."}
+                  : "Dış bildirim, otomatik onay ve ödeme tetiklenmedi. Taslak yalnız kurucu incelemesinde."}
               </p>
               <div>
                 <h4 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/55">Eşleşme açıklaması · AI önerisi</h4>

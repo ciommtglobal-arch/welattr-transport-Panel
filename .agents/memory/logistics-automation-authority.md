@@ -17,6 +17,20 @@ onaylanmış bir karar politikası olmadan kurucu doğrulamasını/son kararın�
 İlan yayın kararı ödeme, sözleşme veya gerçek sevkiyat onayı sayılmaz.
 Hazırlığın onaylanması, Agent'ın kendi başına Publish yapma yetkisi değildir.
 
+## Kontrollü manuel başlangıç
+
+Kurucu, izinli gerçek kayıt girişi ve tek seferlik Gemini taslağı hazırlanırken
+arka plan worker'ının kapalı kalmasını istedi. Manuel model kullanımı ile
+zamanlanmış otomasyonun etkinleşmesini aynı izin sayma. Taşıyıcının havuzda
+aday olarak incelenmesi, doğrulanmış taşıyıcı veya ticari kabul anlamına gelmez.
+
+**Why:** Kullanıcı gerçek verilerle kontrollü başlangıcı onaylarken otomatik
+çalışma, dış bildirim, otomatik karar ve ödeme kilitlerini özellikle korudu.
+
+**How to apply:** Manuel kayıt ve taslak için worker açmayı önkoşul yapma;
+otomatik çalışma ayrıca açıkça etkinleştirilmeli. Aday kaydından doğrulanmış
+operasyon, kesin fiyat veya sevkiyat sonucu çıkarma.
+
 ## Beklenen otomasyonun kapsamı
 
 Kullanıcı sistemin “kendisi bulup kendisi havuz oluşturup alıcı nakliyat ve

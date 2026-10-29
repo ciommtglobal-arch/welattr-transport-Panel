@@ -11,6 +11,7 @@ export type LogisticsPoolActionAction = typeof LogisticsPoolActionAction[keyof t
 
 export const LogisticsPoolActionAction = {
   refresh: 'refresh',
+  refresh_internal: 'refresh_internal',
   source_create: 'source_create',
   source_update: 'source_update',
   source_sync: 'source_sync',

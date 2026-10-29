@@ -24,6 +24,8 @@ const state = vi.hoisted(() => ({
   prompt: "",
   generateCalls: 0,
   databaseWrites: 0,
+  lockAvailable: true,
+  release: vi.fn(),
 }));
 
 vi.mock("@workspace/db", () => {
@@ -49,6 +51,10 @@ vi.mock("@workspace/db", () => {
     },
   });
   return {
+    pool: { connect: async () => ({
+      query: async () => ({ rows: [{ locked: state.lockAvailable }] }),
+      release: state.release,
+    }) },
     db: {
       select,
       insert: (source: { name: string }) => ({
@@ -165,6 +171,8 @@ beforeEach(() => {
   state.prompt = "";
   state.generateCalls = 0;
   state.databaseWrites = 0;
+  state.lockAvailable = true;
+  state.release.mockClear();
 });
 
 afterEach(() => vi.unstubAllEnvs());
@@ -213,12 +221,39 @@ describe("Gemini logistics match draft queue", () => {
     expect(state.databaseWrites).toBe(1);
   });
 
-  it("is disabled on production and published runtimes", async () => {
+  it("requires an actual supported published production runtime", async () => {
     vi.stubEnv("NODE_ENV", "production");
     await request(app).post("/api/logistics/pool/matches/ai-draft").send(body).expect(404);
     vi.stubEnv("NODE_ENV", "development");
     vi.stubEnv("REPLIT_DEPLOYMENT", "1");
     await request(app).post("/api/logistics/pool/matches/ai-draft").send(body).expect(404);
+    expect(state.generateCalls).toBe(0);
+    expect(state.databaseWrites).toBe(0);
+  });
+
+  it("allows one founder-requested real draft with the production worker explicitly off", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("REPLIT_DEPLOYMENT", "1");
+    vi.stubEnv("MMT_LOGISTICS_POOL_AI_DRAFTS_ENABLED", "false");
+    state.entries.forEach(entry => { entry.payload.isTest = false; });
+    await request(app).post("/api/logistics/pool/matches/ai-draft").send(body).expect(200);
+    expect(state.generateCalls).toBe(1);
+    expect(state.drafts[0]).toMatchObject({ status: "pending_review", origin: "founder_request" });
+    expect(state.release).toHaveBeenCalledWith(false);
+  });
+
+  it("rejects simultaneous triggering without a model call", async () => {
+    state.lockAvailable = false;
+    await request(app).post("/api/logistics/pool/matches/ai-draft").send(body).expect(409);
+    expect(state.generateCalls).toBe(0);
+    expect(state.databaseWrites).toBe(0);
+    expect(state.release).toHaveBeenCalledWith(false);
+  });
+
+  it("keeps synthetic records out of the production manual flow", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("REPLIT_DEPLOYMENT", "1");
+    await request(app).post("/api/logistics/pool/matches/ai-draft").send(body).expect(400);
     expect(state.generateCalls).toBe(0);
     expect(state.databaseWrites).toBe(0);
   });

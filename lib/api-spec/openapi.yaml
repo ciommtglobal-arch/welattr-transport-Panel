@@ -4464,7 +4464,7 @@ components:
       additionalProperties: false
       required: [action]
       properties:
-        action: {type: string, enum: [refresh, source_create, source_update, source_sync, review]}
+        action: {type: string, enum: [refresh, refresh_internal, source_create, source_update, source_sync, review]}
         id: {type: string, format: uuid}
         expectedVersion: {type: integer, minimum: 1}
         name: {type: string, minLength: 2, maxLength: 160}
@@ -6684,7 +6684,7 @@ components:
     FieldLoadInput:
       type: object
       additionalProperties: false
-      required: [type, region, requesterName, email, phone, destination, cargoType, weightKg, volumeM3, transportMode, loadingDate, contactUseConfirmed]
+      required: [type, region, requesterName, email, phone, destination, cargoType, weightKg, volumeM3, transportMode, loadingDate, contactUseConfirmed, notes]
       properties:
         type: {type: string, enum: [load]}
         region: {type: string, enum: [Mersin, İskenderun, Gaziantep, Adana]}
@@ -6698,15 +6698,15 @@ components:
         volumeM3: {type: number, minimum: 0, description: "Sahada hacim ölçülmediyse 0 bırakılır; eşleşme hacim teyidi ister."}
         transportMode: {$ref: "#/components/schemas/LogisticsTransportMode"}
         loadingDate: {type: string, format: date}
-        notes: {type: string, maxLength: 2000}
+        notes: {type: string, minLength: 10, maxLength: 2000, description: "Kaynağın ve MMT içi kayıt/eşleştirme izninin nasıl teyit edildiği; gizli belge veya anahtar içermez."}
         contactUseConfirmed: {type: boolean, enum: [true]}
     FieldEmptyTruckInput:
       type: object
       additionalProperties: false
-      required: [type, region, targetDestination, companyName, contactName, email, phone, transportMode, capacity, availability, contactUseConfirmed]
+      required: [type, region, targetDestination, companyName, contactName, email, phone, transportMode, capacity, availability, contactUseConfirmed, notes]
       properties:
         type: {type: string, enum: [empty_truck]}
-        region: {type: string, enum: [Mardin, Şanlıurfa]}
+        region: {type: string, enum: [Mersin, İskenderun, Gaziantep, Adana, Mardin, Şanlıurfa]}
         targetDestination: {type: string, minLength: 2, maxLength: 160}
         companyName: {type: string, minLength: 2, maxLength: 200}
         contactName: {type: string, minLength: 2, maxLength: 160}
@@ -6715,7 +6715,7 @@ components:
         transportMode: {$ref: "#/components/schemas/LogisticsTransportMode"}
         capacity: {type: string, minLength: 1, maxLength: 200, description: "Açık birim yazın; ör. 24 ton"}
         availability: {type: string, format: date}
-        notes: {type: string, maxLength: 2000}
+        notes: {type: string, minLength: 10, maxLength: 2000, description: "Kaynağın ve MMT içi kayıt/eşleştirme izninin nasıl teyit edildiği; gizli belge veya anahtar içermez."}
         contactUseConfirmed: {type: boolean, enum: [true]}
     LogisticsFieldIntakeResult:
       type: object

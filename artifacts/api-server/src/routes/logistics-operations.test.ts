@@ -104,16 +104,28 @@ describe("Logistics HTTP permissions and contracts", () => {
   it("keeps field-found empty vehicles in founder review and rejects missing contact consent", async () => {
     const missingConsent = await request(app).post("/api/logistics/field-intake").send({
       type:"empty_truck",region:"Mardin",targetDestination:"Mersin",companyName:"TEST carrier",contactName:"TEST contact",
-      email:"carrier@example.invalid",phone:"+900000000001",transportMode:"road",capacity:"24 ton",availability:"2027-01-02",contactUseConfirmed:false,
+      email:"carrier@example.invalid",phone:"+900000000001",transportMode:"road",capacity:"24 ton",availability:"2027-01-02",contactUseConfirmed:false,notes:"TEST operator obtained first-party consent",
     });
     expect(missingConsent.status).toBe(400);expect(state.inserted).toHaveLength(0);
     const response = await request(app).post("/api/logistics/field-intake").send({
       type:"empty_truck",region:"Mardin",targetDestination:"Mersin",companyName:"TEST carrier",contactName:"TEST contact",
-      email:"carrier@example.invalid",phone:"+900000000001",transportMode:"road",capacity:"24 ton",availability:"2027-01-02",contactUseConfirmed:true,
+      email:"carrier@example.invalid",phone:"+900000000001",transportMode:"road",capacity:"24 ton",availability:"2027-01-02",contactUseConfirmed:true,notes:"TEST operator obtained first-party consent",
     });
     expect(response.status).toBe(201);
     expect(response.body).toMatchObject({recordType:"empty_truck",status:"pending"});
     expect(state.inserted[0]).toMatchObject({capturedByClerkUserId:"owner",applicantClerkUserId:null,contactUseConfirmed:true,isTest:false,status:"pending",serviceRoutes:"Mardin → Mersin"});
+  });
+  it("accepts a Mersin carrier candidate but requires a nonblank source and permission explanation", async () => {
+    const candidate = {
+      type:"empty_truck",region:"Mersin",targetDestination:"Adana",companyName:"TEST ONLY carrier",contactName:"TEST ONLY contact",
+      email:"carrier@example.invalid",phone:"+900000000001",transportMode:"road",capacity:"24 ton",
+      availability:"2027-01-02",contactUseConfirmed:true,notes:"TEST ONLY: first-party phone consent confirmed by operator",
+    };
+    await request(app).post("/api/logistics/field-intake").send({ ...candidate, notes: " ".repeat(20) }).expect(400);
+    expect(state.inserted).toHaveLength(0);
+    await request(app).post("/api/logistics/field-intake").send(candidate).expect(201);
+    expect(state.inserted[0]).toMatchObject({serviceRoutes:"Mersin → Adana",status:"pending",capturedByClerkUserId:"owner"});
+    expect(state.review).not.toHaveBeenCalled();
   });
   it.each(["admin", "finance", "reviewer", "sales", "media", "leader", "assistant"])(
     "denies %s private logistics reads and coordination mutations", async role => {

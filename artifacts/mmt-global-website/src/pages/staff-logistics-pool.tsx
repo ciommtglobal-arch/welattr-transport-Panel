@@ -92,7 +92,6 @@ export default function StaffLogisticsPool() {
 }
 
 type Tab = "matches" | "pool" | "field" | "sources";
-const REFRESH_MS = 120_000;
 
 function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
   data: LogisticsPoolWorkspace; poolKey: readonly unknown[]; fetching: boolean; updatedAt: number; pollError: unknown; refetch: () => void;
@@ -119,18 +118,12 @@ function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
     runningRef.current = true;
     setRefreshState((s) => ({ ...s, running: true }));
     try {
-      await act({ action: "refresh" });
+      await act({ action: "refresh_internal" });
       setRefreshState({ running: false, at: Date.now(), error: null });
     } catch (err) {
       setRefreshState((s) => ({ running: false, at: s.at, error: describeError(err) }));
     } finally { runningRef.current = false; }
   }, [act]);
-
-  useEffect(() => {
-    void runRefresh();
-    const id = window.setInterval(() => { if (document.visibilityState === "visible") void runRefresh(); }, REFRESH_MS);
-    return () => window.clearInterval(id);
-  }, [runRefresh]);
 
   const [tab, setTab] = useState<Tab>("matches");
   const [pinned, setPinned] = useState<LogisticsPoolMatch | null>(null);
@@ -176,7 +169,7 @@ function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
         </div>
         <div className="flex flex-col items-start gap-1 font-mono text-[10px] uppercase tracking-[0.12em] text-foreground/45 md:items-end">
           <button type="button" onClick={() => void runRefresh()} disabled={refreshState.running} className="flex items-center gap-2 hover:text-primary" data-testid="button-refresh-pool">
-            <RefreshCw size={12} className={refreshState.running ? "animate-spin" : ""} />{refreshState.running ? "Havuz taranıyor" : "Şimdi tara ve eşleştir"}
+            <RefreshCw size={12} className={refreshState.running ? "animate-spin" : ""} />{refreshState.running ? "İzinli kayıtlar eşleştiriliyor" : "İç kayıtları bir kez eşleştir"}
           </button>
           {data.canApprove ? <Link href="/staff/gemini" className="flex items-center gap-2 hover:text-primary" data-testid="link-gemini">Gemini talimat defteri (önizleme)</Link> : null}
           <span>Son tarama <Freshness at={refreshState.at} /> · görünüm <Freshness at={updatedAt} />{fetching ? " · yenileniyor" : ""}</span>

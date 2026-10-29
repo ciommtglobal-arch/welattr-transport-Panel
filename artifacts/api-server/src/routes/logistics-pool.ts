@@ -6,6 +6,7 @@ import {
 import { requireLogisticsOperator } from "../lib/logisticsWorkflowAuth";
 import { AutomationError } from "../lib/logisticsAutomation";
 import { getPoolWorkspace, actOnPool } from "../lib/logisticsPool";
+import { withManualDraftLock } from "../lib/logisticsManualDraftLock";
 import {
   createLogisticsPoolMatchAiDraft, isLogisticsPoolAiDraftPreviewEnabled,
   LogisticsPoolAiDraftError,
@@ -53,7 +54,8 @@ router.post("/logistics/pool/matches/ai-draft", async (req, res): Promise<void> 
     return;
   }
   try {
-    const result = await createLogisticsPoolMatchAiDraft(input.data, actor.userId);
+    const result = await withManualDraftLock(input.data.matchId,
+      () => createLogisticsPoolMatchAiDraft(input.data, actor.userId));
     res.json(GenerateLogisticsPoolMatchAiDraftResponse.parse(result));
   } catch (error) {
     if (error instanceof LogisticsPoolAiDraftError) {

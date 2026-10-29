@@ -283,6 +283,10 @@ router.post("/logistics/field-intake", async (req, res): Promise<void> => {
     res.status(400).json({ error: "Kişinin MMT içi eşleştirme için iletişim izni teyit edilmelidir." });
     return;
   }
+  if ((input.notes?.trim().length ?? 0) < 10) {
+    res.status(400).json({ error: "Kaynağı ve kayıt/eşleştirme izninin nasıl teyit edildiğini en az 10 karakterle açıklayın." });
+    return;
+  }
   const requiredValues = input.type === "load"
     ? [input.requesterName, input.email, input.phone, input.region, input.destination, input.cargoType]
     : [input.companyName, input.contactName, input.email, input.phone, input.region, input.targetDestination, input.capacity];

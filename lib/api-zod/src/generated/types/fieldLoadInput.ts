@@ -44,7 +44,11 @@ export interface FieldLoadInput {
   volumeM3: number;
   transportMode: LogisticsTransportMode;
   loadingDate: Date;
-  /** @maxLength 2000 */
-  notes?: string;
+  /**
+     * Kaynağın ve MMT içi kayıt/eşleştirme izninin nasıl teyit edildiği; gizli belge veya anahtar içermez.
+     * @minLength 10
+     * @maxLength 2000
+     */
+  notes: string;
   contactUseConfirmed: true;
 }

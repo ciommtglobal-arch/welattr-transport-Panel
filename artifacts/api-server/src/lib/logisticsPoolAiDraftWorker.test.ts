@@ -66,6 +66,14 @@ beforeEach(() => {
 afterEach(() => { vi.unstubAllEnvs(); vi.restoreAllMocks(); });
 
 describe("distributed sendless draft worker", () => {
+  it("does not schedule the embedded TEST worker without explicit activation", () => {
+    vi.stubEnv("MMT_LOGISTICS_POOL_AI_DRAFTS_ENABLED", "false");
+    const schedule = vi.spyOn(globalThis, "setInterval");
+    startLogisticsPoolAiDraftWorker();
+    expect(schedule).not.toHaveBeenCalled();
+    expect(state.connections).toBe(0);
+    expect(generate).not.toHaveBeenCalled();
+  });
   it("fails closed in production without explicit activation", async () => {
     vi.stubEnv("NODE_ENV", "production"); vi.stubEnv("REPLIT_DEPLOYMENT", "1");
     expect(await runLogisticsPoolAiDraftWorkerOnce()).toBe("disabled");

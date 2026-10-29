@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod/v4";
-import { logisticsDraftMode } from "./logisticsPoolDraftPolicy";
+import { manualLogisticsDraftEnabled } from "./logisticsPoolDraftPolicy";
 import {
   db, logisticsPoolEntriesTable as entries,
   logisticsPoolMatchesTable as matches, logisticsPoolSourcesTable as sources,
@@ -29,7 +29,7 @@ export const LOGISTICS_POOL_AI_DRAFT_WORKER_ACTOR = "mmt-gemini-test-worker";
 let cachedAi: GoogleGenAI | undefined;
 
 export function isLogisticsPoolAiDraftPreviewEnabled(): boolean {
-  return logisticsDraftMode() !== "disabled";
+  return manualLogisticsDraftEnabled();
 }
 
 function getAiClient(): GoogleGenAI {
@@ -132,6 +132,9 @@ export async function createLogisticsPoolMatchAiDraft(
   }
   if (participants[0]!.payload.isTest !== participants[1]!.payload.isTest) {
     throw new LogisticsPoolAiDraftError(409, "TEST ve gerçek kayıtlar aynı eşleşmede kullanılamaz.");
+  }
+  if (process.env.NODE_ENV === "production" && participants.some(entry => entry.payload.isTest)) {
+    throw new LogisticsPoolAiDraftError(400, "Canlı manuel taslak yalnız izinli gerçek kayıtlar içindir; TEST kayıtları kullanılamaz.");
   }
   const loadEntry = participants.find((entry) => entry.payload.role === "load");
   const carrierEntry = participants.find((entry) => entry.payload.role === "carrier");

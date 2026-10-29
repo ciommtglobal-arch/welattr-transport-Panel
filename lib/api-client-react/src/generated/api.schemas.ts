@@ -53,6 +53,7 @@ export type LogisticsPoolActionAction = typeof LogisticsPoolActionAction[keyof t
 
 export const LogisticsPoolActionAction = {
   refresh: 'refresh',
+  refresh_internal: 'refresh_internal',
   source_create: 'source_create',
   source_update: 'source_update',
   source_sync: 'source_sync',
@@ -2448,8 +2449,12 @@ export interface FieldLoadInput {
   volumeM3: number;
   transportMode: LogisticsTransportMode;
   loadingDate: string;
-  /** @maxLength 2000 */
-  notes?: string;
+  /**
+     * Kaynağın ve MMT içi kayıt/eşleştirme izninin nasıl teyit edildiği; gizli belge veya anahtar içermez.
+     * @minLength 10
+     * @maxLength 2000
+     */
+  notes: string;
   contactUseConfirmed: true;
 }
 
@@ -2464,6 +2469,10 @@ export type FieldEmptyTruckInputRegion = typeof FieldEmptyTruckInputRegion[keyof
 
 
 export const FieldEmptyTruckInputRegion = {
+  Mersin: 'Mersin',
+  İskenderun: 'İskenderun',
+  Gaziantep: 'Gaziantep',
+  Adana: 'Adana',
   Mardin: 'Mardin',
   Şanlıurfa: 'Şanlıurfa',
 } as const;
@@ -2500,8 +2509,12 @@ export interface FieldEmptyTruckInput {
      */
   capacity: string;
   availability: string;
-  /** @maxLength 2000 */
-  notes?: string;
+  /**
+     * Kaynağın ve MMT içi kayıt/eşleştirme izninin nasıl teyit edildiği; gizli belge veya anahtar içermez.
+     * @minLength 10
+     * @maxLength 2000
+     */
+  notes: string;
   contactUseConfirmed: true;
 }
 

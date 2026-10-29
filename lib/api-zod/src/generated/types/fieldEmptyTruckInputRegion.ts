@@ -10,6 +10,10 @@ export type FieldEmptyTruckInputRegion = typeof FieldEmptyTruckInputRegion[keyof
 
 
 export const FieldEmptyTruckInputRegion = {
+  Mersin: 'Mersin',
+  İskenderun: 'İskenderun',
+  Gaziantep: 'Gaziantep',
+  Adana: 'Adana',
   Mardin: 'Mardin',
   Şanlıurfa: 'Şanlıurfa',
 } as const;
