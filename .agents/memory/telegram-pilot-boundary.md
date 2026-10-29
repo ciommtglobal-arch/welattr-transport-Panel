@@ -26,3 +26,13 @@ sorunu olduğunu kanıtlamadı.
 güncellemeleri koruduğunu varsaymayın. Mevcut webhook/mesaj kuyruğu varsa ayrı
 inceleme ve onay olmadan silmeyin; dış mesaj veya gerçek tahsilatla bağlantı
 testi yapmayın.
+
+## Piyasa gruplarının otomatik keşfi
+
+Kullanıcı @mmt33_bot için sabit grup ID zorunluluğunun kaldırılmasını; botun
+yönetici olduğu group/supergroup sohbetinin ilk mesajıyla chat_id kaydını istedi.
+
+**Why:** Kullanıcı grubu elle tanımlamak yerine yönetici yapılan bot üzerinden otomatik katılım talep etti.
+
+**How to apply:** Gerçek Telegram yönetici durumunu ve webhook kimliğini doğrula;
+kapatılmış kaynağı yeniden açma. Bu yetki dış bildirim, ticari onay veya ödeme izni değildir.

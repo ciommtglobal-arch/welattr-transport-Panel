@@ -253,6 +253,87 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+export const getReceiveAutoTelegramMarketUpdateUrl = () => {
+
+
+
+
+  return `/api/telegram/webhook`
+}
+
+/**
+ * Authenticated Telegram messages only. Rechecks bot admin membership on each message; reuses the market-feed parser internally. Disabled sources remain disabled.
+ * @summary Auto-enroll groups where mmt33_bot is verified as administrator
+ */
+export const receiveAutoTelegramMarketUpdate = async (telegramMarketEnvelope: TelegramMarketEnvelope, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<void>(getReceiveAutoTelegramMarketUpdateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(telegramMarketEnvelope)
+  }
+);}
+
+
+
+
+
+export const getReceiveAutoTelegramMarketUpdateMutationKey = () => ['receiveAutoTelegramMarketUpdate'] as const;
+
+export const getReceiveAutoTelegramMarketUpdateMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveAutoTelegramMarketUpdate>>, TError,ReceiveAutoTelegramMarketUpdateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof receiveAutoTelegramMarketUpdate>>, TError,ReceiveAutoTelegramMarketUpdateMutationVariables, TContext> => {
+
+const mutationKey = getReceiveAutoTelegramMarketUpdateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof receiveAutoTelegramMarketUpdate>>, ReceiveAutoTelegramMarketUpdateMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  receiveAutoTelegramMarketUpdate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReceiveAutoTelegramMarketUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof receiveAutoTelegramMarketUpdate>>>
+    export type ReceiveAutoTelegramMarketUpdateMutationBody = BodyType<TelegramMarketEnvelope>
+    export type ReceiveAutoTelegramMarketUpdateMutationError = ErrorType<void>
+    export type ReceiveAutoTelegramMarketUpdateMutationVariables = {data: BodyType<TelegramMarketEnvelope>}
+
+    /**
+ * @summary Auto-enroll groups where mmt33_bot is verified as administrator
+ */
+export const useReceiveAutoTelegramMarketUpdate = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveAutoTelegramMarketUpdate>>, TError,ReceiveAutoTelegramMarketUpdateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof receiveAutoTelegramMarketUpdate>>,
+        TError,
+        ReceiveAutoTelegramMarketUpdateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReceiveAutoTelegramMarketUpdateMutationOptions(options));
+    }
+
 export const getReceiveMarketTextUrl = () => {
 
 

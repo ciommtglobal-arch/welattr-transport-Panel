@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod/v4";
 import { ingestTelegramMarketItem } from "../lib/logisticsPool";
 import { parseMarketText } from "../lib/marketTextParser";
+import { processMarketFeedText } from "../lib/marketFeedService";
 import { marketItemSchema, telegramMarketUpdateSchema, telegramSourceUrl, webhookSecretMatches } from "../lib/marketIngestion";
 
 const router: IRouter = Router();
@@ -81,12 +82,9 @@ router.post("/ingest/market-feed", async (req, res): Promise<void> => {
   if (age > 86400000 || age < -300000) {
     res.status(400).json({ error: "Olay tarihi geçersiz veya eski." }); return;
   }
-  const extraction = parseMarketText(text, eventId);
-  if (!extraction) { res.status(422).json({ error: "Tek yük veya taşıyıcı ilanı belirlenemedi." }); return; }
   try {
-    const inserted = await ingestTelegramMarketItem(source, eventId, extraction.item, extraction.metadata);
-    res.status(200).json({ status: !inserted ? "duplicate" : extraction.metadata.eligible ? "accepted" : "needs_review",
-      missing: extraction.metadata.parserMissing, messagesSent: false });
+    const result = await processMarketFeedText(source, eventId, text);
+    res.status(result.status === "ignored" ? 422 : 200).json(result);
   } catch {
     req.log.warn("Piyasa kaydı saklanamadı.");
     res.status(503).json({ error: "Kayıt tamamlanamadı." });

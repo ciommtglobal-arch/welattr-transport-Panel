@@ -9,6 +9,19 @@ import * as zod from 'zod';
 
 
 /**
+ * Authenticated Telegram messages only. Rechecks bot admin membership on each message; reuses the market-feed parser internally. Disabled sources remain disabled.
+ * @summary Auto-enroll groups where mmt33_bot is verified as administrator
+ */
+export const ReceiveAutoTelegramMarketUpdateHeader = zod.object({
+  "X-Telegram-Bot-Api-Secret-Token": zod.string()
+})
+
+export const ReceiveAutoTelegramMarketUpdateBody = zod.record(zod.string(), zod.unknown()).describe('Telegram Bot API update envelope; only original group text messages containing validated market JSON are ingested.')
+
+export const ReceiveAutoTelegramMarketUpdateResponse = zod.unknown()
+
+
+/**
  * @summary Parse one consented free-text load or carrier advertisement
  */
 export const ReceiveMarketTextHeader = zod.object({

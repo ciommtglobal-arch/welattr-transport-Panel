@@ -1,5 +1,29 @@
 # Market ingestion — disabled until an authorized source is configured
 
+## Automatic administrator-group discovery
+`POST /api/telegram/webhook` is the unified receiver for @mmt33_bot.
+It requires `MMT_TELEGRAM_WEBHOOK_SECRET` in the Telegram secret header, then
+checks getMe and getChatMember through the existing Telegram connector on every
+fresh group/supergroup text message. Only administrator/creator status qualifies.
+Privacy disabled alone does not authorize automatic enrollment.
+The first accepted group message registers its chat ID under the founder-authorized
+auto-enrollment policy; a founder-disabled source is never reactivated.
+The existing source cap (10) still applies.
+
+This route and /api/ingest/market-feed call the same internal processing function,
+not a loopback HTTP request. Raw text is not logged or persisted.
+Source registration can occur for a non-logistics first message, but that message
+is not turned into a load/carrier. Missing/ambiguous logistics fields remain ineligible.
+
+Activation order: configure a separate webhook secret using Secrets; publish;
+confirm the production receiver responds 401 without the secret; stop the old
+normal bot polling receiver (VIP is separate); setWebhook with secret_token,
+allowed_updates=["message"], drop_pending_updates=false; read getWebhookInfo.
+Do not register a webhook against an unpublished route. New webhook ownership
+also changes private-command delivery: this receiver deliberately ignores private
+chat updates and does not implement the old bot's private pilot commands.
+No setWebhook call or automatic publishing is performed by this module.
+
 POST `/api/logistics/market/telegram/:sourceId` accepts Telegram Bot API messages from one consented group.
 No webhook is registered automatically. Existing polling bots are untouched.
 Use a dedicated bot or explicitly coordinate polling/webhook ownership before activation.

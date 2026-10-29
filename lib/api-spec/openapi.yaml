@@ -31,6 +31,29 @@ tags:
   - name: storefront
     description: Shopify buyer catalog and cart; checkout blocked pending merchant verification
 paths:
+  /telegram/webhook:
+    post:
+      operationId: receiveAutoTelegramMarketUpdate
+      summary: Auto-enroll groups where mmt33_bot is verified as administrator
+      description: Authenticated Telegram messages only. Rechecks bot admin membership on each message; reuses the market-feed parser internally. Disabled sources remain disabled.
+      parameters:
+        - in: header
+          name: X-Telegram-Bot-Api-Secret-Token
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramMarketEnvelope'
+      responses:
+        '200':
+          description: accepted, needs_review, duplicate or ignored
+        '401':
+          description: Invalid or missing webhook secret
+        '503':
+          description: Telegram verification or storage unavailable; retry
   /ingest/market-feed:
     post:
       operationId: receiveMarketText

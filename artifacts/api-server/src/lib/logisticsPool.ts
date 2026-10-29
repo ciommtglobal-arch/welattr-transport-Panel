@@ -97,6 +97,22 @@ function payload(item: FeedItem, sourceUrl: string): PoolPayload {
     requiredKg:item.requiredKg ?? null,availableDate:item.availableDate ?? null,requiredDate:item.requiredDate ?? null,
     reference:item.reference ?? item.id,sourceUrl:item.sourceUrl ?? sourceUrl,verified:false,eligible:true};
 }
+/** Founder-authorized auto-enrollment policy; does not assign any user role. */
+export async function enrollTelegramMarketSource(chatId: number) {
+  return db.transaction(async tx => {
+    await lock(tx);
+    const url = `telegram://group/${chatId}`;
+    const [existing] = await tx.select().from(sources).where(eq(sources.url, url)).for("update");
+    if (existing) return existing; // Never re-enable a founder-disabled source.
+    const configured = await tx.select({id:sources.id}).from(sources);
+    if (configured.length >= 10) fail(409,"İzinli kaynak sınırı dolu.");
+    const [created] = await tx.insert(sources).values({
+      name: `Telegram piyasa grubu ${chatId}`, url,
+      consentBy: "founder_authorized_admin_group_auto_enrollment",
+    }).returning();
+    return created;
+  });
+}
 export async function ingestTelegramMarketItem(source: typeof sources.$inferSelect, messageId: number | string, item: FeedItem,
   metadata: { is_market_feed?: boolean; vehicleType?: string; cargoType?: string; parserMissing?: string[]; eligible?: boolean } = {}) {
   return db.transaction(async tx => {
