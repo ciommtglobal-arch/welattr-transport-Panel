@@ -12,9 +12,10 @@ import {
   type LogisticsPoolMatch,
   type LogisticsPoolWorkspace,
 } from "@workspace/api-client-react";
-import { AlertTriangle, ChevronLeft, ClipboardPlus, GitMerge, Globe, Layers, Lock, RefreshCw, ShieldAlert, WifiOff } from "lucide-react";
+import { AlertTriangle, ChevronLeft, ClipboardPaste, ClipboardPlus, GitMerge, Globe, Layers, Lock, RefreshCw, ShieldAlert, WifiOff } from "lucide-react";
 import { btnGhost, btnPrimary, classifyError, describeError, inputCls } from "@/components/logistics-ops/shared";
 import { EntryRow, Freshness, MatchDetail, MatchListItem, SourcesPanel, roleLabels } from "@/components/logistics-pool/pool-panels";
+import { PasteAds } from "@/components/logistics-pool/paste-ads";
 import { FieldCapture } from "@/components/logistics-pool/field-capture";
 import { LogisticsEvidenceTable } from "@/components/logistics-pool/evidence-table";
 
@@ -88,13 +89,13 @@ export default function StaffLogisticsPool() {
   if (!canOperate) return <Shell><Centered icon={ShieldAlert} title="Operasyon yetkisi gerekiyor" text="Bu havuz mevcut kurucu ve operasyon personeline açıktır. Bu sayfa yeni yetki vermez." action={<Link href="/staff/yonlendir" className={btnGhost}>Çalışma alanıma dön</Link>} /></Shell>;
   if (pool.isPending) return <Shell><Skeleton /></Shell>;
   if (pool.isError || !pool.data) return <Shell><QueryErrorView error={pool.error} retry={() => void pool.refetch()} /></Shell>;
-  return <Shell><Workspace data={pool.data} poolKey={poolKey} fetching={pool.isFetching} updatedAt={pool.dataUpdatedAt} pollError={pool.error} refetch={() => void pool.refetch()} /></Shell>;
+  return <Shell><Workspace isFounder={access.data?.role === "founder"} data={pool.data} poolKey={poolKey} fetching={pool.isFetching} updatedAt={pool.dataUpdatedAt} pollError={pool.error} refetch={() => void pool.refetch()} /></Shell>;
 }
 
-type Tab = "matches" | "pool" | "field" | "sources";
+type Tab = "matches" | "pool" | "field" | "paste" | "sources";
 
-function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
-  data: LogisticsPoolWorkspace; poolKey: readonly unknown[]; fetching: boolean; updatedAt: number; pollError: unknown; refetch: () => void;
+function Workspace({ isFounder, data, poolKey, fetching, updatedAt, pollError, refetch }: {
+  isFounder: boolean; data: LogisticsPoolWorkspace; poolKey: readonly unknown[]; fetching: boolean; updatedAt: number; pollError: unknown; refetch: () => void;
 }) {
   const qc = useQueryClient();
   const mutation = useActLogisticsPool();
@@ -201,7 +202,7 @@ function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
 
       <div className="mt-6 flex flex-col gap-3 border-b border-border sm:flex-row sm:items-end sm:justify-between">
         <nav className="flex flex-wrap gap-1" role="tablist">
-          {([["matches", "Eşleşmeler", GitMerge], ["pool", "Havuz", Layers], ["field", "Sahadan topla", ClipboardPlus], ["sources", "Kaynaklar", Globe]] as const).map(([k, l, Icon]) => (
+          {([["matches", "Eşleşmeler", GitMerge], ["pool", "Havuz", Layers], ["field", "Sahadan topla", ClipboardPlus], ...(isFounder ? [["paste", "İlan yapıştır", ClipboardPaste]] as const : []), ["sources", "Kaynaklar", Globe]] as const).map(([k, l, Icon]) => (
             <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} data-testid={`tab-${k}`}
               className={`relative flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.12em] ${tab === k ? "text-foreground" : "text-foreground/45 hover:text-foreground/75"}`}>
               <Icon size={14} />{l}
@@ -281,6 +282,7 @@ function Workspace({ data, poolKey, fetching, updatedAt, pollError, refetch }: {
         </div>
       ) : null}
 
+      {tab === "paste" && isFounder ? <PasteAds onSaved={() => qc.invalidateQueries({ queryKey: poolKey })} /> : null}
       {tab === "field" ? <FieldCapture refresh={runRefresh} /> : null}
 
       <div className={tab === "sources" ? "mt-5" : "hidden"}><SourcesPanel data={data} act={act} /></div>

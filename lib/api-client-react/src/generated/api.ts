@@ -73,6 +73,8 @@ import type {
   ConstructionQuoteInput,
   ConstructionQuoteReference,
   ConstructionQuoteStatusUpdate,
+  CopiedMarketAdsInput,
+  CopiedMarketAdsResult,
   ErrorEnvelope,
   ErrorResponse,
   ExportCompanyRecordsParams,
@@ -413,6 +415,86 @@ export const useReceiveLogisticsEmail = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getReceiveLogisticsEmailMutationOptions(options));
+    }
+
+export const getPasteLogisticsAdsUrl = () => {
+
+
+
+
+  return `/api/logistics/pool/copied-ads`
+}
+
+/**
+ * @summary Founder-only import of consented copied market ads
+ */
+export const pasteLogisticsAds = async (copiedMarketAdsInput: CopiedMarketAdsInput, options?: Parameters<typeof customFetch>[1]): Promise<CopiedMarketAdsResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<CopiedMarketAdsResult>(getPasteLogisticsAdsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(copiedMarketAdsInput)
+  }
+);}
+
+
+
+
+
+export const getPasteLogisticsAdsMutationKey = () => ['pasteLogisticsAds'] as const;
+
+export const getPasteLogisticsAdsMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pasteLogisticsAds>>, TError,PasteLogisticsAdsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof pasteLogisticsAds>>, TError,PasteLogisticsAdsMutationVariables, TContext> => {
+
+const mutationKey = getPasteLogisticsAdsMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof pasteLogisticsAds>>, PasteLogisticsAdsMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  pasteLogisticsAds(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PasteLogisticsAdsMutationResult = NonNullable<Awaited<ReturnType<typeof pasteLogisticsAds>>>
+    export type PasteLogisticsAdsMutationBody = BodyType<CopiedMarketAdsInput>
+    export type PasteLogisticsAdsMutationError = ErrorType<void>
+    export type PasteLogisticsAdsMutationVariables = {data: BodyType<CopiedMarketAdsInput>}
+
+    /**
+ * @summary Founder-only import of consented copied market ads
+ */
+export const usePasteLogisticsAds = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pasteLogisticsAds>>, TError,PasteLogisticsAdsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof pasteLogisticsAds>>,
+        TError,
+        PasteLogisticsAdsMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPasteLogisticsAdsMutationOptions(options));
     }
 
 export const getReceiveIncomingMarketFeedUrl = () => {

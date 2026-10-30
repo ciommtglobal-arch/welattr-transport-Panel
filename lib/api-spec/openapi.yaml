@@ -88,6 +88,35 @@ paths:
           description: Inbox or consented source mismatch
         '503':
           description: Not configured, body unavailable, or persistence failed
+  /logistics/pool/copied-ads:
+    post:
+      operationId: pasteLogisticsAds
+      summary: Founder-only import of consented copied market ads
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CopiedMarketAdsInput'
+      responses:
+        '200':
+          description: Atomically saved candidates or unchanged retry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CopiedMarketAdsResult'
+        '400':
+          description: Invalid input or stale advertisement
+        '401':
+          description: Sign in required
+        '403':
+          description: Founder permission and source consent required
+        '409':
+          description: Conflicting retry or source disabled
+        '422':
+          description: No recognizable logistics advertisement
+        '503':
+          description: Import unavailable; retain input for retry
   /incoming-feed:
     post:
       operationId: receiveIncomingMarketFeed
@@ -4580,6 +4609,44 @@ components:
       type: object
       additionalProperties: true
       description: AgentMail message.received event; verified using the original raw bytes
+    CopiedMarketAdsInput:
+      type: object
+      additionalProperties: false
+      required: [requestId, channel, sourceName, occurredAt, text, consentConfirmed]
+      properties:
+        requestId: { type: string, format: uuid }
+        channel: { type: string, enum: [whatsapp, facebook] }
+        sourceName: { type: string, minLength: 2, maxLength: 120 }
+        reference: { type: string, maxLength: 300 }
+        occurredAt: { type: string, format: date-time }
+        text: { type: string, minLength: 1, maxLength: 8192 }
+        consentConfirmed: { type: boolean }
+    CopiedMarketAdsItem:
+      type: object
+      required: [id, role, origin, destination, isTest, eligible, missing]
+      properties:
+        id: { type: string, format: uuid }
+        role: { type: string }
+        origin: { type: string }
+        destination: { type: string }
+        isTest: { type: boolean }
+        eligible: { type: boolean }
+        missing:
+          type: array
+          items: { type: string }
+    CopiedMarketAdsResult:
+      type: object
+      required: [sourceId, savedCount, duplicateCount, items, messagesSent, approvalGranted]
+      properties:
+        sourceId: { type: string, format: uuid }
+        savedCount: { type: integer }
+        duplicateCount: { type: integer }
+        messagesSent: { type: boolean }
+        approvalGranted: { type: boolean }
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CopiedMarketAdsItem'
     MarketTextEnvelope:
       type: object
       additionalProperties: false

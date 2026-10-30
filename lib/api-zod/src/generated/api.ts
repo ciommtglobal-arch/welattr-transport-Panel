@@ -36,6 +36,46 @@ export const ReceiveLogisticsEmailResponse = zod.unknown()
 
 
 /**
+ * @summary Founder-only import of consented copied market ads
+ */
+export const pasteLogisticsAdsBodySourceNameMin = 2;
+export const pasteLogisticsAdsBodySourceNameMax = 120;
+
+export const pasteLogisticsAdsBodyReferenceMax = 300;
+
+export const pasteLogisticsAdsBodyTextMax = 8192;
+
+
+
+export const PasteLogisticsAdsBody = zod.object({
+  "requestId": zod.uuid(),
+  "channel": zod.enum(['whatsapp', 'facebook']),
+  "sourceName": zod.string().min(pasteLogisticsAdsBodySourceNameMin).max(pasteLogisticsAdsBodySourceNameMax),
+  "reference": zod.string().max(pasteLogisticsAdsBodyReferenceMax).optional(),
+  "occurredAt": zod.coerce.date(),
+  "text": zod.string().min(1).max(pasteLogisticsAdsBodyTextMax),
+  "consentConfirmed": zod.boolean()
+})
+
+export const PasteLogisticsAdsResponse = zod.object({
+  "sourceId": zod.uuid(),
+  "savedCount": zod.int(),
+  "duplicateCount": zod.int(),
+  "messagesSent": zod.boolean(),
+  "approvalGranted": zod.boolean(),
+  "items": zod.array(zod.object({
+  "id": zod.uuid(),
+  "role": zod.string(),
+  "origin": zod.string(),
+  "destination": zod.string(),
+  "isTest": zod.boolean(),
+  "eligible": zod.boolean(),
+  "missing": zod.array(zod.string())
+}))
+})
+
+
+/**
  * @summary Import copied WhatsApp or Facebook ads from a consented source
  */
 export const ReceiveIncomingMarketFeedHeader = zod.object({

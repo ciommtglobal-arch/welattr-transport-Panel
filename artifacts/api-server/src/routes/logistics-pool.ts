@@ -2,16 +2,34 @@ import { Router, type IRouter } from "express";
 import {
   ActLogisticsPoolBody, GenerateLogisticsPoolMatchAiDraftBody,
   GenerateLogisticsPoolMatchAiDraftResponse, GetLogisticsPoolResponse,
+  PasteLogisticsAdsBody, PasteLogisticsAdsResponse,
 } from "@workspace/api-zod";
-import { requireLogisticsOperator } from "../lib/logisticsWorkflowAuth";
+import { requireLogisticsOperator, requireLogisticsFounder } from "../lib/logisticsWorkflowAuth";
 import { AutomationError } from "../lib/logisticsAutomation";
-import { getPoolWorkspace, actOnPool } from "../lib/logisticsPool";
+import { getPoolWorkspace, actOnPool, importCopiedMarketAds } from "../lib/logisticsPool";
 import { withManualDraftLock } from "../lib/logisticsManualDraftLock";
 import {
   createLogisticsPoolMatchAiDraft, isLogisticsPoolAiDraftPreviewEnabled,
   LogisticsPoolAiDraftError,
 } from "../lib/logisticsPoolAiDraft";
 const router: IRouter = Router();
+router.post("/logistics/pool/copied-ads", async (req,res): Promise<void> => {
+  res.set("Cache-Control","no-store");
+  const actor = requireLogisticsFounder(req,res);
+  if (!actor) return;
+  if (Buffer.byteLength(JSON.stringify(req.body ?? {}),"utf8") > 40000) {
+    res.status(413).json({error:"İlan metni çok uzun."}); return;
+  }
+  const parsed = PasteLogisticsAdsBody.strict().safeParse(req.body);
+  if (!parsed.success) {res.status(400).json({error:"Kaynak, tarih, izin ve metin alanlarını kontrol edin."});return;}
+  try {
+    res.json(PasteLogisticsAdsResponse.parse(await importCopiedMarketAds(parsed.data,actor)));
+  } catch (error) {
+    if (error instanceof AutomationError) {res.status(error.status).json({error:error.message});return;}
+    req.log?.warn("Kopyalanan ilan aktarımı tamamlanamadı; hassas içerik loglanmadı.");
+    res.status(503).json({error:"Aktarım tamamlanamadı; metni koruyarak yeniden deneyin."});
+  }
+});
 router.all(["/logistics/pool","/logistics/pool/actions"], async (req,res): Promise<void> => {
   res.set("Cache-Control","no-store");
   const actor = await requireLogisticsOperator(req,res);

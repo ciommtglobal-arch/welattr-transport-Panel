@@ -19,7 +19,7 @@ import {
   logisticsPoolAiDraftsTable as aiDrafts, logisticsPoolDraftNotificationsTable as draftNotifications,
   logisticsCarriersTable as carriers, logisticsShipmentsTable as shipments,
 } from "@workspace/db";
-import { actOnPool, getPoolWorkspace, syncInternalPool, syncPoolSource } from "./logisticsPool";
+import { actOnPool, getPoolWorkspace, syncInternalPool, syncPoolSource, importCopiedMarketAds } from "./logisticsPool";
 const founder = {userId:"pool-TEST-founder",isFounder:true}, operator = {userId:"pool-TEST-operator",isFounder:false};
 const future = () => new Date(Date.now()+7*86400000).toISOString().slice(0,10);
 function person(role: PoolPayload["role"], extra: Partial<PoolPayload> = {}): PoolPayload {
@@ -103,6 +103,26 @@ dbDescribe("Isolated PostgreSQL pool persistence", () => {
       serviceRoutes:"Mersin → Irak",transportMode:"road",capacity:"24 ton",availability:future(),status:"approved",isTest:true});
     await syncInternalPool();
   }
+  it("atomically imports copied routes, requires consent and deduplicates retries", async () => isolated(async () => {
+    const input = {
+      requestId:"11111111-1111-4111-8111-111111111111",channel:"whatsapp" as const,
+      sourceName:"TEST copied ads",occurredAt:new Date(),consentConfirmed:true,
+      text:"TEST\nKIZILTEPE'DEN 📶 URFA HALFETİ\nKIZILTEPE'DEN 📶 HATAY MERKEZ",
+    };
+    await expect(importCopiedMarketAds(input,operator)).rejects.toMatchObject({status:403});
+    await expect(importCopiedMarketAds({...input,consentConfirmed:false},founder)).rejects.toMatchObject({status:403});
+    await expect(importCopiedMarketAds({...input,occurredAt:new Date("2020-01-01T00:00:00Z")},founder)).rejects.toMatchObject({status:400});
+    const first = await importCopiedMarketAds(input,founder);
+    expect(first).toMatchObject({savedCount:2,duplicateCount:0,messagesSent:false,approvalGranted:false});
+    expect(first.items.every(i=>i.isTest && !i.eligible && i.missing.length>0)).toBe(true);
+    expect((await importCopiedMarketAds(input,founder))).toMatchObject({savedCount:0,duplicateCount:2});
+    await expect(importCopiedMarketAds({...input,text:input.text+"\n20 ton"},founder)).rejects.toMatchObject({status:409});
+    expect(await state.tx.select().from(entries)).toHaveLength(2);
+    expect(await state.tx.select().from(sources)).toHaveLength(1);
+    expect(await state.tx.select().from(draftNotifications)).toHaveLength(0);
+    await state.tx.update(sources).set({enabled:false}).where(eq(sources.id,first.sourceId));
+    await expect(importCopiedMarketAds({...input,requestId:"22222222-2222-4222-8222-222222222222"},founder)).rejects.toMatchObject({status:409});
+  }));
   it("automatically persists a real source projection and idempotent matches without altering originals", async () => isolated(async () => {
     await seed(); const first = await getPoolWorkspace(founder); await syncInternalPool(); const next = await getPoolWorkspace(founder);
     expect(first.entries).toHaveLength(2); expect(next.matches).toHaveLength(1);

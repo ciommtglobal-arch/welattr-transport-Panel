@@ -19,6 +19,8 @@ import { isLogisticsPoolAiDraftPreviewEnabled } from "./logisticsPoolAiDraft";
 import { logisticsDraftScheduleDescription, permittedCarrierCandidate, permittedInternalLogisticsRecord } from "./logisticsPoolDraftPolicy";
 import { describeWorkerEvidence } from "./logisticsWorkerEvidence";
 import { isolateTestMarketPayload, isQuarantinedMarketPayload } from "./marketSourcePolicy";
+import { parseMarketTexts } from "./marketTextParser";
+import { PasteLogisticsAdsBody } from "@workspace/api-zod";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Action = z.infer<typeof ActLogisticsPoolBody>;
@@ -122,6 +124,68 @@ export async function enrollTelegramMarketSource(chatId: number) {
       consentBy: "founder_authorized_admin_group_auto_enrollment",
     }).returning();
     return created;
+  });
+}
+
+/** Founder-only copy intake. All candidates and source consent commit together. */
+export async function importCopiedMarketAds(input: z.infer<typeof PasteLogisticsAdsBody>, actor: LogisticsActor) {
+  if (!isLogisticsFounder(actor.userId)) fail(403, "Yalnız kurucu ilan aktarabilir.");
+  if (input.consentConfirmed !== true) fail(403, "Kaydı kullanma yetkisini teyit edin.");
+  const occurredAt = new Date(input.occurredAt);
+  const age = Date.now() - occurredAt.getTime();
+  if (!Number.isFinite(age) || age > 86400000 || age < -300000) fail(400, "İlan tarihi son 24 saat içinde olmalı; eski ilanı güncel diye kaydetmeyin.");
+  const parsed = parseMarketTexts(input.text, input.requestId, occurredAt);
+  if (!parsed.length) fail(422, "Yük veya araç ilanı ayrıştırılamadı. Yönü açık rotayı ve ilan türünü kontrol edin.");
+  if (parsed.length > 50) fail(400, "Tek aktarımda en fazla 50 rota kabul edilir.");
+  const name = input.sourceName.trim();
+  if (name.length < 2) fail(400, "Kaynak adı gerekli.");
+  const url = `market://source/copied-${input.channel}-${digest(name.toLocaleLowerCase("tr-TR")).slice(0, 24)}`;
+  const importDigest = digest(input);
+  return db.transaction(async tx => {
+    await lock(tx);
+    let [source] = await tx.select().from(sources).where(eq(sources.url, url));
+    if (source && !source.enabled) fail(409, "Bu kaynak kapalı; kurucu kaynak ayarından açmalıdır.");
+    if (!source) {
+      const all = await tx.select({id:sources.id}).from(sources);
+      if (all.length >= 10) fail(409, "İzinli kaynak sınırı dolu.");
+      [source] = await tx.insert(sources).values({
+        name:`${input.channel === "whatsapp" ? "WhatsApp" : "Facebook"} · ${name}`,
+        url, consentBy:actor.userId, consentAt:new Date(),
+      }).returning();
+    }
+    if (!source.consentBy || !source.consentAt) fail(403, "Kaynak kullanım izni yok.");
+    const prefix = `copied:${digest([actor.userId,input.requestId])}:`;
+    const prior = await tx.select().from(entries).where(sql`${entries.originKey} LIKE ${prefix + "%"}`);
+    if (prior.some(row => (row.payload as PoolPayload & {importDigest?:string}).importDigest !== importDigest) ||
+        (prior.length > 0 && prior.length !== parsed.length)) fail(409, "Aynı aktarım kimliğiyle içerik değiştirilemez.");
+    let savedCount = 0;
+    const items = [];
+    for (const [index, extraction] of parsed.entries()) {
+      const originKey = `${prefix}${index}`;
+      const data = {
+        ...payload(extraction.item, source.url), ...extraction.metadata,
+        marketOccurredAt:occurredAt.toISOString(),
+        reference:input.reference?.trim() || extraction.item.reference || input.requestId,
+        importDigest,
+      };
+      let row = prior.find(r=>r.originKey === originKey);
+      if (!row) {
+        [row] = await tx.insert(entries).values({
+          originKey, sourceKind:"telegram_market", sourceId:source.id,
+          payload:data, fingerprint:digest(data), active:true,
+        }).returning();
+        savedCount++;
+      }
+      items.push({
+        id:row.id, role:data.role, origin:data.origin, destination:data.destination,
+        isTest:data.isTest, eligible:data.eligible, missing:extraction.metadata.parserMissing,
+      });
+    }
+    if (savedCount) {
+      await tx.update(sources).set({lastSuccessAt:new Date(),lastError:null}).where(eq(sources.id,source.id));
+      await rebuild(tx);
+    }
+    return {sourceId:source.id,savedCount,duplicateCount:items.length-savedCount,items,messagesSent:false,approvalGranted:false};
   });
 }
 export async function ingestTelegramMarketItem(source: typeof sources.$inferSelect, messageId: number | string, item: FeedItem,

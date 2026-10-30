@@ -10,6 +10,52 @@
  */
 export interface LogisticsEmailEvent { [key: string]: unknown }
 
+export type CopiedMarketAdsInputChannel = typeof CopiedMarketAdsInputChannel[keyof typeof CopiedMarketAdsInputChannel];
+
+
+export const CopiedMarketAdsInputChannel = {
+  whatsapp: 'whatsapp',
+  facebook: 'facebook',
+} as const;
+
+export interface CopiedMarketAdsInput {
+  requestId: string;
+  channel: CopiedMarketAdsInputChannel;
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  sourceName: string;
+  /** @maxLength 300 */
+  reference?: string;
+  occurredAt: string;
+  /**
+     * @minLength 1
+     * @maxLength 8192
+     */
+  text: string;
+  consentConfirmed: boolean;
+}
+
+export interface CopiedMarketAdsItem {
+  id: string;
+  role: string;
+  origin: string;
+  destination: string;
+  isTest: boolean;
+  eligible: boolean;
+  missing: string[];
+}
+
+export interface CopiedMarketAdsResult {
+  sourceId: string;
+  savedCount: number;
+  duplicateCount: number;
+  messagesSent: boolean;
+  approvalGranted: boolean;
+  items: CopiedMarketAdsItem[];
+}
+
 export interface MarketTextEnvelope {
   sourceId: string;
   /** @pattern ^[a-zA-Z0-9_-]{1,160}$ */
