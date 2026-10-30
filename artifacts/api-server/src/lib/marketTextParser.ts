@@ -1,6 +1,7 @@
 import { type FeedItem } from "./logisticsPoolFeed";
 import { fold } from "./logisticsPoolEngine";
 import { marketRoute, marketDate, marketVehicleTypes } from "./marketTextFields";
+import { marketWeightKg } from "./marketWeight";
 
 export type MarketExtraction = {
   item: FeedItem;
@@ -19,9 +20,7 @@ export function parseMarketText(text: string, id: string, occurredAt = new Date(
   const missing: string[] = [];
   if (routeOnly && !/\b(yuk|yukumuz|yukleme|paletli|dokme|parsiyel)\b/.test(plain)) missing.push("Yük/araç ilan türü teyidi");
   if (!origin || !destination) missing.push("Tek ve yönü açık çıkış → varış rotası");
-  const weights = [...text.matchAll(/\b(\d+(?:[.,]\d{1,2})?)\s*(tonluk|ton|kg|t)\b/gi)];
-  const quantities = [...new Set(weights.map(m => Number(m[1].replace(",", ".")) * (m[2].toLowerCase() === "kg" ? 1 : 1000)))];
-  const kg = quantities.length === 1 ? quantities[0] : 0;
+  const kg = marketWeightKg(text) ?? 0;
   if (!kg || kg > 1e9) missing.push("Tek ve geçerli tonaj/kapasite");
   const types = marketVehicleTypes(text);
   const vehicleType = types.length === 1 ? types[0] : types.join("/");
