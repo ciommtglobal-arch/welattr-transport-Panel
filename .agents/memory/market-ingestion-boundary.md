@@ -51,3 +51,13 @@ from earlier logistics work.
 Distinguish WhatsApp channels from groups and direct messages, verify permitted
 access, and never claim the existing integration can read the user's followed
 channels without evidence.
+
+The intended adoption path is to attract the existing market to MMT, introduce
+its Telegram bots, and gradually move manual logistics work into digital flows.
+
+**Why:** The user explicitly clarified that WhatsApp/Facebook sourcing is the
+starting point for building MMT adoption, not the final operating model.
+
+**How to apply:** Support current channels initially while preparing voluntary
+direct bot submission and onboarding. Do not describe Telegram as merely an
+incidental channel or make migration a prerequisite for initial participation.
