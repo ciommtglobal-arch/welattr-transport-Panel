@@ -8,8 +8,16 @@ export function marketRoute(text: string): [string, string] {
     .replace(/[\u00A0\u202F]/g, " ")
     .replace(/[’‘ʼ`´]/g, "'")
     .replace(/\s*'\s*/g, "'");
+  text = text.replace(/^\s*(?:TEST|DENEME|ÖRNEK)\s*[:—–-]\s*/iu, "");
   const pairs: [string, string][] = [];
   const add = (a: string, b: string) => pairs.push([a.trim(), b.trim()]);
+  for (const line of text.split("\n")) {
+    const marked = /^([\p{L}. +/]+?)(?:'?(?:den|dan|ten|tan))?\s*📶\s*([\p{L}. /]+?)(?=\s+\d|[,;]|$)/iu.exec(line.trim());
+    if (marked) add(marked[1], marked[2]);
+    // Explicit Iraq destinations only; never guess an unspecified country.
+    const iraq = /^([\p{L}. +/]+?)\s+(Zaho|Erbil|Bağdat|Bagdat|Musul|Basra)(?=\s|[,;]|$)/iu.exec(line.trim());
+    if (iraq) add(iraq[1].replace(/'(?:den|dan|ten|tan)$/iu, ""), iraq[2]);
+  }
   for (const m of text.matchAll(new RegExp(`(?:^|[;\\n.!])\\s*(${place})\\s*(?:→|->)\\s*(${place})(?=$|[;\\n.!\\d])`, "gu"))) add(m[1], m[2]);
   // Explicit Turkish directional suffixes, with or without apostrophes.
   for (const m of text.matchAll(new RegExp(`(?:^|[:;\\n.!])\\s*(${place})'?(?:dan|den|tan|ten)\\s+(${place})'?(?:ya|ye|a|e)(?=\\s+(?:\\d|yük|yuk|boş|bos|araç|arac|tır|tir)|[,;\\n.!]|$)`, "giu"))) add(m[1], m[2]);

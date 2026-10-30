@@ -65,7 +65,7 @@ const marketEnvelope = z.object({
   occurredAt: z.string().datetime({ offset: true }),
   text: z.string().trim().min(1).max(8192),
 }).strict();
-router.post("/ingest/market-feed", async (req, res): Promise<void> => {
+router.post(["/ingest/market-feed", "/incoming-feed"], async (req, res): Promise<void> => {
   const parsed = marketEnvelope.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: "Geçersiz olay." }); return; }
   const { sourceId, eventId, occurredAt, text } = parsed.data;

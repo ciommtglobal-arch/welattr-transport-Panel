@@ -36,6 +36,28 @@ export const ReceiveLogisticsEmailResponse = zod.unknown()
 
 
 /**
+ * @summary Import copied WhatsApp or Facebook ads from a consented source
+ */
+export const ReceiveIncomingMarketFeedHeader = zod.object({
+  "X-MMT-Market-Secret": zod.string()
+})
+
+export const receiveIncomingMarketFeedBodyEventIdRegExp = new RegExp('^[a-zA-Z0-9_-]{1,160}$');
+export const receiveIncomingMarketFeedBodyTextMax = 8192;
+
+
+
+export const ReceiveIncomingMarketFeedBody = zod.object({
+  "sourceId": zod.uuid(),
+  "eventId": zod.string().regex(receiveIncomingMarketFeedBodyEventIdRegExp),
+  "occurredAt": zod.coerce.date(),
+  "text": zod.string().min(1).max(receiveIncomingMarketFeedBodyTextMax)
+})
+
+export const ReceiveIncomingMarketFeedResponse = zod.unknown()
+
+
+/**
  * @summary Parse one consented free-text load or carrier advertisement
  */
 export const ReceiveMarketTextHeader = zod.object({

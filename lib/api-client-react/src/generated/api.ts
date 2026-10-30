@@ -415,6 +415,86 @@ export const useReceiveLogisticsEmail = <TError = ErrorType<void>,
       return useMutation(getReceiveLogisticsEmailMutationOptions(options));
     }
 
+export const getReceiveIncomingMarketFeedUrl = () => {
+
+
+
+
+  return `/api/incoming-feed`
+}
+
+/**
+ * @summary Import copied WhatsApp or Facebook ads from a consented source
+ */
+export const receiveIncomingMarketFeed = async (marketTextEnvelope: MarketTextEnvelope, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+return customFetch<void>(getReceiveIncomingMarketFeedUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(marketTextEnvelope)
+  }
+);}
+
+
+
+
+
+export const getReceiveIncomingMarketFeedMutationKey = () => ['receiveIncomingMarketFeed'] as const;
+
+export const getReceiveIncomingMarketFeedMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveIncomingMarketFeed>>, TError,ReceiveIncomingMarketFeedMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof receiveIncomingMarketFeed>>, TError,ReceiveIncomingMarketFeedMutationVariables, TContext> => {
+
+const mutationKey = getReceiveIncomingMarketFeedMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof receiveIncomingMarketFeed>>, ReceiveIncomingMarketFeedMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  receiveIncomingMarketFeed(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReceiveIncomingMarketFeedMutationResult = NonNullable<Awaited<ReturnType<typeof receiveIncomingMarketFeed>>>
+    export type ReceiveIncomingMarketFeedMutationBody = BodyType<MarketTextEnvelope>
+    export type ReceiveIncomingMarketFeedMutationError = ErrorType<void>
+    export type ReceiveIncomingMarketFeedMutationVariables = {data: BodyType<MarketTextEnvelope>}
+
+    /**
+ * @summary Import copied WhatsApp or Facebook ads from a consented source
+ */
+export const useReceiveIncomingMarketFeed = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveIncomingMarketFeed>>, TError,ReceiveIncomingMarketFeedMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof receiveIncomingMarketFeed>>,
+        TError,
+        ReceiveIncomingMarketFeedMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReceiveIncomingMarketFeedMutationOptions(options));
+    }
+
 export const getReceiveMarketTextUrl = () => {
 
 

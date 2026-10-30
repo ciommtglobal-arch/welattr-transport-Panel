@@ -88,6 +88,34 @@ paths:
           description: Inbox or consented source mismatch
         '503':
           description: Not configured, body unavailable, or persistence failed
+  /incoming-feed:
+    post:
+      operationId: receiveIncomingMarketFeed
+      summary: Import copied WhatsApp or Facebook ads from a consented source
+      parameters:
+        - in: header
+          name: X-MMT-Market-Secret
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarketTextEnvelope'
+      responses:
+        '200':
+          description: Items stored or already present; incomplete items held for review
+        '400':
+          description: Invalid or stale event
+        '401':
+          description: Invalid source secret
+        '403':
+          description: Source not consented
+        '422':
+          description: Unclassified text
+        '503':
+          description: Retry with same eventId; saved parts are deduplicated
   /ingest/market-feed:
     post:
       operationId: receiveMarketText
