@@ -38,3 +38,16 @@ code change needed to use the existing hosted inbox instead.
 **How to apply:** Do not buy a domain or change DNS as a prerequisite. Keep exact
 mailbox binding and signed webhook verification; do not confuse the connected
 mailbox-management tools with permission to administer provider webhooks.
+
+Initial market sourcing should follow the user's existing WhatsApp business
+network and logistics channels, with Facebook also relevant. Telegram adoption
+is a later step, not a prerequisite for the firms to participate.
+
+**Why:** The user explained that their existing business contacts use WhatsApp
+and Facebook, Telegram is not widespread among them, and they are restarting
+from earlier logistics work.
+
+**How to apply:** Do not repeatedly require firms to join Telegram to begin.
+Distinguish WhatsApp channels from groups and direct messages, verify permitted
+access, and never claim the existing integration can read the user's followed
+channels without evidence.
