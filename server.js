@@ -4,19 +4,39 @@ const path = require('path');
 
 const PORT = process.env.PORT || 10000;
 
-function findIndexHtml(baseDir) {
-  const possiblePaths = [
-    path.join(baseDir, 'index.html'),
-    path.join(baseDir, 'public', 'index.html'),
-    path.join(baseDir, 'static', 'index.html'),
-    path.join(baseDir, 'dist', 'index.html'),
-    path.join(baseDir, 'build', 'index.html'),
-    path.join(baseDir, 'client', 'index.html')
+// Check the production builds first, in the requested priority order.
+function findStaticDirectory(baseDir) {
+  const possibleDirectories = [
+    path.join(baseDir, 'artifacts', 'mmt-global-website', 'dist', 'public'),
+    path.join(baseDir, 'artifacts', 'kasa', 'dist', 'public'),
+    // Keep common output locations as fallbacks for local and legacy builds.
+    path.join(baseDir, 'public'),
+    path.join(baseDir, 'static'),
+    path.join(baseDir, 'dist', 'public'),
+    path.join(baseDir, 'dist'),
+    path.join(baseDir, 'build'),
+    path.join(baseDir, 'client'),
+    baseDir
   ];
-  for (const p of possiblePaths) {
-    if (fs.existsSync(p)) return p;
+
+  for (const directory of possibleDirectories) {
+    const indexPath = path.join(directory, 'index.html');
+    try {
+      if (fs.statSync(indexPath).isFile()) return directory;
+    } catch (error) {
+      // This output directory is not present; try the next candidate.
+    }
   }
   return null;
+}
+
+const staticDirectory = findStaticDirectory(__dirname);
+const indexPath = staticDirectory ? path.join(staticDirectory, 'index.html') : null;
+
+if (staticDirectory) {
+  console.log(`Statik dosya dizini: ${staticDirectory}`);
+} else {
+  console.warn('Build çıktısında index.html bulunamadı; dahili panel arayüzü sunuluyor.');
 }
 
 const fallbackHtml = `<!DOCTYPE html>
@@ -43,25 +63,94 @@ const fallbackHtml = `<!DOCTYPE html>
 </body>
 </html>`;
 
-const server = http.createServer((req, res) => {
-  const indexPath = findIndexHtml(__dirname);
-  
-  if (indexPath && fs.existsSync(indexPath)) {
-    fs.readFile(indexPath, (err, data) => {
-      if (err) {
-        res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
-        res.end('Dosya okuma hatasi');
-      } else {
-        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-        res.end(data);
-      }
-    });
-  } else {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(fallbackHtml);
+const contentTypes = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.map': 'application/json; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
+  '.pdf': 'application/pdf'
+};
+
+function sendFile(filePath, res, method) {
+  const contentType = contentTypes[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
+  res.writeHead(200, { 'Content-Type': contentType, 'X-Content-Type-Options': 'nosniff' });
+  if (method === 'HEAD') {
+    res.end();
+    return;
   }
+
+  const stream = fs.createReadStream(filePath);
+  stream.on('error', (error) => {
+    console.error(`Dosya okunamadı (${filePath}):`, error.message);
+    if (!res.headersSent) {
+      res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+    }
+    res.end('Dosya okuma hatasi');
+  });
+  stream.pipe(res);
+}
+
+const server = http.createServer((req, res) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    res.writeHead(405, { Allow: 'GET, HEAD', 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Method not allowed');
+    return;
+  }
+
+  if (!staticDirectory) {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(req.method === 'HEAD' ? undefined : fallbackHtml);
+    return;
+  }
+
+  let requestPath;
+  try {
+    requestPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+  } catch (error) {
+    res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Geçersiz istek yolu.');
+    return;
+  }
+
+  const rootPath = path.resolve(staticDirectory);
+  const requestedFile = path.resolve(rootPath, `.${requestPath}`);
+  if (requestedFile !== rootPath && !requestedFile.startsWith(rootPath + path.sep)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Erişim reddedildi.');
+    return;
+  }
+
+  const filePath = requestPath === '/' ? indexPath : requestedFile;
+  fs.stat(filePath, (error, stats) => {
+    if (!error && stats.isFile()) {
+      sendFile(filePath, res, req.method);
+      return;
+    }
+
+    // Serve index.html for client-side routes, but don't disguise missing assets as HTML.
+    if (path.extname(requestPath)) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('Dosya bulunamadı.');
+      return;
+    }
+    sendFile(indexPath, res, req.method);
+  });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`MMT Global Web Paneli aktif. Port: ${PORT}`);
 });
