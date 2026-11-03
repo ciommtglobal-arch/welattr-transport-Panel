@@ -3,8 +3,9 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-// --- 1. TELEGRAM BOT AYARLARI (SIFIR EK KÜTÜPHANE / RESMİ API) ---
-const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'BOT_TOKENINIZI_BURAYA_GIRIN';
+// --- 1. TELEGRAM BOT AYARLARI (RESMİ API) ---
+// Bot token'ını TELEGRAM_BOT_TOKEN ortam değişkeninde saklayın.
+const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
 function callTelegram(method, data) {
   const postData = JSON.stringify(data);
@@ -42,10 +43,13 @@ function pollTelegramUpdates() {
             handleTelegramUpdate(update);
           });
         }
-      } catch (err) {}
+      } catch (err) {
+        console.error('Telegram yanıtı işlenemedi:', err.message);
+      }
       setTimeout(pollTelegramUpdates, 1000);
     });
   }).on('error', (err) => {
+    console.error('Telegram güncellemeleri alınamadı:', err.message);
     setTimeout(pollTelegramUpdates, 5000);
   });
 }
@@ -146,19 +150,52 @@ function handleTelegramUpdate(update) {
   }
 }
 
-pollTelegramUpdates();
+if (TELEGRAM_TOKEN) {
+  pollTelegramUpdates();
+} else {
+  console.warn('TELEGRAM_BOT_TOKEN tanımlı değil; Telegram botu başlatılmadı.');
+}
 
 // --- 2. STATİK WEB PANELİ SUNUCUSU ---
 const PORT = process.env.PORT || 10000;
 
+// Verilen dizinlerde ve alt klasörlerinde index.html dosyasını bulur.
+function findIndexDirectory(directory) {
+  let entries;
+  try {
+    entries = fs.readdirSync(directory, { withFileTypes: true });
+  } catch (err) {
+    return null;
+  }
+
+  if (entries.some((entry) => entry.isFile() && entry.name === 'index.html')) {
+    return directory;
+  }
+
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      const foundDirectory = findIndexDirectory(path.join(directory, entry.name));
+      if (foundDirectory) return foundDirectory;
+    }
+  }
+
+  return null;
+}
+
 const possibleDirs = [
-  path.join(__dirname, 'artifacts/mmt-transport'),
-  path.join(__dirname, 'dist/public'),
   path.join(__dirname, 'dist'),
-  path.join(__dirname, 'public')
+  path.join(__dirname, 'dist/public'),
+  path.join(__dirname, 'artifacts/mmt-transport')
 ];
 
-let distDir = possibleDirs.find(dir => fs.existsSync(dir)) || __dirname;
+let distDir = null;
+for (const directory of possibleDirs) {
+  distDir = findIndexDirectory(directory);
+  if (distDir) break;
+}
+if (!distDir) distDir = __dirname;
+
+console.log(`Statik dosya dizini: ${distDir}`);
 
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
@@ -176,27 +213,42 @@ const mimeTypes = {
 };
 
 const server = http.createServer((req, res) => {
-  const safeUrl = req.url.split('?')[0];
-  let filePath = path.join(distDir, safeUrl === '/' ? 'index.html' : safeUrl);
-  let ext = path.extname(filePath).toLowerCase();
+  let requestPath;
+  try {
+    requestPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+  } catch (err) {
+    res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Geçersiz istek yolu.');
+    return;
+  }
 
+  const rootPath = path.resolve(distDir);
+  const requestedPath = path.resolve(rootPath, `.${requestPath}`);
+  if (requestedPath !== rootPath && !requestedPath.startsWith(rootPath + path.sep)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Erişim reddedildi.');
+    return;
+  }
+
+  const filePath = requestPath === '/' ? path.join(rootPath, 'index.html') : requestedPath;
   fs.stat(filePath, (err, stats) => {
     if (!err && stats.isFile()) {
-      const contentType = mimeTypes[ext] || 'application/octet-stream';
+      const contentType = mimeTypes[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
       res.writeHead(200, { 'Content-Type': contentType });
       fs.createReadStream(filePath).pipe(res);
-    } else {
-      const indexPath = path.join(distDir, 'index.html');
-      fs.readFile(indexPath, (indexErr, content) => {
-        if (indexErr) {
-          res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-          res.end('MMT Global Arayuz Dosyasi Bulunamadi.');
-        } else {
-          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-          res.end(content);
-        }
-      });
+      return;
     }
+
+    // İstemci tarafı yönlendirmeleri için bulunamayan yolları index.html'e yönlendir.
+    fs.readFile(path.join(rootPath, 'index.html'), (indexErr, content) => {
+      if (indexErr) {
+        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('MMT Global Arayuz Dosyasi Bulunamadi.');
+      } else {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(content);
+      }
+    });
   });
 });
 
