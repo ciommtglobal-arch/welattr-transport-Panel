@@ -4,44 +4,58 @@ const path = require('path');
 
 const PORT = process.env.PORT || 10000;
 
-// Statik klasörü belirle
-const distDir = fs.existsSync(path.join(__dirname, 'dist')) 
-  ? path.join(__dirname, 'dist') 
-  : (fs.existsSync(path.join(__dirname, 'public')) ? path.join(__dirname, 'public') : __dirname);
+// Olası tüm derleme klasörlerini sırayla kontrol eder
+const possibleDirs = [
+  path.join(__dirname, 'artifacts/mmt-global-website/dist/public'),
+  path.join(__dirname, 'dist/public'),
+  path.join(__dirname, 'dist'),
+  path.join(__dirname, 'public')
+];
+
+let distDir = possibleDirs.find(dir => fs.existsSync(dir)) || path.join(__dirname, 'dist');
+console.log(`Statik dosya dizini: ${distDir}`);
 
 const mimeTypes = {
-  '.html': 'text/html',
+  '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript',
   '.css': 'text/css',
   '.json': 'application/json',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
-  '.svg': 'image/svg+xml'
+  '.jpeg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf'
 };
 
 const server = http.createServer((req, res) => {
-  let filePath = path.join(distDir, req.url === '/' ? 'index.html' : req.url);
-  const ext = path.extname(filePath);
+  const safeUrl = req.url.split('?')[0];
+  let filePath = path.join(distDir, safeUrl === '/' ? 'index.html' : safeUrl);
+  let ext = path.extname(filePath).toLowerCase();
 
-  fs.readFile(filePath, (err, content) => {
-    if (err) {
+  fs.stat(filePath, (err, stats) => {
+    if (!err && stats.isFile()) {
+      const contentType = mimeTypes[ext] || 'application/octet-stream';
+      res.writeHead(200, { 'Content-Type': contentType });
+      fs.createReadStream(filePath).pipe(res);
+    } else {
       const indexPath = path.join(distDir, 'index.html');
-      fs.readFile(indexPath, (indexErr, indexContent) => {
+      fs.readFile(indexPath, (indexErr, content) => {
         if (indexErr) {
-          res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-          res.end('MMT Global Transport Panel Aktif (Port: ' + PORT + ')');
+          res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+          res.end('MMT Global Arayuz Dosyalari Bulunamadi.');
         } else {
-          res.writeHead(200, { 'Content-Type': 'text/html' });
-          res.end(indexContent);
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end(content);
         }
       });
-    } else {
-      res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'text/plain' });
-      res.end(content);
     }
   });
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Sunucu aktif: port ${PORT}`);
+  console.log(`MMT Global Web Paneli aktif: http://0.0.0.0:${PORT}`);
 });
+
