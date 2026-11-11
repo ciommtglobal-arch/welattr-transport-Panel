@@ -1,0 +1,89 @@
+modules = ["nodejs-24", "python-base-3.13", "postgresql-16"]
+
+[deployment]
+router = "application"
+deploymentTarget = "gce"
+ignorePorts = false
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "MMT Global Telegram Bot"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "MMT Global VIP Bot"
+
+[[workflows.workflow]]
+name = "MMT Global Telegram Bot"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 telegram-bot/bot.py"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "MMT Global VIP Bot"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 telegram-bot/vip_bot.py"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
+
+[nix]
+channel = "stable-25_05"
+packages = ["cacert", "freetype", "glibcLocales", "gumbo", "harfbuzz", "jbig2dec", "lcms2", "libimagequant", "libjpeg", "libjpeg_turbo", "libtiff", "libwebp", "libxcrypt", "mupdf", "openjpeg", "swig", "tcl", "tk", "xcbuild", "zlib"]
+
+[objectStorage]
+defaultBucketID = "replit-objstore-05d149df-255d-4ae2-bda4-63075e8e0d71"
+
+[userenv]
+
+[userenv.shared]
+TELEGRAM_GROUP_ID = "-1004298923177"
+LOADS_TOPIC_ID = "37"
+EMPTY_VEHICLES_TOPIC_ID = "37"
+TELEGRAM_CONTACT_ADMIN_IDS = "8691874760"
+TELEGRAM_VIP_CHANNEL_ID = "-1004409778193"
+VIP_ACCESS_DAYS = "30"
+VIP_PRICE_STARS = "250"
+MMT_EMAIL_INBOX = "mmtglobal-6213@agentmail.to"
+
+[userenv.production]
+MMT_FOUNDER_REVIEWER_CLERK_USER_ID = "user_3JWCUrF5fmR47cyKeaW7dBTIwuG"
+ORPHAN_UPLOAD_CLEANUP_ENABLED = "false"
+
+[userenv.development]
+MMT_FOUNDER_REVIEWER_CLERK_USER_ID = "user_3JTe9cmnEDByskwz7RRnSRnXk2q"
+TAMI_ENVIRONMENT = "sandbox"
+TAMI_SANDBOX_TEST_ENABLED = "false"
+TELEGRAM_PILOT_MODE = "true"
+
+[[ports]]
+localPort = 10000
+externalPort = 80

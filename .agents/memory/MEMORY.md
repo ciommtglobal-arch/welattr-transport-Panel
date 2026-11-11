@@ -1,0 +1,56 @@
+- [Vite publish environment](vite-publish-environment.md) — Static Vite builds may run without service environment variables; configs need safe build-time defaults.
+- [Workspace package installation](workspace-package-installation.md) — The package helper cannot target pnpm workspace filters; use a scoped pnpm fallback when root installation is rejected.
+- [Mezopotamya Build marketplace](independent-construction-marketplace.md) — Use Mezopotamya Build by MMT Global; never imply an authorized Piyadan distributorship.
+- [Telegram bot log secrets](telegram-bot-log-secrets.md) — Bot API request URLs contain the token; keep HTTP request logs above INFO.
+- [VIP payment split](vip-payment-split.md) — Keep VIP access on a separate bot; launch with Stars while Wallet Pay awaits merchant approval.
+- [Tami hosted payment](tami-hosted-payment.md) — Hosted token auth and payment-status query use different Tami signing materials.
+- [Birlikte ödeme kanalları](payment-channel-scope.md) — Kullanıcı Tami, Shopify ve Stripe’ın uluslararası işlerde birlikte çalışmasını istiyor; tamamlanmış entegrasyon sanma.
+- [MMT Global B2B commission scope](mmt-global-free-b2b-network.md) — Registration/listings free; matching fees split 50/50; corridor rates approved for drafts only, not live collection.
+- [Clerk public route isolation](clerk-public-route-isolation.md) — Keep public pages usable without Clerk; Replit dev previews may fail loading Clerk JS while auth routes still work.
+- [MMT Connect auth callbacks](mmt-connect-auth-callbacks.md) — Keep dedicated Clerk routes: sign-in returns to the panel, sign-up to profile onboarding, invites to acceptance.
+- [MMT Connect verification](mmt-connect-verification.md) — Use one-time business verification, then let verified firms publish their own free B2B listings.
+- [MMT Global language rollout](mmt-global-i18n.md) — Release checks require TR/EN/AR/KU/RU/UA across UI and login; Arabic RTL, user content translated separately.
+- [Authentic MMT Global launch](authentic-mmt-launch.md) — Use only real business contact/social identities; begin organic audience growth after accounts are complete.
+- [Clerk localization compatibility](clerk-localization-compatibility.md) — Match the localization package to the installed Clerk React shared types; runtime can work while TypeScript versions still conflict.
+- [Browser translation guard](browser-translation-guard.md) — MMT Global owns TR/EN/AR/RU translation; prevent mobile browser auto-translation from mixing languages.
+- [Mobile Vite runtime overlay](mobile-vite-runtime-overlay.md) — Ignore message-less development overlay events from mobile browsers while preserving meaningful runtime errors.
+- [Shopify catalog connection](shopify-catalog-connection.md) — Read connected Shopify catalog server-side; never seed products or collections without merchant-supplied real data.
+- [Public logistics hub](public-logistics-hub.md) — Keep approved logistics listings and published logistics media public on MMT Global; keep Shopify separate for physical products.
+- [B2B invitation auth flow](b2b-invitation-auth-flow.md) — Let authenticated invitees accept before the membership-gated company panel query runs; preserve the token through Clerk redirects.
+- [MMT Connect production onboarding](mmt-connect-production-onboarding.md) — Establish production ownership from the founder account; never copy development company records or create employee-owned duplicates.
+- [Mobile business-profile URLs](mobile-business-profile-urls.md) — Normalize optional website values before validation because mobile input can carry invisible characters.
+- [Founder self-review boundary](founder-self-review-boundary.md) — If the founder reviews their own business, bind the exception to one allowlisted Clerk identity and that profile only.
+- [Media pilot publication](media-pilot-publication.md) — Manual links need a separate founder confirmation before “published”; TEST and legacy records never use external dispatch.
+- [MMT Connect delegation boundary](mmt-connect-delegation-boundary.md) — Area leaders can coordinate company work, but final affirmative approval belongs to the company owner.
+- [Staff trial workspace](staff-trial-workspace.md) — Candidate tasks/reports belong in the staff test area, but trial access must not grant permanent operations or manager roles.
+- [Completion review checkpoints](completion-review-checkpoints.md) — A rejected completion review can still commit current edits; inspect history before assuming work disappeared.
+- [Task publication boundary](task-publication-boundary.md) — Isolated task commits are not applied main-project changes; confirm the handoff before asking the user to publish.
+- [Orphaned preview listeners](orphaned-preview-listeners.md) — A failed managed workflow can coexist with an older process still holding its port after runner recovery.
+- [Staff login device gap](staff-login-device-gap.md) — Controlled submissions reached Clerk, but the reported device-specific stall was not reproduced; do not claim real-account login is verified.
+- [Clerk test subjects](clerk-test-subjects.md) — Test helper subject overrides may be ignored; bind temporary dev fixtures to the actual unique test account, not the requested ID.
+- [Artifact validation temporary files](artifact-validation-temp-files.md) — Successful manifest validation can consume its temporary input; recreate it before another edit.
+- [Internal record boundaries](instruction-attribution-labels.md) — WelatTR/Çelik Kubbe are labels; fund corrections are internal records, not bank or Kasa QR actions.
+- [Test environment attribution](test-environment-attribution.md) — A browser worker's NODE_ENV does not identify the managed API or its database; verify development before seeding.
+- [Live panel identification](live-panel-identification.md) — Confirm the intended screen and published site before diagnosing a frozen or old-looking panel.
+- [Project model preference](project-model-preference.md) — The user prefers Gemini for MMT Global work; do not claim model selection without confirmation.
+- [Partial development schema pushes](partial-dev-schema-push.md) — A failed Drizzle push can leave partial changes; inspect the target schema before retrying or testing.
+- [Publish key dependency ordering](publish-key-dependency-order.md) — Non-destructive diffs can still put FKs before unique keys; rehearse actual SQL order and stage Publish safely.
+- [Regional logistics approval](regional-logistics-approval.md) — Mersin is the main logistics center; Ukraine/Dubai remain preparation areas, with founder-controlled publication.
+- [Lojistik taslak yetkisi](logistics-draft-permission.md) — Taslak yetkisi mevcut erişimleri değiştirmemeli; yeni yayımlama kararı kurucuda, ilk gösterim önizlemede kalmalı.
+- [Kullanıcının yayın onayı](publication-consent-boundary.md) — Çelik Kubbe, Telegram ve WelatTR için kullanıcı istemeden yayın yapılmayacak.
+- [Hukuki süreç ve resmiyet](legal-formality-notes.md) — Kullanıcı bu konuların proje notlarında korunmasını istiyor; not tutmak resmî işlem veya hukuki onay değildir.
+- [MMT lojistik önceliği](mmt-logistics-priority.md) — Ana marka MMT Global; lojistik öncelikli, Mersin merkezli; dış bölgeler hazırlıkta, yayın kurucu onayına bağlı.
+- [Lojistik teklif fiyatı](logistics-offer-pricing.md) — Teklif navlunu müşteri satış fiyatıdır; kullanıcı komisyon ve ayrı brüt ticari satış farkı modelini seçti.
+- [Entegrasyon kontrolü](integration-control-boundary.md) — Kontrol kullanıcıda kalmalı; ticari sır niteliğindeki kodların kopyalanıp paylaşılması istenmemeli.
+- [İncelenen kayıtla onay bağı](approval-version-boundary.md) — Karar incelenen sürüme bağlı kalmalı; Nexus onayı tek başına yayın değildir, ayrı kurucu kararı gerekir.
+- [Preview routing health](preview-routing-health.md) — A development-domain 200 can be a “Running” placeholder, not the app; verify response content and the application router.
+- [Dorse Dünyası kapsamı](dorse-dunyasi-scope.md) — Al-sat, yük bulma, nakliye, alıcı-üretici eşleştirmesi, leasing ve ekspertiz; adlandırılmış kapsamı uygulanmış özellik sanma.
+- [Lojistik pilot TEST sınırı](logistics-pilot-test-scope.md) — UKR-MERSİN-NARENCİYE-001 yalnız TEST; gerçek müşteri, sevkiyat, sözleşme veya ticari onay oluşturma.
+- [OpenAPI body ad çakışmaları](openapi-inline-body-collisions.md) — Yeni POST gövdelerinde named components kullan; inline modeller Zod/TypeScript dışa aktarımıyla çakışabilir.
+- [Telegram pilot sınırı](telegram-pilot-boundary.md) — TEST isteği grup yayını değildir; Telegram kimliği MMT yetkisi sayılmaz, webhook sahipliğini bot bazında doğrula.
+- [Lojistik otomasyon yetkisi](logistics-automation-authority.md) — Hazırlık ve takip otomatik; evrakın varlığı doğruluk değildir, son karar açık politika olmadan kaldırılmaz.
+- [Environment presence audits](environment-presence-audits.md) — A false secret entry is not absence when the key exists as a normal environment variable.
+- [Background worker proof](background-worker-proof.md) — Observe a separate worker with committed synthetic dev fixtures; rollback-only service tests cannot prove scheduled execution.
+- [Standalone JSX tests](standalone-jsx-tests.md) — Independent tsx rendering does not inherit Vite’s JSX transform; distinguish test-runtime errors from app failures.
+- [Otomasyon bütçesi](logistics-automation-budget.md) — Kullanıcı lojistik otomasyonu için aylık 40 USD seviyesini kabul etti; uygulanmış harcama limiti değildir.
+- [Market ingestion scope](market-ingestion-boundary.md) — Consent-controlled structured ingestion first; installing a route does not activate a market source.

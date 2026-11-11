@@ -1,0 +1,394 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "hmLyv40G9pDvXxJU0b24w"
+uri = "file://attached_assets/processed/mmt-global-connect-cover.png"
+type = "image"
+title = "MMT Global Connect ilan kapağı"
+description = "İlan formundaki görsel alanına yeniden yükleyin."
+logical_id = "844253c1-f11c-4adb-bd52-929c72470a06"
+content_hash = "sha256:5509a024ba7fc01141a3e7c49483db1361e2d308b791c4be42ea3d1dde54fdff"
+size = 219692
+mtime_ms = 1789778176349
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/844253c1-f11c-4adb-bd52-929c72470a06/448a2635-bb8a-42aa-b13b-381e40914910"
+storage_version_token = "1789778513811696"
+content_type = "image/png"
+
+[[outputs]]
+id = "2Y1AToTj-ad8ugL_c37v4"
+uri = "file://attached_assets/generated_images/mmt-media-whatsapp-icon.svg"
+type = "image"
+title = "MMT Media WhatsApp simgesi"
+description = "MMT Global medya ve YouTube alt grubu için kare WhatsApp simgesi."
+logical_id = "1f1b9b2e-dc92-41f0-881a-4ba5176a298b"
+content_hash = "sha256:7bc43e22e8c3aef7617e0872b55c6f036d2b5406d53e813eb6c957fca7f5368f"
+size = 2087
+mtime_ms = 1790171105835
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/1f1b9b2e-dc92-41f0-881a-4ba5176a298b/a23f2710-b8e6-4723-acb5-c89dfe2e992f"
+storage_version_token = "1790171125432195"
+content_type = "image/svg+xml"
+
+[[outputs]]
+id = "zwkH-BAXEYk2cz2VSr_8C"
+uri = "file://attached_assets/generated_images/mmt-connect-whatsapp-icon.svg"
+type = "image"
+title = "MMT Connect WhatsApp simgesi"
+description = "MMT Global uluslararası bağlantı ve iş geliştirme alt grubu için kare WhatsApp simgesi."
+logical_id = "1f2aaca9-d368-4e46-9aef-8daf38d0ee74"
+content_hash = "sha256:f126e7ca5d40cbbf087df51f5400c6fa45c2b0f28844d1ef2fbcad939d8d836b"
+size = 2312
+mtime_ms = 1790171114187
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/1f2aaca9-d368-4e46-9aef-8daf38d0ee74/3c33cc8a-8dfb-40e1-b3d6-d14cf24dd635"
+storage_version_token = "1790171126824967"
+content_type = "image/svg+xml"
+
+[[outputs]]
+id = "CnnnhVAj8dRR0D7geAINb"
+uri = "file://attached_assets/generated_images/mmt-media-whatsapp-icon.png"
+type = "image"
+title = "MMT Media WhatsApp PNG"
+description = "WhatsApp grup simgesi olarak yüklemeye hazır MMT Media görseli."
+logical_id = "369e346f-23c1-4d85-b9e1-c9cfabbfc3d0"
+content_hash = "sha256:9c37f07f4aace4848de22d3da43c7a084623fc0f0a8b0865c06d238ce228b0ff"
+size = 170869
+mtime_ms = 1790171267904
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/369e346f-23c1-4d85-b9e1-c9cfabbfc3d0/bef1e566-aba7-4ab2-be6f-44b014316294"
+storage_version_token = "1790171277373834"
+content_type = "image/png"
+
+[[outputs]]
+id = "ztgcH8emDY1EE4vLWMxKd"
+uri = "file://attached_assets/generated_images/mmt-connect-whatsapp-icon.png"
+type = "image"
+title = "MMT Connect WhatsApp PNG"
+description = "WhatsApp grup simgesi olarak yüklemeye hazır MMT Connect görseli."
+logical_id = "6120a74d-4a77-4db0-9af1-d652344a8e1a"
+content_hash = "sha256:dacecf0d9204ebb5ac19b542c2d2de259acdd70f11f8c40e29e5ca7983619c70"
+size = 263937
+mtime_ms = 1790171268168
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/6120a74d-4a77-4db0-9af1-d652344a8e1a/76f7b641-5b21-4f6c-a861-ec62e4bfe387"
+storage_version_token = "1790171278683338"
+content_type = "image/png"
+
+[[outputs]]
+id = "lGnoxFYeO7OWQ7fkNrufp"
+uri = "file://attached_assets/mmt-connect-public-preview.jpg"
+type = "image"
+title = "MMT Global Connect public sayfa görseli"
+description = "Telegram grubunda MMT Connect duyurusuyla birlikte yayınlanan public sayfa önizlemesi."
+logical_id = "889739cb-ddad-4e98-b951-b378b8b4eb90"
+content_hash = "sha256:fa3c19063262f01a682ed3bd356cea8e6ca9bfdd9e36d4f88ea2eab60b8ddc77"
+size = 85324
+mtime_ms = 1790192252243
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/889739cb-ddad-4e98-b951-b378b8b4eb90/e4ecb1fe-3443-45fa-b41b-df2dd1c0c2df"
+storage_version_token = "1790192318991411"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "cgED6a12sByEQYdkSGJ_Q"
+uri = "file://screenshots/uzman-paneli-mobil.jpg"
+type = "image"
+title = "Uzman Paneli – Mobil Önizleme"
+description = "Telefon genişliğinde, tüm uzman paneli ekranını gösteren büyütülebilir görüntü."
+logical_id = "e8bb41c0-9bde-4890-9a03-2cd29af8daa1"
+content_hash = "sha256:5e8d7e5eaea73f2584228eee59731a8edd11b24939e766995efcbf9af4fb0482"
+size = 72865
+mtime_ms = 1790230906966
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/e8bb41c0-9bde-4890-9a03-2cd29af8daa1/5511a8e5-f885-40b9-bc0d-144c605f90ce"
+storage_version_token = "1790230915236066"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "OmeTfNPKU9WPCaeCvWdN-"
+uri = "file://screenshots/uzman-paneli-mobil-1.jpg"
+type = "image"
+title = "Uzman paneli — mobil 1/3"
+description = "Başlık ve bugünkü görevler, telefon ekranına sığan parça."
+logical_id = "2a3c5c33-4b06-41b8-9e65-7d728a5fd140"
+content_hash = "sha256:160dbcff5def06d02ff8f6c55bebe9b84c4cfaa55219cf79ae5e71176552dd5c"
+size = 33985
+mtime_ms = 1790231276358
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/2a3c5c33-4b06-41b8-9e65-7d728a5fd140/63a51f43-5010-4524-b77f-03d94316b3da"
+storage_version_token = "1790231288222782"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "peBGaOuvaShV0yvitrdPl"
+uri = "file://screenshots/uzman-paneli-mobil-2.jpg"
+type = "image"
+title = "Uzman paneli — mobil 2/3"
+description = "Atanmış dosyalar ve destek alanı."
+logical_id = "a23fc3e2-96b1-4d82-9bbb-e13b1d20c03b"
+content_hash = "sha256:757ac9b683ff904f1af351fad8de436445a39ffb0bd68effcb54a046ef681edc"
+size = 45998
+mtime_ms = 1790231276406
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/a23fc3e2-96b1-4d82-9bbb-e13b1d20c03b/c425c331-b7ba-4a3b-9d07-ef3eacb948fe"
+storage_version_token = "1790231289947259"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "N6hzrYRytmHPVBp-8lGJY"
+uri = "file://screenshots/uzman-paneli-mobil-3.jpg"
+type = "image"
+title = "Uzman paneli — mobil 3/3"
+description = "Destek ve son güncellemeler."
+logical_id = "f122ac7c-3b21-43dd-ae81-e9dac083c6da"
+content_hash = "sha256:865852f05c83c8bedfb5e161b017a7694bc1b3458962e050fce17a9c12b00e30"
+size = 25478
+mtime_ms = 1790231276454
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/f122ac7c-3b21-43dd-ae81-e9dac083c6da/73f8e00e-becf-4b73-b80a-92969f3f3479"
+storage_version_token = "1790231291249045"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "iBJKo70mvPuE7ysA6awoB"
+uri = "file://attached_assets/generated_audio/davet-kontrolu-aciklama.mp3"
+type = "audio"
+title = "Sesli açıklama — Davet kontrolü"
+description = "Son açıklamanın Türkçe, yapay zekâ ile oluşturulmuş seslendirmesi."
+logical_id = "edd906ce-8755-4a47-b19f-4b9e022064a6"
+content_hash = "sha256:18f257d3e9dba28e8f02df33a84cbcbbde4a58fd8c35da05812cd7b943a243ec"
+size = 744847
+mtime_ms = 1790970426542
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/edd906ce-8755-4a47-b19f-4b9e022064a6/579c41b8-f5d6-414c-9174-48a29a5b1915"
+storage_version_token = "1790970439181988"
+content_type = "audio/mpeg"
+
+[[outputs]]
+id = "Nn4q78Z4rQoRz6r5HVbge"
+uri = "file://deliverables/payment-preparation/banka-teyit-talebi.docx"
+type = "word_document"
+title = "Banka teyit talebi — düzenlenebilir Word"
+description = "Şirket hesabı, TRY/EUR/USD ve IBAN/SWIFT teyidi için imzasız talep taslağı. Eksik alanlar doldurulmalıdır."
+logical_id = "a83652fe-e8c1-49b6-8733-046e3cd0ad6e"
+content_hash = "sha256:4fa5b13f8213990b3fb512ece7d5aeca77715067b5bb4f4fee9b6b4fdc281bd7"
+size = 38757
+mtime_ms = 1791053727727
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/a83652fe-e8c1-49b6-8733-046e3cd0ad6e/fddfb88b-8fbb-42b9-8ee7-f26d85280907"
+storage_version_token = "1791053766444459"
+content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+[[outputs]]
+id = "kDm3p1TPvwWBLlhrrvi8p"
+uri = "file://deliverables/payment-preparation/banka-teyit-talebi.pdf"
+type = "pdf"
+title = "Banka teyit talebi — PDF"
+description = "Bir sayfalık imzasız inceleme kopyası; banka hesabının doğrulandığını göstermez."
+logical_id = "26d23038-a729-4b61-9956-ed04b4eff826"
+content_hash = "sha256:2d5ac531a2d2268266774d9bdd1026a5a179de4cc2aa92f3c959a15b0bc2055d"
+size = 46680
+mtime_ms = 1791053727735
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/26d23038-a729-4b61-9956-ed04b4eff826/57b2fbc7-fdb4-4b71-9843-83de730b8241"
+storage_version_token = "1791053767792813"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "xoHluumRhIseed_BQ0Nst"
+uri = "file://deliverables/payment-preparation/pos-kabul-teklif-talebi.docx"
+type = "word_document"
+title = "POS kabul ve teklif talebi — düzenlenebilir Word"
+description = "3D Secure, kart/para birimi, komisyon, valör, iade, KYC ve mobil imza kabulü için talep taslağı."
+logical_id = "1955a30f-6008-4a6e-8c9f-12559bf9e069"
+content_hash = "sha256:ba1585e51a517cfe9c7206b48be3c701bd0be68f88a733435c506740f06bec97"
+size = 39735
+mtime_ms = 1791053727771
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/1955a30f-6008-4a6e-8c9f-12559bf9e069/a4751191-0832-4354-8746-70e9a215dfa5"
+storage_version_token = "1791053769070559"
+content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+[[outputs]]
+id = "IGEe9MqE8wmlSCAu6W4pS"
+uri = "file://deliverables/payment-preparation/pos-kabul-teklif-talebi.pdf"
+type = "pdf"
+title = "POS kabul ve teklif talebi — PDF"
+description = "İki sayfalık imzasız inceleme kopyası; sağlayıcı kabulü veya sözleşme değildir."
+logical_id = "785fc197-9c4c-41ef-94a1-b5fd8fc391ff"
+content_hash = "sha256:c5bce6a242236a45d2e95ba42fe9de05f68972b322e507ca16afaa818a79e3f4"
+size = 49517
+mtime_ms = 1791053727783
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/785fc197-9c4c-41ef-94a1-b5fd8fc391ff/6689f90e-c53c-4d80-8f6f-0a3327d1a021"
+storage_version_token = "1791053770357911"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "qtgA5n0uZc4l3WbKhrnnP"
+uri = "file://deliverables/payment-preparation/mmt-mobil-imza-hazirlik.pdf"
+type = "pdf"
+title = "Mobil imza hazırlık ve kontrol rehberi — PDF"
+description = "Beş sayfa: mevcut durum, güvenli imza sırası, KYC belgeleri, yazılı teklif kıyaslama şablonu ve resmî kaynaklar."
+logical_id = "c8c59763-72ed-4563-8f04-974087e266f2"
+content_hash = "sha256:8055dd6f0f28c95a7f4d9ded6842b2e99de987a69b9089bba647a798d2c2d386"
+size = 58934
+mtime_ms = 1791053727699
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/c8c59763-72ed-4563-8f04-974087e266f2/faaf23ca-d306-4bc7-bc42-e81d5be5596e"
+storage_version_token = "1791053771677513"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "m4mPQGL_r0MYKu_t3Lvtq"
+uri = "file://deliverables/payment-preparation/mmt-mobil-imza-hazirlik.docx"
+type = "word_document"
+title = "Mobil imza hazırlık rehberi — düzenlenebilir Word"
+description = "Kontrol listelerinin düzenlenebilir sürümü. İmzalanmış veya kurumca onaylanmış belge değildir."
+logical_id = "c54550f3-4ea3-443b-80c2-b91d92660eeb"
+content_hash = "sha256:84113c5f8c18bdc534094fa9ee617525d72f4af1e5d4cf3d212bc38b8a52937b"
+size = 42039
+mtime_ms = 1791053727659
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/c54550f3-4ea3-443b-80c2-b91d92660eeb/b5fd2893-bc6c-4c26-97f2-41638050c008"
+storage_version_token = "1791053772973789"
+content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+[[outputs]]
+id = "vpmdJ1rdcjOQIJGWGYsdq"
+uri = "file://outputs/mmt-global-bolgesel-lojistik-taslak.txt"
+type = "text"
+title = "İsim kullanılmadan düzenlenmiş metin"
+description = "Kişi adı kaldırıldı; Kurucu ifadesi ve diğer tüm maddeler korundu. Yalnızca metin düzenlendi."
+logical_id = "346f6813-2694-44a3-8d07-448c3a775c56"
+content_hash = "sha256:af480b84c1d71e5137f97cc001cc72593e8e6e113f3ebd4127e1a56c990e6ac3"
+size = 2690
+mtime_ms = 1791242952350
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/346f6813-2694-44a3-8d07-448c3a775c56/e6f16cf3-c334-42d5-83d0-b2b233b6262f"
+storage_version_token = "1791242971048965"
+content_type = "text/plain"
+
+[[outputs]]
+id = "ov-Mo4e3Y5RyHo5H6JHpo"
+uri = "file://outputs/mmt-global-yayin-oncesi-kontrol.txt"
+type = "text"
+title = "MMT Global — Yayın Öncesi Kontrol Raporu"
+description = "Geçen testler, modül durumları, değişen dosyalar ve yayın öncesi kalan eksikler. Yalnızca geliştirme/önizleme; yayın yapılmadı."
+logical_id = "870b0245-82a6-416f-be36-ed8c281548db"
+content_hash = "sha256:c3e859e9cad7055f33fca7f88cd62071a1525bc6247adbdcd12443bc9aeffde0"
+size = 10832
+mtime_ms = 1791248048402
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/870b0245-82a6-416f-be36-ed8c281548db/295dc84d-acfa-4054-ac97-2d8ccadcf4df"
+storage_version_token = "1791248151898441"
+content_type = "text/plain"
+
+[[outputs]]
+id = "Q0KQJia2fmxL_QxusJUi7"
+uri = "file://generated-artifacts/dorse-audit/rapor.txt"
+type = "text"
+title = "Dorse Dünyası — Tam doğrulama raporu"
+description = "Altı modülün mevcut durumu, entegrasyon sınırları, 46 tablonun geliştirme/canlı sütun ve indeks envanteri, test sonuçları ve yayın engelleri. Salt okunur denetim; canlı değişiklik yapılmadı."
+logical_id = "d4c66870-c6c4-482e-b566-b5928761fd0f"
+content_hash = "sha256:9994131417dc1d1d4ba5589da0dc7cbb83ecddcc1ce33a99368f44b96554ae11"
+size = 91689
+mtime_ms = 1791712446997
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/d4c66870-c6c4-482e-b566-b5928761fd0f/d5e38930-0ba3-48e2-97b0-dee6473d798d"
+storage_version_token = "1791712481934525"
+content_type = "text/plain"
+
+[[outputs]]
+id = "D9LJ4cKyqkAlT0SelwgpX"
+uri = "file://generated-artifacts/schema-release/rapor.txt"
+type = "text"
+title = "Drizzle şema onarımı ve güvenli yayın planı"
+description = "Onarım ve test sonuçları, 10 gerçek tablo, PostgreSQL yayın provası, kalan sıra hatası ve önerilen iki aşamalı yayın. Canlıya uygulanmadı."
+logical_id = "ed918474-ab4b-4fe8-8536-c0331b1666a9"
+content_hash = "sha256:829ab345fa797c5c964d462b57fae69a0748565e3f2ad2b408ef3bc3e15466b5"
+size = 16560
+mtime_ms = 1791714243654
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/ed918474-ab4b-4fe8-8536-c0331b1666a9/0c83b504-fce9-493c-b246-dfe8193be418"
+storage_version_token = "1791714245253546"
+content_type = "text/plain"
+
+[[outputs]]
+id = "evAQ0D_8YVNriM09qIKkW"
+uri = "file://generated-artifacts/schema-release/ilk-asama-raporu.txt"
+type = "text"
+title = "Güvenli ilk aşama — doğrulama raporu"
+description = "10 tablo, 57 eklemeli SQL işlemi, yazma kilitleri, testler ve başarılı PostgreSQL provası. Canlıya henüz uygulanmadı."
+logical_id = "5bc7c9e7-18f8-4c4b-b149-9bdd937ab6c5"
+content_hash = "sha256:acccf2fd5096a266ea962752380fa93894dbf2eecc2ea9fa81c99418f68be408"
+size = 3456
+mtime_ms = 1791716359535
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/5bc7c9e7-18f8-4c4b-b149-9bdd937ab6c5/c35259d7-9147-412e-b8da-0885a71e38c1"
+storage_version_token = "1791716361182558"
+content_type = "text/plain"
+
+[[outputs]]
+id = "CB6KBjjgd6cjYNUoQk3bK"
+uri = "file://generated-artifacts/schema-release/index-repair-report.txt"
+type = "text"
+title = "Publish migration repair — verified"
+description = "Development-only repair, preserved records and foreign keys, 39 passing tests, and an empty regenerated migration diff."
+logical_id = "85eca514-a032-478f-b703-3538f725995f"
+content_hash = "sha256:8eda90afa0263bbf96a1b04942d86891f2e25c0c8e09c23bc38baeba9a92f568"
+size = 1748
+mtime_ms = 1791814157069
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/85eca514-a032-478f-b703-3538f725995f/0af57ee9-658e-4dbf-9c3b-85bf1dc5941b"
+storage_version_token = "1791814158720862"
+content_type = "text/plain"
+
+[[outputs]]
+id = "Y6fWN1b88rDcR_bcTVqF1"
+uri = "file://generated-artifacts/nexus-preview-raporu.txt"
+type = "text"
+title = "Nexus önizleme ve dosya raporu"
+description = "108 testin sonucu, dosya dökümü, veritabanı kapsamı ve canlı yayın öncesi kalan kontroller."
+logical_id = "09da2dfa-129c-40f1-b674-2577bda14a79"
+content_hash = "sha256:ad76b75115a1761accac91bcaf6cab9680b250a130866a3bac739a2443297371"
+size = 5283
+mtime_ms = 1791817967612
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/09da2dfa-129c-40f1-b674-2577bda14a79/25b50953-aae1-45ba-8189-88d10b4d32a0"
+storage_version_token = "1791818067439673"
+content_type = "text/plain"
+
+[[outputs]]
+id = "rBg7t0cv8jbYpx9_UpQCh"
+uri = "file://generated-artifacts/lojistik-pilot-denetim-raporu.txt"
+type = "text"
+title = "Lojistik pilot denetim raporu"
+description = "Dokuz kontrolün PASS / FAIL / NOT TESTED sonuçları, 110 testin komutları, eksikler ve değiştirilen dosyalar. Yalnız TEST; canlıya alınmadı."
+logical_id = "1e5ca06f-ada9-4b98-9151-617c64d1cdb7"
+content_hash = "sha256:edac9d96a4fcf5b3d5f45c3e0edab4cba89aabdae0dfb83ad6668c4a4adb4c36"
+size = 6788
+mtime_ms = 1791899524854
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/1e5ca06f-ada9-4b98-9151-617c64d1cdb7/78d849de-9aba-4585-ba18-91fc99f78587"
+storage_version_token = "1791899587285246"
+content_type = "text/plain"
+
+[[outputs]]
+id = "5f2Tg2xiZ4aV5BPbVkBn8"
+uri = "file://generated-artifacts/mmt-test-entegrasyon-sonucu.txt"
+type = "text"
+title = "MMT TEST entegrasyonu — uygulama ve test raporu"
+description = "Güvenlik sınırları, iki endpoint, 255 test sonucu, çalıştırılan komutlar ve değişen dosyalar. Yayın başlatılmadı; entegrasyon varsayılan olarak kapalı."
+logical_id = "0a406c5d-ae71-4359-a2fb-970ba28cc929"
+content_hash = "sha256:49224a64266e9d3ddc772e4541da6801cbb4384b5bf5827cb6015be9dafca766"
+size = 5238
+mtime_ms = 1791949098493
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/0a406c5d-ae71-4359-a2fb-970ba28cc929/bc364a7a-5ec4-44f8-9cbb-006c2edf6028"
+storage_version_token = "1791949126689834"
+content_type = "text/plain"
+
+[[outputs]]
+id = "T02GAqpP_JMcmjKJm7uGT"
+uri = "file://docs/mmt-logistics-test-workspace.md"
+type = "text"
+title = "MMT Lojistik TEST Kontrol Raporu"
+description = "Tamamlanan TEST modülleri, PASS/NOT TESTED sonuçları, test komutları, dosya listesi ve geliştirme veritabanı değişiklikleri. Canlıya yayın yapılmadı."
+logical_id = "c1877315-d46a-4ca4-993c-91dc35b4a1cc"
+content_hash = "sha256:00f02c50b45c54ae940d927896073e731e4853f4ce605423ac9b0a31967faf28"
+size = 7226
+mtime_ms = 1792276048192
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/c1877315-d46a-4ca4-993c-91dc35b4a1cc/a635058b-43dc-4216-bc72-42454da49c79"
+storage_version_token = "1792276091303086"
+content_type = "text/markdown"
+
+[[outputs]]
+id = "y58r_Ez1uqwGHMTUPaH9d"
+uri = "file://docs/mmt-logistics-automation.md"
+type = "text"
+title = "MMT lojistik otomasyonu — kontrol raporu"
+description = "Hazırlanan akış, güvenlik sınırları, 160 sunucu testi, tarayıcı kontrolleri, dosya değişiklikleri ve yayın öncesi notlar. Canlı gönderim yapılmadı."
+logical_id = "3bc2d33a-0e82-45a0-8ea7-dd876ceb26d1"
+content_hash = "sha256:4701f677ff13e28a9dd2a4eba023ae7948ff825d45b7386462b6a994c3bc85af"
+size = 7770
+mtime_ms = 1792279450783
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:95daecab-4d2f-48d4-8df3-209aa45e9f35/3bc2d33a-0e82-45a0-8ea7-dd876ceb26d1/0ef737ce-bbe9-43eb-997f-7f355e3d224f"
+storage_version_token = "1792279488941736"
+content_type = "text/markdown"

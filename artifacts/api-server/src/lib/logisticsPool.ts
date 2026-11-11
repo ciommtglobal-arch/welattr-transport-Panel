@@ -1,0 +1,346 @@
+import {
+  db, logisticsPoolSourcesTable as sources, logisticsPoolEntriesTable as entries,
+  logisticsPoolMatchesTable as matches, logisticsRequestsTable as requests,
+  logisticsPoolAiDraftsTable as aiDrafts,
+  logisticsPoolDraftNotificationsTable as draftNotifications,
+  logisticsShipmentsTable as shipments, logisticsCarriersTable as carriers,
+  b2bListingsTable as listings, b2bBusinessProfilesTable as profiles,
+  type PoolPayload,
+} from "@workspace/db";
+import { and, eq, inArray, sql, desc } from "drizzle-orm";
+import { z } from "zod/v4";
+import { ActLogisticsPoolBody } from "@workspace/api-zod";
+import { digest, productWords, explicitKg, suggestPoolMatches, type PoolRow } from "./logisticsPoolEngine";
+import { readPublicFeed, safeFeedUrl, feedSchema, type FeedItem } from "./logisticsPoolFeed";
+import type { LogisticsActor } from "./logisticsWorkflowAuth";
+import { isLogisticsFounder } from "./logisticsListingAuth";
+import { AutomationError } from "./logisticsAutomation";
+import { isLogisticsPoolAiDraftPreviewEnabled } from "./logisticsPoolAiDraft";
+import { logisticsDraftScheduleDescription, permittedCarrierCandidate, permittedInternalLogisticsRecord } from "./logisticsPoolDraftPolicy";
+import { describeWorkerEvidence } from "./logisticsWorkerEvidence";
+import { isolateTestMarketPayload, isQuarantinedMarketPayload } from "./marketSourcePolicy";
+import { parseMarketTexts } from "./marketTextParser";
+import { PasteLogisticsAdsBody } from "@workspace/api-zod";
+
+type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+type Action = z.infer<typeof ActLogisticsPoolBody>;
+function fail(status: number, text: string): never { throw new AutomationError(status,text); }
+const event = (action: string, note: string, actor?: LogisticsActor) => ({at:new Date().toISOString(),action,note,actorUserId:actor?.userId ?? null});
+const empty = (): PoolPayload => ({role:"load",name:"",location:"",origin:"",destination:"",products:[],transportMode:"",capacityKg:null,requiredKg:null,volumeM3:null,availableDate:null,requiredDate:null,contact:"",reference:"",sourceUrl:null,isTest:false,verified:false,eligible:true});
+async function lock(tx: Tx) { await tx.execute(sql`SELECT pg_advisory_xact_lock(4135531)`); }
+async function upsert(tx: Tx, originKey: string, sourceKind: string, payload: PoolPayload, sourceId: string | null = null) {
+  const data = {originKey,sourceKind,sourceId,payload,fingerprint:digest(payload),active:true,lastSeenAt:new Date()};
+  await tx.insert(entries).values(data).onConflictDoUpdate({target:entries.originKey,set:data});
+}
+async function rebuild(tx: Tx) {
+  const rows = await tx.select().from(entries).orderBy(entries.originKey);
+  if (rows.length > 10000) fail(413,"Havuz 10.000 kayıt sınırında; kaynak kapsamını daraltın.");
+  // Apply the founder's source quarantine to existing rows as well as new intake.
+  // This is normal pool reconciliation under the existing transaction lock.
+  for (const row of rows) {
+    const corrected = isolateTestMarketPayload(row.payload);
+    if (corrected !== row.payload && (!row.payload.isTest || row.payload.eligible)) {
+      row.payload = corrected;
+      row.fingerprint = digest(corrected);
+      await tx.update(entries).set({payload:corrected,fingerprint:row.fingerprint}).where(eq(entries.id,row.id));
+    }
+  }
+  const eligible = rows.filter(r => r.lastSeenAt.getTime() >= Date.now()-7*86400000);
+  const generated = suggestPoolMatches(eligible);
+  const existing = await tx.select().from(matches);
+  const byKey = new Map(existing.map(m => [m.matchKey,m]));
+  const generatedKeys = new Set(generated.map(m => m.matchKey));
+  for (const m of existing) if (!generatedKeys.has(m.matchKey) && m.status !== "stale") {
+    await tx.update(matches).set({status:"stale",version:m.version+1,reviewedBy:null,reviewedAt:null,updatedAt:new Date(),
+      events:[...m.events,event("stale","Kaynak değişti, kapandı, eskidi veya eşleşme kapsamından çıktı; önceki karar geçersiz.")]}).where(eq(matches.id,m.id));
+  }
+  for (const candidate of generated) {
+    const previous = byKey.get(candidate.matchKey);
+    if (previous && previous.snapshotHash === candidate.snapshotHash && previous.status !== "stale") continue;
+    const changed = {...candidate,status:"pending",reviewedBy:null,reviewedAt:null,updatedAt:new Date(),
+      version:previous ? previous.version+1 : 1,
+      events:[...(previous?.events ?? []),event("suggested","Gerçek kaynaklardan öneri oluşturuldu; ticari karar veya dış gönderim yapılmadı.")]};
+    if (previous) await tx.update(matches).set(changed).where(eq(matches.id,previous.id));
+    else await tx.insert(matches).values(changed);
+  }
+}
+export async function syncInternalPool() {
+  await db.transaction(async tx => {
+    await lock(tx);
+    const loads = await tx.select({r:requests,s:shipments.status}).from(requests).leftJoin(shipments,eq(shipments.requestId,requests.id)).limit(1001);
+    const fleet = await tx.select().from(carriers).limit(1001);
+    const offers = await tx.select({l:listings,p:profiles.status}).from(listings).leftJoin(profiles,eq(listings.businessProfileId,profiles.id)).limit(1001);
+    if ([loads,fleet,offers].some(rows => rows.length > 1000)) fail(413,"İç kaynak başına 1.000 kayıt sınırı aşıldı; tarama kapsamını daraltın.");
+    await tx.update(entries).set({active:false}).where(sql`${entries.sourceId} IS NULL`);
+    for (const {r,s} of loads) {
+      if (!permittedInternalLogisticsRecord(r)) continue;
+      await upsert(tx,`load:${r.id}`,"mmt_load",{
+      ...empty(),role:"load",name:r.organization || r.requesterName,origin:r.origin,destination:r.destination,
+      location:r.origin,products:productWords(r.cargoType),transportMode:r.transportMode,requiredKg:r.weightKg,volumeM3:r.volumeM3 > 0 ? r.volumeM3 : null,
+      requiredDate:r.loadingDate,contact:[r.email,r.phone].filter(Boolean).join(" · "),reference:r.referenceCode,
+      isTest:r.isTest,eligible:s !== "delivered",
+    });
+    }
+    for (const c of fleet) {
+      if (!permittedInternalLogisticsRecord(c)) continue;
+      // Free text is not GPS or capacity verification. Only one explicitly
+      // directed route and an unambiguous unit can support a route suggestion.
+      const route = c.serviceRoutes.split(/\s*(?:→|->)\s*/);
+      await upsert(tx,`carrier:${c.id}`,"mmt_carrier",{...empty(),role:"carrier",name:c.companyName,
+        origin:route.length === 2 ? route[0] : "",destination:route.length === 2 ? route[1] : "",
+        location:c.serviceRoutes,transportMode:c.transportMode,capacityKg:explicitKg(c.capacity),
+        contact:[c.email,c.phone].filter(Boolean).join(" · "),reference:c.referenceCode,
+        isTest:c.isTest,verified:c.status === "approved",eligible:permittedCarrierCandidate(c),
+        availableDate:/^\d{4}-\d{2}-\d{2}$/.test(c.availability) ? c.availability : null,
+      });
+    }
+    for (const {l,p} of offers) {
+      if (!["buyer","producer"].includes(l.role) || l.status !== "approved" || (l.businessProfileId !== null && p !== "verified")) continue;
+      await upsert(tx,`listing:${l.id}`,"mmt_b2b",{...empty(),role:l.role === "buyer" ? "buyer" : "seller",
+        name:l.organization,location:l.location,products:productWords(l.title),contact:l.contact,reference:l.referenceCode,
+        verified:p === "verified",
+      });
+    }
+    await rebuild(tx);
+  });
+}
+function payload(item: FeedItem, sourceUrl: string): PoolPayload {
+  return {...empty(),...item,transportMode:item.transportMode ?? "",capacityKg:item.capacityKg ?? null,
+    volumeM3:item.volumeM3 ?? null,
+    requiredKg:item.requiredKg ?? null,availableDate:item.availableDate ?? null,requiredDate:item.requiredDate ?? null,
+    reference:item.reference ?? item.id,sourceUrl:item.sourceUrl ?? sourceUrl,verified:false,eligible:true};
+}
+/** Founder-authorized auto-enrollment policy; does not assign any user role. */
+export async function enrollTelegramMarketSource(chatId: number) {
+  return db.transaction(async tx => {
+    await lock(tx);
+    const url = `telegram://group/${chatId}`;
+    const [existing] = await tx.select().from(sources).where(eq(sources.url, url)).for("update");
+    if (existing) return existing; // Never re-enable a founder-disabled source.
+    const configured = await tx.select({id:sources.id}).from(sources);
+    if (configured.length >= 10) fail(409,"İzinli kaynak sınırı dolu.");
+    const [created] = await tx.insert(sources).values({
+      name: `Telegram piyasa grubu ${chatId}`, url,
+      consentBy: "founder_authorized_admin_group_auto_enrollment",
+    }).returning();
+    return created;
+  });
+}
+
+/** Founder-only copy intake. All candidates and source consent commit together. */
+export async function importCopiedMarketAds(input: z.infer<typeof PasteLogisticsAdsBody>, actor: LogisticsActor) {
+  if (!isLogisticsFounder(actor.userId)) fail(403, "Yalnız kurucu ilan aktarabilir.");
+  if (input.consentConfirmed !== true) fail(403, "Kaydı kullanma yetkisini teyit edin.");
+  const occurredAt = new Date(input.occurredAt);
+  const age = Date.now() - occurredAt.getTime();
+  if (!Number.isFinite(age) || age > 86400000 || age < -300000) fail(400, "İlan tarihi son 24 saat içinde olmalı; eski ilanı güncel diye kaydetmeyin.");
+  const parsed = parseMarketTexts(input.text, input.requestId, occurredAt);
+  if (!parsed.length) fail(422, "Yük veya araç ilanı ayrıştırılamadı. Yönü açık rotayı ve ilan türünü kontrol edin.");
+  if (parsed.length > 50) fail(400, "Tek aktarımda en fazla 50 rota kabul edilir.");
+  const name = input.sourceName.trim();
+  if (name.length < 2) fail(400, "Kaynak adı gerekli.");
+  const url = `market://source/copied-${input.channel}-${digest(name.toLocaleLowerCase("tr-TR")).slice(0, 24)}`;
+  const importDigest = digest(input);
+  return db.transaction(async tx => {
+    await lock(tx);
+    let [source] = await tx.select().from(sources).where(eq(sources.url, url));
+    if (source && !source.enabled) fail(409, "Bu kaynak kapalı; kurucu kaynak ayarından açmalıdır.");
+    if (!source) {
+      const all = await tx.select({id:sources.id}).from(sources);
+      if (all.length >= 10) fail(409, "İzinli kaynak sınırı dolu.");
+      [source] = await tx.insert(sources).values({
+        name:`${input.channel === "whatsapp" ? "WhatsApp" : "Facebook"} · ${name}`,
+        url, consentBy:actor.userId, consentAt:new Date(),
+      }).returning();
+    }
+    if (!source.consentBy || !source.consentAt) fail(403, "Kaynak kullanım izni yok.");
+    const prefix = `copied:${digest([actor.userId,input.requestId])}:`;
+    const prior = await tx.select().from(entries).where(sql`${entries.originKey} LIKE ${prefix + "%"}`);
+    if (prior.some(row => (row.payload as PoolPayload & {importDigest?:string}).importDigest !== importDigest) ||
+        (prior.length > 0 && prior.length !== parsed.length)) fail(409, "Aynı aktarım kimliğiyle içerik değiştirilemez.");
+    let savedCount = 0;
+    const items = [];
+    for (const [index, extraction] of parsed.entries()) {
+      const originKey = `${prefix}${index}`;
+      const data = {
+        ...payload(extraction.item, source.url), ...extraction.metadata,
+        marketOccurredAt:occurredAt.toISOString(),
+        reference:input.reference?.trim() || extraction.item.reference || input.requestId,
+        importDigest,
+      };
+      let row = prior.find(r=>r.originKey === originKey);
+      if (!row) {
+        [row] = await tx.insert(entries).values({
+          originKey, sourceKind:"telegram_market", sourceId:source.id,
+          payload:data, fingerprint:digest(data), active:true,
+        }).returning();
+        savedCount++;
+      }
+      items.push({
+        id:row.id, role:data.role, origin:data.origin, destination:data.destination,
+        isTest:data.isTest, eligible:data.eligible, missing:extraction.metadata.parserMissing,
+      });
+    }
+    if (savedCount) {
+      await tx.update(sources).set({lastSuccessAt:new Date(),lastError:null}).where(eq(sources.id,source.id));
+      await rebuild(tx);
+    }
+    return {sourceId:source.id,savedCount,duplicateCount:items.length-savedCount,items,messagesSent:false,approvalGranted:false};
+  });
+}
+export async function ingestTelegramMarketItem(source: typeof sources.$inferSelect, messageId: number | string, item: FeedItem,
+  metadata: { is_market_feed?: boolean; vehicleType?: string; vehicleTypes?: string[]; cargoType?: string; parserMissing?: string[]; eligible?: boolean; marketOccurredAt?: string } = {}) {
+  return db.transaction(async tx => {
+    await lock(tx);
+    const [current] = await tx.select().from(sources).where(eq(sources.id, source.id)).for("update");
+    if (!current?.enabled || current.version !== source.version || current.url !== source.url) fail(409,"Kaynak izni değişti.");
+    const originKey = `${source.url.startsWith("telegram:") ? "telegram" : "market"}:${source.id}:${messageId}`;
+    const data = isolateTestMarketPayload({...payload(item, source.url), ...metadata, sourceUrl:source.url, is_market_feed:true});
+    const added = await tx.insert(entries).values({
+      originKey, sourceKind:"telegram_market", sourceId:source.id,
+      payload:data, fingerprint:digest(data), active:true,
+    }).onConflictDoNothing({target:entries.originKey}).returning({id:entries.id});
+    if (!added.length) return false;
+    await tx.update(sources).set({lastSuccessAt:new Date(),lastError:null}).where(eq(sources.id,source.id));
+    await rebuild(tx);
+    return true;
+  });
+}
+export async function syncPoolSource(id: string, read: typeof readPublicFeed = readPublicFeed) {
+  const capture = await db.transaction(async tx => {
+    await lock(tx);
+    const [s] = await tx.select().from(sources).where(eq(sources.id,id)).for("update");
+    if (!s || !s.enabled) fail(409,"Kaynak kapalı veya bulunamadı.");
+    if (/^(telegram|market):/.test(s.url)) fail(409,"Bu kaynak webhook üzerinden beslenir.");
+    if (s.lastAttemptAt && Date.now()-s.lastAttemptAt.getTime() < 30000) fail(409,"Kaynak kısa süre önce tarandı; tarama bitince yenileyin.");
+    const attempt = new Date();
+    await tx.update(sources).set({lastAttemptAt:attempt}).where(eq(sources.id,id));
+    return {...s,attempt};
+  });
+  let items: FeedItem[];
+  try { items = feedSchema.parse({items:await read(capture.url)}).items; }
+  catch {
+    await db.transaction(async tx => {
+      await lock(tx);
+      const [s] = await tx.select().from(sources).where(eq(sources.id,id));
+      if (!s || s.version !== capture.version || s.lastAttemptAt?.getTime() !== capture.attempt.getTime()) return;
+      await tx.update(sources).set({lastError:"Kaynak alınamadı veya JSON biçimi doğrulanamadı. Eski kayıtlar eşleştirmeden çıkarıldı."}).where(eq(sources.id,id));
+      await tx.update(entries).set({active:false}).where(eq(entries.sourceId,id));
+      await rebuild(tx);
+    });
+    fail(502,"Kaynak doğrulanamadı; eski kaynak kayıtları güvenli biçimde askıya alındı.");
+  }
+  await db.transaction(async tx => {
+    await lock(tx);
+    const [s] = await tx.select().from(sources).where(eq(sources.id,id)).for("update");
+    if (!s?.enabled || s.version !== capture.version || s.lastAttemptAt?.getTime() !== capture.attempt.getTime()) fail(409,"Tarama sırasında kaynak değişti; eski sonuç uygulanmadı.");
+    await tx.update(entries).set({active:false}).where(eq(entries.sourceId,id));
+    for (const item of items) await upsert(tx,`feed:${id}:${item.id}`,"authorized_feed",payload(item,capture.url),id);
+    await tx.update(sources).set({lastSuccessAt:new Date(),lastError:null}).where(eq(sources.id,id));
+    await rebuild(tx);
+  });
+}
+export async function refreshPool(includeSources = true) {
+  await syncInternalPool();
+  if (includeSources) {
+    const configured = await db.select().from(sources).where(eq(sources.enabled,true));
+    for (const source of configured) {
+      if (/^(telegram|market):/.test(source.url)) continue;
+      if (source.lastAttemptAt && Date.now()-source.lastAttemptAt.getTime() < 15*60000) continue;
+      try { await syncPoolSource(source.id); } catch (error) { if (!(error instanceof AutomationError)) throw error; }
+    }
+  }
+}
+export async function getPoolWorkspace(actor: LogisticsActor) {
+  const [pool, suggestions, feeds, drafts, notifications] = await db.transaction(async tx => {
+    const pool = await tx.select().from(entries).orderBy(desc(entries.lastSeenAt)).limit(10001);
+    const suggestions = await tx.select().from(matches).orderBy(desc(matches.updatedAt)).limit(1001);
+    const feeds = await tx.select().from(sources).orderBy(sources.createdAt);
+    const drafts = actor.isFounder
+      ? await tx.select().from(aiDrafts).orderBy(desc(aiDrafts.createdAt)).limit(1000)
+      : [];
+    const notifications = actor.isFounder
+      ? await tx.select().from(draftNotifications).orderBy(desc(draftNotifications.createdAt)).limit(1000)
+      : [];
+    return [pool,suggestions,feeds,drafts,notifications] as const;
+  },{isolationLevel:"repeatable read",accessMode:"read only"});
+  const draftByVersion = new Map(drafts.map(draft => [`${draft.matchId}:${draft.matchVersion}`, draft]));
+  const notificationStatusByDraft = new Map(notifications.map(notification => [notification.draftId, notification.status]));
+  return {
+    canApprove:isLogisticsFounder(actor.userId),
+    aiDraftEnabled:actor.isFounder && isLogisticsPoolAiDraftPreviewEnabled(),
+    externalDiscoveryConfigured:feeds.some(s => s.enabled),
+    automaticSchedule:`${logisticsDraftScheduleDescription()} ${await describeWorkerEvidence()}`,
+    limits:["Her iç kaynakta en çok 1.000, dış beslemede 1.000 kayıt; havuzda 10.000 kayıt.", "Rol başına en çok 200 taraf, 300 alıcı–satıcı çifti ve 1.000 güncel öneri değerlendirilir; benzerlik puanı garanti değildir.",
+      ...(suggestions.length > 1000 ? ["Geçmiş dahil sonuçlar ilk 1.000 kayıtla sınırlı."] : []),
+      ...(!feeds.some(s => s.enabled) ? ["Dış kaynak bağlı değil: internetten yeni müşteri bulunduğu iddia edilmez."] : [])],
+    entries:pool.slice(0,10000).map(e => ({...isolateTestMarketPayload(e.payload),id:e.id,sourceId:e.sourceId,sourceKind:e.sourceKind,active:e.active && e.lastSeenAt.getTime() >= Date.now()-7*86400000,lastSeenAt:e.lastSeenAt.toISOString()})),
+     matches:suggestions.filter(m => !m.entryIds.some(id => pool.some(e => e.id === id && isQuarantinedMarketPayload(e.payload)))).slice(0,1000).map(m => {
+       const draft = actor.isFounder ? draftByVersion.get(`${m.id}:${m.version}`) : undefined;
+       return {
+         ...m,
+         updatedAt:m.updatedAt.toISOString(),
+         reviewedAt:m.reviewedAt?.toISOString() ?? null,
+         aiDraft:draft && draft.snapshotHash === m.snapshotHash && m.status === "pending" && draft.status === "pending_review"
+           ? {matchId:draft.matchId,matchVersion:draft.matchVersion,summary:draft.summary,introductionDraft:draft.introductionDraft,
+              missingChecks:draft.missingChecks,generatedAt:draft.createdAt.toISOString(),
+              telegramNotificationStatus:notificationStatusByDraft.get(draft.id) === "dry_run" ? "dry_run" : null,
+              saved:true,sent:false,decisionMade:false}
+           : null,
+       };
+     }),
+    sources:feeds.map(s => ({id:s.id,name:s.name,url:s.url,enabled:s.enabled,version:s.version,lastAttemptAt:s.lastAttemptAt?.toISOString() ?? null,lastSuccessAt:s.lastSuccessAt?.toISOString() ?? null,lastError:s.lastError})),
+  };
+}
+export async function actOnPool(input: Action, actor: LogisticsActor) {
+  if (input.action === "refresh_internal") { await syncInternalPool(); return getPoolWorkspace(actor); }
+  if (input.action === "refresh") { await refreshPool(); return getPoolWorkspace(actor); }
+  if (input.action === "source_sync") { if (!input.id) fail(400,"Kaynak kimliği gerekli."); await syncPoolSource(input.id); return getPoolWorkspace(actor); }
+  if (!isLogisticsFounder(actor.userId)) fail(403,"Kaynak izni ve son eşleştirme kararı yalnız kurucuya aittir.");
+  if (input.action === "source_create") {
+    if (!input.name || input.name.trim().length < 2 || !input.url || input.consentConfirmed !== true) fail(400,"Gerçek kaynak adı/adresi ve veriyi kullanma yetkisi teyidi gerekli.");
+    const name = input.name.trim();
+    let url: string; try { url = /^(telegram:\/\/group\/-[1-9]\d{0,18}|market:\/\/source\/[a-z0-9-]{3,64})$/.test(input.url) ? input.url : safeFeedUrl(input.url); } catch { fail(400,"İzinli HTTPS JSON, market://source/AD veya telegram://group/GRUP_KIMLIGI adresi gerekli."); }
+    await db.transaction(async tx => {
+      await lock(tx);
+      const all = await tx.select().from(sources);
+      if (all.length >= 10) fail(409,"En fazla 10 izinli kaynak eklenebilir.");
+      if (all.some(s => s.url === url)) fail(409,"Bu kaynak zaten kayıtlı.");
+      await tx.insert(sources).values({name,url,consentBy:actor.userId});
+    });
+  } else if (input.action === "source_update") {
+    if (!input.id || !input.expectedVersion || input.enabled === undefined) fail(400,"Kaynak kimliği, sürümü ve açık/kapalı seçimi gerekli.");
+    await db.transaction(async tx => {
+      await lock(tx);
+      const [s] = await tx.select().from(sources).where(eq(sources.id,input.id!)).for("update");
+      if (!s) fail(404,"Kaynak bulunamadı.");
+      if (s.version !== input.expectedVersion) fail(409,"Kaynak sürümü değişti; yenileyin.");
+      await tx.update(sources).set({enabled:input.enabled,version:s.version+1,lastAttemptAt:null}).where(eq(sources.id,s.id));
+      // Re-enable does not resurrect old snapshots; successful scan required.
+      await tx.update(entries).set({active:false}).where(eq(entries.sourceId,s.id));
+      await rebuild(tx);
+    });
+  } else if (input.action === "review") {
+    if (!input.id || !input.expectedVersion || !input.decision || !input.note || input.note.trim().length < 3) fail(400,"Öneri kimliği, sürümü, karar ve gerekçe gerekli.");
+    if (input.decision === "approved" && input.informationConfirmed !== true) fail(400,"Tarafların ve güncel bilgilerin incelendiğini teyit edin.");
+    const [before] = await db.select().from(matches).where(eq(matches.id,input.id));
+    if (!before) fail(404,"Öneri bulunamadı.");
+    const parties = await db.select().from(entries).where(inArray(entries.id,before.entryIds));
+    for (const sourceId of new Set(parties.map(p => p.sourceId).filter((s):s is string => Boolean(s)))) {
+      const [source] = await db.select().from(sources).where(eq(sources.id,sourceId));
+      if (!source?.enabled || !source.lastSuccessAt || source.lastError || source.lastSuccessAt.getTime() < Date.now()-15*60000) fail(409,"Dış kaynağı yeniden tarayıp önerinin güncel sürümünü inceleyin.");
+    }
+    await syncInternalPool();
+    await db.transaction(async tx => {
+      await lock(tx);
+      const [m] = await tx.select().from(matches).where(eq(matches.id,input.id!)).for("update");
+      if (!m || m.version !== input.expectedVersion || m.status !== "pending") fail(409,"Öneri değişmiş, karara bağlanmış veya geçersiz. Yeni sürümü inceleyin.");
+      const p = await tx.select().from(entries).where(inArray(entries.id,m.entryIds));
+      if (p.length !== m.entryIds.length || p.some(e => isQuarantinedMarketPayload(e.payload) || !e.active || !e.payload.eligible || e.payload.isTest !== p[0].payload.isTest || e.lastSeenAt.getTime()<Date.now()-7*86400000) ||
+          digest(m.entryIds.map(id => {const e = p.find(r => r.id === id)!; return [id,e.fingerprint];})) !== m.snapshotHash) fail(409,"Taraflar değişti; eski sürüm onaylanamaz.");
+      await tx.update(matches).set({status:input.decision,version:m.version+1,reviewedBy:actor.userId,reviewedAt:new Date(),updatedAt:new Date(),
+        events:[...m.events,event(input.decision!,input.note!,actor)]}).where(eq(matches.id,m.id));
+    });
+  } else fail(400,"Desteklenmeyen işlem.");
+  return getPoolWorkspace(actor);
+}

@@ -1,0 +1,134 @@
+---
+name: Tami hosted payment
+description: Tami Common Payment Page authentication and status-query signing requirements
+---
+
+MMT's hosted payment flow must keep card data on Tami's hosted page. Creating the one-time hosted token uses a `PG-Auth-Token` built from merchant number, terminal number, and a Base64 SHA-256 hash of those values plus the merchant secret. Tami's payment-status query additionally signs the request body as an HS512 JWS using the terminal-specific JWK `kid` and `k` values.
+
+**Why:** The official Tami developer documentation separates header authentication from the body `securityHash`; reusing the header hash for status queries would produce invalid or unverifiable payment results.
+
+**How to apply:** Keep merchant number, terminal number, secret key, JWK kid, and JWK k in workspace Secrets only. Never accept card fields in MMT API requests, and do not mark an order as paid from the browser callback alone; reconcile it with Tami's query response.
+
+Do not infer that every requested secret was replaced, or that JWK values form a
+verified pair, from a secrets-form completion notice alone.
+
+**Why:** The user clarified that only the renewed K value had been supplied after
+a notice named both requested JWK fields. Reporting both as renewed overstated
+what was known.
+
+**How to apply:** Honor the user's clarification, distinguish configured values
+from confirmed replacements, and request only the missing field through the
+secure form. Never describe a K/kid pair as verified without provider evidence.
+
+Diagnose header authentication separately from JWK response verification. Tami's
+official error-code documentation identifies `4003` as a `PG-Auth-Token` mismatch.
+
+**Why:** The merchant/terminal/secret triple builds header authentication, while
+terminal JWK material signs the body. Changing JWK values or replacing the header
+with a generic Bearer secret does not establish correct header authentication.
+
+**How to apply:** On this provider error, first establish the credentials' actual
+test/live environment and that the three header credentials belong to the same
+POS, rather than repeatedly requesting replacement secrets. A normal mobile
+account must not be presumed to be a sandbox account. Use the secure secrets flow;
+keep raw provider bodies, computed authentication values and signatures out of
+logs, and keep collection disabled until the required verification succeeds.
+
+The user states that the supplied Tami API credentials belong to their own
+company's existing, real Tami account, not a sandbox account.
+They explicitly chose to begin real collection through this existing Tami
+account instead of opening another provider account.
+
+**Why:** The user clarified and repeated that they mean their own previously
+supplied company account.
+
+**How to apply:** Do not request a new account or describe this account as
+sandbox. Distinguish this ownership/environment statement from independently
+verified application payment readiness. Prioritize the existing Tami channel,
+but do not treat the choice as proof of API/3DS readiness, permission to execute
+a customer's charge, or separate consent to publish the application.
+
+The user explicitly confirmed that Tami's native Link ile Ödeme is already
+working and that they have received payments through it repeatedly.
+
+**Why:** After repeated account/feature checks, the user corrected the assistant
+that this is an established collection method, not a new account to activate.
+
+**How to apply:** Do not ask again whether their Tami account or native payment
+link feature works. Focus on connecting the established method to MMT. Keep
+native collection separate from verified MMT API integration and automated
+invoice reconciliation; do not assume a customer-specific or fixed-amount
+payment link can pay every invoice.
+
+Do not infer that a Tami payment link is invalid from an empty automated
+screenshot or an HTTP response containing only the portal's JavaScript shell.
+
+**Why:** Passive inspection could not render checkout details for a link the
+user reports having collected through. Neither that inspection nor the user's
+past collection establishes the present amount, expiry or reusability.
+
+**How to apply:** Report those details as unverified, not failed or confirmed.
+Do not run a real charge to resolve the inspection gap or promote the link as
+a universal invoice checkout.
+
+The current Tami merchant account supports TRY only. Foreign-currency amounts are converted to TRY by Tami, so MMT must reject USD/EUR live requests instead of presenting them as true multi-currency payments.
+
+**Why:** Tami technical support confirmed that the current account has no multi-currency support.
+
+**How to apply:** Keep USD/EUR available only in mock/test mode until a provider with genuine multi-currency settlement is approved.
+
+Keep the hosted checkout and direct 3DS integration contracts separate. The
+public hosted-token contract does not document a flag that enforces 3DS;
+direct 3DS uses card fields, a bank challenge and a subsequent completion step.
+
+**Why:** Adding a direct-auth/complete call to a hosted flow would mix different
+provider products and expand MMT's card-data/compliance scope. A provider-owned
+payment page does not itself prove that this merchant has enforced 3DS enabled.
+
+**How to apply:** Preserve provider-hosted card entry, confirm hosted/Masterpass
+entitlement and 3DS policy with Tami, and require real provider test evidence.
+The POS's disabled “3D'siz İşlem” option is not proof that 3DS is disabled;
+foreign-card acceptance is another separate permission.
+
+The user reports that they already requested 3DS activation and it remains
+closed.
+
+**Why:** The user corrected a repeated recommendation to submit the same
+activation request.
+
+**How to apply:** Do not keep sending the user back to repeat that request or
+re-enter credentials. Preserve the distinction between the user's reported
+status and independently verified provider capability, and between 3DS,
+the “3D'siz İşlem” toggle and foreign-card permission. Keep existing working
+domestic payments intact; do not present international collection as ready.
+
+Payment integration scope is MMT service invoices only; do not change the construction store's Shopify checkout. Tami sandbox must be explicitly enabled outside production, and live collection must run only in production after all approval, 3D Secure, test-evidence, callback, and verified-credential gates pass.
+
+**Why:** Service billing and physical-product commerce use separate providers and legal/payment controls. A development misconfiguration must not create a real charge.
+
+**How to apply:** Keep the invoice payment routes separate from Shopify, verify test and production modes independently, and leave live collection disabled until written company/provider authorization is recorded.
+
+A lookup for a deliberately nonexistent order is not sufficient evidence that
+checkout, payment reconciliation or refunds work.
+
+**Why:** Such probes can return an unsigned error rather than an authenticated
+business result. A cryptographically verified error from the live endpoint is
+stronger evidence than an unsigned sandbox error, but still is not a completed
+payment, refund, bank approval or settlement.
+
+**How to apply:** Report connectivity, verified signatures, provider business
+results and completed payment/refund evidence separately. Do not approve payment
+readiness from an error response, invent an undocumented error code's meaning,
+or weaken signature verification to make the probe pass.
+
+Treat a generic payment callback as an untrusted lookup hint, not as an authenticated Tami notification. Tami's public hosted-payment documentation describes browser redirects and Query reconciliation; it does not establish a signed server-notification contract.
+
+**Why:** A generic Flask example accepted `status: success` without authenticating the sender. Reusing that shape as a Tami webhook would invent a provider contract and allow unsupported confirmation claims.
+
+**How to apply:** Trust only a verified provider query matching the stored order, invoice amount and currency. Keep notification-driven Telegram/operation automation disabled until Tami confirms its signature, acknowledgement and retry requirements. Collection never substitutes for the company owner's operation approval.
+
+Telegram payment messages must distinguish a verified Tami card collection from money credited to the Garanti bank account. A card-payment success is not evidence of bank settlement or an EFT/havale receipt.
+
+**Why:** Confusing these events would give the owner an incorrect financial confirmation.
+
+**How to apply:** Label a verified card payment as a Tami collection, not a bank-account credit. Bank-credit messages require a separately verified bank source. Before enabling any financial Telegram notification, confirm the owner's authorized private recipient; do not reuse a public media channel.
