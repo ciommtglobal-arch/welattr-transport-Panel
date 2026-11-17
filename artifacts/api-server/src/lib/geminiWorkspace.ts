@@ -20,8 +20,12 @@ export function resolveGeminiProviderConfig(env: NodeJS.ProcessEnv = process.env
 export class GeminiWorkspaceError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
-export function geminiWorkspaceEnabled(): boolean {
-  return ["development", "test"].includes(process.env.NODE_ENV ?? "") && !process.env.REPLIT_DEPLOYMENT;
+export function geminiWorkspaceEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  if (env.REPLIT_DEPLOYMENT) return false;
+  if (["development", "test"].includes(env.NODE_ENV ?? "")) return true;
+  return env.NODE_ENV === "production"
+    && env.GEMINI_WORKSPACE_ENABLED === "true"
+    && env.GEMINI_FREE_TIER_ONLY_CONFIRMED === "true";
 }
 const FAILURE = "Gemini yanıtı alınamadı. Talimat kaydı korundu; işlem yürütülmedi.";
 const INTERRUPTED = "Yanıt süresi doldu veya süreç kesildi. Talimat korundu; yeni talimat verebilirsiniz.";
