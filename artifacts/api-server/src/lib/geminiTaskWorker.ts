@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { GoogleGenAI } from "@google/genai";
-import type { Pool, PoolClient } from "pg";
 import { pool as databasePool } from "@workspace/db";
 import { logger as appLogger } from "./logger";
+
+type DatabaseClient = Awaited<ReturnType<typeof databasePool.connect>>;
 
 const WORKER_LOCK_ID = 6_173_428_119;
 const POLL_INTERVAL_MS = 30_000;
@@ -39,7 +40,7 @@ function workerIsEnabled(env: NodeJS.ProcessEnv): boolean {
     && Boolean(env.GEMINI_API_KEY?.trim());
 }
 
-async function addEvent(client: PoolClient, taskId: string, eventType: string, details: Record<string, unknown> = {}) {
+async function addEvent(client: DatabaseClient, taskId: string, eventType: string, details: Record<string, unknown> = {}) {
   await client.query(
     `INSERT INTO public.ai_task_events (event_id, task_id, actor, event_type, details)
      VALUES ($1::uuid, $2::uuid, 'gemini', $3, $4::jsonb)`,
@@ -47,7 +48,7 @@ async function addEvent(client: PoolClient, taskId: string, eventType: string, d
   );
 }
 
-async function loadRelevantMemory(client: PoolClient, task: Task): Promise<MemoryEntry[]> {
+async function loadRelevantMemory(client: DatabaseClient, task: Task): Promise<MemoryEntry[]> {
   const searchText = task.prompt.slice(0, 240);
   try {
     const result = await client.query<MemoryEntry>(
@@ -87,7 +88,7 @@ function buildPrompt(task: Task, memory: MemoryEntry[]): string {
   ].join("\n\n");
 }
 
-async function claimNextTask(client: PoolClient): Promise<Task | null> {
+async function claimNextTask(client: DatabaseClient): Promise<Task | null> {
   const result = await client.query<Task>(
     `WITH next_task AS (
        SELECT task_id FROM public.ai_tasks
@@ -109,7 +110,7 @@ async function claimNextTask(client: PoolClient): Promise<Task | null> {
   return result.rows[0] ?? null;
 }
 
-async function processOne(client: PoolClient, apiKey: string): Promise<void> {
+async function processOne(client: DatabaseClient, apiKey: string): Promise<void> {
   const recentCalls = await client.query<{ count: string }>(
     `SELECT COUNT(*)::text AS count
        FROM public.ai_task_events
@@ -189,7 +190,7 @@ export function startGeminiTaskWorker({
   env = process.env,
   intervalMs = POLL_INTERVAL_MS,
 }: {
-  database?: Pool;
+  database?: typeof databasePool;
   log?: Pick<typeof appLogger, "info" | "warn">;
   env?: NodeJS.ProcessEnv;
   intervalMs?: number;
@@ -201,7 +202,7 @@ export function startGeminiTaskWorker({
   const run = async () => {
     if (stopped || busy || !workerIsEnabled(env)) return;
     busy = true;
-    let client: PoolClient | undefined;
+    let client: DatabaseClient | undefined;
     let locked = false;
     try {
       client = await database.connect();
