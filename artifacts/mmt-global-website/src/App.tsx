@@ -135,7 +135,7 @@ const clerkPubKey = publishableKeyFromHost(
   window.location.hostname,
   import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
 );
-const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
+const clerkProxyUrl = import.meta.env.PROD ? '/api/__clerk' : import.meta.env.VITE_CLERK_PROXY_URL;
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
 const isStaffDomain = window.location.hostname.toLowerCase() === 'panel.mmtglobal.com.tr';
 type ClerkLocalization = NonNullable<
