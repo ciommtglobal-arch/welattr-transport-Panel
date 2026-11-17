@@ -9,6 +9,7 @@
     "start": "node --enable-source-maps ./dist/index.mjs",
     "logistics:worker": "node --enable-source-maps ./dist/logistics-worker.mjs",
     "logistics:audit": "node --enable-source-maps ./dist/logistics-audit.mjs",
+    "gemini:ping": "node ./scripts/gemini-ping.mjs",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.preview-tests.json --noEmit"
   },
