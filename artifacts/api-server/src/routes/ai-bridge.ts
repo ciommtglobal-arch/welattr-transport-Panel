@@ -83,26 +83,29 @@ router.post("/tasks", async (req: Request, res: Response) => {
   const source = body.source;
   const taskType = body.task_type.trim();
   const prompt = body.prompt.trim();
-  let client: Awaited<ReturnType<typeof pool.connect>> | undefined;
   try {
-    client = await pool.connect();
-    await client.query("BEGIN");
-    await client.query(`
-      INSERT INTO public.ai_tasks
-        (task_id, source, assigned_agent, task_type, prompt, context, status)
-      VALUES ($1::uuid, $2, 'gemini', $3, $4, $5::jsonb, 'QUEUED')
-    `, [taskId, source, taskType, prompt, contextText]);
-    await client.query(`
-      INSERT INTO public.ai_task_events (event_id, task_id, actor, event_type, details)
-      VALUES ($1::uuid, $2::uuid, $3, 'TASK_CREATED', $4::jsonb)
-    `, [randomUUID(), taskId, source, JSON.stringify({ task_type: taskType, assigned_agent: "gemini" })]);
-    await client.query("COMMIT");
-    return res.status(201).json({ task_id: taskId, status: "QUEUED", assigned_agent: "gemini" });
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query(`
+        INSERT INTO public.ai_tasks
+          (task_id, source, assigned_agent, task_type, prompt, context, status)
+        VALUES ($1::uuid, $2, 'gemini', $3, $4, $5::jsonb, 'QUEUED')
+      `, [taskId, source, taskType, prompt, contextText]);
+      await client.query(`
+        INSERT INTO public.ai_task_events (event_id, task_id, actor, event_type, details)
+        VALUES ($1::uuid, $2::uuid, $3, 'TASK_CREATED', $4::jsonb)
+      `, [randomUUID(), taskId, source, JSON.stringify({ task_type: taskType, assigned_agent: "gemini" })]);
+      await client.query("COMMIT");
+      return res.status(201).json({ task_id: taskId, status: "QUEUED", assigned_agent: "gemini" });
+    } catch {
+      await client.query("ROLLBACK").catch(() => {});
+      return res.status(503).json({ error: "Task could not be stored." });
+    } finally {
+      client.release();
+    }
   } catch {
-    if (client) await client.query("ROLLBACK").catch(() => {});
     return res.status(503).json({ error: "Task could not be stored." });
-  } finally {
-    client?.release();
   }
 });
 
