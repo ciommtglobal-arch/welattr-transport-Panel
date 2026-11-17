@@ -152,6 +152,17 @@ async function proxyClerkRequest(req, res, requestPath) {
         responseHeaders[name] = value;
       }
     }
+    if (
+      upstream.status === 307 &&
+      suffix.startsWith('/npm/@clerk/clerk-js@') &&
+      responseHeaders.location
+    ) {
+      // The Clerk JS URL is served with a long immutable cache lifetime.
+      // Version the redirect so clients discard the previously truncated copy.
+      const clerkAssetUrl = new URL(responseHeaders.location);
+      clerkAssetUrl.searchParams.set('mmt-proxy-version', '20261118');
+      responseHeaders.location = clerkAssetUrl.toString();
+    }
     const cookies = upstream.headers.getSetCookie?.();
     if (cookies?.length) responseHeaders['set-cookie'] = cookies;
     res.writeHead(upstream.status, responseHeaders);
