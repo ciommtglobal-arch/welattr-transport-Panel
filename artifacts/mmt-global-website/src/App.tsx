@@ -494,7 +494,7 @@ function PanelAwareHome() {
 function AuthServiceLoading() {
   const [timedOut, setTimedOut] = useState(false);
   useEffect(() => {
-    const timeout = window.setTimeout(() => setTimedOut(true), 12000);
+    const timeout = window.setTimeout(() => setTimedOut(true), 65000);
     return () => window.clearTimeout(timeout);
   }, []);
   return (
