@@ -83,7 +83,7 @@ router.post("/tasks", async (req: Request, res: Response) => {
   const source = body.source;
   const taskType = body.task_type.trim();
   const prompt = body.prompt.trim();
-  let client;
+  let client: Awaited<ReturnType<typeof pool.connect>> | undefined;
   try {
     client = await pool.connect();
     await client.query("BEGIN");
