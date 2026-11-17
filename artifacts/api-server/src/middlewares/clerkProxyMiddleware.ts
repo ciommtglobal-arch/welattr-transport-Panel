@@ -19,8 +19,14 @@ export function clerkProxyMiddleware(): RequestHandler {
     return (_req, _res, next) => next();
   }
 
-  const secretKey = process.env.CLERK_SECRET_KEY;
-  if (!secretKey) {
+  const rawSecretKey = process.env.CLERK_SECRET_KEY;
+  const secretKey = rawSecretKey?.trim();
+  if (!secretKey || /[^\x21-\x7e]/.test(secretKey)) {
+    if (rawSecretKey) {
+      console.error(
+        "CLERK_SECRET_KEY has invalid whitespace or non-ASCII characters",
+      );
+    }
     return (_req, _res, next) => next();
   }
 
