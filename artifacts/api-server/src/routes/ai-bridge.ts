@@ -51,7 +51,10 @@ router.get("/health", async (_req, res) => {
       },
       gemini: {
         apiKeyConfigured: Boolean(process.env.GEMINI_API_KEY),
-        workerEnabled: false,
+        workerEnabled: process.env.GEMINI_TASK_WORKER_ENABLED === "true"
+          && process.env.GEMINI_FREE_TIER_ONLY_CONFIRMED === "true"
+          && Boolean(process.env.GEMINI_API_KEY?.trim()),
+        workerCallsPer24Hours: 1,
       },
     });
   } catch {

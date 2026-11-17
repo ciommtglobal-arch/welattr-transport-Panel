@@ -6,6 +6,7 @@ import { startOrphanUploadCleanupScheduler } from "./lib/orphanUploadCleanupSche
 import { startLogisticsAutomationWorker } from "./lib/logisticsAutomationWorker";
 import { startLogisticsPoolWorker } from "./lib/logisticsPoolWorker";
 import { startLogisticsPoolAiDraftWorker } from "./lib/logisticsPoolAiDraftWorker";
+import { startGeminiTaskWorker } from "./lib/geminiTaskWorker";
 
 const rawPort = process.env["PORT"];
 const ORPHAN_UPLOAD_CLEANUP_LOCK_ID = 4811021014;
@@ -32,6 +33,7 @@ app.listen(port, (err) => {
   startLogisticsAutomationWorker();
   startLogisticsPoolWorker();
   startLogisticsPoolAiDraftWorker();
+  startGeminiTaskWorker();
   startOrphanUploadCleanupScheduler({
     logger,
     runCleanup: async () => {
