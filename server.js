@@ -142,7 +142,13 @@ async function proxyClerkRequest(req, res, requestPath) {
 
     const responseHeaders = {};
     for (const [name, value] of upstream.headers) {
-      if (!hopByHopHeaders.has(name.toLowerCase()) && name.toLowerCase() !== 'set-cookie') {
+      const key = name.toLowerCase();
+      // Node fetch transparently decompresses upstream bodies. Do not forward
+      // encoding or length metadata for the compressed representation.
+      if (
+        !hopByHopHeaders.has(key) &&
+        !['set-cookie', 'content-encoding', 'content-length', 'content-range', 'accept-ranges'].includes(key)
+      ) {
         responseHeaders[name] = value;
       }
     }
