@@ -39,7 +39,7 @@ vi.mock("@google/genai", () => ({
     } };
   },
 }));
-import { getGeminiWorkspace, sendGeminiInstruction } from "./geminiWorkspace";
+import { getGeminiWorkspace, sendGeminiInstruction, resolveGeminiProviderConfig } from "./geminiWorkspace";
 const id = "11111111-1111-4111-8111-111111111111";
 const input = { requestId: id, instruction: "TEST talimat" };
 const row = () => ({
@@ -56,6 +56,26 @@ beforeEach(() => {
   operational.fail = false; operational.calls = 0; operational.config = "";
 });
 afterEach(() => vi.unstubAllEnvs());
+describe("Gemini provider configuration", () => {
+  it("accepts the standard Gemini API key without a Replit gateway URL", () => {
+    expect(resolveGeminiProviderConfig({ GEMINI_API_KEY: " direct-key " })).toEqual({
+      apiKey: "direct-key", httpOptions: { timeout: 45_000 },
+    });
+  });
+  it("keeps the existing Replit gateway configuration compatible", () => {
+    expect(resolveGeminiProviderConfig({
+      AI_INTEGRATIONS_GEMINI_API_KEY: " replit-key ",
+      AI_INTEGRATIONS_GEMINI_BASE_URL: " https://gateway.example/ ",
+    })).toEqual({
+      apiKey: "replit-key",
+      httpOptions: { baseUrl: "https://gateway.example/", apiVersion: "", timeout: 45_000 },
+    });
+  });
+  it("prefers the standard API key and rejects empty keys", () => {
+    expect(resolveGeminiProviderConfig({ GEMINI_API_KEY: "direct", AI_INTEGRATIONS_GEMINI_API_KEY: "legacy" })?.apiKey).toBe("direct");
+    expect(resolveGeminiProviderConfig({ GEMINI_API_KEY: " ", AI_INTEGRATIONS_GEMINI_API_KEY: "" })).toBeNull();
+  });
+});
 describe("Gemini workspace persistence boundaries", () => {
   it("blocks direct service access in production without DB/model access", async () => {
     vi.stubEnv("NODE_ENV", "production");
