@@ -147,20 +147,26 @@ async function processOne(client: PoolClient, apiKey: string): Promise<void> {
     );
     await addEvent(client, task.task_id, "GEMINI_COMPLETED", {
       model: MODEL, memory_entries_used: memory.length, answer_characters: answer.length,
+    }).catch(() => {
+      appLogger.warn({ taskId: task.task_id }, "Gemini sonucu kaydedildi; tamamlanma olayı yazılamadı.");
     });
-    await client.query(
-      `INSERT INTO public.ai_memory_entries
-         (memory_id, source, source_record_id, record_type, subject, content, metadata, recorded_at)
-       VALUES ($1::uuid, 'gemini', $2, 'ai_task_result', $3, $4, $5::jsonb, NOW())
-       ON CONFLICT (source, source_record_id) WHERE source_record_id IS NOT NULL DO NOTHING`,
-      [
-        randomUUID(),
-        `task:${task.task_id}`,
-        `Gemini görev sonucu: ${task.task_type}`,
-        answer.slice(0, 30_000),
-        JSON.stringify({ task_id: task.task_id, task_source: task.source, model: MODEL }),
-      ],
-    );
+    try {
+      await client.query(
+        `INSERT INTO public.ai_memory_entries
+           (memory_id, source, source_record_id, record_type, subject, content, metadata, recorded_at)
+         VALUES ($1::uuid, 'gemini', $2, 'ai_task_result', $3, $4, $5::jsonb, NOW())
+         ON CONFLICT (source, source_record_id) WHERE source_record_id IS NOT NULL DO NOTHING`,
+        [
+          randomUUID(),
+          `task:${task.task_id}`,
+          `Gemini görev sonucu: ${task.task_type}`,
+          answer.slice(0, 30_000),
+          JSON.stringify({ task_id: task.task_id, task_source: task.source, model: MODEL }),
+        ],
+      );
+    } catch {
+      appLogger.warn({ taskId: task.task_id }, "Gemini sonucu kaydedildi; hafıza kopyası yazılamadı.");
+    }
   } catch {
     await client.query(
       `UPDATE public.ai_tasks SET status = 'FAILED', error_code = 'GEMINI_REQUEST_FAILED',
