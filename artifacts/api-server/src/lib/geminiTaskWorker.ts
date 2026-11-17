@@ -43,6 +43,37 @@ function workerIsEnabled(env: NodeJS.ProcessEnv): boolean {
     && Boolean(env.GEMINI_API_KEY?.trim());
 }
 
+function safeProviderDiagnostics(error: unknown): Record<string, string | number> {
+  if (typeof error !== "object" || error === null) return {};
+  const value = error as {
+    name?: unknown;
+    status?: unknown;
+    statusCode?: unknown;
+    code?: unknown;
+    error?: unknown;
+  };
+  const nested = typeof value.error === "object" && value.error !== null
+    ? value.error as { status?: unknown; code?: unknown }
+    : undefined;
+  const diagnostics: Record<string, string | number> = {};
+  const type = value.name;
+  if (typeof type === "string" && /^[A-Za-z][A-Za-z0-9_.-]{0,60}$/.test(type)) {
+    diagnostics.provider_error_type = type;
+  }
+  const status = typeof value.statusCode === "number" ? value.statusCode : value.status;
+  if (typeof status === "number" && Number.isInteger(status) && status >= 100 && status <= 599) {
+    diagnostics.provider_http_status = status;
+  }
+  const code = typeof value.code === "string" ? value.code
+    : typeof value.status === "string" ? value.status
+      : typeof nested?.code === "string" ? nested.code
+        : typeof nested?.status === "string" ? nested.status : undefined;
+  if (typeof code === "string" && /^[A-Za-z0-9_.-]{1,48}$/.test(code)) {
+    diagnostics.provider_error_code = code;
+  }
+  return diagnostics;
+}
+
 async function addEvent(client: DatabaseClient, taskId: string, eventType: string, details: Record<string, unknown> = {}) {
   await client.query(
     `INSERT INTO public.ai_task_events (event_id, task_id, actor, event_type, details)
@@ -125,6 +156,7 @@ async function processOne(client: DatabaseClient, apiKey: string): Promise<void>
   const task = await claimNextTask(client);
   if (!task) return;
 
+  let providerDiagnostics: Record<string, string | number> = {};
   try {
     const memory = await loadRelevantMemory(client, task);
     await addEvent(client, task.task_id, "GEMINI_STARTED", {
@@ -139,6 +171,9 @@ async function processOne(client: DatabaseClient, apiKey: string): Promise<void>
       model: MODEL,
       contents: buildPrompt(task, memory),
       config: { systemInstruction: SYSTEM_INSTRUCTION, temperature: 0.25, maxOutputTokens: 1_200 },
+    }).catch((error: unknown) => {
+      providerDiagnostics = safeProviderDiagnostics(error);
+      throw error;
     });
     const answer = response.text?.trim();
     if (!answer) throw new Error("EMPTY_RESPONSE");
@@ -174,11 +209,16 @@ async function processOne(client: DatabaseClient, apiKey: string): Promise<void>
   } catch {
     await client.query(
       `UPDATE public.ai_tasks SET status = 'FAILED', error_code = 'GEMINI_REQUEST_FAILED',
-              updated_at = NOW() WHERE task_id = $1::uuid`,
+              completed_at = NOW(), updated_at = NOW() WHERE task_id = $1::uuid`,
       [task.task_id],
     );
-    await addEvent(client, task.task_id, "GEMINI_FAILED", { error_code: "GEMINI_REQUEST_FAILED" }).catch(() => {});
-    appLogger.warn({ taskId: task.task_id }, "Gemini görevi tamamlanamadı; sağlayıcı ayrıntıları kaydedilmedi.");
+    await addEvent(client, task.task_id, "GEMINI_FAILED", {
+      error_code: "GEMINI_REQUEST_FAILED", ...providerDiagnostics,
+    }).catch(() => {});
+    appLogger.warn(
+      { taskId: task.task_id, ...providerDiagnostics },
+      "Gemini görevi tamamlanamadı; güvenli sağlayıcı sınıflandırması kaydedildi.",
+    );
   }
 }
 
