@@ -104,7 +104,81 @@ function sendFile(filePath, res, method) {
   stream.pipe(res);
 }
 
+const CLERK_PROXY_PREFIX = '/api/__clerk';
+const CLERK_PROXY_UPSTREAM = 'https://welattr-api-test.onrender.com/api/__clerk';
+const hopByHopHeaders = new Set([
+  'connection', 'keep-alive', 'proxy-authenticate', 'proxy-authorization',
+  'te', 'trailer', 'transfer-encoding', 'upgrade', 'host',
+]);
+
+async function proxyClerkRequest(req, res, requestPath) {
+  const suffix = requestPath.slice(CLERK_PROXY_PREFIX.length);
+  const query = new URL(req.url, 'http://localhost').search;
+  const headers = new Headers();
+
+  for (const [name, value] of Object.entries(req.headers)) {
+    const key = name.toLowerCase();
+    if (value && !hopByHopHeaders.has(key) && key !== 'content-length') {
+      headers.set(key, Array.isArray(value) ? value.join(', ') : value);
+    }
+  }
+
+  // Clerk requires the proxy URL to match the app's public origin.
+  headers.set('x-forwarded-host', req.headers.host || 'panel.mmtglobal.com.tr');
+  headers.set('x-forwarded-proto', 'https');
+
+  try {
+    const hasBody = req.method !== 'GET' && req.method !== 'HEAD';
+    const upstream = await fetch(
+      `${CLERK_PROXY_UPSTREAM}${suffix}${query}`,
+      {
+        method: req.method,
+        headers,
+        body: hasBody ? req : undefined,
+        ...(hasBody ? { duplex: 'half' } : {}),
+        redirect: 'manual',
+      },
+    );
+
+    const responseHeaders = {};
+    for (const [name, value] of upstream.headers) {
+      if (!hopByHopHeaders.has(name.toLowerCase()) && name.toLowerCase() !== 'set-cookie') {
+        responseHeaders[name] = value;
+      }
+    }
+    const cookies = upstream.headers.getSetCookie?.();
+    if (cookies?.length) responseHeaders['set-cookie'] = cookies;
+    res.writeHead(upstream.status, responseHeaders);
+    if (req.method === 'HEAD' || !upstream.body) {
+      res.end();
+    } else {
+      const { Readable } = require('stream');
+      Readable.fromWeb(upstream.body).on('error', () => res.destroy()).pipe(res);
+    }
+  } catch (error) {
+    console.error('Clerk proxy request failed:', error.message);
+    if (!res.headersSent) {
+      res.writeHead(502, { 'Content-Type': 'text/plain; charset=utf-8' });
+    }
+    res.end('Giriş servisine şu anda ulaşılamıyor.');
+  }
+}
+
 const server = http.createServer((req, res) => {
+  let requestPath;
+  try {
+    requestPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+  } catch (error) {
+    res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Geçersiz istek yolu.');
+    return;
+  }
+
+  if (requestPath === CLERK_PROXY_PREFIX || requestPath.startsWith(CLERK_PROXY_PREFIX + '/')) {
+    void proxyClerkRequest(req, res, requestPath);
+    return;
+  }
+
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.writeHead(405, { Allow: 'GET, HEAD', 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Method not allowed');
@@ -114,15 +188,6 @@ const server = http.createServer((req, res) => {
   if (!staticDirectory) {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(req.method === 'HEAD' ? undefined : fallbackHtml);
-    return;
-  }
-
-  let requestPath;
-  try {
-    requestPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-  } catch (error) {
-    res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
-    res.end('Geçersiz istek yolu.');
     return;
   }
 
