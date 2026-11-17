@@ -3,12 +3,29 @@ import { and, desc, eq, lt } from "drizzle-orm";
 import { db, geminiWorkspaceTurnsTable as turns, type GeminiWorkspaceTurn } from "@workspace/db";
 import { getGeminiOperationalContext } from "./geminiOperationalContext";
 
-export const GEMINI_WORKSPACE_MODEL = "gemini-3.8-flash";
+export const GEMINI_WORKSPACE_MODEL = process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash";
+
+export function resolveGeminiProviderConfig(env: NodeJS.ProcessEnv = process.env) {
+  const apiKey = env.GEMINI_API_KEY?.trim() || env.AI_INTEGRATIONS_GEMINI_API_KEY?.trim();
+  if (!apiKey) return null;
+  const baseUrl = env.AI_INTEGRATIONS_GEMINI_BASE_URL?.trim();
+  return {
+    apiKey,
+    httpOptions: {
+      ...(baseUrl ? { baseUrl, apiVersion: "" } : {}),
+      timeout: 45_000,
+    },
+  };
+}
 export class GeminiWorkspaceError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
-export function geminiWorkspaceEnabled(): boolean {
-  return ["development", "test"].includes(process.env.NODE_ENV ?? "") && !process.env.REPLIT_DEPLOYMENT;
+export function geminiWorkspaceEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  if (env.REPLIT_DEPLOYMENT) return false;
+  if (["development", "test"].includes(env.NODE_ENV ?? "")) return true;
+  return env.NODE_ENV === "production"
+    && env.GEMINI_WORKSPACE_ENABLED === "true"
+    && env.GEMINI_FREE_TIER_ONLY_CONFIRMED === "true";
 }
 const FAILURE = "Gemini yanıtı alınamadı. Talimat kaydı korundu; işlem yürütülmedi.";
 const INTERRUPTED = "Yanıt süresi doldu veya süreç kesildi. Talimat korundu; yeni talimat verebilirsiniz.";
@@ -67,9 +84,8 @@ export async function sendGeminiInstruction(owner: string, input: { requestId: s
     if (existing.instruction !== instruction) throw new GeminiWorkspaceError(409, "Aynı istek kimliği farklı talimat için kullanılamaz.");
     return present(existing);
   }
-  const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-  const baseUrl = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL;
-  if (!apiKey || !baseUrl) throw new GeminiWorkspaceError(503, "Gemini bağlantısı yapılandırılmamış; talimat gönderilmedi.");
+  const providerConfig = resolveGeminiProviderConfig();
+  if (!providerConfig) throw new GeminiWorkspaceError(503, "Gemini bağlantısı yapılandırılmamış; talimat gönderilmedi.");
 
   const recent = await db.select().from(turns).where(eq(turns.ownerClerkUserId, owner))
     .orderBy(desc(turns.createdAt)).limit(40);
@@ -103,7 +119,7 @@ export async function sendGeminiInstruction(owner: string, input: { requestId: s
       { role: "model", parts: [{ text: t.reply! }] },
     ]);
     contents.push({ role: "user", parts: [{ text: instruction }] });
-    const ai = new GoogleGenAI({ apiKey, httpOptions: { baseUrl, apiVersion: "", timeout: 45_000 } });
+    const ai = new GoogleGenAI(providerConfig);
     const response = await ai.models.generateContent({
       model: GEMINI_WORKSPACE_MODEL, contents,
       config: {
