@@ -20,14 +20,12 @@ export function clerkProxyMiddleware(): RequestHandler {
   }
 
   const rawSecretKey = process.env.CLERK_SECRET_KEY;
-  // Remove formatting whitespace, including invisible Unicode whitespace that
-  // can be introduced when a key is pasted into the Render dashboard.
-  const secretKey = rawSecretKey?.replace(/[\s\u200B-\u200D\uFEFF]/g, "").trim();
-  if (!secretKey || /[^\x21-\x7e]/.test(secretKey)) {
+  // Remove non-printable and non-ASCII paste artifacts before placing the key
+  // in an HTTP header. The key itself is never logged.
+  const secretKey = rawSecretKey?.replace(/[^\x21-\x7e]/g, "");
+  if (!secretKey) {
     if (rawSecretKey) {
-      console.error(
-        "CLERK_SECRET_KEY has invalid whitespace or non-ASCII characters",
-      );
+      console.error("CLERK_SECRET_KEY is empty after removing invalid characters");
     }
     return (_req, _res, next) => next();
   }
