@@ -3,7 +3,10 @@ import { GoogleGenAI } from "@google/genai";
 import { pool as databasePool } from "@workspace/db";
 import { logger as appLogger } from "./logger";
 
-type DatabaseClient = Awaited<ReturnType<typeof databasePool.connect>>;
+type DatabaseClient = {
+  query<Row = Record<string, unknown>>(sql: string, values?: unknown[]): Promise<{ rows: Row[] }>;
+  release(): void;
+};
 
 const WORKER_LOCK_ID = 6_173_428_119;
 const POLL_INTERVAL_MS = 30_000;
