@@ -20,7 +20,9 @@ export function clerkProxyMiddleware(): RequestHandler {
   }
 
   const rawSecretKey = process.env.CLERK_SECRET_KEY;
-  const secretKey = rawSecretKey?.trim();
+  // Remove formatting whitespace, including invisible Unicode whitespace that
+  // can be introduced when a key is pasted into the Render dashboard.
+  const secretKey = rawSecretKey?.replace(/[\s\u200B-\u200D\uFEFF]/g, "").trim();
   if (!secretKey || /[^\x21-\x7e]/.test(secretKey)) {
     if (rawSecretKey) {
       console.error(
