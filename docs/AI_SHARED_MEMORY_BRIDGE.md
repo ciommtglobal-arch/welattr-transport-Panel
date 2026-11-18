@@ -47,3 +47,14 @@ service at the pilot branch. First verify which database the Render API service
 uses, back up and review that exact database, then apply the additive migration
 only to the intended branch. The worker remains dormant until its dedicated
 opt-in is set after that work.
+
+## 2026-11-18 safety hardening (code prepared; migration not applied)
+
+- Gemini task creation accepts a stable `idempotency_key`; repeats for the same source return the existing task instead of creating a second one. This needs `migrations/20261118_ai_task_safety.sql` on the intended isolated database before the route can store tasks.
+- A `PROCESSING` task older than ten minutes is moved to terminal `UNKNOWN_OUTCOME`; it is never reclaimed for a second provider call. Provider errors also become `UNKNOWN_OUTCOME` and are not automatically retried.
+- Gemini task results remain task-local, untrusted advisories. The worker no longer copies them into `ai_memory_entries`.
+- The migration is additive and intentionally not run by application startup. Verify the database target and backup, then obtain CIO approval before applying it.
+- No provider request, database write, secret change, Render change, or deployment is part of this code preparation.
+
+- Provider failure records contain only a validated HTTP status and a fixed failure category. Provider messages, response bodies, prompts, and credentials are never logged or stored.
+- This PR does not initiate a provider request. The prior pilot connectivity attempt and its generic failure record are tracked separately; this code adds safe diagnostics for a future approved attempt.
