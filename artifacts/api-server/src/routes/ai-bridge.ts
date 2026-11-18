@@ -1,9 +1,10 @@
 import express, { type Request, type Response } from "express";
 import { randomUUID, timingSafeEqual } from "node:crypto";
 import { pool } from "@workspace/db";
+import { normalizeIdempotencyKey } from "../lib/geminiTaskSafety";
 
 const SOURCES = new Set(["chatgpt", "welattr", "gemini", "telegram", "shopify", "mmt", "manual", "system"]);
-const TASK_STATUSES = new Set(["QUEUED", "PROCESSING", "COMPLETED", "FAILED"]);
+const TASK_STATUSES = new Set(["QUEUED", "PROCESSING", "COMPLETED", "FAILED", "UNKNOWN_OUTCOME"]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const router = express.Router();
 
@@ -82,25 +83,58 @@ router.post("/tasks", async (req: Request, res: Response) => {
     return res.status(400).json({ error: "Task context is invalid." });
   }
 
-  const taskId = randomUUID();
   const source = body.source;
   const taskType = body.task_type.trim();
   const prompt = body.prompt.trim();
+  const idempotencyKey = body.idempotency_key === undefined
+    ? null
+    : normalizeIdempotencyKey(body.idempotency_key);
+  if (body.idempotency_key !== undefined && idempotencyKey === null) {
+    return res.status(400).json({ error: "Invalid idempotency key." });
+  }
   try {
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
-      await client.query(`
+      const inserted = await client.query<{ task_id: string }>(`
         INSERT INTO public.ai_tasks
-          (task_id, source, assigned_agent, task_type, prompt, context, status)
-        VALUES ($1::uuid, $2, 'gemini', $3, $4, $5::jsonb, 'QUEUED')
-      `, [taskId, source, taskType, prompt, contextText]);
+          (task_id, source, assigned_agent, task_type, prompt, context, idempotency_key, status)
+        VALUES ($1::uuid, $2, 'gemini', $3, $4, $5::jsonb, $6, 'QUEUED')
+        ON CONFLICT (source, idempotency_key) WHERE idempotency_key IS NOT NULL
+        DO NOTHING
+        RETURNING task_id
+      `, [randomUUID(), source, taskType, prompt, contextText, idempotencyKey]);
+      if (!inserted.rows[0]) {
+        const existing = await client.query<{ task_id: string; status: string }>(`
+          SELECT task_id, status FROM public.ai_tasks
+           WHERE source = $1 AND idempotency_key = $2
+           LIMIT 1
+        `, [source, idempotencyKey]);
+        await client.query("COMMIT");
+        if (!existing.rows[0]) return res.status(503).json({ error: "Task could not be stored." });
+        return res.status(200).json({
+          task_id: existing.rows[0].task_id,
+          status: existing.rows[0].status,
+          assigned_agent: "gemini",
+          duplicate: true,
+        });
+      }
+      const taskId = inserted.rows[0].task_id;
       await client.query(`
         INSERT INTO public.ai_task_events (event_id, task_id, actor, event_type, details)
         VALUES ($1::uuid, $2::uuid, $3, 'TASK_CREATED', $4::jsonb)
-      `, [randomUUID(), taskId, source, JSON.stringify({ task_type: taskType, assigned_agent: "gemini" })]);
+      `, [randomUUID(), taskId, source, JSON.stringify({
+        task_type: taskType,
+        assigned_agent: "gemini",
+        idempotency_key_present: idempotencyKey !== null,
+      })]);
       await client.query("COMMIT");
-      return res.status(201).json({ task_id: taskId, status: "QUEUED", assigned_agent: "gemini" });
+      return res.status(201).json({
+        task_id: taskId,
+        status: "QUEUED",
+        assigned_agent: "gemini",
+        duplicate: false,
+      });
     } catch {
       await client.query("ROLLBACK").catch(() => {});
       return res.status(503).json({ error: "Task could not be stored." });
