@@ -40,10 +40,19 @@ database advisory lock serializes workers across service instances. The global
 worker call budget is one request per rolling 24 hours. No paid call or live
 task was submitted as part of this code preparation.
 
-Current live blocker: the connected Neon production branch has no
-`ai_tasks`, `ai_task_events`, or `ai_memory_entries` tables; those tables
-exist on the separate pilot branch. Do not point the whole production API
-service at the pilot branch. First verify which database the Render API service
-uses, back up and review that exact database, then apply the additive migration
-only to the intended branch. The worker remains dormant until its dedicated
-opt-in is set after that work.
+## 2026-11-17 production-link verification
+
+The earlier note above that the connected production branch lacked the bridge
+tables is stale. A controlled one-call attempt from the Render
+`welattr-api-test` service created a task record and Gemini event rows on the
+Neon `my-first-project` `production` branch. Treat this Render service as
+production-database-linked unless its `DATABASE_URL` target is independently
+verified in Render. Do not queue further tasks there until database isolation
+is confirmed.
+
+The one Gemini request failed with the generic `GEMINI_REQUEST_FAILED`
+classification. The response body and secret-bearing request data were not
+logged, so the provider cause is still unknown. The task worker enforces one
+model request per rolling 24 hours. The follow-up change on
+`fix/gemini-safe-provider-diagnostics` records only sanitized error type,
+HTTP status, and provider code, never the provider message or key.
