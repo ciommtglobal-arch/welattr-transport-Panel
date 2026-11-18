@@ -1,6 +1,15 @@
 # MMT Global — kurumsal ve resmî iş akışı
 
-Bu çalışma düzeni MMT Global / WelatTR / MMT Connect görevlerini aynı kayıt ve onay zincirinde izlemek içindir. Asistan koordinasyon, hazırlık, teknik inceleme ve kayıt takibini yürütür. Şirket adına temsil, imza, hukukî görüş verme, resmî başvuru gönderme veya dış tarafa taahhüt verme yetkisi oluşturmaz. CIO'nun açık onayı ve gereken gerçek imza/kimlik doğrulaması olmadan resmî işlem tamamlanmış sayılmaz.
+Bu çalışma düzeni MMT Global / WelatTR / MMT Connect görevlerini aynı kayıt ve onay zincirinde izlemek içindir. Varsayılan hedef, rutin kurumsal ve resmî işleri uçtan uca dijital akışta otomatik yürütmek; insan müdahalesini yalnız kanunen zorunlu imza/onay, kurum veya sağlayıcı engeli, eksik kanıt ya da yüksek riskli istisnaya indirmektir. Asistan koordinasyon, hazırlık, teknik inceleme, otomasyon tasarımı ve kayıt takibini yürütür. Şirket adına temsil, imza, hukukî görüş verme, resmî başvuru gönderme veya dış tarafa taahhüt verme yetkisi oluşturmaz. CIO'nun açık onayı ve gereken gerçek imza/kimlik doğrulaması olmadan resmî işlem tamamlanmış sayılmaz.
+
+## Dijital öncelikli işletim
+
+- Gelen e-posta, web formu veya entegrasyon olayı tek bir dijital görev kaydına alınır; kaynak, zaman damgası ve kimlik/idempotency bilgisi korunur.
+- OCR/alan çıkarımı, sınıflama, sorumlu kuyruğa yönlendirme, eksik belge kontrolü, durum güncellemesi ve son tarih hatırlatmaları otomatikleştirilir.
+- Standart ve düşük riskli adımlar, kuralları sağladığında otomatik yürür; veri/izin doğrulaması başarısızsa akış kapalı kalır ve görev istisna kuyruğuna alınır.
+- Resmî portal ve sağlayıcı API'leri uygunsa sonuçlar makineyle doğrulanıp kanıt kaydı eklenir. Entegrasyon yoksa dijital belge/yanıt yükleme tek istisna girdisidir; görev yine aynı dijital kayıtta izlenir.
+- CIO onayı ve e-imza dijital onay ekranı/sağlayıcı aracı üzerinden alınır. İmza sahibinin kimlik doğrulaması ve bizzat imzası gereken yerde otomasyon taslağı ve kontrol paketini hazırlar, ardından bekler.
+- Canlı dış mesaj, ödeme, resmî başvuru, taahhüt, yetki değişikliği ve production değişikliği için onay adımı sistemde ayrı kaydedilir; önceden tanımlı kapsam dışındaki hiçbir iş otomatik genişletilmez.
 
 ## Görev yaşam döngüsü
 
@@ -25,6 +34,10 @@ Bu çalışma düzeni MMT Global / WelatTR / MMT Connect görevlerini aynı kay�
 
 ## Durum sözlüğü
 
+- **AUTO_READY:** Gerekli veri ve kurallar mevcut; dijital otomasyon sıraya alınabilir.
+- **AUTO_RUNNING:** Otomasyon çalışıyor; her adım ve sonuç kaydediliyor.
+- **WAITING_SIGNATURE:** Dijital taslak hazır; yetkili kişinin e-imzası/kimlik doğrulaması gerekiyor.
+- **NEEDS_HUMAN_EXCEPTION:** Otomasyon kanıt, erişim, mevzuat veya veri tutarsızlığı nedeniyle durdu; yalnız istisna çözümü bekleniyor.
 - **INBOX:** Talep geldi, kapsamı henüz netleşiyor.
 - **PREPARING:** Kanıt ve taslak hazırlanıyor.
 - **WAITING_EXTERNAL:** Kurum, destek ekibi veya sağlayıcı yanıtı bekleniyor.
@@ -45,4 +58,4 @@ Bu çalışma düzeni MMT Global / WelatTR / MMT Connect görevlerini aynı kay�
 
 ## Bu sürümdeki sınır
 
-Bu dosya yalnız süreç standardı ve kayıt şablonudur. Render/Neon/Meta/Clerk ayarını değiştirmez, anahtarı eklemez, migration çalıştırmaz, başvuru yapmaz ve dış mesaj göndermez.
+Bu dosya dijital öncelikli işletim hedefini ve kayıt şablonunu tanımlar. Bu hedef, henüz bağlanmamış kurum API'lerinin, yetkilerin, e-imza hesabının veya sağlayıcı erişiminin hazır olduğu anlamına gelmez. Bu dosya Render/Neon/Meta/Clerk ayarını değiştirmez, anahtarı eklemez, migration çalıştırmaz, başvuru yapmaz ve dış mesaj göndermez.
