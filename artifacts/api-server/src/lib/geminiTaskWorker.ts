@@ -47,9 +47,9 @@ function safeErrorText(value: unknown): string | undefined {
   if (value === undefined || value === null) return undefined;
   return String(value)
     .replace(/AIza[0-9A-Za-z_-]{20,}/g, "[REDACTED_API_KEY]")
-    .replace(/((?:api[_-]?key|authorization|bearer|token|password|secret)\\s*[:=]\\s*)[^,\\s"'&]+/gi, "$1[REDACTED]")
-    .replace(/([?&][^=\\s&]+)=([^&\\s]+)/g, "$1=[REDACTED]")
-    .replace(/(https?:\\/\\/[^\\s?#]+)\\?[^\\s#]*/gi, "$1?[REDACTED]")
+    .replace(/((?:api[_-]?key|authorization|bearer|token|password|secret)\s*[:=]\s*)[^,\s"'&]+/gi, "$1[REDACTED]")
+    .replace(/([?&][^=\s&]+)=([^&\s]+)/g, "$1=[REDACTED]")
+    .replace(/(https?:\/\/[^\s?#]+)\?[^\s#]*/gi, "$1?[REDACTED]")
     .slice(0, 240);
 }
 
