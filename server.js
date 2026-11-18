@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { createApiProxyHandler, isApiProxyPath } = require('./api-proxy.cjs');
 
 const PORT = process.env.PORT || 10000;
 
@@ -106,6 +107,7 @@ function sendFile(filePath, res, method) {
 
 const CLERK_PROXY_PREFIX = '/api/__clerk';
 const CLERK_PROXY_UPSTREAM = 'https://welattr-api-test.onrender.com/api/__clerk';
+const proxyApiRequest = createApiProxyHandler({ upstreamBase: process.env.MMT_API_UPSTREAM_URL });
 const hopByHopHeaders = new Set([
   'connection', 'keep-alive', 'proxy-authenticate', 'proxy-authorization',
   'te', 'trailer', 'transfer-encoding', 'upgrade', 'host',
@@ -193,6 +195,11 @@ const server = http.createServer((req, res) => {
 
   if (requestPath === CLERK_PROXY_PREFIX || requestPath.startsWith(CLERK_PROXY_PREFIX + '/')) {
     void proxyClerkRequest(req, res, requestPath);
+    return;
+  }
+
+  if (isApiProxyPath(requestPath)) {
+    void proxyApiRequest(req, res, req.url);
     return;
   }
 
