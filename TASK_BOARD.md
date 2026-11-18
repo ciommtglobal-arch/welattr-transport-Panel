@@ -2,7 +2,7 @@
 
 Güncelleme tarihi: 2026-11-18 (Europe/Istanbul saat dilimi)
 
-Bu pano, kod deposunda doğrulanabilen hazırlık ve engelleri özetler. Kaynak dokümanlar ve sağlayıcı kanıtları esas alınır. Bu listedeki onay kutusu, tek başına resmî veya canlı işlem yetkisi değildir.
+Bu pano, kod deposunda doğrulanabilen hazırlık ve engelleri özetler. Hedef, rutin işleri insan eli değmeden dijital otomasyonla yürütmek; görevleri yalnız imza/kimlik doğrulaması, kurum/sağlayıcı engeli veya doğrulama istisnasında CIO kuyruğuna çıkarmaktır. Kaynak dokümanlar ve sağlayıcı kanıtları esas alınır. Bu listedeki onay kutusu, tek başına resmî veya canlı işlem yetkisi değildir.
 
 | ID | Görev | Sorumlu | Durum | Kanıt | Sonraki adım | CIO onayı |
 |---|---|---|---|---|---|---|
@@ -18,6 +18,7 @@ Bu pano, kod deposunda doğrulanabilen hazırlık ve engelleri özetler. Kaynak 
 ## Kısa takip kuralları
 
 - Her görev için kanıt bağlantısı, son kontrol zamanı, ortam ve sonraki adım tutulur.
+- Uygun görevler `AUTO_READY` → `AUTO_RUNNING` durumlarında dijital ilerler; imza `WAITING_SIGNATURE`, diğer istisnalar `NEEDS_HUMAN_EXCEPTION` olarak açıkça işaretlenir.
 - Durum değişikliği ancak yeni kanıtla yapılır.
 - Gizli değerler panoya yazılmaz; yalnız sağlayıcı ortamında saklanır.
 - Dış mesaj, finansal hareket, resmî başvuru, veritabanı migration ve production deploy ayrı CIO onayı ister.
