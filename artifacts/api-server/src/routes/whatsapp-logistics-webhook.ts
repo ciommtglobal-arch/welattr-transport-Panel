@@ -1,6 +1,5 @@
 import { Router, type IRouter } from "express";
 import { ensureLogisticsAutomation } from "../lib/logisticsAutomation";
-import { ReplitConnectors } from "@replit/connectors-sdk";
 import {
   db,
   logisticsInboundDraftsTable,
@@ -186,16 +185,24 @@ async function prepareReply(message: WhatsAppTextMessage) {
 
 async function sendWhatsAppReply(to: string, text: string) {
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  if (!phoneNumberId) throw new Error("WhatsApp phone number id is not configured.");
+  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  if (!phoneNumberId || !accessToken) {
+    throw new Error("WhatsApp Cloud API credentials are not configured.");
+  }
 
-  const apiVersion = process.env.WHATSAPP_GRAPH_API_VERSION || "v23.0";
-  const connectors = new ReplitConnectors();
-  const response = await connectors.proxy(
-    "whatsapp-business",
-    `/${apiVersion}/${phoneNumberId}/messages`,
+  const apiVersion = process.env.WHATSAPP_GRAPH_API_VERSION || "v27.0";
+  if (!/^v\\d+\\.\\d+$/.test(apiVersion)) {
+    throw new Error("WhatsApp Graph API version is invalid.");
+  }
+
+  const response = await fetch(
+    `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         messaging_product: "whatsapp",
         recipient_type: "individual",
@@ -203,6 +210,7 @@ async function sendWhatsAppReply(to: string, text: string) {
         type: "text",
         text: { body: text },
       }),
+      signal: AbortSignal.timeout(10_000),
     },
   );
   if (!response.ok) {
