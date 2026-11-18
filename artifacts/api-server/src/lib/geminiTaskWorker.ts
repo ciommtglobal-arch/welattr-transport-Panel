@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { GoogleGenAI } from "@google/genai";
 import { pool as databasePool } from "@workspace/db";
 import { logger as appLogger } from "./logger";
+import { getGeminiProviderFailure, isGeminiWorkerEnabled } from "./geminiTaskSafety";
 
 type DatabaseClient = {
   query<Row = Record<string, unknown>>(sql: string, values?: unknown[]): Promise<{ rows: Row[] }>;
@@ -37,18 +38,29 @@ type MemoryEntry = {
   recorded_at: Date | string;
 };
 
-function workerIsEnabled(env: NodeJS.ProcessEnv): boolean {
-  return env.GEMINI_TASK_WORKER_ENABLED === "true"
-    && env.GEMINI_FREE_TIER_ONLY_CONFIRMED === "true"
-    && Boolean(env.GEMINI_API_KEY?.trim());
-}
-
 async function addEvent(client: DatabaseClient, taskId: string, eventType: string, details: Record<string, unknown> = {}) {
   await client.query(
     `INSERT INTO public.ai_task_events (event_id, task_id, actor, event_type, details)
      VALUES ($1::uuid, $2::uuid, 'gemini', $3, $4::jsonb)`,
     [randomUUID(), taskId, eventType, JSON.stringify(details)],
   );
+}
+
+async function markStaleProcessingUnknown(client: DatabaseClient): Promise<void> {
+  const stale = await client.query<{ task_id: string }>(
+    `UPDATE public.ai_tasks
+        SET status = 'UNKNOWN_OUTCOME', error_code = 'WORKER_INTERRUPTED',
+            completed_at = NOW(), updated_at = NOW()
+      WHERE assigned_agent = 'gemini' AND status = 'PROCESSING'
+        AND updated_at < NOW() - INTERVAL '10 minutes'
+      RETURNING task_id`,
+  );
+  for (const row of stale.rows) {
+    await addEvent(client, row.task_id, "GEMINI_UNKNOWN_OUTCOME", {
+      reason: "worker_interrupted",
+      retry_allowed: false,
+    }).catch(() => {});
+  }
 }
 
 async function loadRelevantMemory(client: DatabaseClient, task: Task): Promise<MemoryEntry[]> {
@@ -97,8 +109,7 @@ async function claimNextTask(client: DatabaseClient): Promise<Task | null> {
        SELECT task_id FROM public.ai_tasks
         WHERE assigned_agent = 'gemini'
           AND attempt_count < 3
-          AND (status = 'QUEUED'
-            OR (status = 'PROCESSING' AND updated_at < NOW() - INTERVAL '10 minutes'))
+          AND status = 'QUEUED'
         ORDER BY created_at
         FOR UPDATE SKIP LOCKED
         LIMIT 1
@@ -114,6 +125,7 @@ async function claimNextTask(client: DatabaseClient): Promise<Task | null> {
 }
 
 async function processOne(client: DatabaseClient, apiKey: string): Promise<void> {
+  await markStaleProcessingUnknown(client);
   const recentCalls = await client.query<{ count: string }>(
     `SELECT COUNT(*)::text AS count
        FROM public.ai_task_events
@@ -151,34 +163,28 @@ async function processOne(client: DatabaseClient, apiKey: string): Promise<void>
     );
     await addEvent(client, task.task_id, "GEMINI_COMPLETED", {
       model: MODEL, memory_entries_used: memory.length, answer_characters: answer.length,
+      result_trust: "untrusted_advisory",
     }).catch(() => {
       appLogger.warn({ taskId: task.task_id }, "Gemini sonucu kaydedildi; tamamlanma olayı yazılamadı.");
     });
-    try {
-      await client.query(
-        `INSERT INTO public.ai_memory_entries
-           (memory_id, source, source_record_id, record_type, subject, content, metadata, recorded_at)
-         VALUES ($1::uuid, 'gemini', $2, 'ai_task_result', $3, $4, $5::jsonb, NOW())
-         ON CONFLICT (source, source_record_id) WHERE source_record_id IS NOT NULL DO NOTHING`,
-        [
-          randomUUID(),
-          `task:${task.task_id}`,
-          `Gemini görev sonucu: ${task.task_type}`,
-          answer.slice(0, 30_000),
-          JSON.stringify({ task_id: task.task_id, task_source: task.source, model: MODEL }),
-        ],
-      );
-    } catch {
-      appLogger.warn({ taskId: task.task_id }, "Gemini sonucu kaydedildi; hafıza kopyası yazılamadı.");
-    }
-  } catch {
+  } catch (error) {
+    const providerFailure = getGeminiProviderFailure(error);
     await client.query(
-      `UPDATE public.ai_tasks SET status = 'FAILED', error_code = 'GEMINI_REQUEST_FAILED',
-              updated_at = NOW() WHERE task_id = $1::uuid`,
+      `UPDATE public.ai_tasks SET status = 'UNKNOWN_OUTCOME', error_code = 'GEMINI_OUTCOME_UNKNOWN',
+              completed_at = NOW(), updated_at = NOW() WHERE task_id = $1::uuid`,
       [task.task_id],
     );
-    await addEvent(client, task.task_id, "GEMINI_FAILED", { error_code: "GEMINI_REQUEST_FAILED" }).catch(() => {});
-    appLogger.warn({ taskId: task.task_id }, "Gemini görevi tamamlanamadı; sağlayıcı ayrıntıları kaydedilmedi.");
+    await addEvent(client, task.task_id, "GEMINI_UNKNOWN_OUTCOME", {
+      error_code: "GEMINI_OUTCOME_UNKNOWN",
+      provider_http_status: providerFailure.httpStatus,
+      failure_category: providerFailure.category,
+      retry_allowed: false,
+    }).catch(() => {});
+    appLogger.warn({
+      taskId: task.task_id,
+      providerHttpStatus: providerFailure.httpStatus,
+      failureCategory: providerFailure.category,
+    }, "Gemini sonucu belirsiz; otomatik tekrar ve hafızaya aktarma durduruldu.");
   }
 }
 
@@ -198,12 +204,12 @@ export function startGeminiTaskWorker({
   env?: NodeJS.ProcessEnv;
   intervalMs?: number;
 } = {}): () => void {
-  if (!workerIsEnabled(env)) return () => {};
+  if (!isGeminiWorkerEnabled(env)) return () => {};
 
   let stopped = false;
   let busy = false;
   const run = async () => {
-    if (stopped || busy || !workerIsEnabled(env)) return;
+    if (stopped || busy || !isGeminiWorkerEnabled(env)) return;
     busy = true;
     let client: DatabaseClient | undefined;
     let locked = false;
