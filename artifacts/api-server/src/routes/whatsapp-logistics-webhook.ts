@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { ensureLogisticsAutomation } from "../lib/logisticsAutomation";
 import { ReplitConnectors } from "@replit/connectors-sdk";
+import { getWhatsAppLogisticsGate } from "../lib/whatsappLogisticsGate";
 import {
   db,
   logisticsInboundDraftsTable,
@@ -46,7 +47,7 @@ function toIntakeValues(draft: typeof logisticsInboundDraftsTable.$inferSelect) 
   } satisfies LogisticsIntakeValues;
 }
 
-async function prepareReply(message: WhatsAppTextMessage) {
+async function prepareReply(message: WhatsAppTextMessage, allowRealRequest: boolean) {
   return db.transaction(async (tx) => {
     // Serialize updates from one sender so two quick replies cannot overwrite
     // each other's fields or create duplicate active drafts.
@@ -61,7 +62,7 @@ async function prepareReply(message: WhatsAppTextMessage) {
       return {
         id: priorMessage.id,
         replyText: priorMessage.replyText,
-        alreadySent: priorMessage.replyStatus === "sent",
+        alreadySent: true,
       };
     }
 
@@ -82,7 +83,7 @@ async function prepareReply(message: WhatsAppTextMessage) {
       return {
         id: duplicate.id,
         replyText: duplicate.replyText,
-        alreadySent: duplicate.replyStatus === "sent",
+        alreadySent: true,
       };
     }
 
@@ -138,6 +139,8 @@ async function prepareReply(message: WhatsAppTextMessage) {
     let replyText: string;
     if (missingFields.length > 0) {
       replyText = buildMissingInformationReply(missingFields, parsed.invalidFields);
+    } else if (!allowRealRequest) {
+      replyText = "Bilgiler taslak olarak kaydedildi; yetkili incelemesi tamamlanmadan lojistik talebi açılmadı.";
     } else {
       const [request] = await tx
         .insert(logisticsRequestsTable)
@@ -241,6 +244,11 @@ router.post("/webhook/whatsapp", async (req, res): Promise<void> => {
     res.sendStatus(401);
     return;
   }
+  const gates = getWhatsAppLogisticsGate(process.env);
+  if (!gates.intakeEnabled) {
+    res.status(200).json({ received: true, skipped: "disabled", provider_called: false, external_message: "not_sent" });
+    return;
+  }
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   if (!phoneNumberId) {
     res.status(503).json({ error: "WhatsApp phone number id is not configured." });
@@ -255,16 +263,18 @@ router.post("/webhook/whatsapp", async (req, res): Promise<void> => {
     return;
   }
   const messages = extractWhatsAppTextMessages(payload, phoneNumberId);
+  let providerCalled = false;
   try {
     for (const message of messages) {
-      const reply = await prepareReply(message);
-      if (reply.alreadySent || !reply.replyText) continue;
+      const reply = await prepareReply(message, gates.createRealRequests);
+      if (reply.alreadySent || !reply.replyText || !gates.autoReplyEnabled) continue;
 
       await db
         .update(logisticsInboundMessagesTable)
         .set({ replyAttempts: sql`${logisticsInboundMessagesTable.replyAttempts} + 1` })
         .where(eq(logisticsInboundMessagesTable.id, reply.id));
       try {
+        providerCalled = true;
         await sendWhatsAppReply(message.senderPhone, reply.replyText);
         await db
           .update(logisticsInboundMessagesTable)
@@ -286,7 +296,7 @@ router.post("/webhook/whatsapp", async (req, res): Promise<void> => {
     return;
   }
 
-  res.status(200).json({ received: true });
+  res.status(200).json({ received: true, provider_called: providerCalled, external_message: providerCalled ? "sent" : "not_sent" });
 });
 
 router.get("/logistics/inbound-drafts", requireStaff, async (_req, res): Promise<void> => {
