@@ -5,7 +5,7 @@ const {
   createApiProxyHandler,
   isApiProxyPath,
   parseApiUpstreamBase,
-} = require('../../api-proxy.cjs');
+} = require('../../../api-proxy.cjs');
 
 function responseRecorder() {
   return {
