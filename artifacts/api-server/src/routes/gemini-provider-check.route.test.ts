@@ -40,6 +40,20 @@ describe("Gemini provider-check route authorization", () => {
     expect(response.status).toBe(403);
     expect(response.body.error).toMatch(/kurucu/i);
     expect(provider.generateContent).not.toHaveBeenCalled();
+
+    // A subsequent authorized request proves the rejected request did not consume the one-shot lock.
+    process.env.NODE_ENV = "production";
+    process.env.GEMINI_PROVIDER_CHECK_ENABLED = "true";
+    process.env.GEMINI_FREE_TIER_ONLY_CONFIRMED = "true";
+    process.env.GEMINI_API_KEY = "test-only-key";
+    provider.generateContent.mockResolvedValue({ text: "MMT-GEMINI-PING-OK" });
+
+    const authorized = await request(app)
+      .get("/gemini/provider-check")
+      .set("x-test-user-id", "founder-test-user");
+
+    expect(authorized.status).toBe(200);
+    expect(provider.generateContent).toHaveBeenCalledTimes(1);
   });
 
   it("requires a signed-in user before the provider-check route", async () => {
