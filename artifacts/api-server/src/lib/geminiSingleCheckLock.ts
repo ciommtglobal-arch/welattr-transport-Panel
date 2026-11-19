@@ -93,6 +93,7 @@ export function createSingleCheckLock({
   }
 
   function markFinished(generation: number): boolean {
+    normalize();
     if (internalState.status !== "running" || internalState.activeGeneration !== generation) return false;
     internalState.activeGeneration = null;
     internalState.startedAt = null;
@@ -103,6 +104,7 @@ export function createSingleCheckLock({
   }
 
   function markFailed(generation: number, kind: FailureKind, now: number = nowFn()): boolean {
+    normalize(now);
     if (internalState.status !== "running" || internalState.activeGeneration !== generation) return false;
     internalState.activeGeneration = null;
     internalState.startedAt = null;
