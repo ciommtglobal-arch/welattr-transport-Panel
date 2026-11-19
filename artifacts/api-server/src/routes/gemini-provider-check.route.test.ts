@@ -22,7 +22,7 @@ vi.mock("@google/genai", () => ({
 import providerCheckRouter from "./gemini-provider-check";
 
 describe("Gemini provider-check route authorization", () => {
-  const app = express();
+  const app = express().use(providerCheckRouter);
 
   beforeEach(() => {
     process.env.MMT_FOUNDER_REVIEWER_CLERK_USER_ID = "founder-test-user";
