@@ -49,7 +49,7 @@ function maskProviderError(error: unknown): MaskedErrorResponse {
     ...(typeof value?.code === "number" || typeof value?.code === "string"
       ? { code: safeText(value.code) } : {}),
   };
-  return { statusCode: 502, body: { success: false, error: diagnostic } };
+  return { statusCode: 502, body: { success: false, model: process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash", error: diagnostic } };
 }
 
 // Express otherwise treats HEAD as GET; never let a probe spend a provider request.
@@ -79,7 +79,14 @@ router.get("/gemini/provider-check", async (req, res): Promise<void> => {
   const handleCheck = createSingleCheckHandler({
     lock: checkLock,
     classifyError: classifyProviderError,
-    maskError: maskProviderError,
+    maskError: (error, kind) => {
+      const masked = maskProviderError(error);
+      req.log?.warn(
+        { model, kind, error: masked.body.error },
+        "Gemini tek seferlik sağlayıcı kontrolü başarısız; hassas alanlar filtrelendi.",
+      );
+      return masked;
+    },
     runGeminiCheck: async () => {
       const baseUrl = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL?.trim();
       const ai = new GoogleGenAI({
@@ -99,46 +106,14 @@ router.get("/gemini/provider-check", async (req, res): Promise<void> => {
       req.log?.info({ model }, "Gemini tek seferlik sağlayıcı kontrolü başarılı.");
       return { model, reply };
     },
+    successResponse: ({ model: resultModel, reply }) => ({
+      success: true,
+      model: resultModel,
+      reply,
+    }),
   });
 
-  // The one-shot lock and provider call are shared by all requests in this process.
-  const originalMask = maskProviderError;
-  const handleWithLogging = createSingleCheckHandler({
-    lock: checkLock,
-    classifyError: classifyProviderError,
-    maskError: (error, kind) => {
-      const masked = originalMask(error);
-      const diagnostic = (masked.body as { error?: unknown }).error;
-      req.log?.warn({ model, kind, diagnostic }, "Gemini tek seferlik sağlayıcı kontrolü başarısız; hassas alanlar filtrelendi.");
-      return masked;
-    },
-    runGeminiCheck: async () => {
-      const data = await handleCheckRun();
-      return { model, reply: data };
-    },
-  });
-
-  async function handleCheckRun(): Promise<string> {
-    const baseUrl = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL?.trim();
-    const ai = new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        ...(baseUrl ? { baseUrl, apiVersion: "" } : {}),
-        timeout: 45_000,
-      },
-    });
-    const result = await ai.models.generateContent({
-      model,
-      contents: "Reply with exactly: MMT-GEMINI-PING-OK",
-      config: { maxOutputTokens: 24, temperature: 0 },
-    });
-    const reply = result.text?.trim();
-    if (!reply) throw new Error("Empty model response");
-    req.log?.info({ model }, "Gemini tek seferlik sağlayıcı kontrolü başarılı.");
-    return reply;
-  }
-
-  await handleWithLogging(req, res);
+  await handleCheck(req, res);
 });
 
 export default router;
