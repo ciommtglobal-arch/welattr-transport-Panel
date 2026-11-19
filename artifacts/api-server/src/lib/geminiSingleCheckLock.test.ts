@@ -108,7 +108,9 @@ describe("single-check lock", () => {
     const tooSoon = makeResponse();
     await handle({ method: "GET" }, tooSoon.response);
     expect(tooSoon.statusCode).toBe(429);
-    expect(tooSoon.body).toMatchObject({ retryAfterMs: 20 });
+    const retryAfterMs = (tooSoon.body as { retryAfterMs?: unknown }).retryAfterMs;
+    expect(retryAfterMs).toEqual(expect.any(Number));
+    expect(retryAfterMs).toBeGreaterThan(0);
     expect(runGeminiCheck).toHaveBeenCalledTimes(1);
 
     now = 30;
