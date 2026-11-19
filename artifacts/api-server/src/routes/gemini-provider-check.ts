@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { Router, type IRouter } from "express";
+import { requireLogisticsFounder } from "../lib/logisticsWorkflowAuth";
 import {
   createSingleCheckHandler,
   createSingleCheckLock,
@@ -14,9 +15,9 @@ function safeText(value: unknown): string | undefined {
   if (value === undefined || value === null) return undefined;
   return String(value)
     .replace(/AIza[0-9A-Za-z_-]{20,}/g, "[REDACTED_API_KEY]")
-    .replace(/((?:api[_-]?key|authorization|bearer|token|password|secret)\s*[:=]\s*)[^,\s"'&]+/gi, "$1[REDACTED]")
-    .replace(/([?&][^=\s&]+)=([^&\s]+)/g, "$1=[REDACTED]")
-    .replace(/(https?:\/\/[^\s?#]+)\?[^\s#]*/gi, "$1?[REDACTED]")
+    .replace(/((?:api[_-]?key|authorization|bearer|token|password|secret)\\s*[:=]\\s*)[^,\\s"'&]+/gi, "$1[REDACTED]")
+    .replace(/([?&][^=\\s&]+)=([^&\\s]+)/g, "$1=[REDACTED]")
+    .replace(/(https?:\\/\\/[^\\s?#]+)\\?[^\\s#]*/gi, "$1?[REDACTED]")
     .slice(0, 200);
 }
 
@@ -49,18 +50,28 @@ function maskProviderError(error: unknown): MaskedErrorResponse {
     ...(typeof value?.code === "number" || typeof value?.code === "string"
       ? { code: safeText(value.code) } : {}),
   };
-  return { statusCode: 502, body: { success: false, model: process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash", error: diagnostic } };
+  return {
+    statusCode: 502,
+    body: {
+      success: false,
+      model: process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash",
+      error: diagnostic,
+    },
+  };
 }
 
-// Express otherwise treats HEAD as GET; never let a probe spend a provider request.
-router.head("/gemini/provider-check", (_req, res): void => {
+// Express otherwise treats HEAD as GET; authorize first and never spend a provider request.
+router.head("/gemini/provider-check", (req, res): void => {
   res.set("Cache-Control", "no-store");
-  res.set("Allow", "GET");
+  if (!requireLogisticsFounder(req, res)) return;
+  res.setHeader("Allow", "GET");
   res.status(405).end();
 });
 
 router.get("/gemini/provider-check", async (req, res): Promise<void> => {
   res.set("Cache-Control", "no-store");
+  if (!requireLogisticsFounder(req, res)) return;
+
   if (process.env.NODE_ENV !== "production"
       || process.env.GEMINI_PROVIDER_CHECK_ENABLED !== "true"
       || process.env.GEMINI_FREE_TIER_ONLY_CONFIRMED !== "true") {
@@ -114,6 +125,19 @@ router.get("/gemini/provider-check", async (req, res): Promise<void> => {
   });
 
   await handleCheck(req, res);
+});
+
+router.all("/gemini/provider-check", (req, res, next): void => {
+  // Leave CORS preflight handling to the application CORS middleware.
+  if (req.method.toUpperCase() === "OPTIONS") {
+    next();
+    return;
+  }
+
+  if (!requireLogisticsFounder(req, res)) return;
+  res.set("Cache-Control", "no-store");
+  res.setHeader("Allow", "GET");
+  res.status(405).end();
 });
 
 export default router;
