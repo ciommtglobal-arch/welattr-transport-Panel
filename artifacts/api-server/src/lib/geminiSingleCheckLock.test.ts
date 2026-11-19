@@ -32,10 +32,12 @@ function makeHandler({
   lock = createSingleCheckLock(),
   runGeminiCheck = vi.fn(async () => "ok"),
   classifyError = (() => "transient" as FailureKind),
+  nowFn = () => Date.now(),
 }: {
   lock?: ReturnType<typeof createSingleCheckLock>;
   runGeminiCheck?: ReturnType<typeof vi.fn<() => Promise<string>>>;
   classifyError?: (error: unknown) => FailureKind;
+  nowFn?: () => number;
 } = {}) {
   return {
     lock,
@@ -45,6 +47,7 @@ function makeHandler({
       runGeminiCheck,
       classifyError,
       maskError: () => ({ statusCode: 502, body: { success: false } }),
+      nowFn,
     }),
   };
 }
@@ -73,6 +76,7 @@ describe("single-check lock", () => {
       lock,
       runGeminiCheck,
       classifyError: () => "config",
+      nowFn: () => now,
     });
 
     const failed = makeResponse();
@@ -93,7 +97,7 @@ describe("single-check lock", () => {
     const runGeminiCheck = vi.fn()
       .mockRejectedValueOnce(new Error("temporary provider failure"))
       .mockResolvedValueOnce("recovered");
-    const { handle } = makeHandler({ lock, runGeminiCheck });
+    const { handle } = makeHandler({ lock, runGeminiCheck, nowFn: () => now });
 
     const failed = makeResponse();
     await handle({ method: "GET" }, failed.response);
