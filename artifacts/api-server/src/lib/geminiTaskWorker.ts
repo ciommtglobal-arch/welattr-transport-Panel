@@ -37,6 +37,45 @@ type MemoryEntry = {
   recorded_at: Date | string;
 };
 
+type UnknownRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): UnknownRecord {
+  return value !== null && typeof value === "object" ? value as UnknownRecord : {};
+}
+
+function safeErrorText(value: unknown): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  return String(value)
+    .replace(/AIza[0-9A-Za-z_-]{20,}/g, "[REDACTED_API_KEY]")
+    .replace(/((?:api[_-]?key|authorization|bearer|token|password|secret)\s*[:=]\s*)[^,\s"'&]+/gi, "$1[REDACTED]")
+    .replace(/([?&][^=\s&]+)=([^&\s]+)/g, "$1=[REDACTED]")
+    .replace(/(https?:\/\/[^\s?#]+)\?[^\s#]*/gi, "$1?[REDACTED]")
+    .slice(0, 240);
+}
+
+function safeGeminiError(error: unknown): UnknownRecord {
+  const root = asRecord(error);
+  const nested = asRecord(root.error);
+  const detailList = Array.isArray(root.errorDetails)
+    ? root.errorDetails
+    : Array.isArray(root.details)
+      ? root.details
+      : Array.isArray(nested.details)
+        ? nested.details
+        : [];
+  const info = detailList.map(asRecord).find((item) => item.reason || item.domain);
+  const status = root.status ?? root.statusCode ?? nested.code;
+  const code = root.code ?? nested.status;
+  return {
+    name: safeErrorText(root.name),
+    message: safeErrorText(root.message) ?? "Unknown Gemini error",
+    ...(typeof status === "number" || typeof status === "string" ? { status: safeErrorText(status) } : {}),
+    ...(typeof code === "number" || typeof code === "string" ? { code: safeErrorText(code) } : {}),
+    ...(info?.reason ? { reason: safeErrorText(info.reason) } : {}),
+    ...(info?.domain ? { domain: safeErrorText(info.domain) } : {}),
+  };
+}
+
 function workerIsEnabled(env: NodeJS.ProcessEnv): boolean {
   return env.GEMINI_TASK_WORKER_ENABLED === "true"
     && env.GEMINI_FREE_TIER_ONLY_CONFIRMED === "true"
@@ -125,8 +164,10 @@ async function processOne(client: DatabaseClient, apiKey: string): Promise<void>
   const task = await claimNextTask(client);
   if (!task) return;
 
+  let phase = "load_memory";
   try {
     const memory = await loadRelevantMemory(client, task);
+    phase = "record_start";
     await addEvent(client, task.task_id, "GEMINI_STARTED", {
       model: MODEL,
       memory_entries_used: memory.length,
@@ -134,15 +175,18 @@ async function processOne(client: DatabaseClient, apiKey: string): Promise<void>
       worker_call_budget_per_24_hours: MAX_CALLS_PER_24_HOURS,
     });
 
+    phase = "provider_request";
     const ai = new GoogleGenAI({ apiKey, httpOptions: { timeout: 30_000 } });
     const response = await ai.models.generateContent({
       model: MODEL,
       contents: buildPrompt(task, memory),
       config: { systemInstruction: SYSTEM_INSTRUCTION, temperature: 0.25, maxOutputTokens: 1_200 },
     });
+    phase = "validate_response";
     const answer = response.text?.trim();
     if (!answer) throw new Error("EMPTY_RESPONSE");
 
+    phase = "persist_result";
     await client.query(
       `UPDATE public.ai_tasks SET status = 'COMPLETED', result = $2,
               error_code = NULL, completed_at = NOW(), updated_at = NOW()
@@ -171,14 +215,22 @@ async function processOne(client: DatabaseClient, apiKey: string): Promise<void>
     } catch {
       appLogger.warn({ taskId: task.task_id }, "Gemini sonucu kaydedildi; hafıza kopyası yazılamadı.");
     }
-  } catch {
+  } catch (error: unknown) {
+    const diagnostic = safeGeminiError(error);
     await client.query(
       `UPDATE public.ai_tasks SET status = 'FAILED', error_code = 'GEMINI_REQUEST_FAILED',
               updated_at = NOW() WHERE task_id = $1::uuid`,
       [task.task_id],
     );
-    await addEvent(client, task.task_id, "GEMINI_FAILED", { error_code: "GEMINI_REQUEST_FAILED" }).catch(() => {});
-    appLogger.warn({ taskId: task.task_id }, "Gemini görevi tamamlanamadı; sağlayıcı ayrıntıları kaydedilmedi.");
+    await addEvent(client, task.task_id, "GEMINI_FAILED", {
+      error_code: "GEMINI_REQUEST_FAILED",
+      phase,
+      diagnostic,
+    }).catch(() => {});
+    appLogger.warn(
+      { taskId: task.task_id, phase, geminiError: diagnostic },
+      "Gemini görevi tamamlanamadı; gizli alanlar filtrelenerek hata ayrıntısı kaydedildi.",
+    );
   }
 }
 
