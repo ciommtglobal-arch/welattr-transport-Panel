@@ -6,6 +6,7 @@ import logisticsPilotWorkspaceRouter from "./logistics-pilot-workspace";
 import logisticsAutomationRouter from "./logistics-automation";
 import logisticsPoolRouter from "./logistics-pool";
 import geminiWorkspaceRouter from "./gemini-workspace";
+import geminiProviderCheckRouter from "./gemini-provider-check";
 import aiBridgeRouter from "./ai-bridge";
 import limitApplicationsRouter from "./limit-applications";
 import storageRouter from "./storage";
@@ -51,6 +52,7 @@ router.use(logisticsPilotWorkspaceRouter);
 router.use(logisticsAutomationRouter);
 router.use(logisticsPoolRouter);
 router.use(geminiWorkspaceRouter);
+router.use(geminiProviderCheckRouter);
 // Authenticated shared-memory endpoints mount under /api/ai.
 router.use("/ai", aiBridgeRouter);
 router.use(limitApplicationsRouter);

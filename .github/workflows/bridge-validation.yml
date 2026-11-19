@@ -43,5 +43,5 @@ jobs:
       - name: Build API server
         run: pnpm --filter @workspace/api-server build
 
-      - name: Run WhatsApp logistics unit tests
-        run: pnpm --filter @workspace/api-server exec vitest run src/lib/whatsappLogisticsGate.test.ts src/lib/whatsappLogisticsIntake.test.ts
+      - name: Run focused AI and logistics unit tests
+        run: pnpm --filter @workspace/api-server exec vitest run src/lib/geminiSingleCheckLock.test.ts src/lib/whatsappLogisticsGate.test.ts src/lib/whatsappLogisticsIntake.test.ts
