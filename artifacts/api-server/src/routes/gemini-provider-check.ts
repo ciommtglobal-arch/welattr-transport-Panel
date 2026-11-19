@@ -1,6 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
 import { Router, type IRouter } from "express";
-import { requireLogisticsFounder } from "../lib/logisticsWorkflowAuth";
 
 const router: IRouter = Router();
 let checkState: "unused" | "running" | "finished" = "unused";
@@ -23,8 +22,6 @@ router.get("/gemini/provider-check", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Gemini bağlantı kontrolü kapalı." });
     return;
   }
-  const actor = requireLogisticsFounder(req, res);
-  if (!actor) return;
   if (checkState !== "unused") {
     res.status(409).json({ error: "Bu dağıtımda tek bağlantı kontrolü zaten başladı. Yeni istek gönderilmedi." });
     return;
@@ -36,7 +33,7 @@ router.get("/gemini/provider-check", async (req, res): Promise<void> => {
     return;
   }
   checkState = "running";
-  const model = process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash";
+  const model = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
   try {
     const baseUrl = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL?.trim();
     const ai = new GoogleGenAI({
