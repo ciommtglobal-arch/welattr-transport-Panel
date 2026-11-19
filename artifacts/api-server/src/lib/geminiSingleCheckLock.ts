@@ -140,6 +140,7 @@ export interface CreateSingleCheckHandlerParams<TResult> {
   classifyError: (err: unknown) => FailureKind;
   maskError: (err: unknown, kind: FailureKind) => MaskedErrorResponse;
   nowFn?: () => number;
+  successResponse?: (data: TResult) => unknown;
 }
 
 export function createSingleCheckHandler<TResult>({
@@ -148,6 +149,7 @@ export function createSingleCheckHandler<TResult>({
   classifyError,
   maskError,
   nowFn = () => Date.now(),
+  successResponse = (data: TResult) => ({ success: true, data }),
 }: CreateSingleCheckHandlerParams<TResult>) {
   return async function handleSingleCheck(req: RequestLike, res: ResponseLike): Promise<void> {
     if (isPrefetchOrNonActionableRequest(req)) {
@@ -188,7 +190,7 @@ export function createSingleCheckHandler<TResult>({
         res.status(409).json({ success: false, error: "Bu kontrolün süresi doldu; sonucu artık geçerli değil." });
         return;
       }
-      res.status(200).json({ success: true, data });
+      res.status(200).json(successResponse(data));
     } catch (err: unknown) {
       const kind = classifyError(err);
       const currentRun = lock.markFailed(runId, kind, nowFn());
