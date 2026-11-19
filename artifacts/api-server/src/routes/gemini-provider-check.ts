@@ -8,11 +8,19 @@ function safeText(value: unknown): string | undefined {
   if (value === undefined || value === null) return undefined;
   return String(value)
     .replace(/AIza[0-9A-Za-z_-]{20,}/g, "[REDACTED_API_KEY]")
-    .replace(/((?:api[_-]?key|authorization|bearer|token|password|secret)\s*[:=]\s*)[^,\s"'&]+/gi, "$1[REDACTED]")
-    .replace(/([?&][^=\s&]+)=([^&\s]+)/g, "$1=[REDACTED]")
-    .replace(/(https?:\/\/[^\s?#]+)\?[^\s#]*/gi, "$1?[REDACTED]")
+    .replace(/((?:api[_-]?key|authorization|bearer|token|password|secret)\\s*[:=]\\s*)[^,\\s"'&]+/gi, "$1[REDACTED]")
+    .replace(/([?&][^=\\s&]+)=([^&\\s]+)/g, "$1=[REDACTED]")
+    .replace(/(https?:\\/\\/[^\\s?#]+)\\?[^\\s#]*/gi, "$1?[REDACTED]")
     .slice(0, 200);
 }
+
+// Express otherwise treats HEAD as GET and would trigger the one-shot provider call
+// when a browser, proxy, or monitor probes this URL.
+router.head("/gemini/provider-check", (_req, res): void => {
+  res.set("Cache-Control", "no-store");
+  res.set("Allow", "GET");
+  res.status(405).end();
+});
 
 router.get("/gemini/provider-check", async (req, res): Promise<void> => {
   res.set("Cache-Control", "no-store");
