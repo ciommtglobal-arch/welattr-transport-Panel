@@ -42,6 +42,16 @@ describe("single-check lock", () => {
     expect(lock.state.status).toBe("finished");
   });
 
+  it("rejects a provider response that arrives after TTL even if no newer request arrived", () => {
+    let now = 0;
+    const lock = createSingleCheckLock({ ttlMs: 100, nowFn: () => now });
+    const run = lock.markRunning();
+    now = 101;
+    expect(lock.markFinished(run)).toBe(false);
+    expect(lock.state.status).toBe("failed");
+    expect(lock.state.activeGeneration).toBeNull();
+  });
+
   it("marks configuration failures blocked and transient failures retryable after cooldown", () => {
     const lock = createSingleCheckLock({ cooldownMs: 30, nowFn: () => 0 });
     const configRun = lock.markRunning(0);
