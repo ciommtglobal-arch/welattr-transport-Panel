@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { createApiProxyHandler, getClerkProxyUpstream, isApiProxyPath, parseApiUpstreamBase } = require('./api-proxy.cjs');
 
 const PORT = process.env.PORT || 10000;
 
@@ -105,13 +106,20 @@ function sendFile(filePath, res, method) {
 }
 
 const CLERK_PROXY_PREFIX = '/api/__clerk';
-const CLERK_PROXY_UPSTREAM = 'https://welattr-api-test.onrender.com/api/__clerk';
+const apiUpstreamBase = parseApiUpstreamBase(process.env.MMT_API_UPSTREAM_URL);
+const CLERK_PROXY_UPSTREAM = getClerkProxyUpstream(apiUpstreamBase);
+const proxyApiRequest = createApiProxyHandler({ upstreamBase: apiUpstreamBase });
 const hopByHopHeaders = new Set([
   'connection', 'keep-alive', 'proxy-authenticate', 'proxy-authorization',
   'te', 'trailer', 'transfer-encoding', 'upgrade', 'host',
 ]);
 
 async function proxyClerkRequest(req, res, requestPath) {
+  if (!CLERK_PROXY_UPSTREAM) {
+    res.writeHead(503, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+    res.end(JSON.stringify({ error: 'Authentication service is not configured.' }));
+    return;
+  }
   const suffix = requestPath.slice(CLERK_PROXY_PREFIX.length);
   const query = new URL(req.url, 'http://localhost').search;
   const headers = new Headers();
@@ -193,6 +201,11 @@ const server = http.createServer((req, res) => {
 
   if (requestPath === CLERK_PROXY_PREFIX || requestPath.startsWith(CLERK_PROXY_PREFIX + '/')) {
     void proxyClerkRequest(req, res, requestPath);
+    return;
+  }
+
+  if (isApiProxyPath(requestPath)) {
+    void proxyApiRequest(req, res, req.url);
     return;
   }
 

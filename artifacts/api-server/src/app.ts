@@ -1,5 +1,6 @@
 import express, { type Express } from "express";
 import cors from "cors";
+import { isCorsOriginAllowed, parseCorsAllowedOrigins } from "./lib/corsOriginPolicy";
 import pinoHttp from "pino-http";
 import { clerkMiddleware } from "@clerk/express";
 import { publishableKeyFromHost } from "@clerk/shared/keys";
@@ -36,7 +37,13 @@ app.use(
   }),
 );
 app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
-app.use(cors({ credentials: true, origin: true }));
+const allowedCorsOrigins = parseCorsAllowedOrigins(process.env.MMT_CORS_ALLOWED_ORIGINS);
+app.use(cors({
+  credentials: true,
+  origin(origin, callback) {
+    callback(null, isCorsOriginAllowed(origin, allowedCorsOrigins));
+  },
+}));
 app.use(
   clerkMiddleware((req) => ({
     publishableKey: publishableKeyFromHost(
