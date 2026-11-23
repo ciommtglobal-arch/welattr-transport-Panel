@@ -40,6 +40,11 @@ function parseApiUpstreamBase(value) {
   return parsed.origin;
 }
 
+function getClerkProxyUpstream(upstreamBase) {
+  const base = parseApiUpstreamBase(upstreamBase);
+  return base ? `${base}/api/__clerk` : null;
+}
+
 function buildApiProxyTarget(upstreamBase, requestUrl) {
   const base = parseApiUpstreamBase(upstreamBase);
   if (!base) return null;
@@ -112,6 +117,7 @@ function createApiProxyHandler({ upstreamBase, fetchImpl = fetch } = {}) {
 module.exports = {
   buildApiProxyTarget,
   createApiProxyHandler,
+  getClerkProxyUpstream,
   isApiProxyPath,
   parseApiUpstreamBase,
 };
