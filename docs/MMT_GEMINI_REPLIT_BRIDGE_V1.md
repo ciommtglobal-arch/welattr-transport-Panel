@@ -18,13 +18,33 @@
 - Eski `STATE.md` 51 mock/yerel test ve typecheck başarısı kaydediyor; bu, güncel HEAD veya gerçek sağlayıcı bağlantısı için test kanıtı değildir.
 - Eski WelatTR API Test, WelatTR Panel 1–2 ve Telegram bot çalışmaları tarihsel kaynaklar olarak korunur. Ayrı eski Replit uygulamalarının tam dosyaları ve Gemini sohbet geçmişinin otomatik aktarımı doğrulanmadı.
 
-## V1 veri sözleşmesi
+## V1 veri sözleşmesi — Gemini bağımsız inceleme görüşü (23 Kasım 2026)
 
-Replit kaynak koduyla yeniden eşleştirildi: `mmtReviewSummaryContract.ts` **iki ayrı, salt-okunur kaynak projeksiyonu** sunar. Kurumsal takip için gerçek GET alanları `id` (UUID), `version`, `approval` (`pending_review`, `approved`, `rejected`, `revision_requested`) ve `at` (UTC ISO) kullanılır; çıktıda `sourceSystem`, `recordId`, `version`, `approval`, `at` bulunur. Manuel Gemini incelemesi için mevcut LIST yanıtının `id` (review UUID), `source` (`gmail`, `case`, `task`), `createdAt`, `respondedAt`, `decidedAt`, `decision` alanları kullanılır; çıktıda `reviewMode: manual_unverified` açıkça belirtilir. Hiçbir `taskStatus`, `geminiReviewStatus`, `cioDecisionStatus` veya `updatedAt` **uydurulmaz**. TASK_BOARD.md metin kimlikleri, ai_tasks ve mesaj özetleri bu ilk projeksiyona dahil edilmez.
+Gemini'nin CIO tarafından iletilen teknik değerlendirmesiyle ilk köprü kapsamı **yalnız kurumsal takip kaydının dört alanına** indirildi. Mevcut Replit kaynak GET `/api/staff/corporate-follow-up` yanıtında bu alanlar doğrudan var; diğer kaynaklardan sahte kimlik, sürüm veya durum üretmeyeceğiz.
 
-İlk sürümde **başlık, ham Gemini yanıtı, prompt, memory content, e-posta, belge, Clerk user ID, owner scope ve gizli anahtar** taşınmaz. Kurumsal takip `approval` alanı bir dosya durumudur; manuel Gemini incelemesindeki `decision` ayrı bir insan inceleme kararıdır. Bunların hiçbiri tek başına doğrulanmış e-imza veya resmî onay anlamına gelmez. `UNKNOWN_OUTCOME`, `UNVERIFIED` ve `NOT_CONNECTED` gibi bu kaynaklarda bulunmayan durumlar otomatik üretilmez.
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "version": 3,
+  "approval": "revision_requested",
+  "at": "2026-11-23T20:00:00.000Z"
+}
+```
 
-Saf dönüştürücüler `projectAuthorizedCorporateFollowUp` ve `projectAuthorizedManualGeminiReview` kaydın UUID'sini kaynak sunucunun **önceden yetkilendirdiği** UUID ile karşılaştırır. **Bu fonksiyonlar tek başına kullanıcıyı veya tenant'ı yetkilendirmez.** Kaynak sunucu `owner_clerk_user_id`/ilgili dosya ve görev sahipliğini ayrıca doğrulamalı; portalın Clerk issuer/audience ve şirket üyeliği için sunucu tarafında açık güven ilişkisi kurulmalıdır. Tarayıcıdan gönderilen owner ID, e-posta veya Clerk user ID yetki kanıtı değildir.
+Yukarıdaki kayıt **yalnız sentetik şema örneğidir**, gerçek dosya veya canlı API sonucu değildir.
+
+| Alan | Kaynak | Kural |
+| --- | --- | --- |
+| `id` | `id` | Kaynakta yetkilendirilmiş dosyanın UUID'si ile birebir eşleşmeli |
+| `version` | `version` | Pozitif güvenli tam sayı, otomatik varsayılan yok |
+| `approval` | `approval` | Yalnız `pending_review`, `approved`, `rejected`, `revision_requested`; bu **Gemini kararı veya e-imza değildir** |
+| `at` | `at` | Kaynaktaki gerçek UTC ISO olay zamanı, uydurma `updatedAt` yok |
+
+`data.status` (`pending`, `active`, `blocked`, `closed`) **v1'e alınmadı**. Gerçek kullanım gerekçesi ve ayrı testlerle gerekirse sonraki sürümde iş durumu olarak eklenebilir; AI görevi durumu sayılmaz.
+
+**Güvenlik sınırı:** `projectAuthorizedCorporateFollowUp` yalnız saf allowlist fonksiyonudur ve tek başına kayıt sahipliği doğrulamaz. Kaynak sunucu önce kurucu/Clerk erişimini ve `owner_clerk_user_id = actor` kapsamını doğrulamalı, sonra yalnız bu dört alanı seçip **ham `data`, `actor`, `hash`, `note`, geçmiş, prompt, belge, e-posta, API anahtarı veya başka kişisel bilgileri ağ üzerinden göndermemelidir**. Tarayıcıdan verilen ID veya `actor` yetki kanıtı değildir. Bu kaynak tarafı değişiklik **henüz yapılmadı**; PR yalnız hazırlık kodunu ve testleri içerir.
+
+**Manuel Gemini incelemeleri ayrı faz:** Mevcut `POST /api/staff/corporate-follow-up/gemini-review`, `action: "list"` çıktısındaki `id` inceleme UUID'sidir, dosya UUID'si değildir. `source` hedef türü (`gmail`, `case`, `task`), `decision` insan inceleme kararıdır; `version`, `updatedAt`, `geminiReviewStatus`, sağlayıcı/model kanıtı yoktur. `case` hedefi tebligat/notice içermez. Bunlar **v1 köprüsüne dahil edilmez**; mevcut Replit kodu ve geçmişi korunarak ayrı yetki/sözleşme incelemesine alınır.
 
 ## Gerçek bağlantı için kabul kapıları (henüz tamamlanmadı)
 
@@ -37,6 +57,6 @@ Saf dönüştürücüler `projectAuthorizedCorporateFollowUp` ve `projectAuthori
 
 ## Bu PR'ın gerçek kapsamı
 
-- Saf, fail-closed, tenant/source karşılaştırmalı **salt okunur veri projeksiyonu** ve Vitest testleri.
+- Kaynakta önceden yetkilendirilmiş UUID ile eşleşen, yalnız dört gerçek alanı yansıtan saf, fail-closed **kurumsal takip projeksiyonu** ve Vitest testleri. **Tenant/owner doğrulaması henüz bu fonksiyonda veya çalışan bir gateway'de yoktur.**
 - Kaynak envanteri ve sonraki köprü/Clerk/Neon doğrulama adımları.
 - **Henüz yok:** çalışan gateway, Replit portal değişikliği, ortak DB erişimi, Gemini sohbet hafızası ithalatı, otomatik worker, gerçek entegrasyon veya üretim dağıtımı.
