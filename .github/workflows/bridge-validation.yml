@@ -45,3 +45,6 @@ jobs:
 
       - name: Run WhatsApp logistics unit tests
         run: pnpm --filter @workspace/api-server exec vitest run src/lib/whatsappLogisticsGate.test.ts src/lib/whatsappLogisticsIntake.test.ts
+
+      - name: Test MMT Gemini / Replit read-only bridge contract
+        run: pnpm --filter @workspace/api-server exec vitest run src/lib/mmtReviewSummaryContract.test.ts
