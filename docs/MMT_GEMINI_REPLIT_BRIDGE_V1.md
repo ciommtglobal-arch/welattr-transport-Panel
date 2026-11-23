@@ -20,18 +20,18 @@
 
 ## V1 veri sözleşmesi
 
-`mmtReviewSummaryContract.ts` yalnız şu alanları dışarı yansıtır: `sourceSystem`, `recordId` (UUID), `version`, `taskStatus`, `geminiReviewStatus`, `cioDecisionStatus`, `updatedAt`.
+Replit kaynak koduyla yeniden eşleştirildi: `mmtReviewSummaryContract.ts` **iki ayrı, salt-okunur kaynak projeksiyonu** sunar. Kurumsal takip için gerçek GET alanları `id` (UUID), `version`, `approval` (`pending_review`, `approved`, `rejected`, `revision_requested`) ve `at` (UTC ISO) kullanılır; çıktıda `sourceSystem`, `recordId`, `version`, `approval`, `at` bulunur. Manuel Gemini incelemesi için mevcut LIST yanıtının `id` (review UUID), `source` (`gmail`, `case`, `task`), `createdAt`, `respondedAt`, `decidedAt`, `decision` alanları kullanılır; çıktıda `reviewMode: manual_unverified` açıkça belirtilir. Hiçbir `taskStatus`, `geminiReviewStatus`, `cioDecisionStatus` veya `updatedAt` **uydurulmaz**. TASK_BOARD.md metin kimlikleri, ai_tasks ve mesaj özetleri bu ilk projeksiyona dahil edilmez.
 
-İlk sürümde **başlık, ham Gemini yanıtı, prompt, memory content, e-posta, belge, Clerk user ID, owner scope ve gizli anahtar** taşınmaz. `UNKNOWN_OUTCOME` ve `UNVERIFIED` açıkça temsil edilir; `APPROVED` yalnız kaynakta kaydedilmiş karar durumudur, doğrulanmış e-imza veya resmî onay anlamına gelmez.
+İlk sürümde **başlık, ham Gemini yanıtı, prompt, memory content, e-posta, belge, Clerk user ID, owner scope ve gizli anahtar** taşınmaz. Kurumsal takip `approval` alanı bir dosya durumudur; manuel Gemini incelemesindeki `decision` ayrı bir insan inceleme kararıdır. Bunların hiçbiri tek başına doğrulanmış e-imza veya resmî onay anlamına gelmez. `UNKNOWN_OUTCOME`, `UNVERIFIED` ve `NOT_CONNECTED` gibi bu kaynaklarda bulunmayan durumlar otomatik üretilmez.
 
-Saf dönüştürücü `projectAuthorizedReviewSummary` güvenilen owner scope ve kaynak kimliğiyle kayıt kapsamını karşılaştırır. **Bu fonksiyon tek başına kullanıcıyı yetkilendirmez.** Beklenen kapsam yalnız sunucu tarafında doğrulanmış kimlik/üyelikten türetilmeli; kaynak sunucu kaydın sahibini yeniden doğrulamalıdır. Tarayıcıdan gönderilen owner ID, e-posta veya Clerk user ID tek başına güvenilir değildir.
+Saf dönüştürücüler `projectAuthorizedCorporateFollowUp` ve `projectAuthorizedManualGeminiReview` kaydın UUID'sini kaynak sunucunun **önceden yetkilendirdiği** UUID ile karşılaştırır. **Bu fonksiyonlar tek başına kullanıcıyı veya tenant'ı yetkilendirmez.** Kaynak sunucu `owner_clerk_user_id`/ilgili dosya ve görev sahipliğini ayrıca doğrulamalı; portalın Clerk issuer/audience ve şirket üyeliği için sunucu tarafında açık güven ilişkisi kurulmalıdır. Tarayıcıdan gönderilen owner ID, e-posta veya Clerk user ID yetki kanıtı değildir.
 
 ## Gerçek bağlantı için kabul kapıları (henüz tamamlanmadı)
 
 1. Replit portal, Replit pilot ve Render servislerinin kaynak repo, dal, commit, Clerk issuer/audience ve Neon hedef dal eşleştirmesi yetkili ortamda, sır değerleri açılmadan doğrulanır.
 2. Kaynak sunucuda şirket/owner kayıt sahipliği denetlenir. CIO portalındaki server-side gateway yalnız sabit izinli upstream'e gider. Tarayıcıya servis anahtarı, ham belge, prompt veya DB bağlantısı verilmez.
 3. Önce **salt okunur** durum aktarılır. `TASK_BOARD.md` tarihsel devir kaydı ile DB hafızası farklı kaynaklar olarak tutulur; otomatik birleşmez. Eski Gemini sohbetleri API anahtarıyla kendiliğinden içe aktarılmaz; seçilmiş karar özetleri CIO incelemesine tabidir.
-4. Sentetik testlerde yanlış issuer/audience/tenant 401/403; eksik owner eşleşmesi reddedilir; 429/503/timeout otomatik provider tekrarı veya yazma başlatmaz; hassas alanlar sızmaz. `mmtReviewSummaryContract.test.ts` yalnız saf veri projeksiyonunu test eder, ağ/kimlik/DB entegrasyonunu değil.
+4. Sentetik entegrasyon testlerinde yanlış issuer/audience/tenant 401/403; eksik owner eşleşmesi reddedilir; 429/503/timeout otomatik provider tekrarı veya yazma başlatmaz; hassas alanlar sızmaz. `mmtReviewSummaryContract.test.ts` şimdilik yalnız gerçek Replit şemalarına uygun saf veri projeksiyonunu test eder, ağ/kimlik/DB entegrasyonunu değil.
 5. GitHub PR #14 `UNKNOWN_OUTCOME` / idempotency migration'ı merge edilmeden ve hedef Neon dalı/yedeği onaylanmadan görev yazma açılmaz. PR #18 `GET /api/gemini/provider-check` gerçek Gemini `generateContent` çağırır; health check olarak çalıştırılmaz. Worker varsayılan kapalı tutulur.
 6. CIO ayrı olarak onaylamadan Replit Agent harcaması, canlı dağıtım, secrets, production migration, gerçek Gemini çağrısı, dış mesaj, resmî belge veya ödeme işlemi yapılmaz.
 
