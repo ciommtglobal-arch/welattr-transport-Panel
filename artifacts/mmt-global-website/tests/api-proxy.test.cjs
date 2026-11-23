@@ -3,6 +3,7 @@ const test = require('node:test');
 const {
   buildApiProxyTarget,
   createApiProxyHandler,
+  getClerkProxyUpstream,
   isApiProxyPath,
   parseApiUpstreamBase,
 } = require('../../../api-proxy.cjs');
@@ -42,6 +43,13 @@ test('upstream configuration accepts an exact HTTPS origin and local development
   assert.throws(() => parseApiUpstreamBase('http://example.com'));
   assert.throws(() => parseApiUpstreamBase('https://example.com/api'));
   assert.throws(() => parseApiUpstreamBase('https://user:pass@example.com'));
+});
+
+test('Clerk proxy derives from the same API origin and fails closed without one', () => {
+  assert.equal(getClerkProxyUpstream('https://api.example.com'), 'https://api.example.com/api/__clerk');
+  assert.equal(getClerkProxyUpstream(''), null);
+  assert.equal(getClerkProxyUpstream(undefined), null);
+  assert.throws(() => getClerkProxyUpstream('https://api.example.com/unsafe-path'));
 });
 
 test('proxy target preserves the API path and query on the configured host', () => {
