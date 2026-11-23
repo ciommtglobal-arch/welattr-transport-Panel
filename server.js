@@ -1,7 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { createApiProxyHandler, isApiProxyPath, parseApiUpstreamBase } = require('./api-proxy.cjs');
+const { createApiProxyHandler, getClerkProxyUpstream, isApiProxyPath, parseApiUpstreamBase } = require('./api-proxy.cjs');
 
 const PORT = process.env.PORT || 10000;
 
@@ -107,7 +107,7 @@ function sendFile(filePath, res, method) {
 
 const CLERK_PROXY_PREFIX = '/api/__clerk';
 const apiUpstreamBase = parseApiUpstreamBase(process.env.MMT_API_UPSTREAM_URL);
-const CLERK_PROXY_UPSTREAM = apiUpstreamBase ? `${apiUpstreamBase}${CLERK_PROXY_PREFIX}` : null;
+const CLERK_PROXY_UPSTREAM = getClerkProxyUpstream(apiUpstreamBase);
 const proxyApiRequest = createApiProxyHandler({ upstreamBase: apiUpstreamBase });
 const hopByHopHeaders = new Set([
   'connection', 'keep-alive', 'proxy-authenticate', 'proxy-authorization',
