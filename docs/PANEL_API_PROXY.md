@@ -7,12 +7,12 @@ The Render panel service runs the root `server.js`. The website API client uses 
 Set `MMT_API_UPSTREAM_URL` on the panel service to the exact HTTPS origin of the intended API service, for example:
 
 ```text
-https://welattr-api-test.onrender.com
+https://api.example.com
 ```
 
-The value must be an origin only, with no credentials, path, query, or fragment. An empty value keeps the API proxy disabled and returns a JSON 503 for API paths rather than serving the website HTML. The proxy cannot be used to choose an arbitrary target from a request.
+The value must be an origin only, with no credentials, path, query, or fragment. An empty value disables **both** the API proxy and the same-origin Clerk authentication proxy; both return JSON 503 rather than silently connecting to a test instance or serving the website HTML. The example hostname above is a placeholder, **not** a configured or approved production API. The proxy cannot be used to choose an arbitrary target from a request.
 
-The proxy handles `/api` and `/kasa/api`, preserves the browser session and authorization headers, forwards the original host for Clerk, and keeps provider webhook signatures intact by streaming the raw request body. Route-level authentication and webhook signature checks remain the API's responsibility.
+The Clerk proxy `/api/__clerk` derives from the **same** validated API origin, preventing the production panel from silently authenticating against the hard-coded `welattr-api-test` service. The API proxy handles `/api` and `/kasa/api`, preserves the browser session and authorization headers, forwards the original host for Clerk, and keeps provider webhook signatures intact by streaming the raw request body. Route-level authentication and webhook signature checks remain the API's responsibility.
 
 ## Release sequence
 
